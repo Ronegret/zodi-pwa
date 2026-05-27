@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +12,7 @@ type Message = { role: "user" | "zodi"; text: string };
 export function ZodiOracle() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "zodi", text: "Soy ZODI. Habla ahora o guarda silencio para siempre. ¿Qué quieres saber?" }
+    { role: "zodi", text: "Soy ZODI. Habla ahora o guarda silencio para siempre. Â¿QuÃ© quieres saber?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ export function ZodiOracle() {
     
     const session = getLocalSession();
     if (!session.uid) {
-      alert("Debes iniciar sesión para consultar al oráculo.");
+      alert("Debes iniciar sesiÃ³n para consultar al orÃ¡culo.");
       return;
     }
 
@@ -40,7 +40,7 @@ export function ZodiOracle() {
       // Must use Gems (cost: 5 gems per question)
       const currentGems = getGems().total;
       if (currentGems < 5) {
-        alert("Te has quedado sin energía libre y no tienes suficientes gemas (Cuesta 5). Ve a la tienda a comprar más Gemas.");
+        alert("Te has quedado sin energÃ­a libre y no tienes suficientes gemas (Cuesta 5). Ve a la tienda a comprar mÃ¡s Gemas.");
         return;
       }
       spendGems(5);
@@ -70,7 +70,7 @@ export function ZodiOracle() {
       const data = await res.json();
       setMessages(prev => [...prev, { role: "zodi", text: data.text }]);
     } catch (e) {
-      setMessages(prev => [...prev, { role: "zodi", text: "Error de red cósmico. Se me ha caído la bola de cristal." }]);
+      setMessages(prev => [...prev, { role: "zodi", text: "Error de red cÃ³smico. Se me ha caÃ­do la bola de cristal." }]);
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ export function ZodiOracle() {
 
   return (
     <>
-      {/* Botón Flotante: La Bola de Cristal */}
+      {/* BotÃ³n Flotante: La Bola de Cristal */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -106,9 +106,9 @@ export function ZodiOracle() {
                   <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain p-1" />
                 </div>
                 <div>
-                  <h3 className="font-display font-black text-lime-300">ZODI Oráculo</h3>
+                  <h3 className="font-display font-black text-lime-300 text-xl tracking-wide">ZODI OrÃ¡culo</h3>
                   <p className="text-xs text-white/50 flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" /> En línea
+                    <Sparkles className="h-3 w-3" /> En lÃ­nea
                   </p>
                 </div>
               </div>
@@ -121,7 +121,7 @@ export function ZodiOracle() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
+                  <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-lg font-display font-bold tracking-wide ${
                     msg.role === "user" 
                       ? "bg-lime-300 text-black rounded-br-none" 
                       : "bg-white/10 text-white rounded-bl-none border border-white/5"
@@ -132,7 +132,7 @@ export function ZodiOracle() {
               ))}
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-white/10 text-white/50 rounded-2xl rounded-bl-none border border-white/5 px-4 py-3 text-sm flex gap-1">
+                  <div className="bg-white/10 text-white/50 rounded-2xl rounded-bl-none border border-white/5 px-4 py-3 text-base flex gap-1">
                     <span className="animate-bounce">.</span><span className="animate-bounce delay-75">.</span><span className="animate-bounce delay-150">.</span>
                   </div>
                 </div>
@@ -148,8 +148,8 @@ export function ZodiOracle() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Pregúntale al oráculo..."
-                  className="w-full rounded-full border border-white/10 bg-white/5 pl-4 pr-12 py-3 text-sm text-white outline-none focus:border-lime-300/40"
+                  placeholder="PregÃºntale al orÃ¡culo..."
+                  className="w-full rounded-full border border-white/10 bg-white/5 pl-4 pr-12 py-3 text-base font-bold text-white outline-none focus:border-lime-300/40"
                 />
                 <button
                   onClick={handleSend}
@@ -159,7 +159,7 @@ export function ZodiOracle() {
                   <Send className="h-4 w-4 ml-1" />
                 </button>
               </div>
-              <p className="mt-2 text-center text-[10px] text-white/30">ZODI puede equivocarse, pero tú también.</p>
+              <p className="mt-2 text-center text-[10px] text-white/30">ZODI puede equivocarse, pero tÃº tambiÃ©n.</p>
             </div>
           </motion.div>
         )}
