@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/genai": "^2.6.0",
     "@stripe/stripe-js": "^9.7.0",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.10.0",
