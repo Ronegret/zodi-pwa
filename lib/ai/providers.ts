@@ -1,0 +1,329 @@
+import { buildReadingPrompt, zodiSystemPrompt } from "@/lib/ai/prompts";
+import type { ReadingKind, UserProfile } from "@/types/zodi";
+
+export type AIProvider = "openai" | "claude" | "gemini" | "mock" | "auto";
+
+export type GenerateReadingParams = {
+  provider?: AIProvider;
+  kind: ReadingKind;
+  profile: Partial<UserProfile>;
+  input: string;
+  system?: string;
+  prompt?: string;
+  userContext?: Record<string, unknown>;
+};
+
+export type ZodiReadingResponse = {
+  status: "ok" | "fallback";
+  title: string;
+  vibeScore: number;
+  reading: string;
+  warning: string;
+  ritual: string;
+  roast: string;
+  text: string;
+  provider: AIProvider;
+  fallback?: boolean;
+  reason?: string;
+  prompt: {
+    system: string;
+    user: string;
+  };
+};
+
+export async function generateReading(params: GenerateReadingParams): Promise<ZodiReadingResponse> {
+  const promptBundle = params.prompt
+    ? { system: params.system ?? zodiSystemPrompt, user: params.prompt }
+    : buildReadingPrompt(params.kind, params.profile, params.input);
+  const provider = resolveProvider(params.provider);
+
+  if (provider === "mock" || provider === "gemini") {
+    return localFallback(params.kind, params.profile, promptBundle, provider);
+  }
+
+  try {
+    const text =
+      provider === "claude"
+        ? await callClaude(promptBundle.system, promptBundle.user)
+        : await callOpenAI(promptBundle.system, promptBundle.user);
+
+    return normalizeReading(text, params.kind, promptBundle, provider);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "No se pudo completar la lectura.";
+    return localFallback(params.kind, params.profile, promptBundle, provider, reason);
+  }
+}
+
+function resolveProvider(provider: AIProvider = "auto"): AIProvider {
+  if (provider !== "auto") {
+    return provider;
+  }
+
+  if (process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY) {
+    return "claude";
+  }
+
+  if (process.env.OPENAI_API_KEY) {
+    return "openai";
+  }
+
+  return "mock";
+}
+
+async function callClaude(system: string, user: string) {
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+  if (!apiKey) {
+    throw new Error("La señal astral no está activa.");
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: process.env.CLAUDE_MODEL || "claude-sonnet-4-5",
+        max_tokens: 1400,
+        system,
+        messages: [{ role: "user", content: user }]
+      }),
+      signal: controller.signal
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(readProviderError(data, "El oráculo no respondió."));
+    }
+
+    const content = Array.isArray(data.content) ? data.content : [];
+    const text = content.map((item: { text?: string }) => item.text).filter(Boolean).join("\n\n").trim();
+    if (!text) {
+      throw new Error("La lectura llegó en silencio.");
+    }
+
+    return text;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function callOpenAI(system: string, user: string) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("La señal astral no está activa.");
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+        temperature: 0.85,
+        max_tokens: 1200,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user }
+        ]
+      }),
+      signal: controller.signal
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(readProviderError(data, "El oráculo no respondió."));
+    }
+
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text) {
+      throw new Error("La lectura llegó en silencio.");
+    }
+
+    return text;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function normalizeReading(text: string, kind: ReadingKind, prompt: { system: string; user: string }, provider: AIProvider): ZodiReadingResponse {
+  return {
+    status: "ok",
+    title: titleForKind(kind),
+    vibeScore: 65 + Math.floor(Math.random() * 33),
+    reading: text,
+    warning: warningForKind(kind),
+    ritual: ritualForKind(kind),
+    roast: "ZODI ya leyó el caos. Ahora falta que tú no lo conviertas en plan de vida.",
+    text,
+    provider,
+    prompt
+  };
+}
+
+function warningForKind(kind: ReadingKind): string {
+  const warnings: Record<ReadingKind, string> = {
+    "daily-horoscope": "Toma esto como una guía simbólica, no como sentencia del destino.",
+    "weekly-horoscope": "La semana tiene energía propia. No la conviertas en profecía antes de vivirla.",
+    "monthly-horoscope": "Un ciclo no define el mes entero. Úsalo como mapa, no como destino.",
+    "natal-chart": "Tu carta muestra patrones, no jaula. Úsala para entenderte, no para limitarte.",
+    tarot: "Las cartas reflejan energía del momento. Tú decides el movimiento final.",
+    "celtic-tarot": "La tirada celta muestra capas, no verdades absolutas. Interpreta con calma.",
+    compatibility: "La compatibilidad es probabilidad, no destino. Las personas cambian y tú también.",
+    dream: "Los sueños son lenguaje simbólico, no mensajes literales del futuro.",
+    transits: "Los tránsitos son contexto astral, no excusa ni sentencia para tus decisiones.",
+    numerology: "Los números muestran patrones de energía. No los uses como única brújula vital.",
+    "name-reading": "Nombre y apellidos tienen vibración, pero tú construyes tu presencia con acciones.",
+    "palm-reading": "Las líneas de la mano son simbólicas, no deterministas. Tu historia la escribes tú, no las rayas.",
+    biorhythm: "El biorritmo es referencia orientativa, no excusa para no actuar cuando debes.",
+    "chinese-horoscope": "El ciclo chino orienta con sabiduría milenaria, pero no determina tu rumbo.",
+    "mayan-horoscope": "El sello maya es energía simbólica. Léelo como guía, no como decreto del cosmos.",
+    runes: "Las runas son mensajes simbólicos de una tradición antigua. La acción siempre es tuya.",
+    crystals: "Los cristales son recordatorios simbólicos de intención. No son soluciones mágicas.",
+    roast: "El humor ácido ilumina sin destruir. Si duele demasiado, pregúntate por qué resuena.",
+    assistant: "No fuerces una respuesta solo porque la ansiedad quiere tener todo en un calendario."
+  };
+  return warnings[kind];
+}
+
+function ritualForKind(kind: ReadingKind): string {
+  const rituals: Record<ReadingKind, string> = {
+    "daily-horoscope": "Elige una acción concreta basada en la lectura y ponla en práctica hoy. Solo una.",
+    "weekly-horoscope": "Escribe una intención clara para los próximos 7 días y revísala el domingo.",
+    "monthly-horoscope": "Identifica una cosa para soltar y una para construir este mes. Comprométete con ambas.",
+    "natal-chart": "Lee tu carta una vez más y subraya lo que resuena hoy. Ignora lo que no aplica.",
+    tarot: "Guarda la lectura, respira y vuelve a consultarla cuando baje el ruido mental.",
+    "celtic-tarot": "Anota la carta central de la tirada. Es el tema que más merece tu atención ahora.",
+    compatibility: "Describe en tres palabras lo que realmente buscas en una conexión auténtica.",
+    dream: "Escribe el sueño completo antes de interpretarlo. Los detalles olvidados también cuentan.",
+    transits: "Identifica una decisión pendiente que este tránsito quiere que mires de frente.",
+    numerology: "Elige una sola prioridad hoy basada en tu vibración numerológica. Menos es más.",
+    "name-reading": "Preséntate hoy usando tu nombre completo con intención. La firma energética que proyectas también se entrena.",
+    "palm-reading": "Observa tus manos hoy con curiosidad, no con ansiedad. La palma refleja lo que ya vives; el próximo paso lo decides tú.",
+    biorhythm: "Ajusta tu agenda según tu ciclo actual. No empujes cuando el cuerpo pide pausa.",
+    "chinese-horoscope": "Aplica una estrategia lenta y deliberada hoy. Tu animal marca el ritmo correcto.",
+    "mayan-horoscope": "Conecta con tu sello hoy: escribe lo que intuyes sin juzgarlo ni editarlo.",
+    runes: "Dibuja o visualiza la runa que salió. Mantenla presente durante tu próxima decisión.",
+    crystals: "Lleva el cristal sugerido o visualiza su color durante tu próxima decisión importante.",
+    roast: "Comparte la lectura con alguien de confianza. El roast duele menos cuando también te ríes.",
+    assistant: "Elige una acción pequeña de la respuesta, guárdala en favoritos y revisa cómo resultó."
+  };
+  return rituals[kind];
+}
+
+function localFallback(
+  kind: ReadingKind,
+  profile: Partial<UserProfile>,
+  prompt: { system: string; user: string },
+  provider: AIProvider,
+  reason?: string
+): ZodiReadingResponse {
+  const sign = profile.zodiac || "tu signo";
+  const tone = profile.readingTone || "directo";
+  const title = titleForKind(kind);
+  const vibeScore = scoreForKind(kind, sign);
+  const reading = fallbackText(kind, sign, tone);
+  const warning = warningForKind(kind);
+  const ritual = ritualForKind(kind);
+  const roast = "El destino te mandó señales. Tu bandeja mental las marcó como spam.";
+  const text = `${title}\n\nEnergía: ${vibeScore}%\n\n${reading}\n\nAdvertencia: ${warning}\n\nAcción mágica: ${ritual}\n\n${roast}`;
+
+  return {
+    status: "fallback",
+    title,
+    vibeScore,
+    reading,
+    warning,
+    ritual,
+    roast,
+    text,
+    provider,
+    fallback: true,
+    reason,
+    prompt
+  };
+}
+
+function fallbackText(kind: ReadingKind, sign: string, tone: UserProfile["readingTone"] | undefined) {
+  const toneLine = tone === "brutal" || tone === "sarcastico" ? "sin envolverlo en incienso caro" : "con calma y foco";
+
+  const lines: Record<ReadingKind, string> = {
+    "daily-horoscope": `${sign} entra hoy con energía de reinicio: menos drama, más criterio. Lee el ambiente antes de responder y decide ${toneLine}.`,
+    "weekly-horoscope": `Esta semana pide ordenar prioridades. Si algo se repite, no es misterio: es patrón esperando que lo mires de frente.`,
+    "monthly-horoscope": `El mes abre una puerta lenta pero potente. Lo que sostengas con constancia gana más fuerza que cualquier impulso de medianoche.`,
+    "natal-chart": `Tu carta base mezcla deseo, defensa y ambición. La clave está en usar tu intensidad como mapa, no como alarma permanente.`,
+    tarot: `La tirada muestra situación, bloqueo y salida: observa lo obvio, corta el ruido y no negocies contigo cuando ya sabes la respuesta.`,
+    "celtic-tarot": `La cruz celta marca un ciclo de limpieza. Pasado pesado, presente cargado, futuro manejable si dejas de alimentar escenarios que no existen.`,
+    compatibility: `La compatibilidad no se mide por química solamente. Mira ritmo, cuidado, conversación y cómo reaccionan cuando el ego se siente observado.`,
+    dream: `El sueño funciona como graffiti del inconsciente: exagera una emoción real para que por fin la veas sin filtros.`,
+    transits: `Los tránsitos activan decisiones pendientes. No hace falta correr, pero sí dejar de fingir que no viste la señal.`,
+    numerology: `Tu numerología habla de patrones, ciclos y energía personal. Hoy conviene elegir una sola prioridad y cumplirla sin teatro.`,
+    "name-reading": `Tu nombre y apellidos cargan una vibración única. Nombre: identidad pública y energía de primer contacto. Apellidos: herencia, raíces y lo que llevas aunque no lo elijas.`,
+    "palm-reading": `Las líneas de tu mano son un mapa simbólico de tu energía: la línea de la vida marca vitalidad y cambios, la línea del corazón señala tu forma de amar, la línea de la cabeza muestra tu estilo de pensar y decidir.`,
+    biorhythm: `Tu biorritmo sugiere administrar energía. No todo cansancio es bloqueo espiritual; a veces es cuerpo pidiendo mantenimiento básico.`,
+    "chinese-horoscope": `El ciclo chino pide estrategia. Avanza con paciencia, observa alianzas y no gastes poder en demostrar que tienes razón.`,
+    "mayan-horoscope": `El sello maya marca una energía de memoria antigua: escucha intuición, pero pásala por hechos antes de declararla profecía.`,
+    runes: `La runa simbólica del día habla de protección y movimiento. Cierra lo abierto antes de abrir otro portal mental.`,
+    crystals: `La lectura de cristales pide aterrizar. Carga menos objetos y más intención: foco, descanso y una decisión limpia.`,
+    roast: `${sign}, tu intuición está gritando y tu ego pide subtítulos. Hoy bloquea el autosabotaje antes de que se ponga creativo.`,
+    assistant: `ZODI está contigo: pregunta claro, recibe claro. El caos responde mejor cuando no lo alimentas con veinte pestañas abiertas.`
+  };
+
+  return lines[kind];
+}
+
+function titleForKind(kind: ReadingKind) {
+  const titles: Record<ReadingKind, string> = {
+    "daily-horoscope": "Horóscopo de hoy",
+    "weekly-horoscope": "Mapa semanal",
+    "monthly-horoscope": "Predicción mensual",
+    "natal-chart": "Carta natal base",
+    tarot: "Tirada tarot",
+    "celtic-tarot": "Tirada celta",
+    compatibility: "Compatibilidad",
+    dream: "Interpretación de sueño",
+    transits: "Tránsitos activos",
+    numerology: "Numerología",
+    "name-reading": "Lectura de nombre y apellidos",
+    "palm-reading": "Lectura de mano",
+    biorhythm: "Biorritmo",
+    "chinese-horoscope": "Horóscopo chino",
+    "mayan-horoscope": "Horóscopo maya",
+    runes: "Runas vikingas",
+    crystals: "Cristales",
+    roast: "Roast horoscope",
+    assistant: "Oráculo personal"
+  };
+
+  return titles[kind];
+}
+
+function scoreForKind(kind: ReadingKind, sign: string): number {
+  const seed = `${kind}-${sign}`.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return 62 + (seed % 35);
+}
+
+function readProviderError(data: unknown, fallback: string) {
+  if (typeof data === "object" && data && "error" in data) {
+    const error = (data as { error?: { message?: string } | string }).error;
+    if (typeof error === "string") {
+      return error;
+    }
+    if (error?.message) {
+      return error.message;
+    }
+  }
+
+  return fallback;
+}

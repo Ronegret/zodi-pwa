@@ -1,0 +1,78 @@
+{
+  "name": "ZODI — Oraculo Astral con Humor Acido",
+  "short_name": "ZODI",
+  "description": "Horoscopo, tarot, numerologia y comunidad mistica con estetica cyberpunk. Tu perfil astral personalizado.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050507",
+  "theme_color": "#050507",
+  "categories": ["lifestyle", "social", "entertainment"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Horoscopo de hoy",
+      "short_name": "Hoy",
+      "description": "Abre tu horoscopo diario",
+      "url": "/dashboard/horoscopo",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tirada de tarot",
+      "short_name": "Tarot",
+      "description": "Haz una tirada rapida",
+      "url": "/dashboard/tarot",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Oraculo personal",
+      "short_name": "Oraculo",
+      "description": "Pregunta lo que pesa",
+      "url": "/dashboard/oraculo",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mi historial",
+      "short_name": "Historial",
+      "description": "Ver lecturas guardadas",
+      "url": "/dashboard/historial",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/zodi-landpage.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard ZODI en escritorio"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\rodri\\\\Desktop\\\\zodi\\\\Zodi_pwa - claude\" -Recurse -Exclude \"node_modules\" -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Format-List)",
+      "Bash(npm run *)",
+      "Bash(ping -n 5 localhost)",
+      "Bash(curl -sS -o /dev/null -w \"status=%{http_code} time=%{time_total}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -sS -o /dev/null -w \"sw status=%{http_code}\\\\n\" http://localhost:3000/sw.js)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\rodri\\\\Desktop\\\\zodi\\\\Zodi_pwa - claude\" -Recurse -Directory)",
+      "Bash(Sort-Object)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Claude_in_Chrome__read_console_messages",
+      "Read(//tmp/**)",
+      "Bash(taskkill /PID 13552 /F)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(taskkill /PID 13428 /F)",
+      "Bash(findstr \":300\")",
+      "Bash(findstr LISTENING)",
+      "Bash(dir \"C:\\\\Users\\\\rodri\\\\Desktop\\\\zodi\\\\Zodi_pwa - claude\\\\.next\\\\standalone\" /b)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat: ZODI PWA — initial commit *)"
+    ]
+  }
+}
