@@ -91,6 +91,50 @@ export function PremiumUI() {
           Pagos seguros cifrados con Stripe <ShieldHalf className="w-3 h-3" /> Soporta Bizum, Apple Pay y Tarjetas
         </p>
       </div>
+
+      {/* Free Gems Section */}
+      <div className="glass-panel rounded-md p-6 border border-white/10 mt-5 relative overflow-hidden">
+        <h2 className="text-xl font-black mb-2 flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-white" />
+          Gemas Gratis
+        </h2>
+        <p className="text-white/60 mb-4 text-sm">
+          ¿No tienes dinero? ZODI entiende tu pobreza. Gana gemas gratis realizando misiones místicas.
+        </p>
+        
+        <div className="grid gap-3">
+          <button 
+            onClick={() => {
+              if (localStorage.getItem('zodi.ig_rewarded')) {
+                alert('Ya recibiste tu recompensa por seguir a ZODI.');
+                return;
+              }
+              window.open('https://instagram.com/zodi.elcrack', '_blank');
+              setTimeout(() => {
+                const gamification = require('@/lib/gamification');
+                gamification.addGems(20);
+                localStorage.setItem('zodi.ig_rewarded', 'true');
+                alert('¡Has recibido 20 Gemas por seguir a ZODI en Instagram!');
+                window.location.reload();
+              }, 5000);
+            }}
+            className="flex items-center justify-between rounded-md bg-black/40 border border-white/10 p-4 hover:border-lime-300/40 transition"
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 rounded-md flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              </div>
+              <div className="text-left">
+                <h4 className="font-bold text-white text-sm">Seguir a @zodi.elcrack</h4>
+                <p className="text-xs text-white/50">Síguenos en Instagram</p>
+              </div>
+            </div>
+            <div className="bg-lime-300/10 text-lime-300 px-3 py-1 rounded-full text-xs font-black">
+              +20 Gemas
+            </div>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

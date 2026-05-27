@@ -54,6 +54,9 @@ export type UserProfile = {
   birthDate?: string;
   birthTime?: string;
   birthCity?: string;
+  gems?: number;
+  referralCode?: string;
+  referredBy?: string;
   birthCountry?: string;
   currentCity?: string;
   currentCountry?: string;

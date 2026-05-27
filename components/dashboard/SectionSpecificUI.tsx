@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -14,46 +14,47 @@ import { getLocalSession, setLocalSession } from "@/lib/session";
 import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
+import { PremiumUI } from "@/components/dashboard/PremiumUI";
 import { addXp, updateStreak, XP_PER_ACTION } from "@/lib/gamification";
 import { InstallPwaCard } from "@/components/pwa/PwaBoot";
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // ZODIAC DATA
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ZODIAC = [
-  { name: "Aries",       emoji: "♈", el: "Fuego",  dates: "21 Mar - 19 Abr" },
-  { name: "Tauro",       emoji: "♉", el: "Tierra", dates: "20 Abr - 20 May" },
-  { name: "Géminis",     emoji: "♊", el: "Aire",   dates: "21 May - 20 Jun" },
-  { name: "Cáncer",      emoji: "♋", el: "Agua",   dates: "21 Jun - 22 Jul" },
-  { name: "Leo",         emoji: "♌", el: "Fuego",  dates: "23 Jul - 22 Ago" },
-  { name: "Virgo",       emoji: "♍", el: "Tierra", dates: "23 Ago - 22 Sep" },
-  { name: "Libra",       emoji: "♎", el: "Aire",   dates: "23 Sep - 22 Oct" },
-  { name: "Escorpio",    emoji: "♏", el: "Agua",   dates: "23 Oct - 21 Nov" },
-  { name: "Sagitario",   emoji: "♐", el: "Fuego",  dates: "22 Nov - 21 Dic" },
-  { name: "Capricornio", emoji: "♑", el: "Tierra", dates: "22 Dic - 19 Ene" },
-  { name: "Acuario",     emoji: "♒", el: "Aire",   dates: "20 Ene - 18 Feb" },
-  { name: "Piscis",      emoji: "♓", el: "Agua",   dates: "19 Feb - 20 Mar" },
+  { name: "Aries",       emoji: "â™ˆ", el: "Fuego",  dates: "21 Mar - 19 Abr" },
+  { name: "Tauro",       emoji: "â™‰", el: "Tierra", dates: "20 Abr - 20 May" },
+  { name: "GÃ©minis",     emoji: "â™Š", el: "Aire",   dates: "21 May - 20 Jun" },
+  { name: "CÃ¡ncer",      emoji: "â™‹", el: "Agua",   dates: "21 Jun - 22 Jul" },
+  { name: "Leo",         emoji: "â™Œ", el: "Fuego",  dates: "23 Jul - 22 Ago" },
+  { name: "Virgo",       emoji: "â™", el: "Tierra", dates: "23 Ago - 22 Sep" },
+  { name: "Libra",       emoji: "â™Ž", el: "Aire",   dates: "23 Sep - 22 Oct" },
+  { name: "Escorpio",    emoji: "â™", el: "Agua",   dates: "23 Oct - 21 Nov" },
+  { name: "Sagitario",   emoji: "â™", el: "Fuego",  dates: "22 Nov - 21 Dic" },
+  { name: "Capricornio", emoji: "â™‘", el: "Tierra", dates: "22 Dic - 19 Ene" },
+  { name: "Acuario",     emoji: "â™’", el: "Aire",   dates: "20 Ene - 18 Feb" },
+  { name: "Piscis",      emoji: "â™“", el: "Agua",   dates: "19 Feb - 20 Mar" },
 ];
 
-const RUNAS = ["ᚠ","ᚢ","ᚦ","ᚨ","ᚱ","ᚲ","ᚷ","ᚹ","ᚺ","ᚾ","ᛁ","ᛃ","ᛇ","ᛈ","ᛉ","ᛊ","ᛏ","ᛒ","ᛖ","ᛗ","ᛚ","ᛜ","ᛞ","ᛟ"];
+const RUNAS = ["áš ","áš¢","áš¦","áš¨","áš±","áš²","áš·","áš¹","ášº","áš¾","á›","á›ƒ","á›‡","á›ˆ","á›‰","á›Š","á›","á›’","á›–","á›—","á›š","á›œ","á›ž","á›Ÿ"];
 const RUNA_NAMES = ["Fehu","Uruz","Thurisaz","Ansuz","Raidho","Kenaz","Gebo","Wunjo","Hagalaz","Naudiz","Isa","Jera","Eihwaz","Perthro","Algiz","Sowilo","Tiwaz","Berkano","Ehwaz","Mannaz","Laguz","Ingwaz","Dagaz","Othala"];
 
 const CRISTALES = [
-  { name: "Amatista",        emoji: "💜", intent: "Intuición & paz",   color: "border-purple-400/50 bg-purple-500/10" },
-  { name: "Cuarzo rosa",     emoji: "🌸", intent: "Amor & autoestima",  color: "border-pink-400/50 bg-pink-500/10" },
-  { name: "Obsidiana",       emoji: "🖤", intent: "Protección & verdad", color: "border-gray-600/50 bg-gray-800/30" },
-  { name: "Citrino",         emoji: "🌕", intent: "Abundancia & éxito",  color: "border-yellow-400/50 bg-yellow-500/10" },
-  { name: "Lapislázuli",     emoji: "💙", intent: "Comunicación & calma", color: "border-blue-400/50 bg-blue-500/10" },
-  { name: "Selenita",        emoji: "🤍", intent: "Claridad & limpieza",  color: "border-white/40 bg-white/5" },
-  { name: "Turmalina negra", emoji: "⬛", intent: "Bloqueo de energías",  color: "border-gray-800/60 bg-gray-900/40" },
-  { name: "Malaquita",       emoji: "💚", intent: "Transformación",       color: "border-green-500/50 bg-green-500/10" },
+  { name: "Amatista",        emoji: "ðŸ’œ", intent: "IntuiciÃ³n & paz",   color: "border-purple-400/50 bg-purple-500/10" },
+  { name: "Cuarzo rosa",     emoji: "ðŸŒ¸", intent: "Amor & autoestima",  color: "border-pink-400/50 bg-pink-500/10" },
+  { name: "Obsidiana",       emoji: "ðŸ–¤", intent: "ProtecciÃ³n & verdad", color: "border-gray-600/50 bg-gray-800/30" },
+  { name: "Citrino",         emoji: "ðŸŒ•", intent: "Abundancia & Ã©xito",  color: "border-yellow-400/50 bg-yellow-500/10" },
+  { name: "LapislÃ¡zuli",     emoji: "ðŸ’™", intent: "ComunicaciÃ³n & calma", color: "border-blue-400/50 bg-blue-500/10" },
+  { name: "Selenita",        emoji: "ðŸ¤", intent: "Claridad & limpieza",  color: "border-white/40 bg-white/5" },
+  { name: "Turmalina negra", emoji: "â¬›", intent: "Bloqueo de energÃ­as",  color: "border-gray-800/60 bg-gray-900/40" },
+  { name: "Malaquita",       emoji: "ðŸ’š", intent: "TransformaciÃ³n",       color: "border-green-500/50 bg-green-500/10" },
 ];
 
-const INTENTS = ["Amor", "Protección", "Claridad", "Abundancia", "Sanación", "Creatividad", "Intuición", "Calma"];
+const INTENTS = ["Amor", "ProtecciÃ³n", "Claridad", "Abundancia", "SanaciÃ³n", "Creatividad", "IntuiciÃ³n", "Calma"];
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // SHARED CONSULT HOOK
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function useConsult(section: DashboardSection) {
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,7 +65,7 @@ function useConsult(section: DashboardSection) {
   const [profile] = useState(() => buildProfile(getLocalSession()));
 
   const lengthHints: Record<string, string> = {
-    breve:   "\n[LONGITUD: Respuesta BREVE. Máximo 4 frases directas, sin introducciones ni conclusiones largas.]",
+    breve:   "\n[LONGITUD: Respuesta BREVE. MÃ¡ximo 4 frases directas, sin introducciones ni conclusiones largas.]",
     extensa: "\n[LONGITUD: Respuesta EXTENSA. Lectura amplia y detallada, desarrolla cada aspecto con matices concretos.]",
   };
 
@@ -80,9 +81,9 @@ function useConsult(section: DashboardSection) {
         body: JSON.stringify({ provider: "auto", kind: section.kind, input: fullInput, profile }),
       });
       const data = await res.json();
-      setReply(data.text || data.reading || "El universo tardó demasiado. Reintenta.");
+      setReply(data.text || data.reading || "El universo tardÃ³ demasiado. Reintenta.");
     } catch {
-      setReply("Señal cortada. El universo también tiene días de mala cobertura.");
+      setReply("SeÃ±al cortada. El universo tambiÃ©n tiene dÃ­as de mala cobertura.");
     } finally {
       setLoading(false);
     }
@@ -116,9 +117,9 @@ function buildProfile(session: ReturnType<typeof getLocalSession>) {
   };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MARKDOWN TEXT — renders common AI markdown patterns inline (no extra deps)
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// MARKDOWN TEXT â€” renders common AI markdown patterns inline (no extra deps)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function MarkdownText({ text }: { text: string }) {
   function parseInline(s: string, key: number): React.ReactNode {
     const parts: React.ReactNode[] = [];
@@ -152,7 +153,7 @@ function MarkdownText({ text }: { text: string }) {
     } else if (line.startsWith("- ") || line.startsWith("* ")) {
       nodes.push(
         <div key={i} className="flex gap-2">
-          <span className="mt-1 text-lime-300 shrink-0">·</span>
+          <span className="mt-1 text-lime-300 shrink-0">Â·</span>
           <span>{parseInline(line.slice(2), i)}</span>
         </div>
       );
@@ -166,9 +167,9 @@ function MarkdownText({ text }: { text: string }) {
   return <div className="space-y-0.5 font-sans">{nodes}</div>;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // REPLY BOX
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: string; loading: boolean; sectionTitle?: string }) {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -215,7 +216,7 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
   }
 
   async function share() {
-    const shareText = `Mi lectura ZODI — ${sectionTitle}:\n\n${reply.slice(0, 800)}${reply.length > 800 ? "..." : ""}\n\n🔮 zodi.aibueno.es`;
+    const shareText = `Mi lectura ZODI â€” ${sectionTitle}:\n\n${reply.slice(0, 800)}${reply.length > 800 ? "..." : ""}\n\nðŸ”® zodi.aibueno.es`;
     if (typeof navigator !== "undefined" && "share" in navigator) {
       try {
         await navigator.share({
@@ -224,7 +225,7 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
         });
         return;
       } catch {
-        // El usuario canceló o no disponible — fallback a copiar
+        // El usuario cancelÃ³ o no disponible â€” fallback a copiar
       }
     }
     // Fallback: copiar al portapapeles
@@ -245,7 +246,7 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
       {/* XP toast */}
       {xpGained !== null && (
         <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-black text-cyan-300 animate-in fade-in duration-300">
-          ✦ +{xpGained} XP
+          âœ¦ +{xpGained} XP
         </div>
       )}
       <div className="rounded-xl border border-lime-300/30 bg-black/60 p-6 sm:p-8 text-lg sm:text-xl leading-[1.8] tracking-wide text-white/95 shadow-[0_0_30px_rgba(184,255,23,0.05)]">
@@ -279,15 +280,15 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // TONE SELECTOR
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ToneSelector({ value, onChange }: { value: string; onChange: (t: string) => void }) {
   const tones = [
-    { key: "suave",    label: "Suave",    emoji: "🌙", desc: "Con cariño" },
-    { key: "directo",  label: "Directo",  emoji: "⚡", desc: "Sin rodeos" },
-    { key: "brutal",   label: "Brutal",   emoji: "🔥", desc: "Sin filtros" },
-    { key: "sarcastico", label: "Sarcástico", emoji: "💀", desc: "Con veneno" },
+    { key: "suave",    label: "Suave",    emoji: "ðŸŒ™", desc: "Con cariÃ±o" },
+    { key: "directo",  label: "Directo",  emoji: "âš¡", desc: "Sin rodeos" },
+    { key: "brutal",   label: "Brutal",   emoji: "ðŸ”¥", desc: "Sin filtros" },
+    { key: "sarcastico", label: "SarcÃ¡stico", emoji: "ðŸ’€", desc: "Con veneno" },
   ];
   return (
     <div className="flex flex-wrap gap-2">
@@ -309,14 +310,14 @@ function ToneSelector({ value, onChange }: { value: string; onChange: (t: string
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // LENGTH SELECTOR
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LengthSelector({ value, onChange }: { value: string; onChange: (l: "breve" | "normal" | "extensa") => void }) {
   const options = [
-    { key: "breve"   as const, label: "Breve",   emoji: "⚡", desc: "4 frases clave" },
-    { key: "normal"  as const, label: "Normal",  emoji: "📖", desc: "Estándar" },
-    { key: "extensa" as const, label: "Extensa", emoji: "📜", desc: "Análisis profundo" },
+    { key: "breve"   as const, label: "Breve",   emoji: "âš¡", desc: "4 frases clave" },
+    { key: "normal"  as const, label: "Normal",  emoji: "ðŸ“–", desc: "EstÃ¡ndar" },
+    { key: "extensa" as const, label: "Extensa", emoji: "ðŸ“œ", desc: "AnÃ¡lisis profundo" },
   ];
   return (
     <div className="flex flex-wrap gap-2">
@@ -339,9 +340,9 @@ function LengthSelector({ value, onChange }: { value: string; onChange: (l: "bre
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 1. TAROT UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TarotUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, length, setLength } = useConsult(section);
   const [spread, setSpread] = useState<"1" | "3" | "celta">("3");
@@ -351,14 +352,14 @@ function TarotUI({ section }: { section: DashboardSection }) {
   const [drawn, setDrawn] = useState(false);
 
   const spreads = [
-    { key: "1",     label: "1 carta",      emoji: "🃏", desc: "Respuesta directa" },
-    { key: "3",     label: "3 cartas",     emoji: "🎴", desc: "Pasado · Presente · Futuro" },
-    { key: "celta", label: "Cruz celta",   emoji: "✝️",  desc: "Lectura profunda" },
+    { key: "1",     label: "1 carta",      emoji: "ðŸƒ", desc: "Respuesta directa" },
+    { key: "3",     label: "3 cartas",     emoji: "ðŸŽ´", desc: "Pasado Â· Presente Â· Futuro" },
+    { key: "celta", label: "Cruz celta",   emoji: "âœï¸",  desc: "Lectura profunda" },
   ] as const;
 
   const cardCount = spread === "1" ? 1 : spread === "3" ? 3 : 6;
   const cardLabels3 = ["Pasado", "Presente", "Futuro"];
-  const cardLabelsCelta = ["Situación", "Obstáculo", "Pasado", "Futuro", "Consejo", "Resultado"];
+  const cardLabelsCelta = ["SituaciÃ³n", "ObstÃ¡culo", "Pasado", "Futuro", "Consejo", "Resultado"];
 
   function drawCards() {
     setFlipped(Array(cardCount).fill(false));
@@ -432,13 +433,13 @@ function TarotUI({ section }: { section: DashboardSection }) {
                 >
                   {flipped[i] ? (
                     <div className="flex flex-col items-center justify-center h-full p-3 gap-2">
-                      <span className="text-3xl">🌟</span>
+                      <span className="text-3xl">ðŸŒŸ</span>
                       <p className="text-xs font-black text-lime-200">Carta revelada</p>
                       <p className="text-[10px] text-white/40">Consulta la lectura</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full gap-2">
-                      <span className="text-4xl opacity-60">✦</span>
+                      <span className="text-4xl opacity-60">âœ¦</span>
                       <p className="text-xs text-white/30">Tocar</p>
                     </div>
                   )}
@@ -454,7 +455,7 @@ function TarotUI({ section }: { section: DashboardSection }) {
               value={question}
               onChange={e => setQuestion(e.target.value)}
               rows={2}
-              placeholder="¿Tienes una pregunta concreta? (opcional)"
+              placeholder="Â¿Tienes una pregunta concreta? (opcional)"
               className="w-full resize-none rounded-md border border-white/10 bg-black/45 p-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-lime-300/55"
             />
             <ToneSelector value={tone} onChange={setTone} />
@@ -475,9 +476,9 @@ function TarotUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 2. NOMBRE UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function NombreUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, length, setLength } = useConsult(section);
   const [nombre, setNombre] = useState("");
@@ -486,19 +487,19 @@ function NombreUI({ section }: { section: DashboardSection }) {
   const [mode, setMode] = useState<"vibracion" | "historia" | "genealogia">("historia");
 
   const modes = [
-    { key: "historia",   label: "Historia ZODI",    emoji: "📖", desc: "Tu nombre convertido en mito" },
-    { key: "vibracion",  label: "Vibración",         emoji: "🔢", desc: "Energía numerológica de tu nombre" },
-    { key: "genealogia", label: "Genealogía",        emoji: "🌳", desc: "Qué cargan tus apellidos" },
+    { key: "historia",   label: "Historia ZODI",    emoji: "ðŸ“–", desc: "Tu nombre convertido en mito" },
+    { key: "vibracion",  label: "VibraciÃ³n",         emoji: "ðŸ”¢", desc: "EnergÃ­a numerolÃ³gica de tu nombre" },
+    { key: "genealogia", label: "GenealogÃ­a",        emoji: "ðŸŒ³", desc: "QuÃ© cargan tus apellidos" },
   ] as const;
 
-  // Numerología por letra
+  // NumerologÃ­a por letra
   const TABLA: Record<string, number> = {
     a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,
     j:1,k:2,l:3,m:4,n:5,o:6,p:7,q:8,r:9,
     s:1,t:2,u:3,v:4,w:5,x:6,y:7,z:8
   };
   function vibrar(str: string) {
-    let sum = str.toLowerCase().replace(/[^a-záéíóúñü]/g, "")
+    let sum = str.toLowerCase().replace(/[^a-zÃ¡Ã©Ã­Ã³ÃºÃ±Ã¼]/g, "")
       .split("").reduce((a, c) => a + (TABLA[c] || 0), 0);
     while (sum > 9 && ![11,22,33].includes(sum)) {
       sum = String(sum).split("").reduce((a,c)=>a+Number(c),0);
@@ -514,10 +515,10 @@ function NombreUI({ section }: { section: DashboardSection }) {
 
   async function analyze() {
     if (!nombre.trim()) return;
-    const modeLabel = mode === "historia" ? "Inventa una historia mística en estilo ZODI (cyberpunk, oscuro, divertido) sobre el origen y energía del nombre completo. Que sea memorable y única."
-      : mode === "vibracion" ? "Analiza la vibración numerológica de cada parte del nombre (nombre, primer apellido, segundo apellido) y su significado. Sé directo y concreto."
-      : "Analiza el significado genealógico y energético de los apellidos. Qué herencia emocional, karma familiar y vibración pública cargan.";
-    const extra = `Nombre: ${nombre}. Primer apellido: ${ap1 || "no indicado"}. Segundo apellido: ${ap2 || "no indicado"}. Nombre completo: ${nombreCompleto}. Vibración total: ${vibrTotal}.\n${modeLabel}`;
+    const modeLabel = mode === "historia" ? "Inventa una historia mÃ­stica en estilo ZODI (cyberpunk, oscuro, divertido) sobre el origen y energÃ­a del nombre completo. Que sea memorable y Ãºnica."
+      : mode === "vibracion" ? "Analiza la vibraciÃ³n numerolÃ³gica de cada parte del nombre (nombre, primer apellido, segundo apellido) y su significado. SÃ© directo y concreto."
+      : "Analiza el significado genealÃ³gico y energÃ©tico de los apellidos. QuÃ© herencia emocional, karma familiar y vibraciÃ³n pÃºblica cargan.";
+    const extra = `Nombre: ${nombre}. Primer apellido: ${ap1 || "no indicado"}. Segundo apellido: ${ap2 || "no indicado"}. Nombre completo: ${nombreCompleto}. VibraciÃ³n total: ${vibrTotal}.\n${modeLabel}`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
@@ -525,7 +526,7 @@ function NombreUI({ section }: { section: DashboardSection }) {
     <div className="grid gap-5">
       {/* Name inputs */}
       <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-4">Tu firma energética</h2>
+        <h2 className="text-xl font-black mb-4">Tu firma energÃ©tica</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           {[
             { val: nombre, set: setNombre, ph: "Tu nombre", label: "Nombre" },
@@ -547,17 +548,17 @@ function NombreUI({ section }: { section: DashboardSection }) {
         {/* Vibration preview */}
         {nombreCompleto && (
           <div className="mt-4 flex flex-wrap gap-3">
-            {nombre && <span className="rounded-md bg-purple-500/20 border border-purple-400/30 px-3 py-1.5 text-xs font-bold text-purple-300">{nombre} → {vibrNombre}</span>}
-            {ap1 && <span className="rounded-md bg-blue-500/20 border border-blue-400/30 px-3 py-1.5 text-xs font-bold text-blue-300">{ap1} → {vibrAp1}</span>}
-            {ap2 && <span className="rounded-md bg-cyan-500/20 border border-cyan-400/30 px-3 py-1.5 text-xs font-bold text-cyan-300">{ap2} → {vibrAp2}</span>}
-            <span className="rounded-md bg-lime-400/20 border border-lime-400/40 px-3 py-1.5 text-xs font-black text-lime-300">Vibración total: {vibrTotal}</span>
+            {nombre && <span className="rounded-md bg-purple-500/20 border border-purple-400/30 px-3 py-1.5 text-xs font-bold text-purple-300">{nombre} â†’ {vibrNombre}</span>}
+            {ap1 && <span className="rounded-md bg-blue-500/20 border border-blue-400/30 px-3 py-1.5 text-xs font-bold text-blue-300">{ap1} â†’ {vibrAp1}</span>}
+            {ap2 && <span className="rounded-md bg-cyan-500/20 border border-cyan-400/30 px-3 py-1.5 text-xs font-bold text-cyan-300">{ap2} â†’ {vibrAp2}</span>}
+            <span className="rounded-md bg-lime-400/20 border border-lime-400/40 px-3 py-1.5 text-xs font-black text-lime-300">VibraciÃ³n total: {vibrTotal}</span>
           </div>
         )}
       </div>
 
       {/* Mode selector */}
       <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-4">¿Qué quieres saber?</h2>
+        <h2 className="text-xl font-black mb-4">Â¿QuÃ© quieres saber?</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           {modes.map(m => (
             <button
@@ -581,7 +582,7 @@ function NombreUI({ section }: { section: DashboardSection }) {
           disabled={loading || !nombre.trim()}
           className="mt-3 w-full rounded-md bg-lime-300 py-3 font-black text-black disabled:opacity-50 hover:bg-lime-200 transition"
         >
-          {loading ? "ZODI descifra tu nombre..." : `Analizar ${mode === "historia" ? "mi historia" : mode === "vibracion" ? "mi vibración" : "mi genealogía"}`}
+          {loading ? "ZODI descifra tu nombre..." : `Analizar ${mode === "historia" ? "mi historia" : mode === "vibracion" ? "mi vibraciÃ³n" : "mi genealogÃ­a"}`}
         </button>
       </div>
       <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
@@ -589,9 +590,9 @@ function NombreUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 3. LECTURA DE MANO UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ManoUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, length, setLength } = useConsult(section);
   const [selectedZones, setSelectedZones] = useState<string[]>([]);
@@ -600,11 +601,11 @@ function ManoUI({ section }: { section: DashboardSection }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const zones = [
-    { id: "vida",    label: "Línea de la vida",     desc: "Vitalidad y ciclos",       emoji: "💚" },
-    { id: "corazon",label: "Línea del corazón",     desc: "Amor y emociones",         emoji: "❤️" },
-    { id: "cabeza",  label: "Línea de la cabeza",   desc: "Mente y decisiones",       emoji: "💜" },
-    { id: "destino", label: "Línea del destino",    desc: "Vocación y propósito",     emoji: "⭐" },
-    { id: "venus",   label: "Monte de Venus",        desc: "Sensualidad y afecto",     emoji: "🌹" },
+    { id: "vida",    label: "LÃ­nea de la vida",     desc: "Vitalidad y ciclos",       emoji: "ðŸ’š" },
+    { id: "corazon",label: "LÃ­nea del corazÃ³n",     desc: "Amor y emociones",         emoji: "â¤ï¸" },
+    { id: "cabeza",  label: "LÃ­nea de la cabeza",   desc: "Mente y decisiones",       emoji: "ðŸ’œ" },
+    { id: "destino", label: "LÃ­nea del destino",    desc: "VocaciÃ³n y propÃ³sito",     emoji: "â­" },
+    { id: "venus",   label: "Monte de Venus",        desc: "Sensualidad y afecto",     emoji: "ðŸŒ¹" },
   ];
 
   function toggleZone(id: string) {
@@ -617,9 +618,9 @@ function ManoUI({ section }: { section: DashboardSection }) {
 
   async function read() {
     const zonesText = selectedZones.length > 0
-      ? `Analiza especialmente estas líneas: ${selectedZones.map(z => zones.find(x=>x.id===z)?.label).join(", ")}.`
-      : "Analiza todas las líneas principales.";
-    const descText = description ? `Descripción de la mano: ${description}.` : imageUploaded ? "El usuario ha subido una foto de su mano." : "";
+      ? `Analiza especialmente estas lÃ­neas: ${selectedZones.map(z => zones.find(x=>x.id===z)?.label).join(", ")}.`
+      : "Analiza todas las lÃ­neas principales.";
+    const descText = description ? `DescripciÃ³n de la mano: ${description}.` : imageUploaded ? "El usuario ha subido una foto de su mano." : "";
     await consult(`${section.prompt}\n${zonesText}\n${descText}`);
   }
 
@@ -628,7 +629,7 @@ function ManoUI({ section }: { section: DashboardSection }) {
       {/* Upload zone */}
       <div className="glass-panel rounded-md p-5">
         <h2 className="text-xl font-black mb-2">Sube una foto o describe tu mano</h2>
-        <p className="text-sm text-white/50 mb-5">ZODI lee las líneas de tu mano de forma simbólica — sin circo, sin drama, con perspectiva.</p>
+        <p className="text-sm text-white/50 mb-5">ZODI lee las lÃ­neas de tu mano de forma simbÃ³lica â€” sin circo, sin drama, con perspectiva.</p>
 
         <div
           onClick={() => fileRef.current?.click()}
@@ -641,7 +642,7 @@ function ManoUI({ section }: { section: DashboardSection }) {
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           {imageUploaded ? (
             <>
-              <div className="text-4xl mb-2">✅</div>
+              <div className="text-4xl mb-2">âœ…</div>
               <p className="font-black text-lime-300">Foto cargada</p>
               <p className="text-xs text-white/40 mt-1">Haz clic para cambiarla</p>
             </>
@@ -649,7 +650,7 @@ function ManoUI({ section }: { section: DashboardSection }) {
             <>
               <Camera className="h-10 w-10 mx-auto mb-3 text-white/30" />
               <p className="font-black text-white/70">Sube una foto de tu palma</p>
-              <p className="text-xs text-white/35 mt-1">JPG, PNG — mano extendida, luz natural</p>
+              <p className="text-xs text-white/35 mt-1">JPG, PNG â€” mano extendida, luz natural</p>
             </>
           )}
         </div>
@@ -660,7 +661,7 @@ function ManoUI({ section }: { section: DashboardSection }) {
             value={description}
             onChange={e => setDescription(e.target.value)}
             rows={3}
-            placeholder="Ej: línea de la vida larga y curva, línea del corazón profunda pero fragmentada..."
+            placeholder="Ej: lÃ­nea de la vida larga y curva, lÃ­nea del corazÃ³n profunda pero fragmentada..."
             className="w-full resize-none rounded-md border border-white/10 bg-black/45 p-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-lime-300/55"
           />
         </div>
@@ -668,8 +669,8 @@ function ManoUI({ section }: { section: DashboardSection }) {
 
       {/* Zone selector */}
       <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-2">¿Qué líneas te interesan más?</h2>
-        <p className="text-sm text-white/50 mb-4">Selecciona las que quieres que ZODI analice con más detalle (o déjalas todas)</p>
+        <h2 className="text-xl font-black mb-2">Â¿QuÃ© lÃ­neas te interesan mÃ¡s?</h2>
+        <p className="text-sm text-white/50 mb-4">Selecciona las que quieres que ZODI analice con mÃ¡s detalle (o dÃ©jalas todas)</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {zones.map(z => (
             <button
@@ -696,7 +697,7 @@ function ManoUI({ section }: { section: DashboardSection }) {
           disabled={loading || (!imageUploaded && !description.trim())}
           className="mt-3 w-full rounded-md bg-lime-300 py-3 font-black text-black disabled:opacity-50 hover:bg-lime-200 transition"
         >
-          {loading ? "Las líneas hablan..." : "Leer mi mano"}
+          {loading ? "Las lÃ­neas hablan..." : "Leer mi mano"}
         </button>
       </div>
       <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
@@ -704,9 +705,9 @@ function ManoUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 4. COMPATIBILIDAD UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CompatibilidadUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
   const [theirSign, setTheirSign] = useState("");
@@ -715,21 +716,21 @@ function CompatibilidadUI({ section }: { section: DashboardSection }) {
   const mySign = session.astralProfile?.sunSign ?? "";
 
   const relations = [
-    { key: "pareja",   label: "Pareja",   emoji: "💕" },
-    { key: "amistad",  label: "Amistad",  emoji: "🤝" },
-    { key: "trabajo",  label: "Trabajo",  emoji: "💼" },
+    { key: "pareja",   label: "Pareja",   emoji: "ðŸ’•" },
+    { key: "amistad",  label: "Amistad",  emoji: "ðŸ¤" },
+    { key: "trabajo",  label: "Trabajo",  emoji: "ðŸ’¼" },
   ] as const;
 
   async function analyze() {
     if (!theirSign) return;
-    const extra = `Mi signo: ${mySign}. Signo de ${theirName || "la otra persona"}: ${theirSign}. Tipo de relación: ${relation}. Analiza química, comunicación, conflictos posibles, timing y consejo. Sé directo y útil.`;
+    const extra = `Mi signo: ${mySign}. Signo de ${theirName || "la otra persona"}: ${theirSign}. Tipo de relaciÃ³n: ${relation}. Analiza quÃ­mica, comunicaciÃ³n, conflictos posibles, timing y consejo. SÃ© directo y Ãºtil.`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
   return (
     <div className="grid gap-5">
       <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-4">Tipo de relación</h2>
+        <h2 className="text-xl font-black mb-4">Tipo de relaciÃ³n</h2>
         <div className="flex gap-3">
           {relations.map(r => (
             <button
@@ -750,8 +751,8 @@ function CompatibilidadUI({ section }: { section: DashboardSection }) {
         <div className="grid gap-4 sm:grid-cols-2">
           {/* My sign */}
           <div className="rounded-md border border-lime-300/20 bg-lime-300/5 p-4">
-            <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-2">Tú</p>
-            <div className="text-4xl mb-2">{ZODIAC.find(z=>z.name===mySign)?.emoji ?? "⭐"}</div>
+            <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-2">TÃº</p>
+            <div className="text-4xl mb-2">{ZODIAC.find(z=>z.name===mySign)?.emoji ?? "â­"}</div>
             <p className="font-black text-lime-200">{mySign || "Desconocido"}</p>
             <p className="text-xs text-white/40">Signo solar de tu perfil</p>
           </div>
@@ -789,7 +790,7 @@ function CompatibilidadUI({ section }: { section: DashboardSection }) {
           disabled={loading || !theirSign}
           className="mt-3 w-full rounded-md bg-lime-300 py-3 font-black text-black disabled:opacity-50 hover:bg-lime-200 transition"
         >
-          {loading ? "Analizando la química..." : `Analizar compatibilidad ${relation === "pareja" ? "💕" : relation === "amistad" ? "🤝" : "💼"}`}
+          {loading ? "Analizando la quÃ­mica..." : `Analizar compatibilidad ${relation === "pareja" ? "ðŸ’•" : relation === "amistad" ? "ðŸ¤" : "ðŸ’¼"}`}
         </button>
       </div>
       <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
@@ -797,9 +798,9 @@ function CompatibilidadUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 5. NUMEROLOGÍA UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 5. NUMEROLOGÃA UI
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function NumerologiaUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
   const ap = session.astralProfile;
@@ -810,18 +811,18 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
   const [hasAutoConsulted, setHasAutoConsulted] = useState(false);
 
   const numberMeanings: Record<number, string> = {
-    1: "El Pionero — liderazgo, independencia, inicio",
-    2: "El Mediador — armonía, intuición, cooperación",
-    3: "El Creador — expresión, alegría, comunicación",
-    4: "El Constructor — orden, trabajo, estabilidad",
-    5: "El Aventurero — libertad, cambio, versatilidad",
-    6: "El Guardián — amor, responsabilidad, hogar",
-    7: "El Buscador — espiritualidad, análisis, misterio",
-    8: "El Manifestador — poder, ambición, abundancia",
-    9: "El Sabio — compasión, humanidad, completud",
-    11: "El Iluminado — inspiración, intuición elevada",
-    22: "El Maestro Constructor — visión, poder, legado",
-    33: "El Maestro Sanador — amor universal, guía",
+    1: "El Pionero â€” liderazgo, independencia, inicio",
+    2: "El Mediador â€” armonÃ­a, intuiciÃ³n, cooperaciÃ³n",
+    3: "El Creador â€” expresiÃ³n, alegrÃ­a, comunicaciÃ³n",
+    4: "El Constructor â€” orden, trabajo, estabilidad",
+    5: "El Aventurero â€” libertad, cambio, versatilidad",
+    6: "El GuardiÃ¡n â€” amor, responsabilidad, hogar",
+    7: "El Buscador â€” espiritualidad, anÃ¡lisis, misterio",
+    8: "El Manifestador â€” poder, ambiciÃ³n, abundancia",
+    9: "El Sabio â€” compasiÃ³n, humanidad, completud",
+    11: "El Iluminado â€” inspiraciÃ³n, intuiciÃ³n elevada",
+    22: "El Maestro Constructor â€” visiÃ³n, poder, legado",
+    33: "El Maestro Sanador â€” amor universal, guÃ­a",
   };
 
   const allNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33];
@@ -829,14 +830,14 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
   useEffect(() => {
     if (!hasAutoConsulted) {
       setHasAutoConsulted(true);
-      const extra = `Camino de vida: ${targetNumber}. Haz una lectura general de este número y su significado. Añade contexto del año actual (${new Date().getFullYear()}).`;
+      const extra = `Camino de vida: ${targetNumber}. Haz una lectura general de este nÃºmero y su significado. AÃ±ade contexto del aÃ±o actual (${new Date().getFullYear()}).`;
       consult(`${section.prompt}\n${extra}`);
     }
   }, [hasAutoConsulted, targetNumber, consult, section.prompt]);
 
   async function analyzeCotilleo(n: number) {
     setTargetNumber(n);
-    const extra = `Camino de vida: ${n}. Haz una lectura general de este número y su significado. Añade contexto del año actual (${new Date().getFullYear()}). Es en modo cotilleo (sobre otra persona).`;
+    const extra = `Camino de vida: ${n}. Haz una lectura general de este nÃºmero y su significado. AÃ±ade contexto del aÃ±o actual (${new Date().getFullYear()}). Es en modo cotilleo (sobre otra persona).`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
@@ -848,18 +849,18 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
         <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[500px] bg-black">
           <Image
             src={`/zodi-art/numerologia/${targetNumber}.png`}
-            alt={`Número ${targetNumber}`}
+            alt={`NÃºmero ${targetNumber}`}
             fill
             className="object-contain"
             priority
           />
-          {/* Number overlay — bottom-center */}
+          {/* Number overlay â€” bottom-center */}
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.3em] text-lime-200/80 mb-1">
               {targetNumber === lifePathNumber ? "Tu camino de vida" : "Modo cotilleo"}
             </p>
             <p className="text-6xl font-black text-lime-300 drop-shadow-[0_0_20px_rgba(184,255,23,0.6)]">{targetNumber}</p>
-            <p className="mt-2 text-lg font-black text-white">{numberMeanings[targetNumber] ?? "Número especial"}</p>
+            <p className="mt-2 text-lg font-black text-white">{numberMeanings[targetNumber] ?? "NÃºmero especial"}</p>
           </div>
         </div>
 
@@ -867,9 +868,9 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
           <div className="p-5">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
-                { label: "Año personal", value: (() => { const y = new Date().getFullYear(); let s = String(y).split("").reduce((a,c)=>a+Number(c),0); while(s>9&&![11,22,33].includes(s)){s=String(s).split("").reduce((a,c)=>a+Number(c),0)} return s; })() },
+                { label: "AÃ±o personal", value: (() => { const y = new Date().getFullYear(); let s = String(y).split("").reduce((a,c)=>a+Number(c),0); while(s>9&&![11,22,33].includes(s)){s=String(s).split("").reduce((a,c)=>a+Number(c),0)} return s; })() },
                 { label: "Mes personal", value: new Date().getMonth() + 1 },
-                { label: "Día personal", value: new Date().getDate() },
+                { label: "DÃ­a personal", value: new Date().getDate() },
                 { label: "Camino de vida", value: lifePathNumber },
               ].map(item => (
                 <div key={item.label} className="rounded-md border border-white/10 bg-black/30 p-3 text-center">
@@ -895,7 +896,7 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
         
         {cotilleoMode && (
           <div>
-            <p className="text-sm text-white/50 mb-4">Selecciona el número de alguien más para ver su perfil numerológico.</p>
+            <p className="text-sm text-white/50 mb-4">Selecciona el nÃºmero de alguien mÃ¡s para ver su perfil numerolÃ³gico.</p>
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
               {allNumbers.map(n => (
                 <button
@@ -919,32 +920,32 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 6. ROAST UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function RoastUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
   const [intensity, setIntensity] = useState(3);
   const [targetSign, setTargetSign] = useState(session.astralProfile?.sunSign ?? "");
   const [roastTarget, setRoastTarget] = useState<"yo" | "otro">("yo");
 
-  const intensityLabels = ["", "Gentil 🌸", "Honesto 😏", "Directo ⚡", "Sin filtros 🔥", "Devastador 💀"];
+  const intensityLabels = ["", "Gentil ðŸŒ¸", "Honesto ðŸ˜", "Directo âš¡", "Sin filtros ðŸ”¥", "Devastador ðŸ’€"];
   const intensityColors = ["", "text-green-300", "text-yellow-300", "text-orange-300", "text-red-400", "text-pink-500"];
 
   async function roast() {
     const intensityDesc = `Intensidad ${intensity}/5: ${intensityLabels[intensity]}`;
-    const extra = `Signo a roastear: ${targetSign}. ${intensityDesc}. ${roastTarget === "otro" ? "Es una persona de mi entorno." : "Soy yo."} Sé creativo, específico, astuto y no cruel — el humor ácido con verdad es el objetivo.`;
+    const extra = `Signo a roastear: ${targetSign}. ${intensityDesc}. ${roastTarget === "otro" ? "Es una persona de mi entorno." : "Soy yo."} SÃ© creativo, especÃ­fico, astuto y no cruel â€” el humor Ã¡cido con verdad es el objetivo.`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
   return (
     <div className="grid gap-5">
       <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-4">¿A quién roasteamos?</h2>
+        <h2 className="text-xl font-black mb-4">Â¿A quiÃ©n roasteamos?</h2>
         <div className="flex gap-3 mb-5">
           {[
-            { key: "yo",   label: "A mí mismo", emoji: "😅" },
-            { key: "otro", label: "A alguien más", emoji: "😈" },
+            { key: "yo",   label: "A mÃ­ mismo", emoji: "ðŸ˜…" },
+            { key: "otro", label: "A alguien mÃ¡s", emoji: "ðŸ˜ˆ" },
           ].map(t => (
             <button
               key={t.key}
@@ -999,7 +1000,7 @@ function RoastUI({ section }: { section: DashboardSection }) {
           disabled={loading || !targetSign}
           className="mt-3 w-full rounded-md bg-gradient-to-r from-orange-400 to-red-500 py-3 font-black text-black disabled:opacity-50 hover:opacity-90 transition"
         >
-          {loading ? "Preparando la verdad..." : `Roastear ${targetSign || "a alguien"} 🔥`}
+          {loading ? "Preparando la verdad..." : `Roastear ${targetSign || "a alguien"} ðŸ”¥`}
         </button>
       </div>
       <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
@@ -1007,9 +1008,9 @@ function RoastUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 7. RUNAS UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function RunasUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, length, setLength } = useConsult(section);
   const [drawn, setDrawn] = useState<number[]>([]);
@@ -1052,14 +1053,14 @@ function RunasUI({ section }: { section: DashboardSection }) {
                 spread === n ? "border-lime-300 bg-lime-300/10 text-lime-200" : "border-white/10 text-white/60 hover:border-lime-300/25"
               }`}
             >
-              {n === 1 ? "⚡ Una runa" : "ᚠ ᚢ ᚦ Tres runas"}
+              {n === 1 ? "âš¡ Una runa" : "áš  áš¢ áš¦ Tres runas"}
             </button>
           ))}
         </div>
 
         {drawn.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-6">
-            <div className="text-6xl opacity-60 tracking-widest">ᚠ ᚢ ᚦ</div>
+            <div className="text-6xl opacity-60 tracking-widest">áš  áš¢ áš¦</div>
             <button
               onClick={draw}
               className="flex items-center gap-2 rounded-md bg-lime-300 px-8 py-3 font-black text-black hover:bg-lime-200 transition"
@@ -1086,7 +1087,7 @@ function RunasUI({ section }: { section: DashboardSection }) {
                       <span className="text-xs text-white/60 mt-1">{RUNA_NAMES[runaIdx]}</span>
                     </>
                   ) : (
-                    <span className="text-2xl opacity-30">✦</span>
+                    <span className="text-2xl opacity-30">âœ¦</span>
                   )}
                 </button>
               </div>
@@ -1100,7 +1101,7 @@ function RunasUI({ section }: { section: DashboardSection }) {
               value={question}
               onChange={e => setQuestion(e.target.value)}
               rows={2}
-              placeholder="¿Qué querías saber? (opcional)"
+              placeholder="Â¿QuÃ© querÃ­as saber? (opcional)"
               className="w-full resize-none rounded-md border border-white/10 bg-black/45 p-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-lime-300/55"
             />
             <div className="flex gap-3">
@@ -1124,9 +1125,9 @@ function RunasUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 8. CRISTALES UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CristalesUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, length, setLength } = useConsult(section);
   const [intent, setIntent] = useState("");
@@ -1137,16 +1138,16 @@ function CristalesUI({ section }: { section: DashboardSection }) {
   const crystalOfDay = CRISTALES[dayIdx];
 
   async function getCrystalReading() {
-    const cristalText = selectedCristal ? `Cristal elegido: ${selectedCristal.name}` : `Cristal del día: ${crystalOfDay.name}`;
-    const intentText = intent ? `Intención: ${intent}` : "";
-    await consult(`${section.prompt}\n${cristalText}. ${intentText}. Proporciona: propiedades del cristal, cómo usarlo hoy, ritual simple y advertencia energética.`);
+    const cristalText = selectedCristal ? `Cristal elegido: ${selectedCristal.name}` : `Cristal del dÃ­a: ${crystalOfDay.name}`;
+    const intentText = intent ? `IntenciÃ³n: ${intent}` : "";
+    await consult(`${section.prompt}\n${cristalText}. ${intentText}. Proporciona: propiedades del cristal, cÃ³mo usarlo hoy, ritual simple y advertencia energÃ©tica.`);
   }
 
   return (
     <div className="grid gap-5">
       {/* Crystal of the day */}
       <div className="glass-panel rounded-md p-5">
-        <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-3">Cristal del día</p>
+        <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-3">Cristal del dÃ­a</p>
         <div className="flex items-center gap-4 p-4 rounded-md border border-lime-300/20 bg-lime-300/5">
           <span className="text-5xl">{crystalOfDay.emoji}</span>
           <div>
@@ -1158,8 +1159,8 @@ function CristalesUI({ section }: { section: DashboardSection }) {
 
       {/* Intent selector */}
       <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-2">¿Qué necesitas hoy?</h2>
-        <p className="text-sm text-white/50 mb-4">Elige tu intención y ZODI te sugiere el cristal exacto</p>
+        <h2 className="text-xl font-black mb-2">Â¿QuÃ© necesitas hoy?</h2>
+        <p className="text-sm text-white/50 mb-4">Elige tu intenciÃ³n y ZODI te sugiere el cristal exacto</p>
         <div className="grid grid-cols-4 gap-2 mb-5">
           {INTENTS.map(i => (
             <button
@@ -1207,9 +1208,9 @@ function CristalesUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 9. BIORRITMO UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BiorritmoUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
   const birthDate = session.onboardingData?.birthDate;
@@ -1233,16 +1234,16 @@ function BiorritmoUI({ section }: { section: DashboardSection }) {
   }
 
   function getLabel(val: number) {
-    if (val > 70)  return "🔥 Pico";
-    if (val > 30)  return "⬆️ Alto";
-    if (val > -30) return "➡️ Neutro";
-    if (val > -70) return "⬇️ Bajo";
-    return "💤 Valle";
+    if (val > 70)  return "ðŸ”¥ Pico";
+    if (val > 30)  return "â¬†ï¸ Alto";
+    if (val > -30) return "âž¡ï¸ Neutro";
+    if (val > -70) return "â¬‡ï¸ Bajo";
+    return "ðŸ’¤ Valle";
   }
 
   async function analyze() {
     const extra = cycles
-      ? `Biorritmo actual — Físico: ${cycles.physical}%, Emocional: ${cycles.emotional}%, Mental: ${cycles.mental}%. Interpreta cómo aprovechar esta energía hoy.`
+      ? `Biorritmo actual â€” FÃ­sico: ${cycles.physical}%, Emocional: ${cycles.emotional}%, Mental: ${cycles.mental}%. Interpreta cÃ³mo aprovechar esta energÃ­a hoy.`
       : "Genera una lectura de biorritmo general.";
     await consult(`${section.prompt}\n${extra}`);
   }
@@ -1254,7 +1255,7 @@ function BiorritmoUI({ section }: { section: DashboardSection }) {
           <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-4">Tu estado hoy</p>
           <div className="grid gap-4">
             {[
-              { label: "Físico",      icon: <Zap className="h-4 w-4 text-lime-300" />,   val: cycles.physical  },
+              { label: "FÃ­sico",      icon: <Zap className="h-4 w-4 text-lime-300" />,   val: cycles.physical  },
               { label: "Emocional",   icon: <Heart className="h-4 w-4 text-pink-400" />,  val: cycles.emotional },
               { label: "Mental",      icon: <Brain className="h-4 w-4 text-cyan-400" />,  val: cycles.mental    },
             ].map(({ label, icon, val }) => (
@@ -1288,7 +1289,7 @@ function BiorritmoUI({ section }: { section: DashboardSection }) {
         </div>
       ) : (
         <div className="glass-panel rounded-md p-5 text-center py-10">
-          <p className="text-4xl mb-3">📅</p>
+          <p className="text-4xl mb-3">ðŸ“…</p>
           <p className="font-black text-lg">Completa tu perfil</p>
           <p className="text-sm text-white/50 mt-2">Necesitas tu fecha de nacimiento para calcular el biorritmo</p>
           <a href="/dashboard/perfil" className="mt-4 inline-block rounded-md bg-lime-300 px-6 py-2.5 font-black text-black text-sm">Ir al perfil</a>
@@ -1299,12 +1300,12 @@ function BiorritmoUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 10. CHINO UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ChinoUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
-  const mySign = session.astralProfile?.chineseZodiac ?? "Dragón";
+  const mySign = session.astralProfile?.chineseZodiac ?? "DragÃ³n";
   const [targetSign, setTargetSign] = useState<string>(mySign);
   const [cotilleoMode, setCotilleoMode] = useState(false);
   const [hasAutoConsulted, setHasAutoConsulted] = useState(false);
@@ -1314,7 +1315,7 @@ function ChinoUI({ section }: { section: DashboardSection }) {
     { name: "Buey", img: "C_buey.png", years: "1925, 1937, 1949, 1961, 1973, 1985, 1997, 2009, 2021" },
     { name: "Tigre", img: "C_tigre.png", years: "1926, 1938, 1950, 1962, 1974, 1986, 1998, 2010, 2022" },
     { name: "Conejo", img: "C_conejo.png", years: "1927, 1939, 1951, 1963, 1975, 1987, 1999, 2011, 2023" },
-    { name: "Dragón", img: "C_dragon.png", years: "1928, 1940, 1952, 1964, 1976, 1988, 2000, 2012, 2024" },
+    { name: "DragÃ³n", img: "C_dragon.png", years: "1928, 1940, 1952, 1964, 1976, 1988, 2000, 2012, 2024" },
     { name: "Serpiente", img: "C_serpiente.png", years: "1929, 1941, 1953, 1965, 1977, 1989, 2001, 2013, 2025" },
     { name: "Caballo", img: "C_caballo.png", years: "1930, 1942, 1954, 1966, 1978, 1990, 2002, 2014, 2026" },
     { name: "Cabra", img: "C_cabra.png", years: "1931, 1943, 1955, 1967, 1979, 1991, 2003, 2015, 2027" },
@@ -1329,14 +1330,14 @@ function ChinoUI({ section }: { section: DashboardSection }) {
   useEffect(() => {
     if (!hasAutoConsulted) {
       setHasAutoConsulted(true);
-      const extra = `Animal: ${targetSign}. Haz una lectura general de este animal en el horóscopo chino.`;
+      const extra = `Animal: ${targetSign}. Haz una lectura general de este animal en el horÃ³scopo chino.`;
       consult(`${section.prompt}\n${extra}`);
     }
   }, [hasAutoConsulted, targetSign, consult, section.prompt]);
 
   async function analyzeCotilleo(sign: string) {
     setTargetSign(sign);
-    const extra = `Animal: ${sign}. Haz una lectura general de este animal en el horóscopo chino. Es en modo cotilleo (sobre otra persona).`;
+    const extra = `Animal: ${sign}. Haz una lectura general de este animal en el horÃ³scopo chino. Es en modo cotilleo (sobre otra persona).`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
@@ -1357,7 +1358,7 @@ function ChinoUI({ section }: { section: DashboardSection }) {
             </p>
             <p className="text-4xl font-black text-lime-300">{targetSign}</p>
             <p className="mt-1 text-[10px] text-white/50 w-3/4 mx-auto leading-relaxed">
-              Años: {animals.find(a => a.name === targetSign)?.years}
+              AÃ±os: {animals.find(a => a.name === targetSign)?.years}
             </p>
           </div>
         </div>
@@ -1376,7 +1377,7 @@ function ChinoUI({ section }: { section: DashboardSection }) {
         
         {cotilleoMode && (
           <div>
-            <p className="text-sm text-white/50 mb-4">Selecciona el animal de alguien más para ver su horóscopo chino.</p>
+            <p className="text-sm text-white/50 mb-4">Selecciona el animal de alguien mÃ¡s para ver su horÃ³scopo chino.</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {animals.map(a => (
                 <button
@@ -1400,9 +1401,9 @@ function ChinoUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 11. HORÓSCOPO DIARIO UI (enhanced)
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 11. HORÃ“SCOPO DIARIO UI (enhanced)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
   const [tone, setTone] = useState("directo");
@@ -1416,11 +1417,11 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
   const [hasAutoConsulted, setHasAutoConsulted] = useState(false);
 
   const categories = [
-    { key: "amor",     label: "Amor",    emoji: "❤️" },
-    { key: "trabajo",  label: "Trabajo", emoji: "💼" },
-    { key: "dinero",   label: "Dinero",  emoji: "💰" },
-    { key: "energia",  label: "Energía", emoji: "⚡" },
-    { key: "senal",    label: "Señal",   emoji: "🔮" },
+    { key: "amor",     label: "Amor",    emoji: "â¤ï¸" },
+    { key: "trabajo",  label: "Trabajo", emoji: "ðŸ’¼" },
+    { key: "dinero",   label: "Dinero",  emoji: "ðŸ’°" },
+    { key: "energia",  label: "EnergÃ­a", emoji: "âš¡" },
+    { key: "senal",    label: "SeÃ±al",   emoji: "ðŸ”®" },
   ];
 
   const normalizeSign = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -1429,7 +1430,7 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
   useEffect(() => {
     if (!hasAutoConsulted) {
       setHasAutoConsulted(true);
-      const extra = `Signo: ${targetSign}. Fecha: ${ctx.dateReadable}. ${ctx.dayName}. Sol en ${ctx.sunTransit}. Luna: ${ctx.moonPhase}. Vibración del día: ${ctx.dayVibration}. Tono: ${tone}.`;
+      const extra = `Signo: ${targetSign}. Fecha: ${ctx.dateReadable}. ${ctx.dayName}. Sol en ${ctx.sunTransit}. Luna: ${ctx.moonPhase}. VibraciÃ³n del dÃ­a: ${ctx.dayVibration}. Tono: ${tone}.`;
       consult(`${section.prompt}\n${extra}`);
     }
   }, [hasAutoConsulted, targetSign, tone, ctx, consult, section.prompt]);
@@ -1437,8 +1438,8 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
   async function getHoroscope(sign?: string) {
     const s = sign ?? targetSign;
     if (sign) setTargetSign(s);
-    const catText = activeCategory ? `Enfócate especialmente en el área de: ${categories.find(c=>c.key===activeCategory)?.label}.` : "";
-    const extra = `Signo: ${s}. Fecha: ${ctx.dateReadable}. ${ctx.dayName}. Sol en ${ctx.sunTransit}. Luna: ${ctx.moonPhase}. Vibración del día: ${ctx.dayVibration}. Tono: ${tone}. ${catText} ${question ? `Consulta: ${question}` : ""} ${s !== mySign ? "Es en modo cotilleo (sobre otra persona)." : ""}`;
+    const catText = activeCategory ? `EnfÃ³cate especialmente en el Ã¡rea de: ${categories.find(c=>c.key===activeCategory)?.label}.` : "";
+    const extra = `Signo: ${s}. Fecha: ${ctx.dateReadable}. ${ctx.dayName}. Sol en ${ctx.sunTransit}. Luna: ${ctx.moonPhase}. VibraciÃ³n del dÃ­a: ${ctx.dayVibration}. Tono: ${tone}. ${catText} ${question ? `Consulta: ${question}` : ""} ${s !== mySign ? "Es en modo cotilleo (sobre otra persona)." : ""}`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
@@ -1456,7 +1457,7 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
           />
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 text-center">
             <p className="text-[11px] uppercase tracking-[0.3em] text-lime-200/80 mb-1">
-              {targetSign === mySign ? "Tu horóscopo occidental" : "Modo cotilleo"}
+              {targetSign === mySign ? "Tu horÃ³scopo occidental" : "Modo cotilleo"}
             </p>
             <p className="text-5xl font-black text-lime-300 drop-shadow-[0_0_20px_rgba(184,255,23,0.6)]">{targetSign}</p>
             <p className="mt-1 text-xs text-white/50">{ZODIAC.find(z => z.name === targetSign)?.dates}</p>
@@ -1467,10 +1468,10 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
           <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-3">Contexto astral de hoy</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { label: "Fecha",     value: ctx.dateReadable,  emoji: "📅" },
-              { label: "Sol en",    value: ctx.sunTransit,    emoji: "☀️" },
-              { label: "Luna",      value: ctx.moonPhase,     emoji: "🌙" },
-              { label: "Vibración", value: String(ctx.dayVibration), emoji: "🔢" },
+              { label: "Fecha",     value: ctx.dateReadable,  emoji: "ðŸ“…" },
+              { label: "Sol en",    value: ctx.sunTransit,    emoji: "â˜€ï¸" },
+              { label: "Luna",      value: ctx.moonPhase,     emoji: "ðŸŒ™" },
+              { label: "VibraciÃ³n", value: String(ctx.dayVibration), emoji: "ðŸ”¢" },
             ].map(item => (
               <div key={item.label} className="rounded-md border border-white/10 bg-black/30 p-3 text-center">
                 <p className="text-[10px] text-white/40">{item.label}</p>
@@ -1494,7 +1495,7 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
         
         {cotilleoMode && (
           <div className="mb-6">
-            <p className="text-sm text-white/50 mb-4">Selecciona el signo de alguien más para ver qué le deparan los astros hoy.</p>
+            <p className="text-sm text-white/50 mb-4">Selecciona el signo de alguien mÃ¡s para ver quÃ© le deparan los astros hoy.</p>
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
               {ZODIAC.map(z => (
                 <button
@@ -1521,7 +1522,7 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
             onClick={() => setActiveCategory(null)}
             className={`rounded-md border px-4 py-2 text-xs font-bold transition ${!activeCategory ? "border-lime-300 bg-lime-300/10 text-lime-200" : "border-white/10 text-white/50 hover:border-lime-300/25"}`}
           >
-            🌟 Todo
+            ðŸŒŸ Todo
           </button>
           {categories.map(c => (
             <button
@@ -1541,61 +1542,27 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
 
         <textarea
           value={question}
-                 {showDelete && (
-          <div className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="h-4 w-4 text-red-400" />
-              <p className="font-black text-red-400 text-sm">Esta acción es irreversible</p>
-            </div>
-            <p className="text-sm text-white/60 mb-3">Escribe <strong className="text-red-400">ELIMINAR</strong> para confirmar</p>
-            <div className="flex gap-3">
-              <input
-                value={deleteConfirm}
-                onChange={e => setDeleteConfirm(e.target.value)}
-                placeholder="ELIMINAR"
-                className="flex-1 rounded-md border border-red-500/30 bg-black/45 px-4 py-2 text-sm text-white outline-none"
-              />
-              <button
-                onClick={deleteAccount}
-                disabled={deleteConfirm !== "ELIMINAR"}
-                className="rounded-md bg-red-500 px-5 py-2 font-black text-sm text-white disabled:opacity-40"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        )}
+          onChange={e => setQuestion(e.target.value)}
+          rows={2}
+          placeholder="Â¿Algo concreto que quieras saber sobre este dÃ­a? (opcional)"
+          className="mt-4 w-full resize-none rounded-md border border-white/10 bg-black/45 p-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-lime-300/55"
+        />
+        <button
+          onClick={() => getHoroscope()}
+          disabled={loading}
+          className="mt-4 w-full rounded-md bg-lime-300 py-3 font-black text-black disabled:opacity-50 hover:bg-lime-200 transition"
+        >
+          {loading ? "El cosmos habla..." : `Refrescar lectura`}
+        </button>
       </div>
+      <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
+    </div>
+  );
+}
 
-      {/* Invite Friends */}
-      {session.uid && (
-        <div className="glass-panel rounded-md p-5 border border-lime-300/30">
-          <h2 className="text-xl font-black mb-2 flex items-center gap-2">
-            <Gift className="h-5 w-5 text-lime-300" />
-            Invita y gana Gemas
-          </h2>
-          <p className="text-sm text-white/60 mb-4">
-            Comparte tu enlace astral. Tú ganas <strong className="text-lime-300">100 Gemas</strong> y tu amigo gana <strong className="text-lime-300">50 Gemas</strong> cuando se registre.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              readOnly
-              value={`https://zodi.aibueno.es/auth/register?ref=${session.uid.substring(0, 8).toUpperCase()}`}
-              className="flex-1 rounded-md bg-black/45 px-4 py-2 text-sm text-lime-100 outline-none border border-lime-300/20"
-            />
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(`https://zodi.aibueno.es/auth/register?ref=${session.uid?.substring(0, 8).toUpperCase()}`);
-                alert("¡Enlace copiado!");
-              }}
-              className="rounded-md bg-lime-300 px-5 py-2 font-black text-black text-sm hover:bg-lime-200 transition"
-            >
-              Copiar
-            </button>
-          </div>
-        </div>
-      )}
-    </div>��────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 11. PERFIL UI (full editor + sign out)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PerfilUI() {
   const router = useRouter();
   const session = getLocalSession();
@@ -1640,7 +1607,7 @@ function PerfilUI() {
             />
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-widest text-white/40">Correo electrónico</span>
+            <span className="text-xs uppercase tracking-widest text-white/40">Correo electrÃ³nico</span>
             <input
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -1668,12 +1635,12 @@ function PerfilUI() {
           <h2 className="text-xl font-black mb-4">Tu perfil astral</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
-              { label: "Signo solar", value: ap.sunSign ?? "–", emoji: "☀️" },
-              { label: "Luna",        value: ap.moonSign ?? "–",   emoji: "🌙" },
-              { label: "Ascendente",  value: ap.ascendant ?? "–",  emoji: "⬆️" },
-              { label: "Camino vida", value: String(ap.lifePathNumber ?? "–"), emoji: "🔢" },
-              { label: "Chino",       value: ap.chineseZodiac ?? "–", emoji: "🐉" },
-              { label: "Maya",        value: ap.mayanSign ?? "–",  emoji: "🌿" },
+              { label: "Signo solar", value: ap.sunSign ?? "â€“", emoji: "â˜€ï¸" },
+              { label: "Luna",        value: ap.moonSign ?? "â€“",   emoji: "ðŸŒ™" },
+              { label: "Ascendente",  value: ap.ascendant ?? "â€“",  emoji: "â¬†ï¸" },
+              { label: "Camino vida", value: String(ap.lifePathNumber ?? "â€“"), emoji: "ðŸ”¢" },
+              { label: "Chino",       value: ap.chineseZodiac ?? "â€“", emoji: "ðŸ‰" },
+              { label: "Maya",        value: ap.mayanSign ?? "â€“",  emoji: "ðŸŒ¿" },
             ].map(item => (
               <div key={item.label} className="rounded-md border border-white/10 bg-black/30 p-3">
                 <p className="text-xs text-white/40">{item.label}</p>
@@ -1698,7 +1665,7 @@ function PerfilUI() {
             onClick={signOut}
             className="flex items-center gap-3 rounded-md border border-white/15 px-5 py-3 font-bold text-white/70 hover:border-red-400/40 hover:text-red-400 transition"
           >
-            <LogOut className="h-4 w-4" /> Cerrar sesión
+            <LogOut className="h-4 w-4" /> Cerrar sesiÃ³n
           </button>
           <button
             onClick={() => setShowDelete(!showDelete)}
@@ -1712,7 +1679,7 @@ function PerfilUI() {
           <div className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-4">
             <div className="flex items-center gap-2 mb-3">
               <AlertTriangle className="h-4 w-4 text-red-400" />
-              <p className="font-black text-red-400 text-sm">Esta acción es irreversible</p>
+              <p className="font-black text-red-400 text-sm">Esta acciÃ³n es irreversible</p>
             </div>
             <p className="text-sm text-white/60 mb-3">Escribe <strong className="text-red-400">ELIMINAR</strong> para confirmar</p>
             <div className="flex gap-3">
@@ -1737,21 +1704,21 @@ function PerfilUI() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 12. CARTA NATAL UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CartaNatalUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
   const ap = session.astralProfile;
 
   const planets = ap
     ? [
-        { label: "Signo solar",    value: ap.sunSign ?? "–",             emoji: "☀️", color: "border-yellow-400/30 bg-yellow-500/5" },
-        { label: "Luna",           value: ap.moonSign ?? "–",            emoji: "🌙", color: "border-blue-400/30 bg-blue-500/5" },
-        { label: "Ascendente",     value: ap.ascendant ?? "–",           emoji: "⬆️", color: "border-lime-400/30 bg-lime-500/5" },
-        { label: "Camino de vida", value: String(ap.lifePathNumber ?? "–"), emoji: "🔢", color: "border-purple-400/30 bg-purple-500/5" },
-        { label: "Horóscopo chino", value: ap.chineseZodiac ?? "–",     emoji: "🐉", color: "border-red-400/30 bg-red-500/5" },
-        { label: "Sello maya",     value: ap.mayanSign ?? "–",           emoji: "🌿", color: "border-teal-400/30 bg-teal-500/5" },
+        { label: "Signo solar",    value: ap.sunSign ?? "â€“",             emoji: "â˜€ï¸", color: "border-yellow-400/30 bg-yellow-500/5" },
+        { label: "Luna",           value: ap.moonSign ?? "â€“",            emoji: "ðŸŒ™", color: "border-blue-400/30 bg-blue-500/5" },
+        { label: "Ascendente",     value: ap.ascendant ?? "â€“",           emoji: "â¬†ï¸", color: "border-lime-400/30 bg-lime-500/5" },
+        { label: "Camino de vida", value: String(ap.lifePathNumber ?? "â€“"), emoji: "ðŸ”¢", color: "border-purple-400/30 bg-purple-500/5" },
+        { label: "HorÃ³scopo chino", value: ap.chineseZodiac ?? "â€“",     emoji: "ðŸ‰", color: "border-red-400/30 bg-red-500/5" },
+        { label: "Sello maya",     value: ap.mayanSign ?? "â€“",           emoji: "ðŸŒ¿", color: "border-teal-400/30 bg-teal-500/5" },
       ]
     : null;
 
@@ -1828,9 +1795,9 @@ function CartaNatalUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 13. SUEÑOS UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// 13. SUEÃ‘OS UI
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SuenosUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, length, setLength } = useConsult(section);
   const [dreamText, setDreamText] = useState("");
@@ -1838,18 +1805,18 @@ function SuenosUI({ section }: { section: DashboardSection }) {
   const [symbols, setSymbols] = useState<string[]>([]);
 
   const moods = [
-    { key: "luminoso",     label: "Luminoso",     emoji: "🌟" },
-    { key: "emocional",    label: "Emocional",    emoji: "🌊" },
-    { key: "angustiante",  label: "Angustiante",  emoji: "😨" },
-    { key: "confuso",      label: "Confuso",      emoji: "🌀" },
-    { key: "recurrente",   label: "Recurrente",   emoji: "🔁" },
-    { key: "mistico",      label: "Místico",      emoji: "🌙" },
+    { key: "luminoso",     label: "Luminoso",     emoji: "ðŸŒŸ" },
+    { key: "emocional",    label: "Emocional",    emoji: "ðŸŒŠ" },
+    { key: "angustiante",  label: "Angustiante",  emoji: "ðŸ˜¨" },
+    { key: "confuso",      label: "Confuso",      emoji: "ðŸŒ€" },
+    { key: "recurrente",   label: "Recurrente",   emoji: "ðŸ”" },
+    { key: "mistico",      label: "MÃ­stico",      emoji: "ðŸŒ™" },
   ] as const;
 
   const symbolList = [
-    "Agua", "Volar", "Caer", "Perdido", "Persecución",
-    "Casa", "Muerte", "Transformación", "Animales", "Fuego",
-    "Oscuridad", "Luz", "Personas conocidas", "Lugares extraños",
+    "Agua", "Volar", "Caer", "Perdido", "PersecuciÃ³n",
+    "Casa", "Muerte", "TransformaciÃ³n", "Animales", "Fuego",
+    "Oscuridad", "Luz", "Personas conocidas", "Lugares extraÃ±os",
   ];
 
   function toggleSymbol(s: string) {
@@ -1859,8 +1826,8 @@ function SuenosUI({ section }: { section: DashboardSection }) {
   async function interpret() {
     if (!dreamText.trim() && !mood) return;
     const moodLabel = mood ? `Tono emocional: ${mood}.` : "";
-    const symbolLabel = symbols.length ? `Símbolos presentes: ${symbols.join(", ")}.` : "";
-    const extra = `Descripción del sueño: "${dreamText || "no especificada"}". ${moodLabel} ${symbolLabel}\nInterpreta el sueño con símbolos, mensaje central y acción práctica.`;
+    const symbolLabel = symbols.length ? `SÃ­mbolos presentes: ${symbols.join(", ")}.` : "";
+    const extra = `DescripciÃ³n del sueÃ±o: "${dreamText || "no especificada"}". ${moodLabel} ${symbolLabel}\nInterpreta el sueÃ±o con sÃ­mbolos, mensaje central y acciÃ³n prÃ¡ctica.`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
@@ -1872,8 +1839,8 @@ function SuenosUI({ section }: { section: DashboardSection }) {
             <Waves className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-blue-200/60">Diario de sueños</p>
-            <h2 className="text-xl font-black">Describe tu sueño</h2>
+            <p className="text-xs uppercase tracking-[0.28em] text-blue-200/60">Diario de sueÃ±os</p>
+            <h2 className="text-xl font-black">Describe tu sueÃ±o</h2>
           </div>
         </div>
 
@@ -1881,13 +1848,13 @@ function SuenosUI({ section }: { section: DashboardSection }) {
           value={dreamText}
           onChange={e => setDreamText(e.target.value)}
           rows={5}
-          placeholder="Cuéntame lo que soñaste con el máximo detalle que recuerdes. Colores, personas, sensaciones, lugares..."
+          placeholder="CuÃ©ntame lo que soÃ±aste con el mÃ¡ximo detalle que recuerdes. Colores, personas, sensaciones, lugares..."
           className="w-full resize-none rounded-md border border-white/10 bg-black/45 p-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-blue-300/50"
         />
 
         {/* Mood selector */}
         <div className="mt-4">
-          <p className="mb-2 text-xs uppercase tracking-widest text-white/40">Tono del sueño</p>
+          <p className="mb-2 text-xs uppercase tracking-widest text-white/40">Tono del sueÃ±o</p>
           <div className="flex flex-wrap gap-2">
             {moods.map(m => (
               <button
@@ -1907,7 +1874,7 @@ function SuenosUI({ section }: { section: DashboardSection }) {
 
         {/* Symbol tags */}
         <div className="mt-4">
-          <p className="mb-2 text-xs uppercase tracking-widest text-white/40">Símbolos presentes (opcional)</p>
+          <p className="mb-2 text-xs uppercase tracking-widest text-white/40">SÃ­mbolos presentes (opcional)</p>
           <div className="flex flex-wrap gap-2">
             {symbolList.map(s => (
               <button
@@ -1932,7 +1899,7 @@ function SuenosUI({ section }: { section: DashboardSection }) {
           className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-lime-300 py-3 font-black text-black transition hover:bg-lime-200 disabled:opacity-60 sm:w-auto sm:px-8"
         >
           <NotebookPen className="h-4 w-4" />
-          {loading ? "Interpretando señales..." : "Interpretar sueño"}
+          {loading ? "Interpretando seÃ±ales..." : "Interpretar sueÃ±o"}
         </button>
       </div>
       <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
@@ -1942,7 +1909,7 @@ function SuenosUI({ section }: { section: DashboardSection }) {
 
 
 // 15. GENERIC CONSULT UI (improved, for other sections)
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function GenericConsultUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, length, setLength } = useConsult(section);
   const [question, setQuestion] = useState("");
@@ -1950,20 +1917,20 @@ function GenericConsultUI({ section }: { section: DashboardSection }) {
   const ctx = getTodaysAstralContext();
 
   const SECTION_PROMPTS: Record<string, string[]> = {
-    chino:        ["¿Qué dice mi animal chino sobre este momento?", "¿Cuál es mi compatibilidad con el Dragón?", "Dame una predicción según mi animal chino", "¿Qué ciclo estoy atravesando según el calendario chino?"],
-    maya:         ["¿Qué dice mi sello maya sobre mi misión?", "¿Cómo afecta mi tono al mes?", "Dame una lectura de energía ancestral para hoy", "¿Qué significa mi sello en el amor?"],
-    predicciones: ["Dame mis predicciones de amor para este mes", "¿Qué cambiará en mi trabajo próximamente?", "Dame una predicción de energía general", "¿Qué conviene sembrar este ciclo lunar?"],
-    ranking:      ["¿Qué misión debo cumplir hoy para subir de rango?", "Dame una misión de alta vibración", "¿Cómo subo mi nivel espiritual esta semana?", "Dame un desafío ZODI de 24 horas"],
-    puntos:       ["¿Cómo puedo ganar más puntos hoy?", "Dame una misión express de 5 minutos", "¿Qué acciones dan más puntos?", "Dame una rutina para subir al siguiente nivel"],
-    logros:       ["¿Qué logros me faltan desbloquear?", "Dame un logro semanal alcanzable", "¿Qué insignia debería perseguir primero?", "Dame un desafío de racha para esta semana"],
-    rachas:       ["¿Cómo mantengo mi racha cuando tengo poco tiempo?", "Dame un micro ritual de menos de 2 minutos", "¿Qué recompensa tengo en mi próximo hito de racha?", "Dame motivación para volver después de romper racha"],
+    chino:        ["Â¿QuÃ© dice mi animal chino sobre este momento?", "Â¿CuÃ¡l es mi compatibilidad con el DragÃ³n?", "Dame una predicciÃ³n segÃºn mi animal chino", "Â¿QuÃ© ciclo estoy atravesando segÃºn el calendario chino?"],
+    maya:         ["Â¿QuÃ© dice mi sello maya sobre mi misiÃ³n?", "Â¿CÃ³mo afecta mi tono al mes?", "Dame una lectura de energÃ­a ancestral para hoy", "Â¿QuÃ© significa mi sello en el amor?"],
+    predicciones: ["Dame mis predicciones de amor para este mes", "Â¿QuÃ© cambiarÃ¡ en mi trabajo prÃ³ximamente?", "Dame una predicciÃ³n de energÃ­a general", "Â¿QuÃ© conviene sembrar este ciclo lunar?"],
+    ranking:      ["Â¿QuÃ© misiÃ³n debo cumplir hoy para subir de rango?", "Dame una misiÃ³n de alta vibraciÃ³n", "Â¿CÃ³mo subo mi nivel espiritual esta semana?", "Dame un desafÃ­o ZODI de 24 horas"],
+    puntos:       ["Â¿CÃ³mo puedo ganar mÃ¡s puntos hoy?", "Dame una misiÃ³n express de 5 minutos", "Â¿QuÃ© acciones dan mÃ¡s puntos?", "Dame una rutina para subir al siguiente nivel"],
+    logros:       ["Â¿QuÃ© logros me faltan desbloquear?", "Dame un logro semanal alcanzable", "Â¿QuÃ© insignia deberÃ­a perseguir primero?", "Dame un desafÃ­o de racha para esta semana"],
+    rachas:       ["Â¿CÃ³mo mantengo mi racha cuando tengo poco tiempo?", "Dame un micro ritual de menos de 2 minutos", "Â¿QuÃ© recompensa tengo en mi prÃ³ximo hito de racha?", "Dame motivaciÃ³n para volver despuÃ©s de romper racha"],
   };
 
   const quickPrompts = SECTION_PROMPTS[section.slug] ?? [
-    "¿Qué me conviene evitar esta semana?",
-    "Dame una señal concreta para hoy",
-    "¿Qué patrón necesito romper?",
-    "¿Cuál es mi mayor bloqueo ahora mismo?",
+    "Â¿QuÃ© me conviene evitar esta semana?",
+    "Dame una seÃ±al concreta para hoy",
+    "Â¿QuÃ© patrÃ³n necesito romper?",
+    "Â¿CuÃ¡l es mi mayor bloqueo ahora mismo?",
   ];
 
   async function run() {
@@ -1974,7 +1941,7 @@ function GenericConsultUI({ section }: { section: DashboardSection }) {
     <div className="grid gap-5">
       <div className="glass-panel rounded-md p-5">
         <h2 className="text-xl font-black mb-2">Haz tu consulta</h2>
-        <p className="text-sm text-white/50 mb-4">Pregunta lo que quieras o deja el campo vacío para una lectura general</p>
+        <p className="text-sm text-white/50 mb-4">Pregunta lo que quieras o deja el campo vacÃ­o para una lectura general</p>
 
         {/* Quick prompts */}
         <div className="flex flex-wrap gap-2 mb-4">
@@ -2014,9 +1981,9 @@ function GenericConsultUI({ section }: { section: DashboardSection }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // 13. HISTORIAL UI
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function HistorialUI() {
   type SavedReading = { id: number; date: string; section: string; text: string };
   const [readings, setReadings] = useState<SavedReading[]>([]);
@@ -2038,7 +2005,7 @@ function HistorialUI() {
   }
 
   async function shareReading(r: SavedReading) {
-    const text = `Mi lectura ZODI — ${r.section}:\n\n${r.text.slice(0, 600)}${r.text.length > 600 ? "..." : ""}\n\n🔮 zodi.aibueno.es`;
+    const text = `Mi lectura ZODI â€” ${r.section}:\n\n${r.text.slice(0, 600)}${r.text.length > 600 ? "..." : ""}\n\nðŸ”® zodi.aibueno.es`;
     if ("share" in navigator) {
       try { await navigator.share({ title: `ZODI: ${r.section}`, text }); return; } catch { /* cancelled */ }
     }
@@ -2057,7 +2024,7 @@ function HistorialUI() {
   if (readings.length === 0) {
     return (
       <div className="glass-panel rounded-md p-10 text-center">
-        <div className="text-5xl mb-4">📜</div>
+        <div className="text-5xl mb-4">ðŸ“œ</div>
         <h2 className="text-2xl font-black">Sin lecturas guardadas aun</h2>
         <p className="mt-3 text-sm text-white/55 max-w-sm mx-auto">
           Cuando hagas una consulta y pulses "Guardar", aparecera aqui. Hasta 30 lecturas.
@@ -2114,7 +2081,7 @@ function HistorialUI() {
                 </div>
                 <p className="mt-1.5 text-sm text-white/70 line-clamp-2">{r.text}</p>
               </div>
-              <span className="shrink-0 text-white/30 text-lg">{expanded === r.id ? "−" : "+"}</span>
+              <span className="shrink-0 text-white/30 text-lg">{expanded === r.id ? "âˆ’" : "+"}</span>
             </button>
 
             {expanded === r.id && (
@@ -2149,9 +2116,9 @@ function HistorialUI() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // MAIN ROUTER
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function SectionSpecificUI({ section }: { section: DashboardSection }) {
   switch (section.slug) {
     case "tarot":
@@ -2197,3 +2164,4 @@ export function SectionSpecificUI({ section }: { section: DashboardSection }) {
       return <GenericConsultUI section={section} />;
   }
 }
+

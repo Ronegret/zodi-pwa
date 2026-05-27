@@ -76,6 +76,17 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       email: user.email || preserved.email || "",
       uid: user.uid
     });
+    
+    // Si es nuevo o no tiene gemas locales, le damos las iniciales
+    try {
+      const gamification = require("@/lib/gamification");
+      const currentGems = gamification.getGems().total;
+      if (currentGems === 0) {
+        gamification.addGems(15);
+      }
+    } catch (e) {
+      console.warn("Could not add initial gems");
+    }
 
     router.push(onboardingCompleted ? "/dashboard" : "/onboarding");
   }
