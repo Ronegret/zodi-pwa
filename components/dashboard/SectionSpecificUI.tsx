@@ -248,7 +248,7 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
           ✦ +{xpGained} XP
         </div>
       )}
-      <div className="rounded-md border border-lime-300/20 bg-black/55 p-5 text-sm leading-7 text-white/85">
+      <div className="rounded-xl border border-lime-300/30 bg-black/60 p-6 sm:p-8 text-base sm:text-lg leading-[1.8] tracking-wide text-white/95 shadow-[0_0_30px_rgba(184,255,23,0.05)]">
         <MarkdownText text={reply} />
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -1423,7 +1423,8 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
     { key: "senal",    label: "Señal",   emoji: "🔮" },
   ];
 
-  const currentImg = `${targetSign.toLowerCase()}.png`;
+  const normalizeSign = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const currentImg = `${normalizeSign(targetSign)}.png`;
 
   useEffect(() => {
     if (!hasAutoConsulted) {

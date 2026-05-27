@@ -164,18 +164,17 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         }
       }
 
-      // onAuthStateChanged lo manejará si Firebase está activo.
-      // Si Firebase no está disponible, guardamos sesión local y redirigimos.
+      // Si Firebase no está disponible o para fallback local
       if (!getFirebaseAuth()) {
         const preserved = getLocalSession();
-        const onboardingCompleted =
-          preserved.onboardingCompleted || Boolean(preserved.astralProfile);
+        const onboardingCompleted = preserved.onboardingCompleted || Boolean(preserved.astralProfile);
         setLocalSession({
           isAuthenticated: true,
           onboardingCompleted,
           displayName: name.trim() || preserved.displayName || "Viajero ZODI",
           email,
-          uid
+          uid,
+          loginAt: Date.now(),
         });
         router.push(onboardingCompleted ? "/dashboard" : "/onboarding");
       }
@@ -229,7 +228,19 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       <div className="mt-8 grid gap-3">
         {mode === "register" ? (
-          <Field icon={UserRound} label="Nombre" value={name} onChange={setName} type="text" placeholder="Tu nombre visible" />
+          <>
+            <Field icon={UserRound} label="Nombre" value={name} onChange={setName} type="text" placeholder="Tu nombre visible" />
+            <div className="block rounded-md border border-white/10 bg-black/35 p-3">
+              <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/45">
+                 Idioma de la App
+              </span>
+              <select className="w-full bg-transparent text-white outline-none" defaultValue="es">
+                <option value="es" className="bg-black text-white">Español</option>
+                <option value="en" className="bg-black text-white">English</option>
+                <option value="ca" className="bg-black text-white">Català</option>
+              </select>
+            </div>
+          </>
         ) : null}
         <Field icon={AtSign} label="Correo" value={email} onChange={setEmail} type="email" placeholder="tu@email.com" />
         <div className="relative">

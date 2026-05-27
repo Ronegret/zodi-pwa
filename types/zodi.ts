@@ -65,6 +65,7 @@ export type UserProfile = {
   streak: number;
   rank: string;
   plan: "free" | "premium" | "vip";
+  language?: "es" | "en" | "ca";
 };
 
 export type OnboardingData = {
@@ -81,6 +82,7 @@ export type OnboardingData = {
   readingTone: "suave" | "directo" | "brutal" | "sarcastico";
   favoriteTopics: string[];
   notificationPreferences: string[];
+  language?: "es" | "en" | "ca";
 };
 
 export type AstralProfile = {

@@ -12,6 +12,7 @@ export type LocalZodiSession = {
   displayName?: string;
   email?: string;
   uid?: string;
+  loginAt?: number;
   astralProfile?: AstralProfile;
   onboardingData?: OnboardingData;
 };
@@ -22,7 +23,20 @@ export function getLocalSession(): LocalZodiSession {
   }
 
   const raw = window.localStorage.getItem(SESSION_KEY);
-  return raw ? JSON.parse(raw) : { isAuthenticated: false, onboardingCompleted: false };
+  if (!raw) return { isAuthenticated: false, onboardingCompleted: false };
+  
+  const parsed = JSON.parse(raw) as LocalZodiSession;
+  
+  // Expiración de 24 horas (86400000 ms)
+  if (parsed.isAuthenticated && parsed.loginAt) {
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    if (Date.now() - parsed.loginAt > ONE_DAY) {
+      window.localStorage.removeItem(SESSION_KEY);
+      return { isAuthenticated: false, onboardingCompleted: false };
+    }
+  }
+
+  return parsed;
 }
 
 export function setLocalSession(session: Partial<LocalZodiSession>) {

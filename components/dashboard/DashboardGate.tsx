@@ -37,14 +37,28 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
   const [init] = useState(computeInitialState);
   const [gateState, setGateState] = useState<GateState>(init.gate);
 
-  // Only needed for the "loading" case (unauthenticated / not onboarded)
+  // Check authentication status and expiration
   useEffect(() => {
-    if (gateState !== "loading") return;
-    const s = getLocalSession();
-    if (!s.isAuthenticated) { router.replace("/auth/login"); return; }
-    if (!s.onboardingCompleted) { router.replace("/onboarding"); return; }
-    // Authenticated & onboarded but gate was loading — go to ready
-    setGateState("ready");
+    const checkSession = () => {
+      const s = getLocalSession();
+      if (!s.isAuthenticated) {
+        setGateState("loading");
+        router.replace("/auth/login");
+        return;
+      }
+      if (!s.onboardingCompleted && gateState === "loading") {
+        router.replace("/onboarding");
+        return;
+      }
+      if (gateState === "loading") {
+        setGateState("ready");
+      }
+    };
+    
+    checkSession();
+    // Re-check every minute for 24h expiration
+    const interval = setInterval(checkSession, 60000);
+    return () => clearInterval(interval);
   }, [router, gateState]);
 
   /* ── Confirm identity ── */

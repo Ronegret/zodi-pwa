@@ -130,9 +130,21 @@ export function buildReadingPrompt(
     );
   }
 
+  if (kind === "numerology") {
+    baseLines.push(
+      "",
+      "INSTRUCCIÓN ESPECIAL PARA NUMEROLOGÍA: El usuario quiere un análisis NUMEROLÓGICO PROFUNDO Y DETALLADO. " +
+      "1. Explica PASO A PASO y matemáticamente cómo se calculó su número de Camino de Vida basándote en su fecha de nacimiento (suma los dígitos). " +
+      "2. Detalla con mucha profundidad qué significa este número basándote en estudios numerológicos reales. " +
+      "3. Explora sus luces, sus sombras, su misión de vida y cómo lo ven los demás. " +
+      "4. Usa separadores visuales y viñetas para hacer la lectura súper extensa pero fácil de digerir. " +
+      "5. No pierdas NUNCA tu sarcasmo ácido y callejero de ZODI."
+    );
+  }
+
   baseLines.push(
     "",
-    "Devuelve una respuesta en español con: título, porcentaje de energía, lectura, advertencia, ritual/acción y una frase breve compartible."
+    "Devuelve una respuesta en español con: título, porcentaje de energía, lectura (usa markdown, viñetas, negritas para que sea fácil de leer en el móvil), advertencia, ritual/acción y una frase breve compartible."
   );
 
   return {
