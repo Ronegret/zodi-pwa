@@ -8,7 +8,7 @@ import {
   LogOut, Trash2, Save, Camera, Check, X, Shuffle, Moon,
   Sun, CloudLightning, Droplets, Wind, Eye, EyeOff, Plus, Minus,
   Copy, Share2, BookOpen, AlertTriangle, Sparkles, ChartNoAxesCombined,
-  Waves, NotebookPen
+  Waves, NotebookPen, Gift
 } from "lucide-react";
 import { getLocalSession, setLocalSession } from "@/lib/session";
 import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
@@ -1541,27 +1541,61 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
 
         <textarea
           value={question}
-          onChange={e => setQuestion(e.target.value)}
-          rows={2}
-          placeholder="¿Algo concreto que quieras saber sobre este día? (opcional)"
-          className="mt-4 w-full resize-none rounded-md border border-white/10 bg-black/45 p-3 text-sm text-white outline-none placeholder:text-white/25 focus:border-lime-300/55"
-        />
-        <button
-          onClick={() => getHoroscope()}
-          disabled={loading}
-          className="mt-4 w-full rounded-md bg-lime-300 py-3 font-black text-black disabled:opacity-50 hover:bg-lime-200 transition"
-        >
-          {loading ? "El cosmos habla..." : `Refrescar lectura`}
-        </button>
+                 {showDelete && (
+          <div className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-4 w-4 text-red-400" />
+              <p className="font-black text-red-400 text-sm">Esta acción es irreversible</p>
+            </div>
+            <p className="text-sm text-white/60 mb-3">Escribe <strong className="text-red-400">ELIMINAR</strong> para confirmar</p>
+            <div className="flex gap-3">
+              <input
+                value={deleteConfirm}
+                onChange={e => setDeleteConfirm(e.target.value)}
+                placeholder="ELIMINAR"
+                className="flex-1 rounded-md border border-red-500/30 bg-black/45 px-4 py-2 text-sm text-white outline-none"
+              />
+              <button
+                onClick={deleteAccount}
+                disabled={deleteConfirm !== "ELIMINAR"}
+                className="rounded-md bg-red-500 px-5 py-2 font-black text-sm text-white disabled:opacity-40"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-      <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
-    </div>
-  );
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 11. PERFIL UI (full editor + sign out)
-// ─────────────────────────────────────────────────────────────────────────────
+      {/* Invite Friends */}
+      {session.uid && (
+        <div className="glass-panel rounded-md p-5 border border-lime-300/30">
+          <h2 className="text-xl font-black mb-2 flex items-center gap-2">
+            <Gift className="h-5 w-5 text-lime-300" />
+            Invita y gana Gemas
+          </h2>
+          <p className="text-sm text-white/60 mb-4">
+            Comparte tu enlace astral. Tú ganas <strong className="text-lime-300">100 Gemas</strong> y tu amigo gana <strong className="text-lime-300">50 Gemas</strong> cuando se registre.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              readOnly
+              value={`https://zodi.aibueno.es/auth/register?ref=${session.uid.substring(0, 8).toUpperCase()}`}
+              className="flex-1 rounded-md bg-black/45 px-4 py-2 text-sm text-lime-100 outline-none border border-lime-300/20"
+            />
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(`https://zodi.aibueno.es/auth/register?ref=${session.uid?.substring(0, 8).toUpperCase()}`);
+                alert("¡Enlace copiado!");
+              }}
+              className="rounded-md bg-lime-300 px-5 py-2 font-black text-black text-sm hover:bg-lime-200 transition"
+            >
+              Copiar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>��────────────────────────────
 function PerfilUI() {
   const router = useRouter();
   const session = getLocalSession();

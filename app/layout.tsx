@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { MusicPlayer } from "@/components/MusicPlayer";
+import { ZodiOracle } from "@/components/ZodiOracle";
 import "./globals.css";
 
 const syne = Syne({
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es" className={`${syne.variable} ${jakarta.variable} ${mono.variable}`}>
       <body>
         {children}
+        <ZodiOracle />
         <MusicPlayer />
       </body>
     </html>

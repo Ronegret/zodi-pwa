@@ -37,6 +37,9 @@ export async function saveOnboardingProfile(uid: string, data: OnboardingData, a
     return { ok: false, reason: "Firebase env vars are not configured." };
   }
 
+  // Generate a unique referral code based on UID
+  const referralCode = uid.substring(0, 8).toUpperCase();
+
   await Promise.all([
     setDoc(doc(db, "users", uid), {
       displayName: data.displayName,
@@ -47,6 +50,7 @@ export async function saveOnboardingProfile(uid: string, data: OnboardingData, a
       readingTone: data.readingTone,
       favoriteTopics: data.favoriteTopics,
       notificationPreferences: data.notificationPreferences,
+      referralCode,
       updatedAt: serverTimestamp()
     }, { merge: true }),
     setDoc(doc(db, "astralProfiles", uid), {
@@ -56,7 +60,73 @@ export async function saveOnboardingProfile(uid: string, data: OnboardingData, a
     }, { merge: true })
   ]);
 
-  return { ok: true };
+  return { ok: true, referralCode };
+}
+
+export async function updateGems(uid: string, amount: number) {
+  const db = getFirebaseDb();
+  if (!db) return { ok: false };
+  
+  // En producción, esto debería usar runTransaction o increment para seguridad,
+  // pero usaremos merge temporalmente mientras se integra Stripe.
+  const profile = await getProfile(uid);
+  const currentGems = profile?.gems ?? 0;
+  
+  await setDoc(doc(db, "users", uid), {
+    gems: currentGems + amount,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  
+  return { ok: true, newTotal: currentGems + amount };
+}
+
+import { collection, query, where, getDocs, runTransaction } from "firebase/firestore";
+
+export async function applyReferralCode(newUid: string, referralCode: string) {
+  const db = getFirebaseDb();
+  if (!db) return { ok: false };
+
+  const usersRef = collection(db, "users");
+  const q = query(usersRef, where("referralCode", "==", referralCode));
+  const querySnapshot = await getDocs(q);
+
+  if (querySnapshot.empty) {
+    return { ok: false, reason: "Invalid referral code" };
+  }
+
+  const referrerDoc = querySnapshot.docs[0];
+  const referrerUid = referrerDoc.id;
+
+  if (referrerUid === newUid) {
+    return { ok: false, reason: "Can't refer yourself" };
+  }
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const newRef = doc(db, "users", newUid);
+      const newDocSnap = await transaction.get(newRef);
+      if (newDocSnap.exists() && newDocSnap.data().referredBy) {
+        throw new Error("Already referred");
+      }
+
+      // Add 100 gems to referrer
+      const referrerRef = doc(db, "users", referrerUid);
+      const refSnap = await transaction.get(referrerRef);
+      const currentRefGems = refSnap.data()?.gems ?? 0;
+      transaction.update(referrerRef, { gems: currentRefGems + 100 });
+
+      // Add 50 gems to new user, mark as referred
+      const currentNewGems = newDocSnap.data()?.gems ?? 0;
+      transaction.set(newRef, { 
+        gems: currentNewGems + 50,
+        referredBy: referrerUid,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    });
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, reason: e.message };
+  }
 }
 
 export const zodiFirebaseSchema = firebaseCollections.map((collection) => {
