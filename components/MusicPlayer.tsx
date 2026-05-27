@@ -4,8 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, Music, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export function MusicPlayer() {
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith("/dashboard");
+  const bottomClass = isDashboard ? "bottom-[80px]" : "bottom-4";
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [showPrompt, setShowPrompt] = useState(true);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -45,7 +50,7 @@ export function MusicPlayer() {
   if (isDismissed && !isPlaying) return null; // Si lo descartó y no está reproduciendo, lo escondemos por completo.
 
   return (
-    <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div className={`fixed right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6 ${bottomClass} transition-all duration-500`}>
       <AnimatePresence>
         {showPrompt && !isPlaying && !isDismissed && (
           <motion.div

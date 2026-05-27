@@ -248,7 +248,7 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
           ✦ +{xpGained} XP
         </div>
       )}
-      <div className="rounded-xl border border-lime-300/30 bg-black/60 p-6 sm:p-8 text-base sm:text-lg leading-[1.8] tracking-wide text-white/95 shadow-[0_0_30px_rgba(184,255,23,0.05)]">
+      <div className="rounded-xl border border-lime-300/30 bg-black/60 p-6 sm:p-8 text-lg sm:text-xl leading-[1.8] tracking-wide text-white/95 shadow-[0_0_30px_rgba(184,255,23,0.05)]">
         <MarkdownText text={reply} />
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
