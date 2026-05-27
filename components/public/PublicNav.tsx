@@ -57,28 +57,30 @@ export function PublicNav() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed inset-x-0 top-[68px] z-39 border-b border-lime-300/10 bg-black/95 px-4 pb-6 pt-4 backdrop-blur-xl md:hidden"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-x-0 top-[68px] z-39 border-b border-lime-300/10 bg-black/95 backdrop-blur-xl md:hidden overflow-hidden"
           >
-            <nav className="grid gap-1">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="rounded-md px-4 py-3 font-display text-xl sm:text-2xl font-bold tracking-wide text-white/90 transition hover:bg-white/5 hover:text-lime-200"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-            <div className="mt-4 grid gap-2">
-              <Link href="/auth/login" onClick={() => setOpen(false)} className="rounded-md border border-white/20 px-4 py-3 text-center font-display text-lg font-bold text-white/80 transition hover:border-white/35">
-                Entrar
-              </Link>
-              <Link href="/auth/register" onClick={() => setOpen(false)} className="rounded-md bg-lime-300 px-4 py-3 text-center font-display text-lg font-black text-black transition hover:bg-lime-200">
-                Crear cuenta gratis
-              </Link>
+            <div className="px-4 pb-6 pt-4">
+              <nav className="grid gap-1">
+                {navLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className="rounded-md px-4 py-3 font-display text-xl sm:text-2xl font-bold tracking-wide text-white/90 transition hover:bg-white/5 hover:text-lime-200"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+              <div className="mt-4 grid gap-2">
+                <Link href="/auth/login" onClick={() => setOpen(false)} className="rounded-md border border-white/20 px-4 py-3 text-center font-display text-lg font-bold text-white/80 transition hover:border-white/35">
+                  Entrar
+                </Link>
+                <Link href="/auth/register" onClick={() => setOpen(false)} className="rounded-md bg-lime-300 px-4 py-3 text-center font-display text-lg font-black text-black transition hover:bg-lime-200">
+                  Crear cuenta gratis
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}
