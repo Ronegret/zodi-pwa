@@ -15,6 +15,7 @@ import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
 import { addXp, updateStreak, XP_PER_ACTION } from "@/lib/gamification";
+import { InstallPwaCard } from "@/components/pwa/PwaBoot";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ZODIAC DATA
@@ -1622,6 +1623,9 @@ function PerfilUI() {
           {saved ? <><Check className="h-4 w-4" /> Guardado</> : <><Save className="h-4 w-4" /> Guardar cambios</>}
         </button>
       </div>
+
+      {/* PWA Install Card (will return null if not installable or dismissed) */}
+      <InstallPwaCard />
 
       {/* Astral data */}
       {ap && (
