@@ -52,7 +52,7 @@ export async function GET(req: Request) {
     
     <!-- BANNER IMAGE -->
     <div style="width: 100%; height: 200px; background-color: #111; overflow: hidden; position: relative;">
-      <img src="https://zodi.aibueno.es/zodi-landpage.png" alt="Cyberpunk" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
+      <img src="https://zodi.aibueno.es/zodi-art/ritual-wide.png" alt="Cyberpunk" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
     </div>
 
     <!-- CONTENT -->
