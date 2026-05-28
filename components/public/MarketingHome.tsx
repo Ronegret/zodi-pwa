@@ -176,10 +176,10 @@ export function MarketingHome() {
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section className="relative min-h-[calc(100vh-64px)] overflow-hidden px-4 py-10 sm:py-16">
 
-        {/* ═══ ANIMATED BACKGROUND (Video only, everywhere) ═══ */}
+        {/* ── ANIMATED BACKGROUND (Video only, everywhere) ── */}
         <video autoPlay muted loop playsInline poster="/zodi-art/poster-chaos.png"
           className="absolute inset-0 h-full w-full object-cover opacity-60 sm:opacity-40 sm:mix-blend-screen"
-          style={{ transform:"translateZ(0)" }} aria-hidden="true">
+          aria-hidden="true">
           <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
         </video>
 

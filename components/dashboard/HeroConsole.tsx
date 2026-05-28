@@ -97,7 +97,7 @@ export function HeroConsole() {
       <div className="glass-panel neon-border overflow-hidden rounded-2xl p-4 sm:p-7 relative">
         {/* Higgsfield video background */}
         <video
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.15] -z-10 rounded-2xl mix-blend-screen"
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.25] -z-10 rounded-2xl"
           autoPlay muted loop playsInline
         >
           <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
