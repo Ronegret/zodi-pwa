@@ -27,7 +27,7 @@ export function PublicNav() {
       {/* ── Sticky Header ── */}
       <header
         id="main-header"
-        style={{ height: HEADER_H }}
+        style={{ height: HEADER_H, willChange: "transform", transform: "translateZ(0)" }}
         className="sticky top-0 z-40 flex items-center border-b border-white/08 bg-black/85 backdrop-blur-xl"
       >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4">

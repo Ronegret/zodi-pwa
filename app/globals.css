@@ -424,19 +424,32 @@ h1, h2, h3, h4, h5, h6 {
 /* ── Mobile performance ──────────────────────────────────────────────────── */
 
 @media (pointer: coarse), (max-width: 768px) {
+  /* Disable backdrop-filter — expensive on mobile */
   .glass-panel {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: linear-gradient(145deg, rgba(18, 18, 28, 0.97), rgba(10, 10, 18, 0.96));
+    background: linear-gradient(145deg, rgba(18, 18, 28, 0.98), rgba(10, 10, 18, 0.97));
   }
 
+  /* Disable neon glow filter — causes repaint */
   .neon-border::before {
     filter: none;
-    opacity: 0.45;
+    opacity: 0.30;
   }
 
+  /* Kill grid background overlay */
   body::before {
     display: none;
+  }
+
+  /* Kill all looping animations that compete with video on mobile */
+  .magic-float,
+  .magic-pulse,
+  .spell-ring,
+  .spark-field {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
   }
 }
 

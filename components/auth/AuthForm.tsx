@@ -64,32 +64,94 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function applyFirebaseUser(user: User) {
+  async function applyFirebaseUser(user: User) {
     const preserved = getLocalSession();
-    const onboardingCompleted =
-      preserved.onboardingCompleted || Boolean(preserved.astralProfile);
 
-    setLocalSession({
-      isAuthenticated: true,
-      onboardingCompleted,
-      displayName: user.displayName || preserved.displayName || "Viajero ZODI",
-      email: user.email || preserved.email || "",
-      uid: user.uid
-    });
-    
-    // Si es nuevo o no tiene gemas locales, le damos las iniciales
+    // ── Step 1: Check local session first (fast path) ──
+    const localDone = preserved.onboardingCompleted && Boolean(preserved.astralProfile);
+
+    // ── Step 2: Always try to restore from Firestore (source of truth) ──
+    let firestoreDone = false;
+    try {
+      const { getDoc, doc } = await import("firebase/firestore");
+      const { getFirebaseDb } = await import("@/lib/firebase/client");
+      const db = getFirebaseDb();
+      if (db) {
+        const [userSnap, astralSnap] = await Promise.all([
+          getDoc(doc(db, "users", user.uid)),
+          getDoc(doc(db, "astralProfiles", user.uid)),
+        ]);
+
+        if (userSnap.exists() && userSnap.data().onboardingCompleted) {
+          const userData = userSnap.data();
+          const astralData = astralSnap.exists() ? astralSnap.data() : null;
+
+          // Restore full session from Firestore
+          const onboardingData = astralData ? {
+            displayName: userData.displayName ?? "",
+            username: userData.username ?? "",
+            avatar: userData.avatar ?? "/zodi-art/perfil/perfil-1.png",
+            genderIdentity: userData.genderIdentity ?? "",
+            birthDate: astralData.birthDate ?? "",
+            birthTime: astralData.birthTime ?? "",
+            birthCity: astralData.birthCity ?? "",
+            birthCountry: astralData.birthCountry ?? "",
+            readingTone: userData.readingTone ?? "directo",
+            favoriteTopics: userData.favoriteTopics ?? [],
+            notificationPreferences: userData.notificationPreferences ?? { dailyHoroscope: true, weeklyReport: false, specialEvents: true },
+          } : preserved.onboardingData;
+
+          const astralProfile = astralData ? {
+            sunSign: astralData.sunSign ?? "",
+            moonSign: astralData.moonSign ?? "",
+            ascendant: astralData.ascendant ?? "",
+            lifePathNumber: astralData.lifePathNumber ?? 1,
+            chineseZodiac: astralData.chineseZodiac ?? "",
+            mayanSign: astralData.mayanSign ?? "",
+            biorhythmBaseline: astralData.biorhythmBaseline ?? new Date().toISOString(),
+          } : preserved.astralProfile;
+
+          setLocalSession({
+            isAuthenticated: true,
+            onboardingCompleted: true,
+            displayName: userData.displayName || user.displayName || preserved.displayName || "Viajero ZODI",
+            email: user.email || preserved.email || "",
+            uid: user.uid,
+            loginAt: Date.now(),
+            astralProfile: astralProfile as any,
+            onboardingData: onboardingData as any,
+          });
+
+          firestoreDone = true;
+        }
+      }
+    } catch {
+      // Firebase unavailable — fall back to local data
+    }
+
+    // ── Step 3: If Firestore didn't resolve, use local data ──
+    if (!firestoreDone) {
+      setLocalSession({
+        isAuthenticated: true,
+        onboardingCompleted: localDone,
+        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
+        email: user.email || preserved.email || "",
+        uid: user.uid,
+        loginAt: Date.now(),
+      });
+    }
+
+    // Give initial gems if none
     try {
       const gamification = require("@/lib/gamification");
       const currentGems = gamification.getGems().total;
-      if (currentGems === 0) {
-        gamification.addGems(15);
-      }
-    } catch (e) {
-      console.warn("Could not add initial gems");
-    }
+      if (currentGems === 0) gamification.addGems(15);
+    } catch { /* ignore */ }
 
-    router.push(onboardingCompleted ? "/dashboard" : "/onboarding");
+    const done = firestoreDone || localDone;
+    router.push(done ? "/dashboard" : "/onboarding");
   }
+
 
   async function continueFlow(provider: "email" | "google") {
     setMessage("");

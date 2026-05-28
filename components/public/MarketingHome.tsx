@@ -183,6 +183,7 @@ export function MarketingHome() {
           playsInline
           poster="/zodi-art/poster-chaos.png"
           className="absolute inset-0 h-full w-full object-cover opacity-80"
+          style={{ willChange: "auto", transform: "translateZ(0)" }}
           aria-hidden="true"
         >
           <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
@@ -193,7 +194,8 @@ export function MarketingHome() {
             className="absolute inset-0 h-full w-full object-cover"
           />
         </video>
-        <div className="spark-field" />
+        {/* spark-field only on desktop — too heavy for mobile with video */}
+        <div className="spark-field hidden sm:block" />
         {/* Gradiente encima del video para legibilidad del texto */}
         <div className="absolute inset-0 bg-gradient-to-b from-[rgba(5,5,7,0.30)] via-[rgba(5,5,7,0.55)] to-[rgba(5,5,7,0.88)] sm:bg-[linear-gradient(90deg,rgba(5,5,7,.88),rgba(5,5,7,.42),rgba(5,5,7,.78))]" />
 
@@ -219,7 +221,7 @@ export function MarketingHome() {
           <motion.div
             initial={{ opacity: 0, rotate: -3, y: 24 }}
             animate={{ opacity: 1, rotate: 0, y: 0 }}
-            className="glass-panel neon-border magic-float rounded-md p-3 sm:p-5 lg:block"
+            className="glass-panel neon-border rounded-md p-3 sm:p-5 lg:block"
           >
             <button
               onClick={() => setLightbox("/zodi-art/home/hero-main.png")}
