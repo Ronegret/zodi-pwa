@@ -175,25 +175,26 @@ export function MarketingHome() {
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section className="relative min-h-[calc(100vh-68px)] overflow-hidden px-4 py-10 sm:py-16">
-        {/* Video de fondo — muted, autoplay, loop */}
+        {/* Video — only on sm+ screens to avoid GPU overload on mobile */}
         <video
           autoPlay
           muted
           loop
           playsInline
           poster="/zodi-art/poster-chaos.png"
-          className="absolute inset-0 h-full w-full object-cover opacity-80"
-          style={{ willChange: "auto", transform: "translateZ(0)" }}
+          className="absolute inset-0 hidden h-full w-full object-cover opacity-80 sm:block"
+          style={{ transform: "translateZ(0)" }}
           aria-hidden="true"
         >
           <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
-          {/* Fallback: imagen estática si el navegador no soporta video */}
-          <img
-            src="/zodi-art/poster-chaos.png"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
         </video>
+        {/* Mobile: static poster image instead of video */}
+        <img
+          src="/zodi-art/poster-chaos.png"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-80 sm:hidden"
+          aria-hidden="true"
+        />
         {/* spark-field only on desktop — too heavy for mobile with video */}
         <div className="spark-field hidden sm:block" />
         {/* Gradiente encima del video para legibilidad del texto */}
