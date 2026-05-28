@@ -188,17 +188,75 @@ export function MarketingHome() {
         >
           <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
         </video>
-        {/* Mobile: static poster image instead of video */}
-        <img
-          src="/zodi-art/poster-chaos.png"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-80 sm:hidden"
-          aria-hidden="true"
-        />
-        {/* spark-field only on desktop — too heavy for mobile with video */}
-        <div className="spark-field hidden sm:block" />
-        {/* Gradiente encima del video para legibilidad del texto */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(5,5,7,0.30)] via-[rgba(5,5,7,0.55)] to-[rgba(5,5,7,0.88)] sm:bg-[linear-gradient(90deg,rgba(5,5,7,.88),rgba(5,5,7,.42),rgba(5,5,7,.78))]" />
+        {/* Mobile: CSS animated background (no video = no GPU fight) */}
+        <div className="absolute inset-0 sm:hidden" aria-hidden="true">
+          {/* Dark base */}
+          <div className="absolute inset-0 bg-[#060608]" />
+          {/* Animated orb 1 — acid lime */}
+          <div style={{
+            position: "absolute",
+            width: "320px",
+            height: "320px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(184,255,23,0.22) 0%, transparent 70%)",
+            top: "-60px",
+            right: "-60px",
+            animation: "hero-orb-1 8s ease-in-out infinite",
+            willChange: "transform",
+          }} />
+          {/* Animated orb 2 — violet */}
+          <div style={{
+            position: "absolute",
+            width: "280px",
+            height: "280px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(155,77,255,0.28) 0%, transparent 70%)",
+            bottom: "10%",
+            left: "-40px",
+            animation: "hero-orb-2 11s ease-in-out infinite",
+            willChange: "transform",
+          }} />
+          {/* Animated orb 3 — hot pink */}
+          <div style={{
+            position: "absolute",
+            width: "200px",
+            height: "200px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(255,43,214,0.18) 0%, transparent 70%)",
+            top: "40%",
+            right: "5%",
+            animation: "hero-orb-3 9s ease-in-out infinite",
+            willChange: "transform",
+          }} />
+          {/* Subtle grid lines */}
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: "linear-gradient(rgba(184,255,23,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(184,255,23,0.04) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+            animation: "hero-grid 20s linear infinite",
+            willChange: "background-position",
+          }} />
+          {/* Floating particles */}
+          {[...Array(6)].map((_, i) => (
+            <div key={i} style={{
+              position: "absolute",
+              width: i % 2 === 0 ? "3px" : "2px",
+              height: i % 2 === 0 ? "3px" : "2px",
+              borderRadius: "50%",
+              background: i % 3 === 0 ? "#b8ff17" : i % 3 === 1 ? "#9b4dff" : "#ff2bd6",
+              left: `${10 + i * 15}%`,
+              top: `${20 + (i * 13) % 60}%`,
+              boxShadow: i % 3 === 0 ? "0 0 6px #b8ff17" : i % 3 === 1 ? "0 0 6px #9b4dff" : "0 0 6px #ff2bd6",
+              animation: `hero-particle-${i % 3} ${5 + i}s ease-in-out infinite`,
+              willChange: "transform, opacity",
+            }} />
+          ))}
+        </div>
+        {/* Gradient overlay for mobile (keeps text readable over the animation) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(5,5,7,0.10)] via-[rgba(5,5,7,0.40)] to-[rgba(5,5,7,0.92)] sm:hidden" />
+        {/* Gradient overlay for desktop (over video) */}
+        <div className="absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(5,5,7,.88),rgba(5,5,7,.42),rgba(5,5,7,.78))] sm:block" />
 
         <div className="relative mx-auto grid min-h-[74vh] max-w-7xl items-center gap-8 lg:grid-cols-[1fr_0.8fr]">
           <div>
