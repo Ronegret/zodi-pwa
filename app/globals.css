@@ -270,9 +270,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .glitch {
   position: relative;
-  text-shadow:
-    1.5px 0 rgba(184, 255, 23, 0.55),
-    -1.5px 0 rgba(255, 43, 214, 0.40);
   font-family: var(--font-display);
 }
 

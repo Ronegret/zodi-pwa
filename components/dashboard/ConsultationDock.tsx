@@ -268,7 +268,7 @@ export function ConsultationDock() {
         {/* Panel derecho — configuración y resultado */}
         <article className="glass-panel neon-border grid overflow-hidden rounded-2xl md:grid-cols-[0.85fr_1.15fr]">
           {/* Imagen de la consulta */}
-          <div className="relative min-h-72 bg-black/60 md:min-h-full">
+          <div className="relative min-h-40 bg-black/60 md:min-h-full">
             <Image
               src={active.image}
               alt={active.title}
@@ -286,7 +286,7 @@ export function ConsultationDock() {
           </div>
 
           {/* Panel de configuración */}
-          <div className="flex max-h-[600px] flex-col overflow-y-auto p-5 no-scrollbar">
+          <div className="flex flex-col overflow-y-auto p-5 no-scrollbar">
             <p className="zodi-kicker">{active.label}</p>
             <h3 className="mt-1.5 text-3xl font-black" style={{ fontFamily: "var(--font-display)" }}>
               {active.title}

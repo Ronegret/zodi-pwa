@@ -13,7 +13,7 @@ export default function DashboardPage() {
   return (
     <AnimatedShell>
       <DashboardGate>
-        <div className="mx-auto flex w-full max-w-[1500px] gap-5 px-3 py-4 sm:px-5">
+        <div className="mx-auto flex w-full max-w-[1500px] gap-5 px-3 py-4 pb-nav sm:px-5">
           <Sidebar />
           <div className="min-w-0 flex-1">
             <HeroConsole />

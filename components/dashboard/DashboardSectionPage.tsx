@@ -52,7 +52,7 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
       )}
       {showHero && (
         <section className="glass-panel neon-border grid overflow-hidden rounded-2xl lg:grid-cols-[0.9fr_1.1fr] shadow-[0_0_40px_rgba(0,0,0,0.6)]">
-          <div className="relative min-h-80 bg-black p-4">
+          <div className="relative min-h-48 bg-black p-4 lg:min-h-80">
             <Image
               src={section.image}
               alt={section.title}

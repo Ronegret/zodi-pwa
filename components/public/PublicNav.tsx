@@ -58,7 +58,7 @@ export function PublicNav() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-x-0 top-[68px] z-39 border-b border-lime-300/10 bg-black/95 backdrop-blur-xl md:hidden overflow-hidden"
+            className="fixed inset-x-0 top-[68px] z-[39] border-b border-lime-300/10 bg-black/95 backdrop-blur-xl md:hidden overflow-hidden"
           >
             <div className="px-4 pb-6 pt-4">
               <nav className="grid gap-1">
