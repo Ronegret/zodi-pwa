@@ -291,23 +291,23 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <div className="glass-panel neon-border w-full max-w-xl rounded-md p-5 sm:p-7">
-      <p className="text-xs uppercase tracking-[0.32em] text-lime-200/70">
+    <div className="glass-panel neon-border w-full max-w-xl rounded-md p-4 sm:p-7">
+      <p className="text-[10px] sm:text-xs uppercase tracking-[0.32em] text-lime-200/70">
         {mode === "login" ? "Entrada" : "Registro"}
       </p>
-      <h1 className="mt-3 text-4xl font-black">
+      <h1 className="mt-1 sm:mt-3 text-2xl sm:text-4xl font-black">
         {mode === "login" ? "Vuelve al oráculo." : "Crea tu cuenta astral."}
       </h1>
 
-      <div className="mt-8 grid gap-3">
+      <div className="mt-4 sm:mt-8 grid gap-2 sm:gap-3">
         {mode === "register" ? (
           <>
             <Field icon={UserRound} label="Nombre" value={name} onChange={setName} type="text" placeholder="Tu nombre visible" />
-            <div className="block rounded-md border border-white/10 bg-black/35 p-3">
-              <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/45">
+            <div className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3">
+              <span className="mb-1 sm:mb-2 flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/45">
                  Idioma de la App
               </span>
-              <select className="w-full bg-transparent text-white outline-none" defaultValue="es">
+              <select className="w-full bg-transparent text-white outline-none text-sm sm:text-base" defaultValue="es">
                 <option value="es" className="bg-black text-white">Español</option>
                 <option value="en" className="bg-black text-white">English</option>
                 <option value="ca" className="bg-black text-white">Català</option>
@@ -346,7 +346,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         ) : null}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-white/62">
+      <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-xs sm:text-sm text-white/62">
         {mode === "login" ? (
           <label className="flex cursor-pointer items-center gap-2">
             <input checked={remember} onChange={(e) => setRemember(e.target.checked)} type="checkbox" />
@@ -368,14 +368,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       <button
         onClick={() => continueFlow("email")}
         disabled={loading}
-        className="mt-6 w-full rounded-md bg-lime-300 px-4 py-3 font-black text-black disabled:opacity-60 active:scale-95 transition"
+        className="mt-4 sm:mt-6 w-full rounded-md bg-lime-300 px-4 py-2.5 sm:py-3 text-sm sm:text-base font-black text-black disabled:opacity-60 active:scale-95 transition"
       >
         {loading ? "Abriendo portal..." : mode === "login" ? "Entrar" : "Crear cuenta"}
       </button>
 
-      <div className="my-6 flex items-center gap-3">
+      <div className="my-4 sm:my-6 flex items-center gap-3">
         <div className="h-px flex-1 bg-white/10" />
-        <span className="text-xs text-white/40">o</span>
+        <span className="text-[10px] sm:text-xs text-white/40">o</span>
         <div className="h-px flex-1 bg-white/10" />
       </div>
 
@@ -429,12 +429,12 @@ function Field({
   placeholder?: string;
 }) {
   return (
-    <label className="block rounded-md border border-white/10 bg-black/35 p-3 cursor-text">
-      <span className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/45">
-        <Icon className="h-4 w-4" /> {label}
+    <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3 cursor-text">
+      <span className="mb-1 sm:mb-2 flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/45">
+        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {label}
       </span>
       <input
-        className="w-full bg-transparent text-white outline-none placeholder:text-white/30"
+        className="w-full bg-transparent text-white outline-none placeholder:text-white/30 text-sm sm:text-base"
         type={type}
         value={value}
         placeholder={placeholder}
