@@ -1,33 +1,40 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, Send, WandSparkles } from "lucide-react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { getLocalSession } from "@/lib/session";
 import { getGems, spendGems } from "@/lib/gamification";
 
 type Message = { role: "user" | "zodi"; text: string };
 
 export function ZodiOracle() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "zodi", text: "Soy ZODI. Habla ahora o guarda silencio para siempre. Â¿QuÃ© quieres saber?" }
+    { role: "zodi", text: "Soy ZODI. Habla ahora o guarda silencio para siempre. ¿Qué quieres saber?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Solo mostrar en las rutas del dashboard, NUNCA en la página de inicio (landing)
+  const isDashboard = pathname?.startsWith("/dashboard");
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  if (!isDashboard) return null;
 
   const handleSend = async () => {
     if (!input.trim()) return;
     
     const session = getLocalSession();
     if (!session.uid) {
-      alert("Debes iniciar sesiÃ³n para consultar al orÃ¡culo.");
+      alert("Debes iniciar sesión para consultar al oráculo.");
       return;
     }
 
@@ -40,7 +47,7 @@ export function ZodiOracle() {
       // Must use Gems (cost: 5 gems per question)
       const currentGems = getGems().total;
       if (currentGems < 5) {
-        alert("Te has quedado sin energÃ­a libre y no tienes suficientes gemas (Cuesta 5). Ve a la tienda a comprar mÃ¡s Gemas.");
+        alert("Te has quedado sin energía libre y no tienes suficientes gemas (Cuesta 5). Ve a la tienda a comprar más Gemas.");
         return;
       }
       spendGems(5);
@@ -70,7 +77,7 @@ export function ZodiOracle() {
       const data = await res.json();
       setMessages(prev => [...prev, { role: "zodi", text: data.text }]);
     } catch (e) {
-      setMessages(prev => [...prev, { role: "zodi", text: "Error de red cÃ³smico. Se me ha caÃ­do la bola de cristal." }]);
+      setMessages(prev => [...prev, { role: "zodi", text: "Error de red cósmico. Se me ha caído la bola de cristal." }]);
     } finally {
       setLoading(false);
     }
@@ -78,7 +85,7 @@ export function ZodiOracle() {
 
   return (
     <>
-      {/* BotÃ³n Flotante: La Bola de Cristal */}
+      {/* Botón Flotante: La Bola de Cristal */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -106,9 +113,9 @@ export function ZodiOracle() {
                   <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain p-1" />
                 </div>
                 <div>
-                  <h3 className="font-display font-black text-lime-300 text-xl tracking-wide">ZODI OrÃ¡culo</h3>
+                  <h3 className="font-display font-black text-lime-300 text-xl tracking-wide">ZODI Oráculo</h3>
                   <p className="text-xs text-white/50 flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" /> En lÃ­nea
+                    <Sparkles className="h-3 w-3" /> En línea
                   </p>
                 </div>
               </div>
@@ -148,7 +155,7 @@ export function ZodiOracle() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="PregÃºntale al orÃ¡culo..."
+                  placeholder="Pregúntale al oráculo..."
                   className="w-full rounded-full border border-white/10 bg-white/5 pl-4 pr-12 py-3 text-base font-bold text-white outline-none focus:border-lime-300/40"
                 />
                 <button
@@ -159,7 +166,7 @@ export function ZodiOracle() {
                   <Send className="h-4 w-4 ml-1" />
                 </button>
               </div>
-              <p className="mt-2 text-center text-[10px] text-white/30">ZODI puede equivocarse, pero tÃº tambiÃ©n.</p>
+              <p className="mt-2 text-center text-[10px] text-white/30">ZODI puede equivocarse, pero tú también.</p>
             </div>
           </motion.div>
         )}
