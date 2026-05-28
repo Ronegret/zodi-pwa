@@ -136,13 +136,13 @@ export function Sidebar() {
       style={{ background: "linear-gradient(180deg, rgba(16,16,24,0.95) 0%, rgba(10,10,18,0.98) 100%)" }}
     >
       {/* Logo — click lleva al inicio */}
-      <div className="flex items-center justify-center border-b border-white/07 px-3 py-4">
-        <Link href="/" className="relative block h-24 w-full scale-110">
+      <div className="flex items-center justify-center border-b border-white/07 px-3 py-6">
+        <Link href="/" className="relative block h-28 w-full scale-[1.35]">
           <Image
             src="/zodi-logo-mark.png"
             alt="ZODI"
             fill
-            className="object-contain drop-shadow-[0_0_18px_rgba(184,255,23,0.55)]"
+            className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.55)]"
             priority
           />
         </Link>
@@ -233,13 +233,11 @@ export function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/08 lg:hidden"
       style={{
-        background: "linear-gradient(to top, rgba(6,6,8,0.98) 0%, rgba(10,10,16,0.95) 100%)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)"
+        background: "#08080a", // Color sólido oscuro en móvil en lugar de blur para evitar parpadeos
+        paddingBottom: "env(safe-area-inset-bottom, 0px)"
       }}
     >
-      <div className="grid grid-cols-5" style={{ height: "68px" }}>
+      <div className="grid grid-cols-5" style={{ height: "60px" }}>
         {bottomNav.map((item, i) => {
           const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           const isOracle = item.href === "/dashboard/oraculo";

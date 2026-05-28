@@ -37,10 +37,10 @@ export function DashboardPanels() {
 
       <Panel title="Feed comunitario" kicker="Anónimo + zodiaco">
         <div className="space-y-3">
-          <div className="rounded-xl border border-white/08 bg-black/40 p-6 text-center transition hover:border-white/15">
+          <div className="rounded-xl border border-white/08 bg-black/40 p-4 sm:p-6 text-center transition hover:border-white/15">
             <MessageCircle className="mx-auto mb-3 h-8 w-8 text-white/20" />
-            <p className="text-base text-white/60">Aún no hay publicaciones reales en tu zona.</p>
-            <p className="mt-2 text-sm text-white/40">Sé el primero en quejarte de tu mercurio retrógrado.</p>
+            <p className="text-sm sm:text-base text-white/60">Aún no hay publicaciones reales en tu zona.</p>
+            <p className="mt-2 text-xs sm:text-sm text-white/40">Sé el primero en quejarte de tu mercurio retrógrado.</p>
           </div>
           {notice ? <p className="mt-3 rounded-xl border border-lime-300/20 bg-lime-300/10 p-3 text-sm font-medium text-lime-200">{notice}</p> : null}
         </div>
@@ -79,11 +79,11 @@ export function DashboardPanels() {
 
 function Panel({ title, kicker, children }: { title: string; kicker: string; children: React.ReactNode }) {
   return (
-    <article className="glass-panel min-w-0 rounded-2xl p-5 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-      <div className="mb-5 flex items-center justify-between">
+    <article className="glass-panel min-w-0 rounded-2xl p-4 sm:p-5 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+      <div className="mb-4 sm:mb-5 flex items-center justify-between">
         <div>
-          <p className="zodi-kicker mb-1.5">{kicker}</p>
-          <h2 className="text-2xl font-black" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
+          <p className="zodi-kicker mb-1 sm:mb-1.5">{kicker}</p>
+          <h2 className="text-xl sm:text-2xl font-black" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
         </div>
       </div>
       {children}

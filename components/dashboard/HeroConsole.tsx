@@ -94,7 +94,7 @@ export function HeroConsole() {
   return (
     <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
       {/* Left panel */}
-      <div className="glass-panel neon-border overflow-hidden rounded-2xl p-5 sm:p-7 relative">
+      <div className="glass-panel neon-border overflow-hidden rounded-2xl p-4 sm:p-7 relative">
         {/* Higgsfield video background */}
         <video
           className="absolute inset-0 h-full w-full object-cover opacity-[0.15] -z-10 rounded-2xl mix-blend-screen"
@@ -104,8 +104,8 @@ export function HeroConsole() {
         </video>
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent -z-10 rounded-2xl" />
         
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+          <div className="flex-1">
             <p className="zodi-kicker mb-3">ZODI / Panel astral</p>
             {!mounted ? (
               <div className="mt-3 space-y-2">
@@ -113,21 +113,30 @@ export function HeroConsole() {
                 <Shimmer w="w-64" />
               </div>
             ) : firstName ? (
-              <h1 className="glitch mt-3 max-w-3xl text-4xl font-black leading-none sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
+              <h1 className="glitch mt-3 max-w-2xl text-4xl font-black leading-none sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
                 Hola, {firstName}.<br />
                 <span className="text-lime-300">{profile?.zodiac ?? "Tu signo"}</span>{" "}
                 tiene mucho que decirte.
               </h1>
             ) : (
-              <h1 className="glitch mt-3 max-w-3xl text-4xl font-black leading-none sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
+              <h1 className="glitch mt-3 max-w-2xl text-4xl font-black leading-none sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
                 Tu mapa astral, tus lecturas y tu energia en un solo lugar.
               </h1>
             )}
+            <p className="mt-4 text-sm text-white/55">
+              {ctx.moonPhase} &nbsp;·&nbsp; Sol en {ctx.sunTransit} &nbsp;·&nbsp; Vibracion {ctx.dayVibration}
+            </p>
+          </div>
+          <div className="hidden sm:block shrink-0">
+            <Image 
+              src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.png" 
+              alt="ZODI Intenso" 
+              width={160} 
+              height={160} 
+              className="object-contain drop-shadow-[0_0_15px_rgba(184,255,23,0.2)]" 
+            />
           </div>
         </div>
-        <p className="mt-4 text-sm text-white/55">
-          {ctx.moonPhase} &nbsp;·&nbsp; Sol en {ctx.sunTransit} &nbsp;·&nbsp; Vibracion {ctx.dayVibration}
-        </p>
 
         {/* Daily signal cards */}
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -159,7 +168,7 @@ export function HeroConsole() {
       </div>
 
       {/* Right panel — profile card */}
-      <div className="glass-panel relative overflow-hidden rounded-2xl p-5">
+      <div className="glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
         <Image
           src="/zodi-logo-mark.png"
           alt="ZODI sigil"

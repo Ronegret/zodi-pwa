@@ -362,6 +362,72 @@ export function MarketingHome() {
         </div>
       </Section>
 
+      {/* ── TAROT ZODI ────────────────────────────────────────────────── */}
+      <Section id="tarot" kicker="Tarot ZODI" title="Respuestas que pican, pero que necesitas escuchar.">
+        <div className="no-scrollbar flex snap-x gap-4 overflow-x-auto pb-6">
+          {[
+            "La-Red-Flag.png",
+            "El-Karma.png",
+            "La-Verdad.png",
+            "El-Destino.png",
+            "El-Ego.png",
+            "La-Mala-Idea.png",
+            "La-Venganza-Cosmica.png"
+          ].map((card, idx) => (
+            <FadeUp key={card} delay={idx * 0.1}>
+              <button
+                onClick={() => setLightbox(`/zodi-art/nuevas/8-Tarot-ZODI/${card}`)}
+                className="group relative block w-48 shrink-0 snap-center overflow-hidden rounded-xl glass-panel p-1.5 transition hover:border-lime-300/40"
+              >
+                <Image
+                  src={`/zodi-art/nuevas/8-Tarot-ZODI/${card}`}
+                  alt={`Carta Tarot ZODI ${card}`}
+                  width={300}
+                  height={500}
+                  className="h-auto w-full object-contain transition duration-500 group-hover:scale-105"
+                />
+              </button>
+            </FadeUp>
+          ))}
+        </div>
+      </Section>
+
+      {/* ── ZODIACO ZODI (AVATARES) ────────────────────────────────────────── */}
+      <Section id="signos" kicker="Tus Avatares" title="Elige tu identidad astral en el metaverso.">
+        <div className="no-scrollbar flex snap-x gap-4 overflow-x-auto pb-6">
+          {[
+            "Avatar_Aries.png",
+            "Avatar_Tauro.png",
+            "Avatar_Geminis.png",
+            "Avatar_Cancer.png",
+            "Avatar_Leo.png",
+            "Avatar_Virgo.png",
+            "Avatar_Libra.png",
+            "Avatar_Escorpio.png",
+            "Avatar_Sagitario.png",
+            "Avatar_Capricornio.png",
+            "Avatar_Acuario.png",
+            "Avatar_Piscis.png"
+          ].map((avatar, idx) => (
+            <FadeUp key={avatar} delay={idx * 0.05}>
+              <button
+                onClick={() => setLightbox(`/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${avatar}`)}
+                className="group relative block w-32 sm:w-40 shrink-0 snap-center overflow-hidden rounded-full glass-panel p-2 transition hover:border-lime-300/40 hover:scale-105"
+              >
+                <div className="relative aspect-square w-full rounded-full overflow-hidden">
+                  <Image
+                    src={`/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${avatar}`}
+                    alt={`Avatar ${avatar}`}
+                    fill
+                    className="object-cover transition duration-500 group-hover:scale-110"
+                  />
+                </div>
+              </button>
+            </FadeUp>
+          ))}
+        </div>
+      </Section>
+
       {/* ── NUMEROLOGÍA SARCÁSTICA ──────────────────────────────────────── */}
       <Section id="numerologia" kicker="Numerología" title="Porque los astros no eran suficientes para juzgarte.">
         <div className="grid gap-8 lg:grid-cols-2 items-center">
@@ -371,11 +437,11 @@ export function MarketingHome() {
             </p>
           </div>
           <button
-            onClick={() => setLightbox("/zodi-art/numerologia/imagen-general-numerologia.png")}
+            onClick={() => setLightbox("/zodi-art/nuevas/7-Numerologia/Imagen-general-numerologia.png")}
             className="group relative block w-full overflow-hidden rounded-2xl glass-panel p-2"
           >
             <Image
-              src="/zodi-art/numerologia/imagen-general-numerologia.png"
+              src="/zodi-art/nuevas/7-Numerologia/Imagen-general-numerologia.png"
               alt="Numerología ZODI"
               width={800}
               height={600}
@@ -536,8 +602,10 @@ export function MarketingHome() {
       <footer className="border-t border-white/10 px-4 py-10">
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
           <div>
-            <Link href="/"><Image src="/zodi-logo-mark.png" alt="Logo de ZODI" width={130} height={60} className="h-auto w-32" /></Link>
-            <p className="mt-4 max-w-sm text-sm leading-6 text-white/62">
+            <Link href="/" className="inline-block scale-110 origin-left">
+              <Image src="/zodi-logo-mark.png" alt="Logo de ZODI" width={200} height={92} className="h-auto w-48 drop-shadow-[0_0_15px_rgba(184,255,23,0.3)]" />
+            </Link>
+            <p className="mt-6 max-w-sm text-sm leading-6 text-white/62">
               ZODI es un espacio místico, visual y social para consultar señales, guardar lecturas y reírte un poco de tus patrones. Con cariño. Con neón. Con cero ganas de venderte paz falsa.
             </p>
           </div>

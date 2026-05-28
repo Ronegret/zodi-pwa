@@ -98,15 +98,15 @@ export function PublicNav() {
         className="sticky top-0 z-50 flex items-center border-b border-white/08 bg-black sm:bg-black/85 sm:backdrop-blur-xl"
       >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4">
-          {/* Logo */}
+          {/* ── LOGO ── */}
           <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
-            <span className="relative block h-9 w-32">
+            <span className="relative block h-14 w-40 sm:h-16 sm:w-48 scale-110">
               <Image
                 src="/zodi-logo-mark.png"
                 alt="ZODI"
                 fill
-                sizes="128px"
-                className="object-contain brightness-125 contrast-125"
+                sizes="192px"
+                className="object-contain"
                 priority
               />
             </span>
