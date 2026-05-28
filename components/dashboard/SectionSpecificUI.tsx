@@ -1910,6 +1910,61 @@ function SuenosUI({ section }: { section: DashboardSection }) {
 
 // 15. GENERIC CONSULT UI (improved, for other sections)
 // ─────────────────────────────────────────────────────────────────────────────
+
+function EmailSubscriptionBanner() {
+  const [email, setEmail] = require("react").useState("");
+  const [subscribed, setSubscribed] = require("react").useState(false);
+  const [loading, setLoading] = require("react").useState(false);
+
+  require("react").useEffect(() => {
+    // Basic init
+  }, []);
+
+  const handleSubscribe = async () => {
+    if (!email.includes("@")) return alert("Ingresa un correo válido");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: "user", email, subscribe: true })
+      });
+      if (res.ok) {
+        setSubscribed(true);
+        alert("¡Te has suscrito al caos diario de ZODI!");
+      }
+    } catch (e) { }
+    setLoading(false);
+  };
+
+  if (subscribed) return null;
+
+  return (
+    <div className="glass-panel p-5 rounded-md mb-6 border border-lime-300/30 bg-lime-300/5 flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div>
+        <h3 className="font-black text-lime-300 text-lg">El Caos Diario en tu Correo</h3>
+        <p className="text-sm text-white/70">Suscríbete para recibir tu horóscopo ZODI cada mañana en tu bandeja de entrada.</p>
+      </div>
+      <div className="flex w-full sm:w-auto gap-2">
+        <input 
+          type="email" 
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="tu@correo.com" 
+          className="bg-black/50 border border-white/20 rounded-md px-3 py-2 text-sm text-white outline-none focus:border-lime-300/50 flex-1 sm:w-48"
+        />
+        <button 
+          onClick={handleSubscribe}
+          disabled={loading}
+          className="bg-lime-300 text-black font-bold px-4 py-2 rounded-md text-sm hover:bg-lime-200 disabled:opacity-50"
+        >
+          {loading ? "..." : "Suscribir"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function GenericConsultUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, length, setLength } = useConsult(section);
   const [question, setQuestion] = useState("");
