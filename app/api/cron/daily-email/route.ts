@@ -42,45 +42,61 @@ export async function GET(req: Request) {
       } catch (e) {}
 
       const htmlTemplate = `
-<div style="background-color: #060608; padding: 40px 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #0a0a0c; border: 2px solid #b8ff17; border-radius: 16px; overflow: hidden; box-shadow: 0 0 20px rgba(184, 255, 23, 0.2);">
-    
-    <!-- HEADER LOGO -->
-    <div style="width: 100%; text-align: center; background-color: #000000; padding: 30px 0; border-bottom: 1px solid rgba(184, 255, 23, 0.2);">
-      <img src="https://zodi.aibueno.es/zodi-logo-mark.png" alt="ZODI" style="height: 60px; object-fit: contain;">
-    </div>
-    
-    <!-- BANNER IMAGE -->
-    <div style="width: 100%; height: 200px; background-color: #111; overflow: hidden; position: relative;">
-      <img src="https://zodi.aibueno.es/zodi-art/ritual-wide.png" alt="Cyberpunk" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
-    </div>
-
-    <!-- CONTENT -->
-    <div style="padding: 40px 30px; text-align: center;">
-      <h2 style="color: #b8ff17; font-size: 24px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px;">Tu Veredicto Diario</h2>
-      
-      <div style="background-color: rgba(184, 255, 23, 0.05); border-left: 4px solid #b8ff17; padding: 25px; margin-bottom: 35px; text-align: left; border-radius: 0 8px 8px 0;">
-        <p style="font-size: 18px; line-height: 1.6; color: #eeeeee; margin: 0; font-style: italic;">
-          "${horoscopeText}"
-        </p>
-      </div>
-
-      <!-- BUTTON -->
-      <a href="https://zodi.aibueno.es/dashboard" style="display: inline-block; background-color: #b8ff17; color: #000000; text-decoration: none; padding: 16px 32px; font-weight: 900; font-size: 16px; border-radius: 8px; text-transform: uppercase; letter-spacing: 1px;">Entrar al Oráculo</a>
-    </div>
-
-    <!-- FOOTER -->
-    <div style="background-color: #000000; padding: 25px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);">
-      <img src="https://zodi.aibueno.es/zodi-logo-mark.png" alt="ZODI" style="height: 20px; opacity: 0.3; margin-bottom: 10px;">
-      <p style="margin: 0; font-size: 11px; color: #666666; text-transform: uppercase; letter-spacing: 1px;">
-        ZODI AI © 2026. El universo es caótico, nosotros también.
-        <br><br>
-        Recibes esto porque invocaste el Caos Diario. Puedes desactivarlo en el portal.
-      </p>
-    </div>
-  </div>
-</div>
-      `;
+<body style="margin: 0; padding: 0; background-color: #000000;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#000000" style="background-color: #000000;">
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <table width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #000000; border: 2px solid #b8ff17;">
+          <tr>
+            <td align="center" style="background-color: #000000; padding: 40px 20px; border-bottom: 2px solid #b8ff17;">
+              <img src="https://zodi.aibueno.es/zodi-logo-mark.png" alt="ZODI" width="180" style="display: block; margin: 0 auto;">
+              <p style="color: #b8ff17; font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; letter-spacing: 5px; margin-top: 20px;">LA INTELIGENCIA DEL CAOS</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="background-color: #000000;">
+              <img src="https://zodi.aibueno.es/zodi-art/zodi-horoscopo-card.png" alt="Oraculo" width="600" style="display: block; width: 100%; max-width: 600px;">
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding: 50px 30px; background-color: #050505;">
+              <h2 style="color: #b8ff17; font-family: 'Arial Black', Impact, sans-serif; font-size: 30px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 30px 0;">TU LECTURA DIARIA</h2>
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="border-left: 6px solid #b8ff17; background-color: #111111; padding: 25px;">
+                    <p style="color: #ffffff; font-family: 'Courier New', monospace; font-size: 18px; line-height: 1.6; margin: 0; font-weight: bold;">
+                      "${horoscopeText}"
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              <br><br><br>
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center" bgcolor="#b8ff17" style="border-radius: 4px;">
+                    <a href="https://zodi.aibueno.es/dashboard" target="_blank" style="font-size: 18px; font-family: 'Arial Black', Impact, sans-serif; font-weight: bold; color: #000000; text-decoration: none; padding: 20px 40px; display: inline-block; text-transform: uppercase; letter-spacing: 3px;">
+                      CONECTAR AL PORTAL ZODI
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding: 40px 20px; background-color: #000000; border-top: 1px solid #333333;">
+              <img src="https://zodi.aibueno.es/zodi-logo-mark.png" alt="ZODI" width="100" style="display: block; margin: 0 auto; opacity: 0.5;">
+              <p style="color: #666666; font-family: 'Courier New', monospace; font-size: 12px; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px;">
+                ZODI AI © 2026. EL UNIVERSO ES CAÓTICO.<br><br>
+                ESTÁS RECIBIENDO ESTO PORQUE ESTÁS EN LA MATRIX DE ZODI.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+`;
 
       await sendZodiEmail({
         to: user.email,
