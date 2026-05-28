@@ -174,103 +174,134 @@ export function MarketingHome() {
       {lightbox && <Lightbox src={lightbox} onClose={() => setLightbox(null)} />}
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[calc(100vh-68px)] overflow-hidden px-4 py-10 sm:py-16">
-        {/* Video — only on sm+ screens to avoid GPU overload on mobile */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/zodi-art/poster-chaos.png"
-          className="absolute inset-0 hidden h-full w-full object-cover opacity-80 sm:block"
-          style={{ transform: "translateZ(0)" }}
-          aria-hidden="true"
-        >
-          <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
-        </video>
-        {/* Mobile: CSS animated background (no video = no GPU fight) */}
-        <div className="absolute inset-0 sm:hidden" aria-hidden="true">
-          {/* Dark base */}
+      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden px-4 py-10 sm:py-16">
+
+        {/* ═══ ANIMATED BACKGROUND (shared mobile + desktop) ═══ */}
+        <div className="absolute inset-0" aria-hidden="true">
+          {/* Base */}
           <div className="absolute inset-0 bg-[#060608]" />
-          {/* Animated orb 1 — acid lime */}
-          <div style={{
-            position: "absolute",
-            width: "320px",
-            height: "320px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(184,255,23,0.22) 0%, transparent 70%)",
-            top: "-60px",
-            right: "-60px",
-            animation: "hero-orb-1 8s ease-in-out infinite",
-            willChange: "transform",
-          }} />
-          {/* Animated orb 2 — violet */}
-          <div style={{
-            position: "absolute",
-            width: "280px",
-            height: "280px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(155,77,255,0.28) 0%, transparent 70%)",
-            bottom: "10%",
-            left: "-40px",
-            animation: "hero-orb-2 11s ease-in-out infinite",
-            willChange: "transform",
-          }} />
-          {/* Animated orb 3 — hot pink */}
-          <div style={{
-            position: "absolute",
-            width: "200px",
-            height: "200px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(255,43,214,0.18) 0%, transparent 70%)",
-            top: "40%",
-            right: "5%",
-            animation: "hero-orb-3 9s ease-in-out infinite",
-            willChange: "transform",
-          }} />
-          {/* Subtle grid lines */}
-          <div style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: "linear-gradient(rgba(184,255,23,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(184,255,23,0.04) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-            animation: "hero-grid 20s linear infinite",
-            willChange: "background-position",
-          }} />
-          {/* Floating particles */}
-          {[...Array(6)].map((_, i) => (
+
+          {/* ── 5 Massive floating orbs ── */}
+          <div style={{ position:"absolute", width:"500px", height:"500px", borderRadius:"50%",
+            background:"radial-gradient(circle, rgba(184,255,23,0.18) 0%, transparent 65%)",
+            top:"-100px", right:"-80px",
+            animation:"hero-orb-1 10s ease-in-out infinite", willChange:"transform" }} />
+          <div style={{ position:"absolute", width:"420px", height:"420px", borderRadius:"50%",
+            background:"radial-gradient(circle, rgba(155,77,255,0.22) 0%, transparent 65%)",
+            bottom:"-60px", left:"-80px",
+            animation:"hero-orb-2 13s ease-in-out infinite", willChange:"transform" }} />
+          <div style={{ position:"absolute", width:"300px", height:"300px", borderRadius:"50%",
+            background:"radial-gradient(circle, rgba(255,43,214,0.20) 0%, transparent 65%)",
+            top:"35%", right:"15%",
+            animation:"hero-orb-3 9s ease-in-out infinite", willChange:"transform" }} />
+          <div style={{ position:"absolute", width:"260px", height:"260px", borderRadius:"50%",
+            background:"radial-gradient(circle, rgba(0,240,255,0.14) 0%, transparent 65%)",
+            top:"10%", left:"30%",
+            animation:"hero-orb-4 15s ease-in-out infinite", willChange:"transform" }} />
+          <div style={{ position:"absolute", width:"220px", height:"220px", borderRadius:"50%",
+            background:"radial-gradient(circle, rgba(255,140,0,0.12) 0%, transparent 65%)",
+            bottom:"20%", right:"35%",
+            animation:"hero-orb-5 11s ease-in-out infinite", willChange:"transform" }} />
+
+          {/* ── Neon grid ── */}
+          <div style={{ position:"absolute", inset:0,
+            backgroundImage:"linear-gradient(rgba(184,255,23,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(184,255,23,0.03) 1px, transparent 1px)",
+            backgroundSize:"60px 60px",
+            animation:"hero-grid 25s linear infinite", willChange:"background-position" }} />
+
+          {/* ── Scanlines (desktop only) ── */}
+          <div className="hidden sm:block" style={{ position:"absolute", inset:0, overflow:"hidden", pointerEvents:"none" }}>
+            <div style={{ position:"absolute", width:"100%", height:"2px",
+              background:"linear-gradient(90deg, transparent, rgba(184,255,23,0.15), transparent)",
+              animation:"scanlines 6s linear infinite", willChange:"transform" }} />
+            <div style={{ position:"absolute", width:"100%", height:"1px",
+              background:"linear-gradient(90deg, transparent, rgba(155,77,255,0.12), transparent)",
+              animation:"scanlines 9s linear infinite 3s", willChange:"transform" }} />
+          </div>
+
+          {/* ── Neon stripe sweep ── */}
+          <div style={{ position:"absolute", inset:0, overflow:"hidden", pointerEvents:"none" }}>
+            <div style={{ position:"absolute", top:"30%", width:"100%", height:"80px",
+              background:"linear-gradient(90deg, transparent, rgba(184,255,23,0.06), transparent)",
+              animation:"neon-stripe 8s ease-in-out infinite", willChange:"transform" }} />
+            <div style={{ position:"absolute", top:"60%", width:"100%", height:"40px",
+              background:"linear-gradient(90deg, transparent, rgba(155,77,255,0.08), transparent)",
+              animation:"neon-stripe 12s ease-in-out infinite 4s", willChange:"transform" }} />
+          </div>
+
+          {/* ── Pulsing neon rings ── */}
+          {[0,1,2].map(i => (
             <div key={i} style={{
-              position: "absolute",
-              width: i % 2 === 0 ? "3px" : "2px",
-              height: i % 2 === 0 ? "3px" : "2px",
-              borderRadius: "50%",
-              background: i % 3 === 0 ? "#b8ff17" : i % 3 === 1 ? "#9b4dff" : "#ff2bd6",
-              left: `${10 + i * 15}%`,
-              top: `${20 + (i * 13) % 60}%`,
-              boxShadow: i % 3 === 0 ? "0 0 6px #b8ff17" : i % 3 === 1 ? "0 0 6px #9b4dff" : "0 0 6px #ff2bd6",
-              animation: `hero-particle-${i % 3} ${5 + i}s ease-in-out infinite`,
-              willChange: "transform, opacity",
+              position:"absolute", borderRadius:"50%",
+              border:`1px solid ${i===0?"rgba(184,255,23,0.3)":i===1?"rgba(155,77,255,0.25)":"rgba(255,43,214,0.2)"}`,
+              width: `${200+i*120}px`, height: `${200+i*120}px`,
+              top:"50%", left:"50%",
+              transform:"translate(-50%,-50%)",
+              animation:`ring-pulse ${5+i*2}s ease-in-out infinite ${i*1.5}s`,
+              willChange:"transform, opacity"
+            }} />
+          ))}
+
+          {/* ── Floating zodiac symbols ── */}
+          {["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"].map((sym, i) => (
+            <div key={sym} style={{
+              position:"absolute",
+              left:`${5 + (i * 8) % 90}%`,
+              top:`${15 + (i * 17) % 75}%`,
+              fontSize: i % 3 === 0 ? "28px" : i % 3 === 1 ? "20px" : "16px",
+              color: i % 3 === 0 ? "rgba(184,255,23,0.25)" : i % 3 === 1 ? "rgba(155,77,255,0.25)" : "rgba(255,43,214,0.2)",
+              animation:`zodiac-float ${8+i*1.5}s ease-in-out infinite ${i*0.8}s`,
+              willChange:"transform, opacity",
+              userSelect:"none", pointerEvents:"none",
+              fontFamily:"serif"
+            }}>{sym}</div>
+          ))}
+
+          {/* ── Floating particles ── */}
+          {[...Array(10)].map((_,i) => (
+            <div key={i} style={{
+              position:"absolute",
+              width: i%2===0 ? "4px" : "2px",
+              height: i%2===0 ? "4px" : "2px",
+              borderRadius:"50%",
+              background: i%3===0?"#b8ff17":i%3===1?"#9b4dff":"#ff2bd6",
+              left:`${5+i*9}%`, top:`${10+(i*11)%80}%`,
+              boxShadow: i%3===0?"0 0 8px #b8ff17":i%3===1?"0 0 8px #9b4dff":"0 0 8px #ff2bd6",
+              animation:`hero-particle-${i%3} ${4+i*0.8}s ease-in-out infinite ${i*0.3}s`,
+              willChange:"transform, opacity"
             }} />
           ))}
         </div>
-        {/* Gradient overlay for mobile (keeps text readable over the animation) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(5,5,7,0.10)] via-[rgba(5,5,7,0.40)] to-[rgba(5,5,7,0.92)] sm:hidden" />
-        {/* Gradient overlay for desktop (over video) */}
-        <div className="absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(5,5,7,.88),rgba(5,5,7,.42),rgba(5,5,7,.78))] sm:block" />
 
-        <div className="relative mx-auto grid min-h-[74vh] max-w-7xl items-center gap-8 lg:grid-cols-[1fr_0.8fr]">
+        {/* Video overlay on desktop (on top of CSS animations) */}
+        <video autoPlay muted loop playsInline poster="/zodi-art/poster-chaos.png"
+          className="absolute inset-0 hidden h-full w-full object-cover opacity-30 sm:block mix-blend-screen"
+          style={{ transform:"translateZ(0)" }} aria-hidden="true">
+          <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
+        </video>
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgba(5,5,7,0.45)] to-[rgba(5,5,7,0.95)] sm:bg-[linear-gradient(110deg,rgba(5,5,7,.85)_45%,rgba(5,5,7,0.2)_100%)]" />
+
+        <div className="relative mx-auto grid min-h-[80vh] max-w-7xl items-center gap-8 lg:grid-cols-[1fr_0.85fr]">
           <div>
-            <h1 className="glitch max-w-4xl text-5xl font-black leading-none sm:text-7xl lg:text-8xl">
+            <p className="stagger-1 mb-4 inline-block rounded-full border border-lime-300/30 bg-lime-300/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-lime-300">
+              ✦ Oráculo Astral ZODI ✦
+            </p>
+            <h1 className="glitch-text stagger-2 max-w-4xl text-5xl font-black leading-[1.02] sm:text-7xl lg:text-8xl"
+              style={{ fontFamily:"var(--font-display)" }}>
               Zodi te lee el futuro y te juzga el presente.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
+            <p className="stagger-2 mt-6 max-w-2xl text-lg leading-8 text-white/70">
               Horóscopo, tarot, numerología, carta natal y comunidad en un solo lugar oscuro y brillante. Crea tu perfil astral gratis, elige qué quieres consultar y recibe lecturas con personalidad: directas, místicas y con el humor exacto para no convertirte en víctima del universo.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/auth/register" className="flex items-center gap-2 rounded-md bg-lime-300 px-5 py-4 font-black text-black shadow-[0_0_28px_rgba(184,255,23,.35)]">
+            <div className="stagger-3 mt-8 flex flex-wrap gap-3">
+              <Link href="/auth/register"
+                className="hero-cta-pulse flex items-center gap-2 rounded-xl bg-lime-300 px-6 py-4 font-black text-black">
                 Empezar gratis <ArrowRight className="h-5 w-5" />
               </Link>
-              <a href="#consultas" className="rounded-md border border-purple-300/40 bg-purple-500/10 px-5 py-4 font-bold text-purple-100">
+              <a href="#consultas"
+                className="rounded-xl border border-purple-300/40 bg-purple-500/10 px-6 py-4 font-bold text-purple-100 transition hover:bg-purple-500/20">
                 Explorar lecturas
               </a>
             </div>
