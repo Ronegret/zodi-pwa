@@ -21,7 +21,7 @@ export function PublicNav() {
       <header className="sticky top-0 z-40 border-b border-lime-300/10 bg-black/65 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center" onClick={() => setOpen(false)}>
-            <span className="relative block h-12 w-32 overflow-hidden">
+            <span className="relative block h-20 w-48 overflow-hidden scale-110 origin-left">
               <Image src="/zodi-logo-mark.png" alt="Logo de ZODI" fill sizes="128px" className="object-contain brightness-125 contrast-125" priority />
             </span>
           </Link>

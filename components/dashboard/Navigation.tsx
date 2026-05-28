@@ -137,7 +137,7 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center justify-center border-b border-white/07 px-3 py-4">
-        <div className="relative h-14 w-full">
+        <div className="relative h-24 w-full scale-110">
           <Image
             src="/zodi-logo-mark.png"
             alt="ZODI"
