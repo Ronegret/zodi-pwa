@@ -61,6 +61,7 @@ html {
   color-scheme: dark;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden; /* Prevents any element from causing horizontal scroll */
 }
 
 body {
@@ -155,27 +156,28 @@ h1, h2, h3, h4, h5, h6 {
 
 .neon-border {
   position: relative;
+  overflow: hidden; /* Prevent blur glow from escaping the element */
 }
 
 .neon-border::before {
   position: absolute;
-  inset: -1px;
+  inset: 0;
   z-index: -1;
   content: "";
   border-radius: inherit;
   background: linear-gradient(
     135deg,
-    rgba(184, 255, 23, 0.55),
-    rgba(155, 77, 255, 0.50),
-    rgba(255, 43, 214, 0.35)
+    rgba(184, 255, 23, 0.30),
+    rgba(155, 77, 255, 0.28),
+    rgba(255, 43, 214, 0.20)
   );
-  filter: blur(8px);
-  opacity: 0.35;
+  filter: blur(4px);
+  opacity: 0.30;
   transition: opacity 0.3s;
 }
 
 .neon-border:hover::before {
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
 /* ── ZODI UI Components ───────────────────────────────────────────────────── */
