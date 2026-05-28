@@ -176,112 +176,15 @@ export function MarketingHome() {
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section className="relative min-h-[calc(100vh-64px)] overflow-hidden px-4 py-10 sm:py-16">
 
-        {/* ═══ ANIMATED BACKGROUND (shared mobile + desktop) ═══ */}
-        <div className="absolute inset-0" aria-hidden="true">
-          {/* Base */}
-          <div className="absolute inset-0 bg-[#060608]" />
-
-          {/* ── 5 Massive floating orbs ── */}
-          <div style={{ position:"absolute", width:"500px", height:"500px", borderRadius:"50%",
-            background:"radial-gradient(circle, rgba(184,255,23,0.18) 0%, transparent 65%)",
-            top:"-100px", right:"-80px",
-            animation:"hero-orb-1 10s ease-in-out infinite", willChange:"transform" }} />
-          <div style={{ position:"absolute", width:"420px", height:"420px", borderRadius:"50%",
-            background:"radial-gradient(circle, rgba(155,77,255,0.22) 0%, transparent 65%)",
-            bottom:"-60px", left:"-80px",
-            animation:"hero-orb-2 13s ease-in-out infinite", willChange:"transform" }} />
-          <div style={{ position:"absolute", width:"300px", height:"300px", borderRadius:"50%",
-            background:"radial-gradient(circle, rgba(255,43,214,0.20) 0%, transparent 65%)",
-            top:"35%", right:"15%",
-            animation:"hero-orb-3 9s ease-in-out infinite", willChange:"transform" }} />
-          <div style={{ position:"absolute", width:"260px", height:"260px", borderRadius:"50%",
-            background:"radial-gradient(circle, rgba(0,240,255,0.14) 0%, transparent 65%)",
-            top:"10%", left:"30%",
-            animation:"hero-orb-4 15s ease-in-out infinite", willChange:"transform" }} />
-          <div style={{ position:"absolute", width:"220px", height:"220px", borderRadius:"50%",
-            background:"radial-gradient(circle, rgba(255,140,0,0.12) 0%, transparent 65%)",
-            bottom:"20%", right:"35%",
-            animation:"hero-orb-5 11s ease-in-out infinite", willChange:"transform" }} />
-
-          {/* ── Neon grid ── */}
-          <div style={{ position:"absolute", inset:0,
-            backgroundImage:"linear-gradient(rgba(184,255,23,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(184,255,23,0.03) 1px, transparent 1px)",
-            backgroundSize:"60px 60px",
-            animation:"hero-grid 25s linear infinite", willChange:"background-position" }} />
-
-          {/* ── Scanlines (desktop only) ── */}
-          <div className="hidden sm:block" style={{ position:"absolute", inset:0, overflow:"hidden", pointerEvents:"none" }}>
-            <div style={{ position:"absolute", width:"100%", height:"2px",
-              background:"linear-gradient(90deg, transparent, rgba(184,255,23,0.15), transparent)",
-              animation:"scanlines 6s linear infinite", willChange:"transform" }} />
-            <div style={{ position:"absolute", width:"100%", height:"1px",
-              background:"linear-gradient(90deg, transparent, rgba(155,77,255,0.12), transparent)",
-              animation:"scanlines 9s linear infinite 3s", willChange:"transform" }} />
-          </div>
-
-          {/* ── Neon stripe sweep ── */}
-          <div style={{ position:"absolute", inset:0, overflow:"hidden", pointerEvents:"none" }}>
-            <div style={{ position:"absolute", top:"30%", width:"100%", height:"80px",
-              background:"linear-gradient(90deg, transparent, rgba(184,255,23,0.06), transparent)",
-              animation:"neon-stripe 8s ease-in-out infinite", willChange:"transform" }} />
-            <div style={{ position:"absolute", top:"60%", width:"100%", height:"40px",
-              background:"linear-gradient(90deg, transparent, rgba(155,77,255,0.08), transparent)",
-              animation:"neon-stripe 12s ease-in-out infinite 4s", willChange:"transform" }} />
-          </div>
-
-          {/* ── Pulsing neon rings ── */}
-          {[0,1,2].map(i => (
-            <div key={i} style={{
-              position:"absolute", borderRadius:"50%",
-              border:`1px solid ${i===0?"rgba(184,255,23,0.3)":i===1?"rgba(155,77,255,0.25)":"rgba(255,43,214,0.2)"}`,
-              width: `${200+i*120}px`, height: `${200+i*120}px`,
-              top:"50%", left:"50%",
-              transform:"translate(-50%,-50%)",
-              animation:`ring-pulse ${5+i*2}s ease-in-out infinite ${i*1.5}s`,
-              willChange:"transform, opacity"
-            }} />
-          ))}
-
-          {/* ── Floating zodiac symbols ── */}
-          {["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"].map((sym, i) => (
-            <div key={sym} style={{
-              position:"absolute",
-              left:`${5 + (i * 8) % 90}%`,
-              top:`${15 + (i * 17) % 75}%`,
-              fontSize: i % 3 === 0 ? "28px" : i % 3 === 1 ? "20px" : "16px",
-              color: i % 3 === 0 ? "rgba(184,255,23,0.25)" : i % 3 === 1 ? "rgba(155,77,255,0.25)" : "rgba(255,43,214,0.2)",
-              animation:`zodiac-float ${8+i*1.5}s ease-in-out infinite ${i*0.8}s`,
-              willChange:"transform, opacity",
-              userSelect:"none", pointerEvents:"none",
-              fontFamily:"serif"
-            }}>{sym}</div>
-          ))}
-
-          {/* ── Floating particles ── */}
-          {[...Array(10)].map((_,i) => (
-            <div key={i} style={{
-              position:"absolute",
-              width: i%2===0 ? "4px" : "2px",
-              height: i%2===0 ? "4px" : "2px",
-              borderRadius:"50%",
-              background: i%3===0?"#b8ff17":i%3===1?"#9b4dff":"#ff2bd6",
-              left:`${5+i*9}%`, top:`${10+(i*11)%80}%`,
-              boxShadow: i%3===0?"0 0 8px #b8ff17":i%3===1?"0 0 8px #9b4dff":"0 0 8px #ff2bd6",
-              animation:`hero-particle-${i%3} ${4+i*0.8}s ease-in-out infinite ${i*0.3}s`,
-              willChange:"transform, opacity"
-            }} />
-          ))}
-        </div>
-
-        {/* Video overlay on desktop (on top of CSS animations) */}
+        {/* ═══ ANIMATED BACKGROUND (Video only, everywhere) ═══ */}
         <video autoPlay muted loop playsInline poster="/zodi-art/poster-chaos.png"
-          className="absolute inset-0 hidden h-full w-full object-cover opacity-30 sm:block mix-blend-screen"
+          className="absolute inset-0 h-full w-full object-cover opacity-60 sm:opacity-40 sm:mix-blend-screen"
           style={{ transform:"translateZ(0)" }} aria-hidden="true">
           <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
         </video>
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgba(5,5,7,0.45)] to-[rgba(5,5,7,0.95)] sm:bg-[linear-gradient(110deg,rgba(5,5,7,.85)_45%,rgba(5,5,7,0.2)_100%)]" />
+        {/* Gradient overlay to keep text readable */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgba(5,5,7,0.5)] to-[rgba(5,5,7,0.98)] sm:bg-[linear-gradient(110deg,rgba(5,5,7,.85)_45%,rgba(5,5,7,0.2)_100%)]" />
 
         <div className="relative mx-auto grid min-h-[80vh] max-w-7xl items-center gap-8 lg:grid-cols-[1fr_0.85fr]">
           <div>
@@ -375,11 +278,6 @@ export function MarketingHome() {
                 height={700}
                 className="h-[420px] w-full object-cover transition duration-500 group-hover:scale-105 sm:h-[540px]"
               />
-              <div className="absolute inset-0 flex items-end justify-end bg-gradient-to-t from-black/60 via-transparent to-transparent p-4">
-                <div className="sm:hidden flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white/70 backdrop-blur-sm">
-                  <ZoomIn className="h-3 w-3" /> Ampliar
-                </div>
-              </div>
             </button>
           </div>
         </div>
@@ -388,45 +286,37 @@ export function MarketingHome() {
       {/* ── CONSULTAS ────────────────────────────────────────────────── */}
       <Section id="consultas" kicker="Empieza por aquí" title="Elige qué quieres consultar hoy.">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {mainConsultas.map((item) => (
-            <motion.div
-              key={item.title}
-              whileHover={{ y: -8 }}
-              className="glass-panel group flex min-h-full flex-col overflow-hidden rounded-md"
-            >
-              {/* Imagen — toca para ampliar */}
-              <button
-                onClick={() => setLightbox(item.image)}
-                className="relative block overflow-hidden"
-                aria-label={`Ver ${item.title} en grande`}
-              >
-                <div className={`relative ${item.fit === "contain" ? "h-80 bg-black/70 p-4" : "h-64"}`}>
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    width={800}
-                    height={900}
-                    className={`h-full w-full transition duration-700 group-hover:scale-105 ${item.fit === "contain" ? "object-contain bg-black/40" : "object-cover"}`}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                  {/* Ícono de zoom sobre la imagen */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition duration-300 group-hover:bg-black/30">
-                    <ZoomIn className="h-9 w-9 text-white opacity-0 drop-shadow-lg transition duration-300 group-hover:opacity-100" />
+          {mainConsultas.map((item, index) => (
+            <FadeUp key={item.title} delay={index * 0.1}>
+              <motion.div whileHover={{ y: -6 }} className="glass-panel group flex h-full flex-col overflow-hidden rounded-lg">
+                <button
+                  type="button"
+                  className="relative block aspect-[4/3] w-full overflow-hidden border-b border-white/10"
+                  onClick={() => setLightbox(item.image)}
+                >
+                  <div className="relative h-full w-full">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      width={800}
+                      height={900}
+                      className={`h-full w-full transition duration-700 group-hover:scale-105 ${item.fit === "contain" ? "object-contain bg-black/40" : "object-cover"}`}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition duration-300 group-hover:bg-black/30">
+                      <ZoomIn className="h-9 w-9 text-white opacity-0 drop-shadow-lg transition duration-300 group-hover:opacity-100" />
+                    </div>
                   </div>
-                  {/* Hint en móvil (siempre visible, pequeño) */}
-                  <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white/70 backdrop-blur-sm sm:hidden">
-                    <ZoomIn className="h-3 w-3" /> Ampliar
-                  </div>
+                </button>
+                <div className="flex flex-1 flex-col p-4">
+                  <h3 className="text-2xl font-black">{item.title}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-6 text-white/68">{item.body}</p>
+                  <Link href={item.href} className="mt-5 inline-flex w-fit items-center gap-2 rounded-md bg-lime-300 px-3 py-2 text-sm font-black text-black">
+                    {item.action} <ChevronRight className="h-4 w-4" />
+                  </Link>
                 </div>
-              </button>
-              <div className="flex flex-1 flex-col p-4">
-                <h3 className="text-2xl font-black">{item.title}</h3>
-                <p className="mt-2 flex-1 text-sm leading-6 text-white/68">{item.body}</p>
-                <Link href={item.href} className="mt-5 inline-flex w-fit items-center gap-2 rounded-md bg-lime-300 px-3 py-2 text-sm font-black text-black">
-                  {item.action} <ChevronRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </motion.div>
+              </motion.div>
+            </FadeUp>
           ))}
         </div>
       </Section>
@@ -440,12 +330,14 @@ export function MarketingHome() {
             ["Oráculo conversacional", "Preguntas, escribes lo que te pasa y recibes una lectura con tono humano: suave, directo, brutal o sarcástico."],
             ["Comunidad espiritual", "Publicaciones anónimas, reacciones, comentarios y señales compartidas por signos. Como terapia grupal, pero más neón."],
             ["Progreso y rituales", "Rachas, logros, favoritos y puntos para que volver cada día se sienta útil, divertido y un poco adictivo."]
-          ].map(([title, body]) => (
-            <motion.div key={title} whileHover={{ y: -6 }} className="glass-panel rounded-md p-5">
-              <Sparkles className="mb-5 h-6 w-6 text-lime-300" />
-              <h3 className="text-lg font-black">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-white/66">{body}</p>
-            </motion.div>
+          ].map(([title, body], index) => (
+            <FadeUp key={title} delay={index * 0.1}>
+              <motion.div whileHover={{ y: -6 }} className="glass-panel rounded-md p-5 h-full">
+                <Sparkles className="mb-5 h-6 w-6 text-lime-300" />
+                <h3 className="text-lg font-black">{title}</h3>
+                <p className="mt-3 text-sm leading-6 text-white/66">{body}</p>
+              </motion.div>
+            </FadeUp>
           ))}
         </div>
       </Section>
@@ -454,21 +346,18 @@ export function MarketingHome() {
       <Section id="lecturas" kicker="Lecturas" title="Todo lo que puedes consultar, ordenado para no perderte.">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {readings.map((module, index) => (
-            <motion.article
-              key={module.title}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: Math.min(index * 0.02, 0.18) }}
-              whileHover={{ y: -6, scale: 1.01 }}
-              className="glass-panel group rounded-md p-4"
-            >
-              <div className={`mb-4 grid h-12 w-12 place-items-center rounded-md bg-gradient-to-br ${module.accent} text-black`}>
-                <module.icon className="h-5 w-5" />
-              </div>
-              <h3 className="font-black">{module.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-white/62">{module.description}</p>
-            </motion.article>
+            <FadeUp key={module.title} delay={Math.min(index * 0.05, 0.4)}>
+              <motion.article
+                whileHover={{ y: -6, scale: 1.01 }}
+                className="glass-panel group rounded-md p-4 h-full"
+              >
+                <div className={`mb-4 grid h-12 w-12 place-items-center rounded-md bg-gradient-to-br ${module.accent} text-black`}>
+                  <module.icon className="h-5 w-5" />
+                </div>
+                <h3 className="font-black">{module.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-white/62">{module.description}</p>
+              </motion.article>
+            </FadeUp>
           ))}
         </div>
       </Section>
@@ -480,14 +369,10 @@ export function MarketingHome() {
             <p className="text-lg leading-8 text-white/70">
               ¿Qué es la numerología? Es el arte milenario de sumar tu fecha de nacimiento hasta que quede un solo dígito y luego culpar a ese número de por qué no sabes ahorrar o por qué siempre te enamoras de la misma *red flag*.
             </p>
-            <p className="mt-4 text-lg leading-8 text-white/70">
-              En ZODI calculamos tu camino de vida, tu año personal y la vibración de tu nombre. No, no te va a solucionar la vida ni a pagar el alquiler, pero te dará una excusa matemáticamente precisa para justificar tus peores hábitos. Los números no mienten, pero tú definitivamente sí te mientes a ti mismo.
-            </p>
           </div>
           <button
             onClick={() => setLightbox("/zodi-art/numerologia/imagen-general-numerologia.png")}
             className="group relative block w-full overflow-hidden rounded-2xl glass-panel p-2"
-            aria-label="Ver numerología en grande"
           >
             <Image
               src="/zodi-art/numerologia/imagen-general-numerologia.png"
@@ -496,51 +381,40 @@ export function MarketingHome() {
               height={600}
               className="h-auto w-full object-contain transition duration-500 group-hover:scale-105 bg-black/40 rounded-xl"
             />
-            <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/0 transition duration-300 group-hover:bg-black/30">
-              <ZoomIn className="h-10 w-10 text-white opacity-0 drop-shadow-lg transition group-hover:opacity-100" />
-            </div>
           </button>
         </div>
       </Section>
 
       {/* ── FEATURE CARDS (3 imágenes) ───────────────────────────────── */}
       <section className="relative overflow-hidden px-4 py-14">
-        {/* Fondo más visible: mayor opacidad en móvil, overlay más suave */}
-        <div className="absolute inset-0 bg-[url('/zodi-art/oracle-frame-tall.png')] bg-cover bg-center opacity-40 sm:opacity-25" />
-        <div className="absolute inset-0 bg-black/55 sm:bg-black/68" />
+        <div className="absolute inset-0 bg-[url('/zodi-art/oracle-frame-tall.png')] bg-cover bg-center opacity-25" />
+        <div className="absolute inset-0 bg-black/60" />
         <div className="relative mx-auto grid max-w-7xl gap-5 lg:grid-cols-3">
           {[
             { img: "/zodi-art/home/zodi-cartas.png", title: "La verdad no viene suave", body: "Tarot visual con cartas, energía y respuestas directas. A veces abraza. A veces te mira fijo hasta que entiendes." },
             { img: "/zodi-art/home/zodi-energia.png", title: "Rituales de todos los días", body: "Pequeñas misiones, rachas y recordatorios para ordenar la energía sin convertir tu agenda en un monasterio." },
             { img: "/zodi-art/home/zodi-sarcasmo.png", title: "Humor ácido astrológico", body: "Lecturas con carácter, frases para compartir y esa dosis de sinceridad que duele poquito, pero ilumina bastante." }
-          ].map((card) => (
-            <motion.article key={card.title} whileHover={{ y: -8 }} className="glass-panel group overflow-hidden rounded-md">
-              {/* Imagen clicable */}
-              <button
-                onClick={() => setLightbox(card.img)}
-                className="relative block w-full overflow-hidden"
-                aria-label={`Ver ${card.title} en grande`}
-              >
-                <Image
-                  src={card.img}
-                  alt={card.title}
-                  width={600}
-                  height={720}
-                  className="h-72 w-full object-contain bg-black/40 transition duration-500 group-hover:scale-105 sm:h-80"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition duration-300 group-hover:bg-black/30">
-                  <ZoomIn className="h-9 w-9 text-white opacity-0 drop-shadow-lg transition duration-300 group-hover:opacity-100" />
+          ].map((card, index) => (
+            <FadeUp key={card.title} delay={index * 0.1}>
+              <motion.article whileHover={{ y: -8 }} className="glass-panel group overflow-hidden rounded-md h-full">
+                <button
+                  onClick={() => setLightbox(card.img)}
+                  className="relative block w-full overflow-hidden"
+                >
+                  <Image
+                    src={card.img}
+                    alt={card.title}
+                    width={600}
+                    height={720}
+                    className="h-72 w-full object-contain bg-black/40 transition duration-500 group-hover:scale-105 sm:h-80"
+                  />
+                </button>
+                <div className="p-5">
+                  <h3 className="text-2xl font-black">{card.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-white/66">{card.body}</p>
                 </div>
-                {/* Hint móvil */}
-                <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white/70 backdrop-blur-sm sm:hidden">
-                  <ZoomIn className="h-3 w-3" /> Ampliar
-                </div>
-              </button>
-              <div className="p-5">
-                <h3 className="text-2xl font-black">{card.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-white/66">{card.body}</p>
-              </div>
-            </motion.article>
+              </motion.article>
+            </FadeUp>
           ))}
         </div>
       </section>
@@ -549,14 +423,19 @@ export function MarketingHome() {
       <Section id="como-funciona" kicker="Cómo funciona" title="Se entiende en seis pasos. Prometido: no hace falta mercurio avanzado.">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {steps.map((step, index) => (
-            <motion.article key={step.title} whileHover={{ y: -6 }} className="glass-panel relative overflow-hidden rounded-md p-5">
-              <span className="absolute right-4 top-3 text-6xl font-black text-lime-300/10">
-                0{index + 1}
-              </span>
-              <span className="grid h-11 w-11 place-items-center rounded-md bg-lime-300 font-black text-black">0{index + 1}</span>
-              <h3 className="mt-5 text-xl font-black">{step.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-white/66">{step.body}</p>
-            </motion.article>
+            <FadeUp key={step.title} delay={index * 0.1}>
+              <motion.article whileHover={{ y: -6 }} className="glass-panel relative overflow-hidden rounded-md h-full">
+                <div className="absolute -right-8 -top-8 text-[120px] font-black leading-none text-white/02 transition-transform duration-500 group-hover:scale-110">
+                  0{index + 1}
+                </div>
+                <div className="relative p-6">
+                  <h3 className="text-xl font-black text-lime-300">
+                    <span className="text-white/40">0{index + 1}.</span> {step.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-white/68">{step.body}</p>
+                </div>
+              </motion.article>
+            </FadeUp>
           ))}
         </div>
       </Section>
@@ -567,8 +446,7 @@ export function MarketingHome() {
           <div className="glass-panel overflow-hidden rounded-md p-4">
             <button
               onClick={() => setLightbox("/zodi-art/ritual-wide.png")}
-              className="group relative block w-full overflow-hidden rounded-md"
-              aria-label="Ver panel en grande"
+              className="relative block w-full overflow-hidden rounded-md"
             >
               <Image
                 src="/zodi-art/ritual-wide.png"
@@ -577,12 +455,6 @@ export function MarketingHome() {
                 height={700}
                 className="w-full rounded-md border border-lime-300/20 object-cover magic-pulse transition duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/0 transition duration-300 group-hover:bg-black/30">
-                <ZoomIn className="h-10 w-10 text-white opacity-0 drop-shadow-lg transition duration-300 group-hover:opacity-100" />
-              </div>
-              <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white/70 backdrop-blur-sm sm:hidden">
-                <ZoomIn className="h-3 w-3" /> Ampliar
-              </div>
             </button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -606,9 +478,8 @@ export function MarketingHome() {
 
       {/* ── COMUNIDAD ────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden px-4 py-14">
-        {/* Imagen fondo más visible en móvil */}
-        <div className="absolute inset-0 bg-[url('/zodi-art/hoodie-phone-wide.png')] bg-cover bg-center opacity-65 sm:opacity-45" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[rgba(5,5,7,0.92)] via-[rgba(5,5,7,0.70)] to-[rgba(5,5,7,0.50)] sm:bg-[linear-gradient(90deg,rgba(5,5,7,.94),rgba(5,5,7,.72))]" />
+        <div className="absolute inset-0 bg-[url('/zodi-art/hoodie-phone-wide.png')] bg-cover bg-center opacity-45" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,7,.94),rgba(5,5,7,.72))]" />
         <div className="relative mx-auto max-w-7xl">
           <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/70">Magia social</p>
           <h2 className="mt-3 max-w-4xl text-4xl font-black leading-tight sm:text-6xl">Tu futuro, sin filtro. Tu comunidad, sin postureo.</h2>
@@ -683,12 +554,44 @@ export function MarketingHome() {
   );
 }
 
+// ── Reusable scroll-triggered fade-up wrapper ──────────────────────────────
+function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ── Section wrapper with animated title ────────────────────────────────────
 function Section({ id, kicker, title, children }: { id: string; kicker: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="px-4 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl">
-        <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/70">{kicker}</p>
-        <h2 className="mt-3 mb-7 max-w-4xl text-3xl font-black leading-tight sm:text-5xl">{title}</h2>
+        <motion.p
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/70"
+        >
+          {kicker}
+        </motion.p>
+        <motion.h2
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          className="mt-3 mb-7 max-w-4xl text-3xl font-black leading-tight sm:text-5xl"
+        >
+          {title}
+        </motion.h2>
         {children}
       </div>
     </section>
