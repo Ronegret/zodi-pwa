@@ -55,7 +55,13 @@
 
 *, *::before, *::after {
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent; /* Remove mobile tap flashing */
+  -webkit-tap-highlight-color: transparent; /* Remove mobile tap flash */
+  /* Prevent 300ms tap delay on all interactive elements */
+}
+
+/* Disable 300ms tap delay on all tappable elements */
+a, button, [role="button"], input, label, select, summary, textarea {
+  touch-action: manipulation;
 }
 
 html {
@@ -75,6 +81,8 @@ body {
     radial-gradient(ellipse 80% 50% at 10% -5%, rgba(155, 77, 255, 0.14), transparent),
     radial-gradient(ellipse 60% 40% at 90% 5%,  rgba(184, 255, 23, 0.10), transparent),
     radial-gradient(ellipse 50% 60% at 50% 100%, rgba(255, 43, 214, 0.06), transparent);
+  /* Attach body gradients to a separate GPU layer so they never repaint on scroll */
+  background-attachment: local;
   color: var(--text-primary);
   font-family: var(--font-body);
   font-feature-settings: "kern", "liga", "calt";
@@ -94,7 +102,7 @@ body::before {
     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 40px 40px;
-  will-change: transform;
+  /* NO will-change here — it's not animating so it was causing unnecessary layer promotion */
   transform: translateZ(0);
 }
 
@@ -127,14 +135,13 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border);
   background: linear-gradient(
     145deg,
-    rgba(22, 22, 32, 0.90),
-    rgba(14, 14, 20, 0.85)
+    rgba(22, 22, 32, 0.97),
+    rgba(14, 14, 20, 0.97)
   );
   box-shadow:
     0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
     0 0 0 0 transparent;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* No backdrop-filter: eliminado porque causaba parpadeo en iOS/Android en cada tap/scroll */
 }
 
 /* Elevated card variant */

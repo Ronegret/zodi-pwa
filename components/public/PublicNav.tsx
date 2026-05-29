@@ -96,7 +96,8 @@ export function PublicNav() {
           transform: "translateZ(0)",   // own GPU compositing layer
           contain: "layout style paint", // isolate from rest of page
         }}
-        className="sticky top-0 z-50 flex flex-col justify-center border-b border-white/08 bg-black sm:bg-black/85 sm:backdrop-blur-xl"
+        className="sticky top-0 z-50 flex flex-col justify-center border-b border-white/08"
+        style={{ background: "rgb(6, 6, 10)" }}
       >
         <div className="mx-auto flex w-full h-16 max-w-7xl items-center justify-between px-4">
           {/* ── LOGO ── */}
@@ -107,7 +108,7 @@ export function PublicNav() {
                 alt="ZODI"
                 fill
                 sizes="192px"
-                className="object-contain mix-blend-screen"
+                className="object-contain"
                 priority
               />
             </span>

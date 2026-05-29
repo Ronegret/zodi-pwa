@@ -132,8 +132,8 @@ export function Sidebar() {
   }, []);
 
   return (
-    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-52 shrink-0 flex-col rounded-xl border border-white/07 bg-surface/90 shadow-[0_0_40px_rgba(184,255,23,0.06)] backdrop-blur-xl lg:flex overflow-hidden"
-      style={{ background: "linear-gradient(180deg, rgba(16,16,24,0.95) 0%, rgba(10,10,18,0.98) 100%)" }}
+    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-52 shrink-0 flex-col rounded-xl border border-white/07 shadow-[0_0_40px_rgba(184,255,23,0.06)] lg:flex overflow-hidden"
+      style={{ background: "linear-gradient(180deg, rgb(12,12,20) 0%, rgb(8,8,16) 100%)" }}
     >
       {/* Logo — click lleva al inicio */}
       <div className="flex items-center justify-center border-b border-white/07 px-3 py-6">
@@ -231,9 +231,12 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-white/10 bg-black/60 shadow-[0_8_32px_rgba(0,0,0,0.8)] backdrop-blur-2xl lg:hidden"
+      className="fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] lg:hidden"
       style={{
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) / 2)"
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) / 2)",
+        background: "rgb(8, 8, 14)",
+        transform: "translateZ(0)",
+        willChange: "auto",
       }}
     >
       <div className="grid grid-cols-5 items-center justify-between px-2" style={{ height: "68px" }}>

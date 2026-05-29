@@ -2,20 +2,18 @@ import type { ReactNode } from "react";
 
 /**
  * Dashboard layout — adds full-screen atmospheric backgrounds behind all dashboard pages.
- * Multiple image layers at low opacity create depth without fighting the UI.
+ * PERFORMANCE: All bg layers use translateZ(0) for GPU promotion but NO willChange
+ * because willChange on non-animating fixed elements causes scroll flicker on mobile.
  */
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative min-h-screen">
-      {/* Layer 1 — main ZODI atmosphere image.
-          transform: translateZ(0) forces a GPU compositing layer so iOS
-          doesn't software-repaint this on every scroll tick. */}
+    <div className="relative min-h-screen" style={{ isolation: "isolate" }}>
+      {/* Layer 1 — main ZODI atmosphere image */}
       <div
         className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center"
         style={{
           backgroundImage: "url('/zodi-art/zodi-fondoo.png')",
           opacity: 0.07,
-          willChange: "transform",
           transform: "translateZ(0)"
         }}
       />
@@ -25,7 +23,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         style={{
           backgroundImage: "url('/zodi-art/zodi-fondo0.png')",
           opacity: 0.055,
-          willChange: "transform",
           transform: "translateZ(0)"
         }}
       />
@@ -34,7 +31,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%)",
-          willChange: "transform",
           transform: "translateZ(0)"
         }}
       />

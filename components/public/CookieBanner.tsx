@@ -31,7 +31,8 @@ export function CookieBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-0 left-0 right-0 z-[60] flex flex-col items-center justify-between gap-4 border-t border-white/10 bg-black/90 p-5 backdrop-blur-xl sm:flex-row sm:px-8 pb-[max(env(safe-area-inset-bottom,20px),20px)]"
+          className="fixed bottom-0 left-0 right-0 z-[60] flex flex-col items-center justify-between gap-4 border-t border-white/10 p-5 sm:flex-row sm:px-8 pb-[max(env(safe-area-inset-bottom,20px),20px)]"
+          style={{ background: "rgb(4, 4, 8)" }}
         >
           <div className="max-w-3xl text-sm leading-relaxed text-white/70">
             <strong>El cosmos tiene cookies.</strong> Usamos cookies estrictamente necesarias para el funcionamiento de ZODI y para recordar tu sesión. No te rastreamos por toda la web ni vendemos tu carta natal. Al seguir navegando, aceptas nuestra{" "}

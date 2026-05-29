@@ -46,8 +46,8 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
       {/* Full-screen section background */}
       {sectionBg && (
         <div
-          className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center mix-blend-screen"
-          style={{ backgroundImage: `url('${sectionBg}')`, opacity: 0.12 }}
+          className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center"
+          style={{ backgroundImage: `url('${sectionBg}')`, opacity: 0.08, transform: "translateZ(0)" }}
         />
       )}
       {showHero && (
