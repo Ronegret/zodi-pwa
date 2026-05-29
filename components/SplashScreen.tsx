@@ -1,16 +1,19 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function SplashScreen() {
-  const [showSplash, setShowSplash] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     // Check if we already showed the splash in this session
     const hasSeenSplash = sessionStorage.getItem("zodi.splash_seen");
-    if (!hasSeenSplash) {
-      setShowSplash(true);
+    if (hasSeenSplash) {
+      setShowSplash(false);
     }
   }, []);
 
@@ -19,55 +22,67 @@ export function SplashScreen() {
     setShowSplash(false);
   };
 
+  // Prevenir un parpadeo de contenido subyacente mientras determinamos el estado
+  if (!isMounted && typeof window !== 'undefined') {
+    return (
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black" />
+    );
+  }
+
   return (
     <AnimatePresence>
-      {showSplash && (
+      {showSplash && isMounted && (
         <motion.div
           key="splash"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-end bg-black pb-12 overflow-hidden"
         >
-          {/* Fondo o decoración opcional */}
-          <div className="absolute inset-0 bg-black opacity-80" />
+          {/* Fullscreen Video Background */}
+          <video 
+            autoPlay 
+            muted 
+            playsInline 
+            onEnded={handleFinish}
+            className="absolute inset-0 h-full w-full object-cover"
+          >
+            <source src="/zodi-art/splash-zodi.mp4" type="video/mp4" />
+          </video>
           
-          <div className="relative w-full max-w-sm px-6 text-center">
-            <video 
-              autoPlay 
-              muted 
-              playsInline 
-              onEnded={handleFinish}
-              className="w-full rounded-2xl shadow-[0_0_40px_rgba(184,255,23,0.3)] object-cover mb-8"
-              style={{ maxHeight: "60vh" }}
-            >
-              <source src="/zodi-art/splash-zodi.mp4" type="video/mp4" />
-            </video>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+          {/* Gradient Overlay to make text readable */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+          
+          <div className="relative w-full px-6 text-center z-10 flex flex-col items-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.5, duration: 1 }}
-              className="text-4xl font-black text-lime-300 tracking-widest uppercase glitch-text"
-              style={{ fontFamily: "var(--font-display)" }}
+              className="relative h-20 w-48 mx-auto"
             >
-              ZODI
-            </motion.h1>
+              <Image
+                src="/zodi-logo.png"
+                alt="ZODI"
+                fill
+                className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.4)] mix-blend-screen"
+                priority
+              />
+            </motion.div>
             
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1, duration: 1 }}
-              className="mt-2 text-sm text-white/50"
+              className="mt-3 text-sm md:text-base font-medium text-white/70"
             >
               Conectando con el cosmos...
             </motion.p>
             
             <button 
               onClick={handleFinish}
-              className="mt-8 rounded-full border border-white/20 px-6 py-2 text-xs font-bold text-white/60 hover:bg-white/10 transition"
+              className="mt-10 rounded-full border border-white/20 bg-black/40 backdrop-blur-md px-8 py-3 text-sm font-bold text-white/70 hover:bg-white/10 hover:text-white transition"
             >
-              Saltar
+              Saltar intro
             </button>
           </div>
         </motion.div>
