@@ -231,13 +231,12 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/08 lg:hidden"
+      className="fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-white/10 bg-black/60 shadow-[0_8_32px_rgba(0,0,0,0.8)] backdrop-blur-2xl lg:hidden"
       style={{
-        background: "#08080a", // Color sólido oscuro en móvil en lugar de blur para evitar parpadeos
-        paddingBottom: "env(safe-area-inset-bottom, 0px)"
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) / 2)"
       }}
     >
-      <div className="grid grid-cols-5" style={{ height: "60px" }}>
+      <div className="grid grid-cols-5 items-center justify-between px-2" style={{ height: "68px" }}>
         {bottomNav.map((item, i) => {
           const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           const isOracle = item.href === "/dashboard/oraculo";

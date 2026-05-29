@@ -91,13 +91,14 @@ export function PublicNav() {
       <header
         id="main-header"
         style={{
-          height: HEADER_H,
+          minHeight: HEADER_H,
+          paddingTop: "env(safe-area-inset-top, 0px)",
           transform: "translateZ(0)",   // own GPU compositing layer
           contain: "layout style paint", // isolate from rest of page
         }}
-        className="sticky top-0 z-50 flex items-center border-b border-white/08 bg-black sm:bg-black/85 sm:backdrop-blur-xl"
+        className="sticky top-0 z-50 flex flex-col justify-center border-b border-white/08 bg-black sm:bg-black/85 sm:backdrop-blur-xl"
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4">
+        <div className="mx-auto flex w-full h-16 max-w-7xl items-center justify-between px-4">
           {/* ── LOGO ── */}
           <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
             <span className="relative block h-14 w-40 sm:h-16 sm:w-48 scale-110">
@@ -138,12 +139,15 @@ export function PublicNav() {
             </Link>
             {/* Hamburger — mobile only */}
             <button
-              className="ml-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-white/15 text-white/70 transition hover:border-white/30 md:hidden"
-              onClick={() => setOpen((v) => !v)}
+              className="ml-1 grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/15 text-white/70 transition hover:border-white/30 md:hidden z-50 relative"
+              onClick={(e) => {
+                e.preventDefault();
+                setOpen(!open);
+              }}
               aria-label={open ? "Cerrar menú" : "Abrir menú"}
               aria-expanded={open}
             >
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
@@ -153,8 +157,8 @@ export function PublicNav() {
       <div
         aria-hidden={!open}
         style={{
-          top: HEADER_H,
-          maxHeight: open ? `calc(100dvh - ${HEADER_H}px)` : "0px",
+          top: "calc(64px + env(safe-area-inset-top, 0px))",
+          maxHeight: open ? "calc(100dvh - 64px - env(safe-area-inset-top, 0px))" : "0px",
           opacity: open ? 1 : 0,
           visibility: open ? "visible" : "hidden",
           transition: "max-height 0.25s ease, opacity 0.2s ease, visibility 0.2s",

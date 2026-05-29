@@ -7,6 +7,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getLocalSession } from "@/lib/session";
 import { getGems, spendGems } from "@/lib/gamification";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
 type Message = { role: "user" | "zodi"; text: string };
 
@@ -33,7 +34,10 @@ export function ZodiOracle() {
     if (!input.trim()) return;
     
     const session = getLocalSession();
-    if (!session.uid) {
+    const auth = getFirebaseAuth();
+    const user = auth?.currentUser;
+
+    if (!session.uid || !user) {
       alert("Debes iniciar sesión para consultar al oráculo.");
       return;
     }
@@ -62,12 +66,16 @@ export function ZodiOracle() {
     setLoading(true);
 
     try {
+      const token = await user.getIdToken();
       // Slice history to the last 4 messages to save tokens
       const historyToKeep = newMessages.slice(-4);
       
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ 
           messages: historyToKeep,
           userProfile: session.astralProfile || { sunSign: "Desconocido" }

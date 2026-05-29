@@ -1,15 +1,49 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { getFirebaseAuth } from "@/lib/firebase/admin";
+import { z } from "zod";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+const ChatSchema = z.object({
+  messages: z.array(z.object({
+    role: z.enum(["user", "model", "zodi"]),
+    text: z.string().min(1).max(1000)
+  })).min(1).max(50),
+  userProfile: z.object({
+    sunSign: z.string().optional(),
+    moonSign: z.string().optional(),
+    ascendant: z.string().optional()
+  }).optional()
+});
+
 export async function POST(req: Request) {
   try {
-    const { messages, userProfile } = await req.json();
-
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: "Invalid messages format" }, { status: 400 });
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "No autorizado. El oráculo no habla con extraños." }, { status: 401 });
     }
+
+    const token = authHeader.split("Bearer ")[1];
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      return NextResponse.json({ error: "Configuración de servidor incompleta." }, { status: 500 });
+    }
+
+    try {
+      await auth.verifyIdToken(token);
+    } catch (e) {
+      return NextResponse.json({ error: "Token inválido o expirado." }, { status: 401 });
+    }
+
+    const json = await req.json();
+    const parsed = ChatSchema.safeParse(json);
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Formato de mensaje inválido", details: parsed.error.issues }, { status: 400 });
+    }
+
+    const { messages, userProfile } = parsed.data;
 
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(

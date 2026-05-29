@@ -51,13 +51,18 @@ export const viewport: Viewport = {
   viewportFit: "cover"
 };
 
+import { CookieBanner } from "@/components/public/CookieBanner";
+import { SplashScreen } from "@/components/SplashScreen";
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" className={`${syne.variable} ${jakarta.variable} ${mono.variable}`}>
       <body>
+        <SplashScreen />
         {children}
         <ZodiOracle />
         <MusicPlayer />
+        <CookieBanner />
       </body>
     </html>
   );

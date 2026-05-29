@@ -61,14 +61,13 @@ html {
   color-scheme: dark;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-  overflow-x: hidden; /* Prevents any element from causing horizontal scroll */
+  overflow-x: clip; /* clip is better than hidden for mobile scroll performance */
 }
 
 body {
   min-height: 100vh;
   min-height: 100dvh; /* dynamic viewport for mobile */
   margin: 0;
-  overflow-x: hidden;
   background-color: var(--ink);
   background-image:
     radial-gradient(ellipse 80% 50% at 10% -5%, rgba(155, 77, 255, 0.14), transparent),

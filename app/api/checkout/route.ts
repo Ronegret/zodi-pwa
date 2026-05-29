@@ -1,16 +1,50 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { getFirebaseAuth } from "@/lib/firebase/admin";
+import { z } from "zod";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_test_123", {
   apiVersion: "2024-04-10" as any,
 });
 
+const CheckoutSchema = z.object({
+  uid: z.string().min(5),
+  email: z.string().email(),
+  packId: z.string().min(1)
+});
+
 export async function POST(req: Request) {
   try {
-    const { uid, email, packId } = await req.json();
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
-    if (!uid) {
-      return NextResponse.json({ error: "No UID provided" }, { status: 400 });
+    const token = authHeader.split("Bearer ")[1];
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      return NextResponse.json({ error: "Server config error" }, { status: 500 });
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = await auth.verifyIdToken(token);
+    } catch (e) {
+      return NextResponse.json({ error: "Token inválido" }, { status: 401 });
+    }
+
+    const json = await req.json();
+    const parsed = CheckoutSchema.safeParse(json);
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid data", details: parsed.error.issues }, { status: 400 });
+    }
+
+    const { uid, email, packId } = parsed.data;
+
+    // Verificar que el usuario que paga es el mismo del token
+    if (decodedToken.uid !== uid) {
+      return NextResponse.json({ error: "UID mismatch" }, { status: 403 });
     }
 
     // Define the products

@@ -20,7 +20,8 @@
     "nodemailer": "^8.0.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "stripe": "^22.2.0"
+    "stripe": "^22.2.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

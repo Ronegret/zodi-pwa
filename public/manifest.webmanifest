@@ -12,25 +12,25 @@
   "categories": ["lifestyle", "social", "entertainment"],
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/icon-192-v3.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/icon-192-v3.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/icon-512-v3.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/icon-512-v3.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -42,28 +42,28 @@
       "short_name": "Hoy",
       "description": "Abre tu horoscopo diario",
       "url": "/dashboard/horoscopo",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-192-v3.png", "sizes": "192x192" }]
     },
     {
       "name": "Tirada de tarot",
       "short_name": "Tarot",
       "description": "Haz una tirada rapida",
       "url": "/dashboard/tarot",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-192-v3.png", "sizes": "192x192" }]
     },
     {
       "name": "Oraculo personal",
       "short_name": "Oraculo",
       "description": "Pregunta lo que pesa",
       "url": "/dashboard/oraculo",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-192-v3.png", "sizes": "192x192" }]
     },
     {
       "name": "Mi historial",
       "short_name": "Historial",
       "description": "Ver lecturas guardadas",
       "url": "/dashboard/historial",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-192-v3.png", "sizes": "192x192" }]
     }
   ],
   "screenshots": [

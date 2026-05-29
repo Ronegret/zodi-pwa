@@ -13,11 +13,23 @@ export function PremiumUI() {
       alert("Debes iniciar sesión para comprar gemas.");
       return;
     }
+
+    const auth = (await import('@/lib/firebase/client')).getFirebaseAuth();
+    const user = auth?.currentUser;
+    if (!user) {
+      alert("Sesión no válida");
+      return;
+    }
+
     setLoadingId(packId);
     try {
+      const token = await user.getIdToken();
       const res = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ uid: session.uid, email: session.email, packId }),
       });
       const data = await res.json();

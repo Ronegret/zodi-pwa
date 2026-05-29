@@ -36,7 +36,12 @@ const zodiAvatars: [string, string][] = [
   ["ZODI 5", "/zodi-art/perfil/perfil-5.png"],
   ["ZODI 6", "/zodi-art/perfil/perfil-6.png"],
   ["ZODI 7", "/zodi-art/perfil/perfil-7.png"],
-  ["ZODI 8", "/zodi-art/perfil/perfil8.png"]
+  ["ZODI 8", "/zodi-art/perfil/perfil8.png"],
+  ["ZODI 9", "/zodi-art/perfil/perfil-9.png"],
+  ["ZODI 10", "/zodi-art/perfil/perfil-10.png"],
+  ["ZODI 11", "/zodi-art/perfil/perfil-11.png"],
+  ["ZODI 12", "/zodi-art/perfil/perfil-12.png"],
+  ["ZODI Mini", "/zodi-art/perfil/perfil-13.png"]
 ];
 
 const chineseAvatars: [string, string][] = [

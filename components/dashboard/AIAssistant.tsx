@@ -5,6 +5,7 @@ import { Bot, Check, Copy, Send, Share2, Star } from "lucide-react";
 import { getLocalSession, getSessionProfile } from "@/lib/session";
 import { demoProfile } from "@/lib/data";
 import { addXp, updateStreak } from "@/lib/gamification";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
 // ── Inline markdown renderer ───────────────────────────────────────────────
 function MarkdownText({ text }: { text: string }) {
@@ -77,6 +78,14 @@ export function AIAssistant() {
   async function ask(text?: string) {
     const query = (text ?? input).trim();
     if (!query) return;
+
+    const auth = getFirebaseAuth();
+    const user = auth?.currentUser;
+    if (!user) {
+      alert("Debes iniciar sesión");
+      return;
+    }
+
     setLoading(true);
     setReply("");
     setSaved(false);
@@ -84,9 +93,13 @@ export function AIAssistant() {
     const profile = sessionProfile ?? demoProfile;
     const fullQuery = query + (lengthHints[length] ?? "");
     try {
+      const token = await user.getIdToken();
       const response = await fetch("/api/ai/reading", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           provider: "auto",
           kind: "assistant",

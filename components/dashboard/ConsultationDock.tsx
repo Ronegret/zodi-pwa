@@ -184,6 +184,14 @@ export function ConsultationDock() {
     setLoading(true);
     setResult(null);
 
+    const auth = (await import('@/lib/firebase/client')).getFirebaseAuth();
+    const user = auth?.currentUser;
+    if (!user) {
+      alert("Debes iniciar sesión");
+      setLoading(false);
+      return;
+    }
+
     const sessionProfile = getSessionProfile();
     const baseProfile = sessionProfile ?? demoProfile;
 
@@ -196,9 +204,13 @@ export function ConsultationDock() {
     ].filter(Boolean).join("\n");
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch("/api/ai/reading", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           provider: "auto",
           kind: active.kind,

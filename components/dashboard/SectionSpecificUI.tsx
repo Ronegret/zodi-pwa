@@ -1586,8 +1586,31 @@ function PerfilUI() {
     router.push("/auth/login");
   }
 
-  function deleteAccount() {
+  async function deleteAccount() {
     if (deleteConfirm !== "ELIMINAR") return;
+    
+    try {
+      const auth = (await import('@/lib/firebase/client')).getFirebaseAuth();
+      const user = auth?.currentUser;
+      if (user) {
+        const token = await user.getIdToken();
+        const res = await fetch("/api/user/delete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (!res.ok) {
+          throw new Error("Failed to delete from server");
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Hubo un error al eliminar tu cuenta en el servidor.");
+      return;
+    }
+
     localStorage.clear();
     router.push("/");
   }

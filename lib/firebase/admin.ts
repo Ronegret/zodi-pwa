@@ -1,8 +1,8 @@
 import * as admin from "firebase-admin";
 
-export async function getFirebaseAdmin() {
+export function initFirebaseAdmin() {
   if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
-    return null;
+    return false;
   }
 
   if (!admin.apps.length) {
@@ -14,5 +14,15 @@ export async function getFirebaseAdmin() {
       }),
     });
   }
+  return true;
+}
+
+export async function getFirebaseAdmin() {
+  if (!initFirebaseAdmin()) return null;
   return admin.firestore();
+}
+
+export function getFirebaseAuth() {
+  if (!initFirebaseAdmin()) return null;
+  return admin.auth();
 }
