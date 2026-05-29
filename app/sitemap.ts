@@ -1,9 +1,15 @@
 import { MetadataRoute } from 'next';
 
+const validSigns = [
+  "aries", "tauro", "geminis", "cancer", 
+  "leo", "virgo", "libra", "escorpio", 
+  "sagitario", "capricornio", "acuario", "piscis"
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zodi.aibueno.es'; // Asegúrate de definir esto en tu entorno
 
-  return [
+  const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}`,
       lastModified: new Date(),
@@ -35,4 +41,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
   ];
+
+  const dynamicHoroscopeRoutes: MetadataRoute.Sitemap = validSigns.map((sign) => ({
+    url: `${baseUrl}/horoscopo-diario/${sign}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily',
+    priority: 0.9,
+  }));
+
+  return [...staticRoutes, ...dynamicHoroscopeRoutes];
 }
