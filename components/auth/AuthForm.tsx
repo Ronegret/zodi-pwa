@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   createUserWithEmailAndPassword,
@@ -19,6 +19,9 @@ import { getLocalSession, setLocalSession } from "@/lib/session";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref");
+  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -229,6 +232,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         if (mode === "register") {
           // Reset any existing session so new users always go through onboarding
           setLocalSession({ isAuthenticated: false, onboardingCompleted: false, astralProfile: undefined, onboardingData: undefined });
+          if (refCode) {
+            localStorage.setItem("zodi_ref_code", refCode);
+          }
           const result = await createUserWithEmailAndPassword(auth, email, password);
           uid = result.user.uid;
         } else {
@@ -261,7 +267,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       ) {
         setMessage("Correo o contraseña incorrectos. Revisa tus datos.");
       } else if (code === "auth/email-already-in-use") {
-        setMessage("Ese correo ya tiene una cuenta. Entra en lugar de registrarte.");
+        setMessage("Tu alma ya pertenece a este universo. Redirigiendo a inicio de sesión...");
+        setTimeout(() => router.push("/auth/login"), 2500);
       } else if (code === "auth/too-many-requests") {
         setMessage("Demasiados intentos. Espera unos minutos antes de volver a intentarlo.");
       } else {

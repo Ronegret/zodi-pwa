@@ -8,7 +8,7 @@ import {
   LogOut, Trash2, Save, Camera, Check, X, Shuffle, Moon,
   Sun, CloudLightning, Droplets, Wind, Eye, EyeOff, Plus, Minus,
   Copy, Share2, BookOpen, AlertTriangle, Sparkles, ChartNoAxesCombined,
-  Waves, NotebookPen
+  Waves, NotebookPen, Gem
 } from "lucide-react";
 import { getLocalSession, setLocalSession } from "@/lib/session";
 import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
@@ -1651,6 +1651,42 @@ function PerfilUI() {
 
       {/* PWA Install Card (will return null if not installable or dismissed) */}
       <InstallPwaCard />
+
+      {/* Rewards & Referrals */}
+      <div className="glass-panel rounded-md p-5 border border-yellow-400/20 bg-yellow-400/5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow-400/20">
+            <Gem className="h-5 w-5 text-yellow-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-yellow-100">Programa Embajadores ZODI</h2>
+            <p className="text-xs text-yellow-200/60">Invita amigos y gana recompensas</p>
+          </div>
+        </div>
+        <p className="text-sm text-white/70 mb-4">
+          Gana <strong className="text-yellow-400">500 gemas</strong> por cada amigo que se registre con tu enlace. Ellos recibirán <strong className="text-yellow-400">200 gemas extra</strong> para empezar.
+        </p>
+        <div className="flex items-center gap-2 rounded-md border border-white/10 bg-black/40 p-2">
+          <input 
+            readOnly 
+            value={typeof window !== 'undefined' ? `${window.location.origin}/auth/register?ref=${session.uid}` : ''}
+            className="w-full bg-transparent text-sm text-white/50 outline-none px-2"
+          />
+          <button
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                navigator.clipboard.writeText(`${window.location.origin}/auth/register?ref=${session.uid}`);
+                const btn = document.getElementById("copy-btn");
+                if (btn) { btn.innerText = "¡Copiado!"; setTimeout(() => btn.innerText = "Copiar", 2000); }
+              }
+            }}
+            id="copy-btn"
+            className="shrink-0 rounded bg-yellow-400 px-4 py-2 text-xs font-black text-black hover:bg-yellow-300 transition"
+          >
+            Copiar
+          </button>
+        </div>
+      </div>
 
       {/* Astral data */}
       {ap && (

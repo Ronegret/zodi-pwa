@@ -181,6 +181,35 @@ export function OnboardingFlow() {
       } catch { /* Firebase no configurado — localStorage es el fallback */ }
     }
 
+    // ── GROWTH HACKING: Recompensas de bienvenida y referidos ──
+    try {
+      const gamification = await import("@/lib/gamification");
+      const currentGems = gamification.getGems().total;
+      
+      // Bono de bienvenida
+      if (currentGems < 300) {
+        gamification.addGems(300 - currentGems); 
+      }
+      
+      // Bonus por referido
+      const refCode = localStorage.getItem("zodi_ref_code");
+      if (refCode && session.uid && refCode !== session.uid) {
+        // Bono extra para el nuevo
+        gamification.addGems(200); 
+        
+        // Notificar al backend para premiar al embajador (el que invitó)
+        fetch("/api/user/referral", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referrerId: refCode, newUserId: session.uid })
+        }).catch(() => {});
+
+        localStorage.removeItem("zodi_ref_code");
+      }
+    } catch (e) { 
+      console.warn("No se pudieron cargar las recompensas locales", e); 
+    }
+
     router.push("/dashboard");
   }
 
