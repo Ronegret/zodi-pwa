@@ -9,7 +9,7 @@ import {
   Sparkles, UserRound, Gem, Flame
 } from "lucide-react";
 import { generateAstralProfile } from "@/lib/astral";
-import { completeLocalOnboarding, getLocalSession } from "@/lib/session";
+import { completeLocalOnboarding, getLocalSession, clearLocalSession } from "@/lib/session";
 import type { OnboardingData } from "@/types/zodi";
 
 // ── Avatares ───────────────────────────────────────────────────────────────────
@@ -305,7 +305,7 @@ export function OnboardingFlow() {
           </div>
           <button
             onClick={() => {
-              window.localStorage.removeItem("zodi.session");
+              clearLocalSession();
               router.push("/");
             }}
             title="Cancelar y volver al inicio"

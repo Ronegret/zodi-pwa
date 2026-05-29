@@ -10,7 +10,7 @@ import {
   Copy, Share2, BookOpen, AlertTriangle, Sparkles, ChartNoAxesCombined,
   Waves, NotebookPen, Gem
 } from "lucide-react";
-import { getLocalSession, setLocalSession } from "@/lib/session";
+import { getLocalSession, setLocalSession, clearLocalSession } from "@/lib/session";
 import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
@@ -1605,8 +1605,7 @@ function PerfilUI() {
   }
 
   function signOut() {
-    localStorage.removeItem("zodi.session");
-    localStorage.removeItem("zodi.onboarding");
+    clearLocalSession();
     router.push("/auth/login");
   }
 

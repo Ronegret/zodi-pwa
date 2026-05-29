@@ -39,6 +39,7 @@ export function SplashScreen() {
             muted 
             playsInline 
             onEnded={handleFinish}
+            poster="/zodi-art/zodi-fondoo.png"
             className="absolute inset-0 h-full w-full object-cover"
           >
             <source src="/zodi-art/splash-zodi.mp4" type="video/mp4" />

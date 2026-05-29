@@ -7,7 +7,6 @@ import { Suspense } from "react";
 export default function RegisterPage() {
   return (
     <AnimatedShell>
-      <AuthRedirect />
       <PublicNav />
       <section className="relative flex min-h-[calc(100vh-68px)] flex-col items-center px-3 py-8 sm:px-4 sm:py-12">
         <div className="absolute inset-0 -z-10 bg-[url('/zodi-art/zodi-us.png')] bg-cover bg-center opacity-35" />

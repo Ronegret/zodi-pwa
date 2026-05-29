@@ -31,7 +31,7 @@ export function getLocalSession(): LocalZodiSession {
   if (parsed.isAuthenticated && parsed.loginAt) {
     const ONE_DAY = 24 * 60 * 60 * 1000;
     if (Date.now() - parsed.loginAt > ONE_DAY) {
-      window.localStorage.removeItem(SESSION_KEY);
+      clearLocalSession();
       return { isAuthenticated: false, onboardingCompleted: false };
     }
   }
@@ -42,7 +42,28 @@ export function getLocalSession(): LocalZodiSession {
 export function setLocalSession(session: Partial<LocalZodiSession>) {
   if (typeof window === "undefined") return;
   const current = getLocalSession();
-  window.localStorage.setItem(SESSION_KEY, JSON.stringify({ ...current, ...session }));
+  const nextSession = { ...current, ...session };
+  window.localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
+  
+  // Sincronizar estado a cookies para el middleware (Next.js)
+  if (nextSession.isAuthenticated) {
+    document.cookie = "zodi_auth=1; path=/; max-age=86400; SameSite=Lax";
+    if (nextSession.onboardingCompleted) {
+      document.cookie = "zodi_onboarding=1; path=/; max-age=86400; SameSite=Lax";
+    } else {
+      document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+  } else {
+    clearLocalSession();
+  }
+}
+
+export function clearLocalSession() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(SESSION_KEY);
+  window.localStorage.removeItem(ONBOARDING_KEY);
+  document.cookie = "zodi_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 }
 
 export function completeLocalOnboarding(data: OnboardingData, astralProfile: AstralProfile) {
