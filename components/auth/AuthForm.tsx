@@ -233,19 +233,63 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       // Si Firebase no está disponible o para fallback local
       if (!getFirebaseAuth()) {
-        const preserved = getLocalSession();
-        const onboardingCompleted = preserved.onboardingCompleted || Boolean(preserved.astralProfile);
-        setLocalSession({
-          isAuthenticated: true,
-          onboardingCompleted,
-          displayName: name.trim() || preserved.displayName || "Viajero ZODI",
-          email,
-          uid,
-          loginAt: Date.now(),
-        });
-        router.push(onboardingCompleted ? "/dashboard" : "/onboarding");
+        const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
+        let users: any[] = [];
+        try { users = JSON.parse(usersStr); } catch(e) {}
+
+        if (mode === "register") {
+          // Check if email already exists
+          if (users.find(u => u.email === email)) {
+            setMessage("Tu alma ya pertenece a este universo. Usa otro correo o inicia sesión.");
+            setLoading(false);
+            return;
+          }
+          // Create new user
+          const newUser = {
+            email,
+            password,
+            displayName: name.trim() || "Viajero ZODI",
+            uid: "local_" + Date.now(),
+            astralProfile: null,
+            onboardingData: null,
+            onboardingCompleted: false
+          };
+          users.push(newUser);
+          window.localStorage.setItem("zodi.local_users", JSON.stringify(users));
+
+          // Clear global session so they do onboarding
+          setLocalSession({
+            isAuthenticated: true,
+            onboardingCompleted: false,
+            displayName: newUser.displayName,
+            email: newUser.email,
+            uid: newUser.uid,
+            loginAt: Date.now(),
+          });
+          router.push("/onboarding");
+        } else {
+          // Login mode
+          const user = users.find(u => u.email === email && u.password === password);
+          if (!user) {
+            setMessage("Correo o contraseña incorrectos. Revisa tus datos.");
+            setLoading(false);
+            return;
+          }
+          
+          // Login successful
+          setLocalSession({
+            isAuthenticated: true,
+            onboardingCompleted: user.onboardingCompleted,
+            displayName: user.displayName,
+            email: user.email,
+            uid: user.uid,
+            loginAt: Date.now(),
+            astralProfile: user.astralProfile,
+            onboardingData: user.onboardingData
+          });
+          router.push(user.onboardingCompleted ? "/dashboard" : "/onboarding");
+        }
       }
-      // Si Firebase está activo, onAuthStateChanged tomará el control.
     } catch (err) {
       const code = (err as { code?: string }).code ?? "";
       if (
@@ -278,7 +322,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         await sendPasswordResetEmail(auth, email);
         setMessage("Correo de recuperación enviado. Revisa tu bandeja (y el spam, por si acaso).");
       } else {
-        setMessage("Firebase no está configurado. Usa otra vía para recuperar tu cuenta.");
+        const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
+        let users: any[] = [];
+        try { users = JSON.parse(usersStr); } catch(e) {}
+        if (users.find(u => u.email === email)) {
+          setMessage("Modo Local: No podemos enviar correos. Tu cuenta existe, ¡recuerda tu contraseña!");
+        } else {
+          setMessage("Modo Local: Esta cuenta no existe en nuestros registros.");
+        }
       }
     } catch {
       setMessage("No se pudo enviar el correo. Verifica que el email sea correcto.");

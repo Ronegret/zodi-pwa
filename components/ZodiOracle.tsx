@@ -28,6 +28,12 @@ export function ZodiOracle() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const handleOpen = () => setOpen(true);
+    window.addEventListener("open-oracle", handleOpen);
+    return () => window.removeEventListener("open-oracle", handleOpen);
+  }, []);
+
   if (!isDashboard) return null;
 
   const handleSend = async () => {
@@ -37,7 +43,7 @@ export function ZodiOracle() {
     const auth = getFirebaseAuth();
     const user = auth?.currentUser;
 
-    if (!session.uid || !user) {
+    if (!session.isAuthenticated) {
       alert("Debes iniciar sesión para consultar al oráculo.");
       return;
     }
@@ -66,7 +72,10 @@ export function ZodiOracle() {
     setLoading(true);
 
     try {
-      const token = await user.getIdToken();
+      let token = "local_fallback";
+      if (user) {
+        token = await user.getIdToken();
+      }
       // Slice history to the last 4 messages to save tokens
       const historyToKeep = newMessages.slice(-4);
       

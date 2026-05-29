@@ -57,7 +57,7 @@ const sidebarGroups: { label: string; items: NavItem[] }[] = [
     label: "Principal",
     items: [
       { label: "Inicio",    icon: Home,          href: "/dashboard" },
-      { label: "Oráculo",   icon: WandSparkles,  href: "/dashboard/oraculo" },
+      { label: "Oráculo",   icon: WandSparkles,  href: "#open-oracle" },
       { label: "Perfil",    icon: UserRound,     href: "/dashboard/perfil" }
     ]
   },
@@ -185,6 +185,22 @@ export function Sidebar() {
             </p>
             {group.items.map((item) => {
               const active = pathname === item.href;
+              const isOracle = item.href === "#open-oracle";
+              
+              if (isOracle) {
+                return (
+                  <button
+                    key={item.href}
+                    title={item.label}
+                    onClick={() => window.dispatchEvent(new CustomEvent('open-oracle'))}
+                    className="flex w-full items-center gap-2.5 px-3 py-1.5 text-sm transition-all text-white/55 hover:text-lime-100 hover:bg-white/[0.035] font-medium text-left"
+                  >
+                    <item.icon className="h-3.5 w-3.5 shrink-0 text-white/40" />
+                    <span className="truncate text-[13px]">{item.label}</span>
+                  </button>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
@@ -244,6 +260,29 @@ export function BottomNav() {
           const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           const isOracle = item.href === "/dashboard/oraculo";
 
+          if (isOracle) {
+            return (
+              <button
+                key={item.href}
+                aria-label={item.label}
+                onClick={() => window.dispatchEvent(new CustomEvent('open-oracle'))}
+                className="relative flex flex-col items-center justify-center gap-0.5 transition-all text-white/45 scale-100"
+              >
+                <div className="relative flex h-12 w-12 items-center justify-center rounded-xl transition-all bg-white/08 border border-white/12">
+                  <item.icon className="h-5 w-5" />
+                  <motion.span
+                    animate={{ opacity: [0.3, 0.8, 0.3], scale: [1, 1.08, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 rounded-xl border border-lime-300/30"
+                  />
+                </div>
+                <span className="text-[10px] font-semibold leading-tight mt-0.5">
+                  {item.label}
+                </span>
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.href}
@@ -251,10 +290,10 @@ export function BottomNav() {
               aria-label={item.label}
               className={`relative flex flex-col items-center justify-center gap-0.5 transition-all ${
                 active ? "text-lime-300" : "text-white/45"
-              } ${isOracle ? "scale-100" : ""}`}
+              }`}
             >
               {/* Active indicator — pill arriba del icono */}
-              {active && !isOracle && (
+              {active && (
                 <motion.span
                   layoutId="tab-indicator"
                   className="absolute top-0 h-0.5 w-8 rounded-full bg-lime-300"
@@ -262,28 +301,9 @@ export function BottomNav() {
                 />
               )}
 
-              {/* Botón central del Oráculo — más grande */}
-              {isOracle ? (
-                <div className={`relative flex h-12 w-12 items-center justify-center rounded-xl transition-all ${
-                  active
-                    ? "bg-lime-300 text-black shadow-[0_0_20px_rgba(184,255,23,0.45)]"
-                    : "bg-white/08 border border-white/12"
-                }`}>
-                  <item.icon className="h-5 w-5" />
-                  {/* Glow animado cuando no está activo */}
-                  {!active && (
-                    <motion.span
-                      animate={{ opacity: [0.3, 0.8, 0.3], scale: [1, 1.08, 1] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute inset-0 rounded-xl border border-lime-300/30"
-                    />
-                  )}
-                </div>
-              ) : (
-                <div className={`flex h-6 w-6 items-center justify-center transition-all ${active ? "scale-110" : ""}`}>
-                  <item.icon className="h-5 w-5" />
-                </div>
-              )}
+              <div className={`flex h-6 w-6 items-center justify-center transition-all ${active ? "scale-110" : ""}`}>
+                <item.icon className="h-5 w-5" />
+              </div>
 
               {/* Badges */}
               {item.href === "/dashboard/horoscopo" && (
@@ -296,7 +316,7 @@ export function BottomNav() {
                 </span>
               )}
 
-              <span className={`text-[10px] font-semibold leading-tight ${isOracle ? "mt-0.5" : ""}`}>
+              <span className="text-[10px] font-semibold leading-tight">
                 {item.label}
               </span>
             </Link>

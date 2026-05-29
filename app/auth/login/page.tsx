@@ -9,12 +9,14 @@ export default function LoginPage() {
     <AnimatedShell>
       <AuthRedirect />
       <PublicNav />
-      <section className="relative grid min-h-[calc(100vh-68px)] place-items-center overflow-hidden px-3 py-4 sm:px-4 sm:py-10">
+      <section className="relative flex min-h-[calc(100vh-68px)] flex-col items-center px-3 py-8 sm:px-4 sm:py-12">
         <div className="absolute inset-0 -z-10 bg-[url('/zodi-art/tarot-reader.png')] bg-cover bg-center opacity-35" />
         <div className="spark-field -z-10" />
-        <Suspense fallback={<div className="h-96 flex items-center text-white/50">Cargando...</div>}>
-          <AuthForm mode="login" />
-        </Suspense>
+        <div className="my-auto w-full max-w-xl">
+          <Suspense fallback={<div className="h-96 flex items-center text-white/50">Cargando...</div>}>
+            <AuthForm mode="login" />
+          </Suspense>
+        </div>
       </section>
     </AnimatedShell>
   );

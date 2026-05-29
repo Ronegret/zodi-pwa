@@ -73,7 +73,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   };
 
   return (
-    <html lang="es" className={`${syne.variable} ${jakarta.variable} ${mono.variable}`}>
+    <html lang="es" className={`${syne.variable} ${jakarta.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -91,7 +91,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           }}
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <SplashScreen />
         {children}
         <ZodiOracle />
