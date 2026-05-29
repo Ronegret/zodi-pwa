@@ -142,7 +142,7 @@ export function Sidebar() {
             src="/zodi-logo-mark.png"
             alt="ZODI"
             fill
-            className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.55)]"
+            className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.55)] mix-blend-screen"
             priority
           />
         </Link>

@@ -603,7 +603,7 @@ export function MarketingHome() {
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
           <div>
             <Link href="/" className="inline-block scale-110 origin-left">
-              <Image src="/zodi-logo-mark.png" alt="Logo de ZODI" width={200} height={92} className="h-auto w-48 drop-shadow-[0_0_15px_rgba(184,255,23,0.3)]" />
+              <Image src="/zodi-logo-mark.png" alt="Logo de ZODI" width={200} height={92} className="h-auto w-48 drop-shadow-[0_0_15px_rgba(184,255,23,0.3)] mix-blend-screen" />
             </Link>
             <p className="mt-6 max-w-sm text-sm leading-6 text-white/62">
               ZODI es un espacio místico, visual y social para consultar señales, guardar lecturas y reírte un poco de tus patrones. Con cariño. Con neón. Con cero ganas de venderte paz falsa.

@@ -241,7 +241,7 @@ export function OnboardingFlow() {
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             className="h-28 w-28 overflow-hidden rounded-full border-2 border-lime-300/50 shadow-[0_0_32px_rgba(184,255,23,0.35)]"
           >
-            <Image src="/zodi-logo-mark.png" alt="ZODI calculando" width={112} height={112} className="h-full w-full object-contain p-2" />
+            <Image src="/zodi-logo-mark.png" alt="ZODI calculando" width={112} height={112} className="h-full w-full object-contain p-2 mix-blend-screen" />
           </motion.div>
           {/* Centro */}
           <div className="absolute inset-0 flex items-center justify-center">
@@ -290,7 +290,7 @@ export function OnboardingFlow() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="relative h-10 w-28">
-          <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain" />
+          <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain mix-blend-screen" />
         </div>
         <div className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5">
           {[...Array(TOTAL_STEPS)].map((_, i) => (

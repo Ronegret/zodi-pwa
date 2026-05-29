@@ -140,7 +140,7 @@ export function ZodiLoader({ fullscreen = false, compact = false, kind, message 
             src="/zodi-logo-mark.png"
             alt="ZODI cargando"
             fill
-            className="object-contain p-1.5"
+            className="object-contain p-1.5 mix-blend-screen"
             priority
           />
         </motion.div>
@@ -200,7 +200,7 @@ export function ZodiSpinner({ size = 20 }: { size?: number }) {
       style={{ width: size, height: size }}
       className="relative flex-shrink-0"
     >
-      <Image src="/zodi-logo-mark.png" alt="Cargando" fill className="object-contain opacity-80" />
+      <Image src="/zodi-logo-mark.png" alt="Cargando" fill className="object-contain opacity-80 mix-blend-screen" />
     </motion.div>
   );
 }

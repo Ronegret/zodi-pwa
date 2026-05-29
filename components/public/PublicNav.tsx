@@ -107,7 +107,7 @@ export function PublicNav() {
                 alt="ZODI"
                 fill
                 sizes="192px"
-                className="object-contain"
+                className="object-contain mix-blend-screen"
                 priority
               />
             </span>

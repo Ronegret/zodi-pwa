@@ -253,7 +253,177 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
         <MarkdownText text={reply} />
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
-                        <div className="relative w-full aspect-[2/3] perspective-1000">
+        <button
+          onClick={copy}
+          className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-2 text-xs font-bold text-white/55 transition hover:text-white/80"
+        >
+          {copied ? <><Check className="h-3 w-3 text-lime-300" /> Copiado</> : <><Copy className="h-3 w-3" /> Copiar</>}
+        </button>
+        <button
+          onClick={saveReading}
+          className={`flex items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-bold transition ${
+            saved
+              ? "border-lime-300/50 bg-lime-300/10 text-lime-300"
+              : "border-lime-300/20 text-lime-200/70 hover:text-lime-200"
+          }`}
+        >
+          {saved ? <><Check className="h-3 w-3" /> Guardado</> : <><Star className="h-3 w-3" /> Guardar</>}
+        </button>
+        <button
+          onClick={share}
+          className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-2 text-xs font-bold text-white/55 transition hover:text-white/80"
+        >
+          <Share2 className="h-3 w-3" /> Compartir
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TONE SELECTOR
+// ─────────────────────────────────────────────────────────────────────────────
+function ToneSelector({ value, onChange }: { value: string; onChange: (t: string) => void }) {
+  const tones = [
+    { key: "suave",    label: "Suave",    emoji: "🌙", desc: "Con cariño" },
+    { key: "directo",  label: "Directo",  emoji: "⚡", desc: "Sin rodeos" },
+    { key: "brutal",   label: "Brutal",   emoji: "🔥", desc: "Sin filtros" },
+    { key: "sarcastico", label: "Sarcástico", emoji: "💀", desc: "Con veneno" },
+  ];
+  return (
+    <div className="flex flex-wrap gap-2">
+      <p className="w-full text-xs uppercase tracking-widest text-white/40 mb-1">Tono de respuesta</p>
+      {tones.map(t => (
+        <button
+          key={t.key}
+          onClick={() => onChange(t.key)}
+          className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-bold transition ${
+            value === t.key
+              ? "bg-lime-300 text-black"
+              : "border border-white/10 text-white/60 hover:border-lime-300/40 hover:text-lime-200"
+          }`}
+        >
+          {t.emoji} {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LENGTH SELECTOR
+// ─────────────────────────────────────────────────────────────────────────────
+function LengthSelector({ value, onChange }: { value: string; onChange: (l: "breve" | "normal" | "extensa") => void }) {
+  const options = [
+    { key: "breve"   as const, label: "Breve",   emoji: "⚡", desc: "4 frases clave" },
+    { key: "normal"  as const, label: "Normal",  emoji: "📖", desc: "Estándar" },
+    { key: "extensa" as const, label: "Extensa", emoji: "📜", desc: "Análisis profundo" },
+  ];
+  return (
+    <div className="flex flex-wrap gap-2">
+      <p className="w-full text-xs uppercase tracking-widest text-white/40 mb-1">Longitud de respuesta</p>
+      {options.map(o => (
+        <button
+          key={o.key}
+          onClick={() => onChange(o.key)}
+          title={o.desc}
+          className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-bold transition ${
+            value === o.key
+              ? "bg-cyan-300 text-black"
+              : "border border-white/10 text-white/60 hover:border-cyan-300/40 hover:text-cyan-200"
+          }`}
+        >
+          {o.emoji} {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. TAROT UI
+// ─────────────────────────────────────────────────────────────────────────────
+function TarotUI({ section }: { section: DashboardSection }) {
+  const { reply, loading, consult, length, setLength } = useConsult(section);
+  const [spread, setSpread] = useState<"1" | "3" | "celta">("3");
+  const [tone, setTone] = useState("directo");
+  const [question, setQuestion] = useState("");
+  const [flipped, setFlipped] = useState<boolean[]>([false, false, false]);
+  const [drawn, setDrawn] = useState(false);
+
+  const spreads = [
+    { key: "1",     label: "1 carta",      emoji: "🃏", desc: "Respuesta directa" },
+    { key: "3",     label: "3 cartas",     emoji: "🎴", desc: "Pasado · Presente · Futuro" },
+    { key: "celta", label: "Cruz celta",   emoji: "✝️",  desc: "Lectura profunda" },
+  ] as const;
+
+  const cardCount = spread === "1" ? 1 : spread === "3" ? 3 : 6;
+  const cardLabels3 = ["Pasado", "Presente", "Futuro"];
+  const cardLabelsCelta = ["Situación", "Obstáculo", "Pasado", "Futuro", "Consejo", "Resultado"];
+
+  function drawCards() {
+    setFlipped(Array(cardCount).fill(false));
+    setDrawn(true);
+  }
+
+  function flipCard(i: number) {
+    setFlipped(prev => { const n = [...prev]; n[i] = true; return n; });
+  }
+
+  async function readCards() {
+    const labels = spread === "3" ? cardLabels3 : spread === "celta" ? cardLabelsCelta : ["Carta"];
+    const extra = `Tipo de tirada: ${spread === "1" ? "Una carta" : spread === "3" ? "Tres cartas" : "Cruz celta"}\nPosiciones: ${labels.join(", ")}\nTono: ${tone}\n${question ? `Consulta: ${question}` : ""}`;
+    await consult(`${section.prompt}\n${extra}`);
+  }
+
+  return (
+    <div className="grid gap-5">
+      {/* Spread selector */}
+      <div className="glass-panel rounded-md p-5">
+        <h2 className="text-xl font-black mb-4">Elige tu tirada</h2>
+        <div className="grid grid-cols-3 gap-3">
+          {spreads.map(s => (
+            <button
+              key={s.key}
+              onClick={() => { setSpread(s.key); setDrawn(false); setFlipped([]); }}
+              className={`rounded-md border p-4 text-center transition ${
+                spread === s.key
+                  ? "border-lime-300 bg-lime-300/10 text-lime-200"
+                  : "border-white/10 text-white/60 hover:border-lime-300/30"
+              }`}
+            >
+              <div className="text-2xl mb-1">{s.emoji}</div>
+              <p className="font-black text-sm">{s.label}</p>
+              <p className="text-xs text-white/40 mt-1">{s.desc}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Cards area */}
+      <div className="glass-panel rounded-md p-5">
+        <h2 className="text-xl font-black mb-2">Tu tirada</h2>
+        <p className="text-sm text-white/50 mb-5">
+          {drawn ? "Haz clic en cada carta para revelarla" : "Haz clic en 'Robar cartas' para empezar"}
+        </p>
+
+        {!drawn ? (
+          <div className="flex justify-center">
+            <button
+              onClick={drawCards}
+              className="flex items-center gap-2 rounded-md bg-lime-300 px-8 py-4 font-black text-black hover:bg-lime-200 transition"
+            >
+              <Shuffle className="h-5 w-5" /> Robar cartas
+            </button>
+          </div>
+        ) : (
+          <div className={`grid gap-4 ${cardCount === 1 ? "max-w-xs mx-auto" : cardCount === 3 ? "grid-cols-3" : "grid-cols-3"}`}>
+            {Array.from({ length: cardCount }).map((_, i) => (
+              <div key={i} className="text-center">
+                <p className="text-xs text-lime-200/50 uppercase tracking-widest mb-2">
+                  {spread === "3" ? cardLabels3[i] : spread === "celta" ? cardLabelsCelta[i] : "Carta"}
+                </p>
+                <div className="relative w-full aspect-[2/3] perspective-1000">
                   <button
                     onClick={() => flipCard(i)}
                     className="relative w-full h-full transition-all duration-700 preserve-3d cursor-pointer"
@@ -279,7 +449,6 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
                       className="absolute inset-0 w-full h-full backface-hidden rounded-xl border border-lime-300/40 overflow-hidden bg-black shadow-[0_0_30px_rgba(184,255,23,0.4)]"
                       style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
                     >
-                      {/* Pick a random custom card image for the front based on the index */}
                       <div className={`absolute inset-0 bg-cover bg-center opacity-90 mix-blend-screen transition duration-500 ${
                         ["bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Verdad.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/El-Karma.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Red-Flag.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/El-Destino.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Mala-Idea.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Venganza-Cosmica.png')]"][i % 6]
                       }`} />

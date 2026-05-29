@@ -118,7 +118,7 @@ export function ZodiOracle() {
             <div className="flex items-center justify-between border-b border-lime-300/10 bg-black p-4">
               <div className="flex items-center gap-3">
                 <div className="relative h-10 w-10 overflow-hidden rounded-full border border-lime-300/30">
-                  <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain p-1" />
+                  <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain p-1 mix-blend-screen" />
                 </div>
                 <div>
                   <h3 className="font-display font-black text-lime-300 text-xl tracking-wide">ZODI Oráculo</h3>
