@@ -6,10 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function SplashScreen() {
   const [showSplash, setShowSplash] = useState(true);
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
     // Check if we already showed the splash in this session
     const hasSeenSplash = sessionStorage.getItem("zodi.splash_seen");
     if (hasSeenSplash) {
@@ -19,26 +17,22 @@ export function SplashScreen() {
 
   const handleFinish = () => {
     sessionStorage.setItem("zodi.splash_seen", "true");
+    document.documentElement.classList.add("splash-seen");
     setShowSplash(false);
   };
 
-  // Prevenir un parpadeo de contenido subyacente mientras determinamos el estado
-  if (!isMounted && typeof window !== 'undefined') {
-    return (
-      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black" />
-    );
-  }
+  // If React knows it should be hidden, unmount it to save memory.
+  if (!showSplash) return null;
 
   return (
     <AnimatePresence>
-      {showSplash && isMounted && (
-        <motion.div
-          key="splash"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-end bg-black pb-12 overflow-hidden"
-        >
+      <motion.div
+        key="splash"
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.8, ease: "easeInOut" }}
+        className="zodi-splash-container fixed inset-0 z-[100] flex flex-col items-center justify-end bg-black pb-12 overflow-hidden"
+      >
           {/* Fullscreen Video Background */}
           <video 
             autoPlay 
@@ -86,7 +80,6 @@ export function SplashScreen() {
             </button>
           </div>
         </motion.div>
-      )}
     </AnimatePresence>
   );
 }

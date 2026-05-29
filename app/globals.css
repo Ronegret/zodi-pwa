@@ -606,3 +606,4 @@ h1, h2, h3, h4, h5, h6 {
     animation: none !important;
   }
 }
+html.splash-seen .zodi-splash-container { display: none !important; }

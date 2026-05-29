@@ -79,6 +79,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (sessionStorage.getItem('zodi.splash_seen')) {
+                  document.documentElement.classList.add('splash-seen');
+                }
+              } catch (e) {}
+            `
+          }}
+        />
       </head>
       <body>
         <SplashScreen />
