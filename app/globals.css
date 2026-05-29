@@ -55,6 +55,7 @@
 
 *, *::before, *::after {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* Remove mobile tap flashing */
 }
 
 html {
@@ -62,6 +63,7 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   overflow-x: clip; /* clip is better than hidden for mobile scroll performance */
+  overscroll-behavior-y: none; /* prevent iOS scroll bounce flashing */
 }
 
 body {
