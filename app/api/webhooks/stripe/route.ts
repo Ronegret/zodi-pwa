@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getFirebaseAdmin } from "@/lib/firebase/admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_test_123", {
   apiVersion: "2024-04-10" as any,
@@ -38,11 +39,14 @@ export async function POST(req: Request) {
         try {
           const adminDb = await getFirebaseAdmin();
           if (adminDb) {
-            const userRef = adminDb.collection("users").doc(uid);
+            const gamificationRef = adminDb.collection("gamification").doc(uid);
             await adminDb.runTransaction(async (t: any) => {
-              const doc = await t.get(userRef);
+              const doc = await t.get(gamificationRef);
               const currentGems = doc.exists ? (doc.data().gems ?? 0) : 0;
-              t.update(userRef, { gems: currentGems + gems });
+              t.set(gamificationRef, { 
+                gems: currentGems + gems,
+                lastUpdated: FieldValue.serverTimestamp() 
+              }, { merge: true });
             });
             console.log(`Successfully added ${gems} gems to user ${uid}`);
           } else {

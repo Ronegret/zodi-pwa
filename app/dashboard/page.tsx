@@ -8,6 +8,8 @@ import { DashboardPanels } from "@/components/dashboard/DashboardPanels";
 import { HeroConsole } from "@/components/dashboard/HeroConsole";
 import { PremiumPlans } from "@/components/dashboard/PremiumPlans";
 import { FeatureGrid } from "@/components/modules/FeatureGrid";
+import { PaymentHandler } from "@/components/dashboard/PaymentHandler";
+import { Suspense } from "react";
 
 export default function DashboardPage() {
   return (
@@ -26,6 +28,9 @@ export default function DashboardPage() {
           </div>
         </div>
         <BottomNav />
+        <Suspense fallback={null}>
+          <PaymentHandler />
+        </Suspense>
       </DashboardGate>
     </AnimatedShell>
   );
