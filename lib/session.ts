@@ -48,6 +48,9 @@ export function setLocalSession(session: Partial<LocalZodiSession>) {
 export function completeLocalOnboarding(data: OnboardingData, astralProfile: AstralProfile) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(ONBOARDING_KEY, JSON.stringify({ data, astralProfile }));
+  
+  const currentSession = getLocalSession();
+  
   setLocalSession({
     isAuthenticated: true,
     onboardingCompleted: true,
@@ -55,6 +58,24 @@ export function completeLocalOnboarding(data: OnboardingData, astralProfile: Ast
     onboardingData: data,
     astralProfile
   });
+
+  // Si estamos en modo local (sin firebase o como fallback), actualizamos la base de datos local
+  if (currentSession.uid?.startsWith("local_")) {
+    const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
+    try {
+      let users = JSON.parse(usersStr);
+      const userIndex = users.findIndex((u: any) => u.uid === currentSession.uid);
+      if (userIndex !== -1) {
+        users[userIndex].onboardingCompleted = true;
+        users[userIndex].astralProfile = astralProfile;
+        users[userIndex].onboardingData = data;
+        users[userIndex].displayName = data.displayName;
+        window.localStorage.setItem("zodi.local_users", JSON.stringify(users));
+      }
+    } catch (e) {
+      console.warn("Could not save local user data", e);
+    }
+  }
 }
 
 export function getSessionProfile(): Partial<UserProfile> | null {

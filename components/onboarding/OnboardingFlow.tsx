@@ -305,7 +305,7 @@ export function OnboardingFlow() {
           </div>
           <button
             onClick={() => {
-              setLocalSession({ isAuthenticated: false, onboardingCompleted: false });
+              window.localStorage.removeItem("zodi.session");
               router.push("/");
             }}
             title="Cancelar y volver al inicio"
