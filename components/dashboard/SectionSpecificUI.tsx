@@ -1688,6 +1688,36 @@ function PerfilUI() {
         </div>
       </div>
 
+      {/* Push Notifications UI */}
+      <div className="glass-panel rounded-md p-5 border border-purple-500/20 bg-purple-500/5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/20">
+              <span className="text-xl">🔔</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-purple-100">Notificaciones del Cosmos</h2>
+              <p className="text-xs text-purple-200/60">Avisos de gemas y eventos astrales</p>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              if (typeof window !== 'undefined' && 'Notification' in window) {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                  alert("¡El cosmos te avisará! (Pronto configuraremos Firebase Messaging completo)");
+                } else {
+                  alert("Permiso denegado. No podremos avisarte de premios.");
+                }
+              }
+            }}
+            className="shrink-0 rounded bg-purple-500 px-4 py-2 text-xs font-black text-white hover:bg-purple-400 transition"
+          >
+            Activar
+          </button>
+        </div>
+      </div>
+
       {/* Astral data */}
       {ap && (
         <div className="glass-panel rounded-md p-5">

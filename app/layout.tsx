@@ -26,10 +26,11 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://zodi.aibueno.es"),
   title: "ZODI — Oráculo Astral con Humor Ácido | Horóscopo, Tarot y Numerología",
   description: "Horóscopo diario, tarot, numerología, carta natal y comunidad mística con estética cyberpunk. Crea tu perfil astral gratis y recibe lecturas con personalidad.",
   applicationName: "ZODI",
+  keywords: ["horóscopo", "tarot", "carta natal", "astrología", "oráculo", "esoterismo cyberpunk", "tirada de cartas", "zodiaco", "numerología", "lectura de mano"],
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -39,7 +40,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ZODI — Oráculo Astral con Humor Ácido",
     description: "Horóscopo, tarot, numerología y comunidad mística. Tu perfil astral personalizado con lecturas directas, cyberpunk y sin postureo espiritual.",
-    images: ["/zodi-landpage.png"]
+    images: ["/zodi-landpage.png"],
+    type: "website",
+    siteName: "ZODI",
   }
 };
 
@@ -55,8 +58,28 @@ import { CookieBanner } from "@/components/public/CookieBanner";
 import { SplashScreen } from "@/components/SplashScreen";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ZODI",
+    "operatingSystem": "Web, iOS, Android",
+    "applicationCategory": "LifestyleApplication",
+    "description": "Oráculo Astral con Humor Ácido. Horóscopo diario, tarot, numerología y comunidad mística.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  };
+
   return (
     <html lang="es" className={`${syne.variable} ${jakarta.variable} ${mono.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body>
         <SplashScreen />
         {children}
