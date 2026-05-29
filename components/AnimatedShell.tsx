@@ -8,7 +8,7 @@ export function AnimatedShell({ children }: { children: React.ReactNode }) {
     <motion.main
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       className="relative min-h-screen pb-24 lg:pb-8"
     >
       <PwaBoot />

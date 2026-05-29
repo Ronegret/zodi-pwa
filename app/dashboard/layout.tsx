@@ -15,6 +15,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         style={{
           backgroundImage: "url('/zodi-art/zodi-fondoo.png')",
           opacity: 0.07,
+          willChange: "transform",
+          transform: "translateZ(0)"
         }}
       />
       {/* Layer 2 — secondary overlay */}
@@ -23,6 +25,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         style={{
           backgroundImage: "url('/zodi-art/zodi-fondo0.png')",
           opacity: 0.055,
+          willChange: "transform",
+          transform: "translateZ(0)"
         }}
       />
       {/* Layer 3 — vignette */}
@@ -30,6 +34,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%)",
+          willChange: "transform",
+          transform: "translateZ(0)"
         }}
       />
       {children}

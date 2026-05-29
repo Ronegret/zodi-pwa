@@ -51,8 +51,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           applyFirebaseUser(result.user);
         }
       })
-      .catch(() => {
-        // Ignorar: simplemente no había redirect pendiente
+      .catch((err) => {
+        const code = err?.code;
+        if (code === "auth/account-exists-with-different-credential") {
+          setMessage("Ya existe una cuenta con este correo (probablemente usaste contraseña). Inicia sesión con tu correo y contraseña.");
+        } else {
+          setMessage("Hubo un problema al iniciar sesión con Google. Inténtalo de nuevo.");
+        }
       });
 
     // Luego escuchar cambios de auth state (cubre sesión persistida y popup)
@@ -168,29 +173,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       }
       setLoading(true);
       try {
-        // signInWithPopup funciona desde un click del usuario (el navegador lo permite)
-        await signInWithPopup(auth, googleProvider);
-        // onAuthStateChanged lo detectará y redirigirá automáticamente
+        // En móviles y PWA, signInWithRedirect es mucho más fluido y evita bloqueadores de popups.
+        // Redirige inmediatamente a Google y vuelve a la app.
+        await signInWithRedirect(auth, googleProvider);
       } catch (err) {
-        const code = (err as { code?: string }).code ?? "";
-        if (code === "auth/popup-blocked") {
-          // Fallback: redirect si el popup fue bloqueado
-          try {
-            await signInWithRedirect(auth, googleProvider);
-          } catch {
-            setLoading(false);
-            setMessage("No se pudo abrir Google. Comprueba que los popups no estén bloqueados.");
-          }
-        } else if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-          setLoading(false);
-          setMessage("Cerraste la ventana de Google antes de completar el acceso.");
-        } else if (code === "auth/unauthorized-domain") {
-          setLoading(false);
-          setMessage("Este dominio no está autorizado en Firebase. Contacta al administrador.");
-        } else {
-          setLoading(false);
-          setMessage("No se pudo iniciar el acceso con Google. Inténtalo de nuevo.");
-        }
+        setLoading(false);
+        setMessage("No se pudo iniciar el acceso con Google. Inténtalo de nuevo.");
       }
       return;
     }

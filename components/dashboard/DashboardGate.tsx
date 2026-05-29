@@ -21,8 +21,16 @@ function computeInitialState(): { gate: GateState; name: string; zodiac: string 
   if (!s.isAuthenticated || !s.onboardingCompleted) {
     return { gate: "loading", name: "", zodiac: "" }; // useEffect will redirect
   }
+  
+  // Auto-confirmar si inició sesión hace menos de 10 segundos
+  const justLoggedIn = s.loginAt && (Date.now() - s.loginAt < 10000);
   const confirmed = sessionStorage.getItem("zodi.confirmed");
-  if (confirmed) return { gate: "ready", name: "", zodiac: "" };
+  
+  if (confirmed || justLoggedIn) {
+    if (justLoggedIn) sessionStorage.setItem("zodi.confirmed", "1");
+    return { gate: "ready", name: "", zodiac: "" };
+  }
+  
   return {
     gate: "confirm",
     name: s.displayName?.split(" ")[0] ?? "Viajero",

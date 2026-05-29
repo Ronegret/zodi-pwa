@@ -98,7 +98,7 @@ export function ZodiOracle() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setOpen(true)}
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex h-16 w-16 items-center justify-center rounded-full border-2 border-lime-300/40 bg-black/80 shadow-[0_0_20px_rgba(184,255,23,0.3)] backdrop-blur-md transition sm:bottom-6 sm:h-20 sm:w-20"
+        className="fixed bottom-6 right-6 z-50 hidden md:flex h-16 w-16 items-center justify-center rounded-full border-2 border-lime-300/40 bg-black/80 shadow-[0_0_20px_rgba(184,255,23,0.3)] backdrop-blur-md transition sm:h-20 sm:w-20"
       >
         <div className="absolute inset-0 animate-pulse rounded-full bg-lime-300/10 blur-xl" />
         <WandSparkles className="relative z-10 h-7 w-7 text-lime-300 sm:h-9 sm:w-9" />
