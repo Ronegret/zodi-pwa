@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ZODI</string>
+    <string name="title_activity_main">ZODI</string>
+    <string name="package_name">es.aibueno.zodi</string>
+    <string name="custom_url_scheme">es.aibueno.zodi</string>
+</resources>
