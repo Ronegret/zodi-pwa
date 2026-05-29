@@ -127,45 +127,60 @@ export function InstallPwaCard() {
   if (installState !== "android" && installState !== "ios") return null;
 
   return (
-    <div className="rounded-md border border-lime-300/25 bg-lime-300/5 p-5 mt-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-lime-300">
+    <div className="rounded-xl border border-lime-300/30 bg-gradient-to-br from-black/80 to-lime-900/10 p-6 mt-5 relative overflow-hidden shadow-[0_0_30px_rgba(184,255,23,0.1)]">
+      {/* Decorative gradient orb */}
+      <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-lime-300/10 blur-2xl pointer-events-none" />
+      
+      <div className="relative z-10 flex items-start justify-between gap-4">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-lime-300 shadow-[0_0_15px_rgba(184,255,23,0.3)]">
           {installState === "ios" ? (
-            <Share className="h-5 w-5 text-black" />
+            <Share className="h-6 w-6 text-black" />
           ) : (
-            <Download className="h-5 w-5 text-black" />
+            <Download className="h-6 w-6 text-black" />
           )}
         </div>
         <div className="flex-1">
-          <p className="font-black text-white">Descarga la App ZODI</p>
+          <p className="font-black text-white text-lg">Instala la App ZODI</p>
           {installState === "android" ? (
-            <p className="mt-1 text-xs text-white/60">
-              Guárdalo en tu pantalla de inicio para una experiencia más rápida.
+            <p className="mt-1 text-sm text-white/60 leading-relaxed">
+              Guárdalo en tu pantalla de inicio para una experiencia más rápida, acceso offline y sin distracciones.
             </p>
           ) : (
-            <p className="mt-1 text-xs text-white/60">
-              Toca <span className="text-lime-200 font-bold">Compartir</span> y luego <span className="text-lime-200 font-bold">"Agregar a inicio"</span>.
-            </p>
+            <div className="mt-2 text-sm text-white/70 leading-relaxed">
+              Para tener ZODI como una App real en tu iPhone:
+              <ol className="mt-3 grid gap-2">
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px] font-bold">1</span>
+                  Toca el botón <Share className="h-4 w-4 text-lime-300 mx-1 inline" /> <span className="font-bold text-white">Compartir</span> abajo.
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[10px] font-bold">2</span>
+                  Baja y toca <span className="rounded bg-white/10 px-2 py-0.5 text-xs font-bold text-white">➕ Agregar a inicio</span>
+                </li>
+              </ol>
+            </div>
           )}
         </div>
       </div>
-      {installState === "android" && (
-        <div className="mt-4 flex gap-2">
-          <button onClick={install} className="flex-1 rounded-md bg-lime-300 py-2.5 text-xs font-black text-black">
-            Instalar ahora
-          </button>
-          <button onClick={dismiss} className="rounded-md border border-white/15 px-4 py-2.5 text-xs text-white/60">
-            Ocultar
-          </button>
-        </div>
-      )}
-      {installState === "ios" && (
-        <div className="mt-4 flex gap-2">
-          <button onClick={dismiss} className="w-full rounded-md border border-white/15 py-2.5 text-xs text-white/60">
-            Entendido, ocultar
-          </button>
-        </div>
-      )}
+      <div className="relative z-10">
+        {installState === "android" && (
+          <div className="mt-6 flex gap-3">
+            <button onClick={install} className="flex-1 rounded-lg bg-lime-300 py-3 text-sm font-black text-black hover:bg-lime-200 transition shadow-[0_0_15px_rgba(184,255,23,0.3)]">
+              Instalar ahora
+            </button>
+            <button onClick={dismiss} className="rounded-lg border border-white/20 px-5 py-3 text-sm font-bold text-white/60 hover:text-white transition">
+              Ocultar
+            </button>
+          </div>
+        )}
+        {installState === "ios" && (
+          <div className="mt-6 flex gap-3">
+            <button onClick={dismiss} className="w-full rounded-lg border border-lime-300/30 py-3 text-sm font-bold text-lime-100 hover:bg-lime-300/10 transition">
+              Entendido, ya lo instalé (Ocultar)
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

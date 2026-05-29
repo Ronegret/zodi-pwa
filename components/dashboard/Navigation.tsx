@@ -139,7 +139,7 @@ export function Sidebar() {
       <div className="flex items-center justify-center border-b border-white/07 px-3 py-6">
         <Link href="/" className="relative block h-28 w-full scale-[1.35]">
           <Image
-            src="/zodi-logo-mark.png"
+            src="/zodi-logo.png"
             alt="ZODI"
             fill
             className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.55)] mix-blend-screen"
@@ -158,12 +158,12 @@ export function Sidebar() {
         </div>
         <div className="flex items-center gap-3">
           {/* Gemas */}
-          <div className="flex items-center gap-1">
-            <Gem className="h-3 w-3 text-lime-300" />
+          <Link href="/dashboard/premium" className="flex items-center gap-1 hover:opacity-80 transition" title="Recargar energía">
+            <Gem className="h-3 w-3 text-lime-300 drop-shadow-[0_0_8px_rgba(184,255,23,0.8)]" />
             <span className="text-xs font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>
               {stats.gems}
             </span>
-          </div>
+          </Link>
           {/* Racha */}
           {stats.streak > 0 && (
             <div className="flex items-center gap-1">

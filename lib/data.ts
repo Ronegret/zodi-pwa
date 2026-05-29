@@ -95,20 +95,26 @@ export const plans: Plan[] = [
   {
     name: "Gratis",
     price: "0 EUR",
-    signal: "Oráculo callejero",
-    perks: ["Horóscopo diario", "Tarot básico", "Feed anónimo", "Puntos y rachas"]
+    signal: "Oráculo Callejero",
+    perks: ["1 Lectura diaria", "Respuestas de IA estándar", "Feed anónimo", "Puntos y rachas"]
   },
   {
-    name: "Premium",
-    price: "5 EUR/mes",
-    signal: "Cosmos Pro",
-    perks: ["Todas las lecturas", "Consultas amplias", "Tono completo", "7 días gratis"]
+    name: "ZODI Pro",
+    price: "4,99 EUR/mes",
+    signal: "Cosmos Ilimitado",
+    perks: ["Lecturas ilimitadas", "Todos los tonos ZODI", "Respuestas extensas", "7 días gratis"]
   },
   {
-    name: "Eterno",
+    name: "ZODI Pro Anual",
+    price: "39,99 EUR/año",
+    signal: "Ahorra un 33%",
+    perks: ["Todo lo de ZODI Pro", "Cobro anual", "Gemas extra de regalo", "Prioridad en nuevas funciones"]
+  },
+  {
+    name: "Pase Pionero",
     price: "49 EUR",
-    signal: "Pago único",
-    perks: ["Acceso de por vida", "Futuras mejoras incluidas", "Sin mirar el reloj", "Lecturas profundas"]
+    signal: "Edición Limitada",
+    perks: ["Acceso de por vida a Pro", "Pago único (sin suscripción)", "Solo para early adopters", "Lecturas profundas eternas"]
   }
 ];
 

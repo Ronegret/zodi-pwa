@@ -55,12 +55,11 @@
 
 *, *::before, *::after {
   box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent; /* Remove mobile tap flash */
-  /* Prevent 300ms tap delay on all interactive elements */
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Disable 300ms tap delay on all tappable elements */
-a, button, [role="button"], input, label, select, summary, textarea {
+/* Remove 300ms tap delay only on buttons — NOT on links to avoid breaking navigation */
+button, [role="button"], input[type="submit"], input[type="button"] {
   touch-action: manipulation;
 }
 
@@ -74,15 +73,14 @@ html {
 
 body {
   min-height: 100vh;
-  min-height: 100dvh; /* dynamic viewport for mobile */
+  min-height: 100dvh;
   margin: 0;
   background-color: var(--ink);
   background-image:
     radial-gradient(ellipse 80% 50% at 10% -5%, rgba(155, 77, 255, 0.14), transparent),
     radial-gradient(ellipse 60% 40% at 90% 5%,  rgba(184, 255, 23, 0.10), transparent),
     radial-gradient(ellipse 50% 60% at 50% 100%, rgba(255, 43, 214, 0.06), transparent);
-  /* Attach body gradients to a separate GPU layer so they never repaint on scroll */
-  background-attachment: local;
+  /* NO background-attachment: fixed/local — both cause repaints on scroll */
   color: var(--text-primary);
   font-family: var(--font-body);
   font-feature-settings: "kern", "liga", "calt";
@@ -91,7 +89,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle grid overlay — adds depth */
+/* Subtle grid overlay — adds depth (hidden on mobile via media query below) */
 body::before {
   position: fixed;
   inset: 0;
@@ -102,7 +100,6 @@ body::before {
     linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 40px 40px;
-  /* NO will-change here — it's not animating so it was causing unnecessary layer promotion */
   transform: translateZ(0);
 }
 
@@ -491,6 +488,23 @@ h1, h2, h3, h4, h5, h6 {
   animation: fade-in 0.35s ease both;
 }
 
+/* ── Hover Micro-animations ──────────────────────────────────────────────── */
+
+.hover-bubble {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s ease;
+}
+
+@media (hover: hover) {
+  .hover-bubble:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+      0 12px 30px rgba(0, 0, 0, 0.5),
+      0 0 25px rgba(184, 255, 23, 0.12);
+    border-color: rgba(184, 255, 23, 0.4);
+    z-index: 10;
+  }
+}
+
 /* Skeleton loading shimmer */
 .shimmer {
   background: linear-gradient(
@@ -555,6 +569,12 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
   }
 
+  /* Hide fixed atmospheric bg images on mobile — they're <8% opacity and
+     invisible, but keeping them as fixed layers forces full-page repaints */
+  .dashboard-bg {
+    display: none;
+  }
+
   /* Kill all looping animations that compete with video on mobile */
   .magic-float,
   .magic-pulse,
@@ -566,10 +586,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-body::before {
-  will-change: transform;
-  transform: translateZ(0);
-}
+
 
 /* ── Reduced Motion ──────────────────────────────────────────────────────── */
 

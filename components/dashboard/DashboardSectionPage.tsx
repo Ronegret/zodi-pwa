@@ -6,6 +6,7 @@ import { useState } from "react";
 import { CommunityHub } from "@/components/dashboard/CommunityHub";
 import { SectionSpecificUI } from "@/components/dashboard/SectionSpecificUI";
 import { plans } from "@/lib/data";
+import { GemStore } from "@/components/dashboard/GemStore";
 import { getDashboardSection } from "@/lib/dashboard-sections";
 
 // Maps section slugs to atmospheric background images
@@ -93,11 +94,11 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
 
       {/* Plans grid — only for premium section */}
       {section.slug === "premium" && (
-        <section className="grid gap-3 lg:grid-cols-3">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {plans.map((plan) => (
             <article
               key={plan.name}
-              className={`glass-panel rounded-2xl p-6 transition-all ${selectedPlan === plan.name ? "border-lime-300/50 bg-lime-300/05 shadow-[0_0_40px_rgba(184,255,23,0.15)] scale-[1.02]" : "hover:border-white/20"}`}
+              className={`glass-panel hover-bubble rounded-2xl p-6 transition-all ${selectedPlan === plan.name ? "border-lime-300/50 bg-lime-300/05 shadow-[0_0_40px_rgba(184,255,23,0.15)] scale-[1.02]" : "hover:border-white/20"}`}
             >
               <p className="zodi-kicker">{plan.signal}</p>
               <h3 className="mt-2 text-2xl font-black" style={{ fontFamily: "var(--font-display)" }}>{plan.name}</h3>
@@ -120,6 +121,11 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
             </article>
           ))}
         </section>
+      )}
+
+      {/* Gem Store — only for premium section */}
+      {section.slug === "premium" && (
+        <GemStore />
       )}
     </div>
   );

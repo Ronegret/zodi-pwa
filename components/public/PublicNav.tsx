@@ -102,9 +102,9 @@ export function PublicNav() {
         <div className="mx-auto flex w-full h-16 max-w-7xl items-center justify-between px-4">
           {/* ── LOGO ── */}
           <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
-            <span className="relative block h-14 w-40 sm:h-16 sm:w-48 scale-110">
+            <span className="relative block h-14 w-40 sm:h-16 sm:w-48">
               <Image
-                src="/zodi-logo-mark.png"
+                src="/zodi-logo.png"
                 alt="ZODI"
                 fill
                 sizes="192px"
@@ -128,13 +128,13 @@ export function PublicNav() {
           <div className="flex items-center gap-2">
             <Link
               href="/auth/login"
-              className="hidden rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-white/75 transition hover:border-white/30 sm:inline-block"
+              className="rounded-lg border border-white/15 px-3 py-1.5 text-xs sm:text-sm font-bold text-white/75 transition hover:border-white/30"
             >
               Entrar
             </Link>
             <Link
               href="/auth/register"
-              className="rounded-lg bg-lime-300 px-4 py-2 text-sm font-black text-black transition hover:bg-lime-200"
+              className="rounded-lg bg-lime-300 px-3 py-1.5 text-xs sm:text-sm font-black text-black transition hover:bg-lime-200"
             >
               Crear cuenta
             </Link>

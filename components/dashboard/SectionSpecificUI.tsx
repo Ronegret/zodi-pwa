@@ -1651,10 +1651,10 @@ function PerfilUI() {
             </span>
           </div>
         </div>
-        <h2 className="text-xl font-black mb-5">Tu identidad astral</h2>
+        <h2 className="text-xl font-black mb-5">Tu perfil (o lo que crees que eres)</h2>
         <div className="grid gap-4">
           <label className="block">
-            <span className="text-xs uppercase tracking-widest text-white/40">Nombre visible</span>
+            <span className="text-xs uppercase tracking-widest text-white/40">Cómo quieres que te llame</span>
             <input
               value={displayName}
               onChange={e => setDisplayName(e.target.value)}
@@ -1756,7 +1756,7 @@ function PerfilUI() {
           <h2 className="text-xl font-black mb-4">Tu perfil astral</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
-              { label: "Signo solar", value: ap.sunSign ?? "–", type: "zodiac", img: `/zodi-art/nuevas/2-Compatibilidad/${ap.sunSign}.png` },
+              { label: "Signo solar", value: ap.sunSign ?? "–", type: "zodiac", img: `/zodiac/${ap.sunSign?.toLowerCase() === 'piscis' ? 'picis' : ap.sunSign?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()}.png` },
               { label: "Luna",        value: ap.moonSign ?? "–",   emoji: "🌙" },
               { label: "Ascendente",  value: ap.ascendant ?? "–",  emoji: "⬆️" },
               { label: "Camino vida", value: String(ap.lifePathNumber ?? "–"), type: "numerology", img: `/zodi-art/numerologia/${ap.lifePathNumber}.png` },
@@ -1780,7 +1780,7 @@ function PerfilUI() {
             href="/onboarding"
             className="mt-4 inline-flex items-center gap-2 rounded-md border border-white/15 px-5 py-2.5 text-sm font-bold text-white/60 hover:text-white/90 transition"
           >
-            <RefreshCw className="h-4 w-4" /> Recalcular perfil astral
+            <RefreshCw className="h-4 w-4" /> Recalcular mi destino
           </a>
         </div>
       )}
