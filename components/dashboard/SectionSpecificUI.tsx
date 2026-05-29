@@ -766,11 +766,17 @@ function CompatibilidadUI({ section }: { section: DashboardSection }) {
         <h2 className="text-xl font-black mb-4">Los dos perfiles</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {/* My sign */}
-          <div className="rounded-md border border-lime-300/20 bg-lime-300/5 p-4">
-            <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-2">Tú</p>
-            <div className="text-4xl mb-2">{ZODIAC.find(z=>z.name===mySign)?.emoji ?? "⭐"}</div>
-            <p className="font-black text-lime-200">{mySign || "Desconocido"}</p>
-            <p className="text-xs text-white/40">Signo solar de tu perfil</p>
+          <div className="rounded-md border border-lime-300/20 bg-lime-300/5 p-4 flex flex-col items-center">
+            <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-2 w-full text-left">Tú</p>
+            {mySign ? (
+              <div className="relative w-32 h-32 mb-2">
+                <Image src={`/zodi-art/nuevas/2-Compatibilidad/${mySign}.png`} alt={mySign} fill className="object-contain" />
+              </div>
+            ) : (
+              <div className="text-4xl mb-2">⭐</div>
+            )}
+            <p className="font-black text-lime-200 text-lg">{mySign || "Desconocido"}</p>
+            <p className="text-xs text-white/40">Signo solar</p>
           </div>
           {/* Their sign */}
           <div className="rounded-md border border-white/10 p-4">
@@ -782,17 +788,17 @@ function CompatibilidadUI({ section }: { section: DashboardSection }) {
               className="w-full rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-lime-300/40 mb-3"
             />
             <p className="text-xs text-white/40 mb-2">Su signo solar</p>
-            <div className="grid grid-cols-4 gap-1">
+            <div className="grid grid-cols-4 gap-2 mt-2">
               {ZODIAC.map(z => (
                 <button
                   key={z.name}
                   onClick={() => setTheirSign(z.name)}
                   title={z.name}
-                  className={`rounded p-1 text-center text-lg transition ${
-                    theirSign === z.name ? "bg-lime-300/20 ring-1 ring-lime-300" : "hover:bg-white/5"
+                  className={`relative aspect-square w-full rounded-md transition overflow-hidden ${
+                    theirSign === z.name ? "ring-2 ring-lime-300 shadow-[0_0_15px_rgba(184,255,23,0.3)] scale-105" : "hover:bg-white/10 opacity-70 hover:opacity-100"
                   }`}
                 >
-                  {z.emoji}
+                  <Image src={`/zodi-art/nuevas/2-Compatibilidad/${z.name}.png`} alt={z.name} fill className="object-contain p-1" />
                 </button>
               ))}
             </div>
@@ -918,11 +924,12 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
                 <button
                   key={n}
                   onClick={() => analyzeCotilleo(n)}
-                  className={`rounded-md border p-3 text-center transition ${
-                    targetNumber === n ? "border-lime-300 bg-lime-300/10 text-lime-200 ring-1 ring-lime-300" : "border-white/10 hover:border-lime-300/40 text-white/60"
+                  title={`Número ${n}`}
+                  className={`relative aspect-square w-full rounded-md border transition overflow-hidden ${
+                    targetNumber === n ? "border-lime-300 ring-2 ring-lime-300 shadow-[0_0_15px_rgba(184,255,23,0.3)] scale-105" : "border-white/10 opacity-70 hover:opacity-100 hover:border-lime-300/40"
                   }`}
                 >
-                  <span className="text-xl font-black">{n}</span>
+                  <Image src={`/zodi-art/numerologia/${n}.png`} alt={`Número ${n}`} fill className="object-cover" />
                 </button>
               ))}
             </div>
@@ -1399,11 +1406,12 @@ function ChinoUI({ section }: { section: DashboardSection }) {
                 <button
                   key={a.name}
                   onClick={() => analyzeCotilleo(a.name)}
-                  className={`rounded-md border p-2 text-center transition ${
-                    targetSign === a.name ? "border-lime-300 bg-lime-300/10 text-lime-200 ring-1 ring-lime-300" : "border-white/10 hover:border-lime-300/40 text-white/60"
+                  title={a.name}
+                  className={`relative aspect-square w-full rounded-md border transition overflow-hidden ${
+                    targetSign === a.name ? "border-lime-300 ring-2 ring-lime-300 shadow-[0_0_15px_rgba(184,255,23,0.3)] scale-105" : "border-white/10 opacity-70 hover:opacity-100 hover:border-lime-300/40"
                   }`}
                 >
-                  <span className="text-xs font-black">{a.name}</span>
+                  <Image src={`/zodi-art/chino/${a.img}`} alt={a.name} fill className="object-cover" />
                 </button>
               ))}
             </div>
@@ -1634,7 +1642,15 @@ function PerfilUI() {
   return (
     <div className="grid gap-5">
       {/* Profile info */}
-      <div className="glass-panel rounded-md p-5">
+      <div className="glass-panel rounded-md p-5 relative">
+        <div className="absolute top-5 right-5 flex flex-col items-end gap-2">
+          <div className="flex items-center gap-1.5 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1 shadow-[0_0_15px_rgba(184,255,23,0.2)]">
+            <Gem className="h-4 w-4 text-lime-300" />
+            <span className="text-sm font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>
+              {getLocalSession().isAuthenticated ? 200 : 0}
+            </span>
+          </div>
+        </div>
         <h2 className="text-xl font-black mb-5">Tu identidad astral</h2>
         <div className="grid gap-4">
           <label className="block">
@@ -1740,16 +1756,23 @@ function PerfilUI() {
           <h2 className="text-xl font-black mb-4">Tu perfil astral</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
-              { label: "Signo solar", value: ap.sunSign ?? "–", emoji: "☀️" },
+              { label: "Signo solar", value: ap.sunSign ?? "–", type: "zodiac", img: `/zodi-art/nuevas/2-Compatibilidad/${ap.sunSign}.png` },
               { label: "Luna",        value: ap.moonSign ?? "–",   emoji: "🌙" },
               { label: "Ascendente",  value: ap.ascendant ?? "–",  emoji: "⬆️" },
-              { label: "Camino vida", value: String(ap.lifePathNumber ?? "–"), emoji: "🔢" },
-              { label: "Chino",       value: ap.chineseZodiac ?? "–", emoji: "🐉" },
+              { label: "Camino vida", value: String(ap.lifePathNumber ?? "–"), type: "numerology", img: `/zodi-art/numerologia/${ap.lifePathNumber}.png` },
+              { label: "Chino",       value: ap.chineseZodiac ?? "–", type: "chinese", img: `/zodi-art/chino/C_${ap.chineseZodiac ? ap.chineseZodiac.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""}.png` },
               { label: "Maya",        value: ap.mayanSign ?? "–",  emoji: "🌿" },
             ].map(item => (
-              <div key={item.label} className="rounded-md border border-white/10 bg-black/30 p-3">
-                <p className="text-xs text-white/40">{item.label}</p>
-                <p className="font-black text-sm mt-1">{item.emoji} {item.value}</p>
+              <div key={item.label} className="rounded-md border border-white/10 bg-black/30 p-3 flex flex-col items-center text-center">
+                <p className="text-xs text-white/40 mb-2 w-full text-left">{item.label}</p>
+                {item.img && item.value !== "–" ? (
+                  <div className="relative w-16 h-16 mb-2">
+                    <Image src={item.img} alt={item.value} fill className="object-contain" />
+                  </div>
+                ) : (
+                  <p className="text-3xl mb-2">{item.emoji}</p>
+                )}
+                <p className="font-black text-sm">{item.value}</p>
               </div>
             ))}
           </div>

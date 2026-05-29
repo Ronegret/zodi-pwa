@@ -71,7 +71,7 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
               <Icon className="h-6 w-6" />
             </div>
             <p className="mt-6 zodi-kicker">{section.kicker}</p>
-            <h1 className="glitch mt-2 text-4xl font-black leading-tight sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>{section.title}</h1>
+            <h1 className="glitch mt-2 text-3xl font-black leading-tight md:text-5xl lg:text-6xl" style={{ fontFamily: "var(--font-display)" }}>{section.title}</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">{section.description}</p>
             <div className="mt-6 flex flex-wrap gap-2">
               {section.chips.map((chip) => (
