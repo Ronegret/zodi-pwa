@@ -213,38 +213,43 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     setLoading(true);
     try {
-      let uid: string | undefined;
       const auth = getFirebaseAuth();
+      let firebaseSuccess = false;
 
       if (auth) {
-        if (mode === "register") {
-          // Reset any existing session so new users always go through onboarding
-          setLocalSession({ isAuthenticated: false, onboardingCompleted: false, astralProfile: undefined, onboardingData: undefined });
-          if (refCode) {
-            localStorage.setItem("zodi_ref_code", refCode);
+        try {
+          if (mode === "register") {
+            setLocalSession({ isAuthenticated: false, onboardingCompleted: false, astralProfile: undefined, onboardingData: undefined });
+            if (refCode) localStorage.setItem("zodi_ref_code", refCode);
+            await createUserWithEmailAndPassword(auth, email, password);
+          } else {
+            await signInWithEmailAndPassword(auth, email, password);
           }
-          const result = await createUserWithEmailAndPassword(auth, email, password);
-          uid = result.user.uid;
-        } else {
-          const result = await signInWithEmailAndPassword(auth, email, password);
-          uid = result.user.uid;
+          firebaseSuccess = true;
+          // Si Firebase tuvo éxito, el onAuthStateChanged (arriba) se encargará del redirect.
+          return;
+        } catch (firebaseErr: any) {
+          // Si es registro y el email ya está en Firebase, lanzamos el error
+          if (mode === "register" && firebaseErr.code === "auth/email-already-in-use") {
+            throw firebaseErr;
+          }
+          // Si no, ignoramos y probamos el fallback local por si la cuenta existe en localStorage
+          console.warn("Firebase auth falló, intentando fallback local...", firebaseErr);
         }
       }
 
-      // Si Firebase no está disponible o para fallback local
-      if (!getFirebaseAuth()) {
+      // FALLBACK LOCAL
+      if (!firebaseSuccess) {
         const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
         let users: any[] = [];
         try { users = JSON.parse(usersStr); } catch(e) {}
 
         if (mode === "register") {
-          // Check if email already exists
           if (users.find(u => u.email === email)) {
             setMessage("Tu alma ya pertenece a este universo. Usa otro correo o inicia sesión.");
             setLoading(false);
             return;
           }
-          // Create new user
           const newUser = {
             email,
             password,
@@ -257,7 +262,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           users.push(newUser);
           window.localStorage.setItem("zodi.local_users", JSON.stringify(users));
 
-          // Clear global session so they do onboarding
           setLocalSession({
             isAuthenticated: true,
             onboardingCompleted: false,
@@ -268,7 +272,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           });
           router.push("/onboarding");
         } else {
-          // Login mode
+          // Login mode local
           const user = users.find(u => u.email === email && u.password === password);
           if (!user) {
             setMessage("Correo o contraseña incorrectos. Revisa tus datos.");
@@ -276,7 +280,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             return;
           }
           
-          // Login successful
           setLocalSession({
             isAuthenticated: true,
             onboardingCompleted: user.onboardingCompleted,
@@ -292,13 +295,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       }
     } catch (err) {
       const code = (err as { code?: string }).code ?? "";
-      if (
-        code === "auth/user-not-found" ||
-        code === "auth/wrong-password" ||
-        code === "auth/invalid-credential"
-      ) {
-        setMessage("Correo o contraseña incorrectos. Revisa tus datos.");
-      } else if (code === "auth/email-already-in-use") {
+      if (code === "auth/email-already-in-use") {
         setMessage("Tu alma ya pertenece a este universo. Redirigiendo a inicio de sesión...");
         setTimeout(() => router.push("/auth/login"), 2500);
       } else if (code === "auth/too-many-requests") {

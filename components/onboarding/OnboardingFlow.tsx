@@ -292,15 +292,27 @@ export function OnboardingFlow() {
         <div className="relative h-10 w-28">
           <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain mix-blend-screen" />
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5">
-          {[...Array(TOTAL_STEPS)].map((_, i) => (
-            <span
-              key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i <= step ? "w-6 bg-lime-300" : "w-1.5 bg-white/20"
-              }`}
-            />
-          ))}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5">
+            {[...Array(TOTAL_STEPS)].map((_, i) => (
+              <span
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i <= step ? "w-6 bg-lime-300" : "w-1.5 bg-white/20"
+                }`}
+              />
+            ))}
+          </div>
+          <button
+            onClick={() => {
+              setLocalSession({ isAuthenticated: false, onboardingCompleted: false });
+              router.push("/");
+            }}
+            title="Cancelar y volver al inicio"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/50 transition hover:bg-white/10 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
       </div>
 
