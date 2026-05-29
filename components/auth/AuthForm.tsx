@@ -13,7 +13,7 @@ import {
   onAuthStateChanged,
   type User
 } from "firebase/auth";
-import { AtSign, Chrome, Eye, EyeOff, Lock, UserRound } from "lucide-react";
+import { ArrowLeft, AtSign, Chrome, Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession } from "@/lib/session";
 
@@ -287,6 +287,15 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   return (
     <div className="glass-panel neon-border w-full max-w-xl rounded-md p-4 sm:p-7">
+      {/* Back to home — always visible */}
+      <Link
+        href="/"
+        className="mb-5 inline-flex items-center gap-2 text-sm text-white/50 hover:text-lime-300 transition group"
+      >
+        <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
+        Volver al inicio
+      </Link>
+
       <p className="text-[10px] sm:text-xs uppercase tracking-[0.32em] text-lime-200/70">
         {mode === "login" ? "Entrada" : "Registro"}
       </p>
@@ -404,6 +413,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           {mode === "login" ? "Crear cuenta" : "Entrar"}
         </Link>
       </p>
+
+      {/* Extra escape hatch */}
+      <div className="mt-4 pt-4 border-t border-white/08 text-center">
+        <Link href="/" className="text-xs text-white/35 hover:text-white/60 transition">
+          ← Regresar a la web principal sin iniciar sesión
+        </Link>
+      </div>
     </div>
   );
 }

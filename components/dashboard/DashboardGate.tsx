@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getLocalSession, setLocalSession } from "@/lib/session";
@@ -92,6 +93,9 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
         <div className="glass-panel rounded-md p-6 text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-lime-200/70">ZODI</p>
           <h1 className="mt-3 text-2xl font-black animate-pulse">Abriendo el portal...</h1>
+          <Link href="/" className="mt-6 inline-block text-sm text-white/40 hover:text-white/70 transition">
+            ← Volver al inicio
+          </Link>
         </div>
       </div>
     );
@@ -109,13 +113,21 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
 
+        {/* Escape link top-left */}
+        <Link
+          href="/"
+          className="absolute top-5 left-5 z-20 inline-flex items-center gap-2 text-sm text-white/40 hover:text-lime-300 transition"
+        >
+          ← Inicio
+        </Link>
+
         <div className="relative z-10 glass-panel neon-border w-full max-w-sm rounded-xl p-8 text-center">
           <div className="relative mx-auto mb-6 h-24 w-full max-w-[220px]">
             <Image
               src="/zodi-logo-mark.png"
               alt="ZODI"
               fill
-              className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.5)] mix-blend-screen"
+              className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.5)]"
               priority
             />
           </div>
@@ -131,14 +143,20 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             onClick={handleConfirm}
             className="w-full rounded-lg bg-lime-300 py-4 text-lg font-black text-black transition hover:bg-lime-200 active:scale-95 shadow-[0_0_20px_rgba(184,255,23,0.3)]"
           >
-            Sí, soy yo ✦
+            Sí, soy yo ❆
           </button>
           <button
             onClick={handleChangeUser}
-            className="mt-4 w-full text-sm text-white/40 transition hover:text-white/70"
+            className="mt-3 w-full text-sm text-white/40 transition hover:text-white/70"
           >
             No soy yo — cambiar cuenta
           </button>
+          <Link
+            href="/"
+            className="mt-4 block text-xs text-white/25 hover:text-white/50 transition"
+          >
+            ← Volver al inicio sin acceder
+          </Link>
         </div>
       </div>
     );
