@@ -93,11 +93,11 @@ export function PublicNav() {
         style={{
           minHeight: HEADER_H,
           paddingTop: "env(safe-area-inset-top, 0px)",
-          transform: "translateZ(0)",   // own GPU compositing layer
-          contain: "layout style paint", // isolate from rest of page
+          transform: "translateZ(0)",
+          contain: "layout style paint",
+          background: "rgb(6, 6, 10)",
         }}
         className="sticky top-0 z-50 flex flex-col justify-center border-b border-white/08"
-        style={{ background: "rgb(6, 6, 10)" }}
       >
         <div className="mx-auto flex w-full h-16 max-w-7xl items-center justify-between px-4">
           {/* ── LOGO ── */}
