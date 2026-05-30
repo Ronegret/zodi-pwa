@@ -75,6 +75,7 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0;
+  overscroll-behavior-y: none; /* iOS Safari también lo necesita en body */
   background-color: var(--ink);
   color: var(--text-primary);
   font-family: var(--font-body);

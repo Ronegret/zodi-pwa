@@ -87,7 +87,7 @@ export function ZodiOracle() {
       
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "No se pudo consultar al orÃ¡culo.");
+        throw new Error(data.error || "No se pudo consultar al oráculo.");
       }
       if (hasDaily) {
         localStorage.setItem('zodi.daily_oracle_used', today);

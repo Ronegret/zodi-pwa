@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
 import { ArrowLeft, AtSign, Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession } from "@/lib/session";
@@ -25,6 +25,41 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const explicitAuthFlow = useRef(false);
 
   // ── Detectar sesión activa de Firebase al montar ──────────────────
+  // ── Capturar resultado de signInWithRedirect (solo si se inició un redirect) ─
+  useEffect(() => {
+    // Solo procesar si realmente iniciamos un redirect (marcado en sessionStorage)
+    const redirectPending = sessionStorage.getItem("zodi.google_redirect_pending");
+    if (!redirectPending) return;
+
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+
+    explicitAuthFlow.current = true;
+    setLoading(true);
+
+    getRedirectResult(auth)
+      .then(async (result) => {
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        if (result?.user) {
+          const { getAdditionalUserInfo } = await import("firebase/auth");
+          const details = getAdditionalUserInfo(result);
+          await applyFirebaseUser(result.user, details?.isNewUser ?? false);
+        } else {
+          explicitAuthFlow.current = false;
+          setLoading(false);
+        }
+      })
+      .catch((err: any) => {
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        explicitAuthFlow.current = false;
+        setLoading(false);
+        if (err?.code && err.code !== "auth/popup-closed-by-user" && err.code !== "auth/internal-error") {
+          setMessage(`Error Google: ${err.message || err.code}`);
+        }
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const auth = getFirebaseAuth();
     if (!auth) return;
@@ -125,7 +160,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     // Give initial gems if none
     try {
-      const gamification = require("@/lib/gamification");
+      const gamification = await import("@/lib/gamification");
       const currentGems = gamification.getGems().total;
       if (currentGems === 0) gamification.addGems(15);
     } catch { /* ignore */ }
@@ -142,23 +177,50 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     if (provider === "google") {
       const auth = getFirebaseAuth();
       if (!auth) {
-        setMessage("Firebase no estÃ¡ configurado para iniciar sesiÃ³n con Google.");
+        setMessage("Firebase no está configurado. Contacta al administrador.");
         return;
       }
       setLoading(true);
       explicitAuthFlow.current = true;
+
+      // Móvil: popups bloqueados por el OS → usar redirect
+      const isMobile = /android|iphone|ipad|ipod|mobile/i.test(
+        typeof navigator !== "undefined" ? navigator.userAgent : ""
+      );
+
+      if (isMobile) {
+        try {
+          sessionStorage.setItem("zodi.google_redirect_pending", "1");
+          await signInWithRedirect(auth, googleProvider);
+        } catch (err: any) {
+          sessionStorage.removeItem("zodi.google_redirect_pending");
+          setLoading(false);
+          explicitAuthFlow.current = false;
+          setMessage(`Error Google: ${err.message || err.code}`);
+        }
+        return;
+      }
+
+      // Desktop: popup normal
       try {
         const { getAdditionalUserInfo } = await import("firebase/auth");
         const result = await signInWithPopup(auth, googleProvider);
         const details = getAdditionalUserInfo(result);
-
-        await applyFirebaseUser(result.user, details?.isNewUser);
+        await applyFirebaseUser(result.user, details?.isNewUser ?? false);
       } catch (err: any) {
         setLoading(false);
         explicitAuthFlow.current = false;
         if (err.code !== "auth/popup-closed-by-user") {
           if (err.code === "auth/account-exists-with-different-credential") {
-            setMessage("Ese correo ya existe con otro mÃ©todo. Inicia sesiÃ³n con email y contraseÃ±a, o vincula Google desde tu cuenta.");
+            setMessage("Ese correo ya existe con otro método. Inicia sesión con email y contraseña, o vincula Google desde tu cuenta.");
+          } else if (err.code === "auth/popup-blocked") {
+            try {
+              sessionStorage.setItem("zodi.google_redirect_pending", "1");
+              await signInWithRedirect(auth, googleProvider);
+            } catch {
+              sessionStorage.removeItem("zodi.google_redirect_pending");
+              setMessage("El navegador bloqueó el popup. Permite popups para este sitio e inténtalo de nuevo.");
+            }
           } else {
             setMessage(`Error Google: ${err.message || err.code}`);
           }

@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     // Set up the Stripe session
     const stripe = getStripe();
     if (!stripe) {
-      return NextResponse.json({ error: "Stripe no estÃ¡ configurado" }, { status: 500 });
+      return NextResponse.json({ error: "Stripe no está configurado" }, { status: 500 });
     }
 
     const session = await stripe.checkout.sessions.create({

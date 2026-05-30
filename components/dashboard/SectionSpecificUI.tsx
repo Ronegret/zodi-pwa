@@ -102,7 +102,7 @@ function useConsult(section: DashboardSection) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setReply(data.error || "Necesitas iniciar sesiÃ³n para consultar a ZODI.");
+        setReply(data.error || "Necesitas iniciar sesión para consultar a ZODI.");
         return;
       }
       setReply(data.text || data.reading || "El universo tardó demasiado. Reintenta.");
