@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  AlertCircle, Calendar, Check, ImagePlus, MapPin,
-  Sparkles, UserRound, Gem, Flame, X
+  AlertCircle, Check, ChevronDown, ImagePlus, MapPin,
+  Sparkles, Gem, Flame, X
 } from "lucide-react";
 import { generateAstralProfile } from "@/lib/astral";
 import { completeLocalOnboarding, getLocalSession, signOutZodi } from "@/lib/session";
+import { COUNTRY_LIST, getCitiesForCountry } from "@/lib/places";
 import type { OnboardingData } from "@/types/zodi";
 
 // ── Avatares ───────────────────────────────────────────────────────────────────
@@ -62,9 +63,6 @@ const chineseAvatars: [string, string][] = [
 const topics = ["amor", "dinero", "trabajo", "espiritualidad", "futuro", "energía"] as const;
 const tones  = ["suave", "directo", "brutal", "sarcastico"] as const;
 
-// ── Ciudades y países frecuentes ───────────────────────────────────────────────
-const CITIES = ["Madrid", "Barcelona", "Valencia", "Sevilla", "Ciudad de México", "Buenos Aires", "Bogotá", "Lima", "Santiago", "Nueva York", "Los Ángeles", "Londres", "París"];
-const COUNTRIES = ["España", "México", "Argentina", "Colombia", "Chile", "Perú", "Venezuela", "Ecuador", "Bolivia", "Uruguay", "Estados Unidos", "Alemania", "Francia", "Italia", "Reino Unido"];
 
 // ── Frases de ZODI mientras calcula el perfil ─────────────────────────────────
 const CALC_PHRASES = [
@@ -426,18 +424,30 @@ export function OnboardingFlow() {
                   Con esto calculo tu signo solar, lunar, ascendente y carta natal. La hora exacta mejora el ascendente.
                 </p>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <div className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-3">
+                <div className="mt-6 grid gap-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <Input label="Fecha de nacimiento *" value={data.birthDate} onChange={(v) => update("birthDate", v)} type="date" />
                     <div>
                       <Input label="Hora (opcional — mejora el ascendente)" value={data.birthTime} onChange={(v) => update("birthTime", v)} type="time" />
                       <p className="mt-1 text-[11px] text-white/35">Sin hora exacta, calculo igual pero el ascendente será aproximado.</p>
                     </div>
                   </div>
-                  <CityInput label="Ciudad de nacimiento *" value={data.birthCity} onChange={(v) => update("birthCity", v)} list={CITIES} />
-                  <CountryInput label="País de nacimiento *" value={data.birthCountry} onChange={(v) => update("birthCountry", v)} />
-                  <CityInput label="Ciudad actual (opcional)" value={data.currentCity} onChange={(v) => update("currentCity", v)} list={CITIES} />
-                  <CountryInput label="País actual (opcional)" value={data.currentCountry} onChange={(v) => update("currentCountry", v)} />
+                  <PlacePicker
+                    countryLabel="País de nacimiento *"
+                    countryValue={data.birthCountry}
+                    onCountryChange={(v) => { update("birthCountry", v); update("birthCity", ""); }}
+                    cityLabel="Ciudad de nacimiento *"
+                    cityValue={data.birthCity}
+                    onCityChange={(v) => update("birthCity", v)}
+                  />
+                  <PlacePicker
+                    countryLabel="País actual (opcional)"
+                    countryValue={data.currentCountry}
+                    onCountryChange={(v) => { update("currentCountry", v); update("currentCity", ""); }}
+                    cityLabel="Ciudad actual (opcional)"
+                    cityValue={data.currentCity}
+                    onCityChange={(v) => update("currentCity", v)}
+                  />
                 </div>
               </div>
             )}
@@ -672,45 +682,134 @@ function Input({ label, value, onChange, type = "text", placeholder }: {
   );
 }
 
-function CityInput({ label, value, onChange, list }: {
-  label: string; value: string; onChange: (v: string) => void; list: string[];
+// ── SearchSelect: combobox accesible con filtro ────────────────────────────────
+function SearchSelect({ label, value, onChange, options, placeholder, icon: Icon }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+  icon?: React.ElementType;
 }) {
-  const id = `zodi-list-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  const [query, setQuery] = useState(value);
+  const [open, setOpen]   = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Sincronizar query cuando value cambia externamente
+  useEffect(() => { setQuery(value); }, [value]);
+
+  // Cerrar al hacer click fuera
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const filtered = query.length === 0
+    ? options
+    : options.filter(o => o.toLowerCase().includes(query.toLowerCase()));
+
+  function select(opt: string) {
+    onChange(opt);
+    setQuery(opt);
+    setOpen(false);
+  }
+
+  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
+    setQuery(e.target.value);
+    onChange(e.target.value);
+    setOpen(true);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Escape") { setOpen(false); }
+    if (e.key === "Enter" && filtered.length === 1) { select(filtered[0]); e.preventDefault(); }
+  }
+
   return (
-    <label className="block cursor-text rounded-xl border border-white/08 bg-black/35 p-3.5 transition focus-within:border-lime-300/40">
-      <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40">
-        <MapPin className="h-3 w-3" /> {label}
-      </span>
-      <input
-        list={id}
-        className="w-full bg-transparent text-white outline-none placeholder:text-white/25"
-        value={value}
-        placeholder="Empieza a escribir..."
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <datalist id={id}>
-        {list.map((item) => <option key={item} value={item} />)}
-      </datalist>
-    </label>
+    <div ref={ref} className="relative">
+      <div
+        className={`flex cursor-text flex-col rounded-xl border bg-black/35 p-3.5 transition ${open ? "border-lime-300/50" : "border-white/08 hover:border-white/20"}`}
+        onClick={() => { setOpen(true); }}
+      >
+        <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40">
+          {Icon && <Icon className="h-3 w-3" />}
+          {label}
+        </span>
+        <div className="flex items-center gap-2">
+          <input
+            className="flex-1 bg-transparent text-white outline-none placeholder:text-white/25"
+            value={query}
+            placeholder={placeholder ?? "Buscar..."}
+            onChange={handleInput}
+            onFocus={() => setOpen(true)}
+            onKeyDown={handleKeyDown}
+            autoComplete="off"
+          />
+          <ChevronDown className={`h-4 w-4 shrink-0 text-white/30 transition-transform ${open ? "rotate-180" : ""}`} />
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-52 overflow-y-auto rounded-xl border border-white/10 bg-[#0e0e14] shadow-2xl no-scrollbar"
+          >
+            {filtered.length === 0 ? (
+              <li className="px-4 py-3 text-sm text-white/40">
+                No encontrado — puedes escribirlo libremente
+              </li>
+            ) : (
+              filtered.map((opt) => (
+                <li key={opt}>
+                  <button
+                    type="button"
+                    className={`w-full px-4 py-2.5 text-left text-sm transition hover:bg-lime-300/10 hover:text-lime-200 ${opt === value ? "bg-lime-300/08 text-lime-300" : "text-white/80"}`}
+                    onClick={() => select(opt)}
+                  >
+                    {opt === value && <Check className="mr-2 inline h-3 w-3 text-lime-300" />}
+                    {opt}
+                  </button>
+                </li>
+              ))
+            )}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
-function CountryInput({ label, value, onChange }: {
-  label: string; value: string; onChange: (v: string) => void;
+// ── PlacePicker: país → ciudad encadenados ─────────────────────────────────────
+function PlacePicker({ countryLabel, countryValue, onCountryChange, cityLabel, cityValue, onCityChange }: {
+  countryLabel: string; countryValue: string; onCountryChange: (v: string) => void;
+  cityLabel: string;    cityValue: string;    onCityChange: (v: string) => void;
 }) {
+  const cities = getCitiesForCountry(countryValue);
+
   return (
-    <label className="block cursor-text rounded-xl border border-white/08 bg-black/35 p-3.5 transition focus-within:border-lime-300/40">
-      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/40">{label}</span>
-      <input
-        list="zodi-countries"
-        className="w-full bg-transparent text-white outline-none placeholder:text-white/25"
-        value={value}
-        placeholder="Selecciona o escribe..."
-        onChange={(e) => onChange(e.target.value)}
+    <div className="grid gap-3 sm:grid-cols-2">
+      <SearchSelect
+        label={countryLabel}
+        value={countryValue}
+        onChange={onCountryChange}
+        options={COUNTRY_LIST}
+        placeholder="Buscar país..."
       />
-      <datalist id="zodi-countries">
-        {COUNTRIES.map((c) => <option key={c} value={c} />)}
-      </datalist>
-    </label>
+      <SearchSelect
+        label={cityLabel}
+        value={cityValue}
+        onChange={onCityChange}
+        options={cities}
+        placeholder={countryValue ? "Buscar ciudad..." : "Selecciona el país primero"}
+        icon={MapPin}
+      />
+    </div>
   );
 }

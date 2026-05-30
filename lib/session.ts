@@ -24,15 +24,20 @@ export function getLocalSession(): LocalZodiSession {
 
   const raw = window.localStorage.getItem(SESSION_KEY);
   if (!raw) return { isAuthenticated: false, onboardingCompleted: false };
-  
-  const parsed = JSON.parse(raw) as LocalZodiSession;
-  
-  // Expiración de 30 días
+
+  let parsed: LocalZodiSession;
+  try { parsed = JSON.parse(raw) as LocalZodiSession; }
+  catch { return { isAuthenticated: false, onboardingCompleted: false }; }
+
+  // Expiración de 30 días — conserva datos para match por email tras caducidad
   if (parsed.isAuthenticated && parsed.loginAt) {
     const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
     if (Date.now() - parsed.loginAt > THIRTY_DAYS) {
-      clearLocalSession();
-      return { isAuthenticated: false, onboardingCompleted: false };
+      const expired = { ...parsed, isAuthenticated: false };
+      window.localStorage.setItem(SESSION_KEY, JSON.stringify(expired));
+      document.cookie = "zodi_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      return expired;
     }
   }
 
