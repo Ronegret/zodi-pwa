@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertCircle, Calendar, Check, ImagePlus, MapPin,
-  Sparkles, UserRound, Gem, Flame
+  Sparkles, UserRound, Gem, Flame, X
 } from "lucide-react";
 import { generateAstralProfile } from "@/lib/astral";
 import { completeLocalOnboarding, getLocalSession, clearLocalSession } from "@/lib/session";
