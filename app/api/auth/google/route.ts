@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/auth/google
  * Inicia el flujo OAuth de Google en el servidor.

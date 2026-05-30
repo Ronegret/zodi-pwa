@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getFirebaseAuth } from "@/lib/firebase/admin";
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/auth/callback
  * Recibe el código de autorización de Google, crea un Firebase custom token
