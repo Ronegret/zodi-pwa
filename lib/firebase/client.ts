@@ -1,5 +1,5 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -43,6 +43,23 @@ export function getFirebaseAuth() {
 export function getFirebaseDb() {
   const firebaseApp = getFirebaseApp();
   return firebaseApp ? getFirestore(firebaseApp) : undefined;
+}
+
+// Obtiene el token esperando el estado de auth (hasta 3s).
+// Nunca bloquea — si Firebase no está listo devuelve "local_session".
+export async function getFirebaseToken(): Promise<string> {
+  const auth = getFirebaseAuth();
+  if (!auth) return "local_session";
+  if (auth.currentUser) return auth.currentUser.getIdToken();
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => { unsub(); resolve("local_session"); }, 3000);
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      clearTimeout(timeout);
+      unsub();
+      resolve(user ? await user.getIdToken() : "local_session");
+    });
+  });
 }
 
 export const googleProvider = new GoogleAuthProvider();

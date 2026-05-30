@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getLocalSession, setLocalSession } from "@/lib/session";
+import { getLocalSession, setLocalSession, getSavedIdentity } from "@/lib/session";
 
 type FirebaseUserLike = {
   uid: string;
@@ -127,10 +127,31 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             return;
           }
 
-          // Firestore vacío pero sesión local tiene datos del mismo usuario (match email)
+          // Firestore vacío — intentar con identidad duradera
+          const identity = getSavedIdentity();
+          const identityMatch = identity && (identity.uid === user.uid || identity.email === user.email) && identity.onboardingCompleted;
+
+          if (identityMatch && identity) {
+            setLocalSession({
+              isAuthenticated: true,
+              onboardingCompleted: true,
+              uid: user.uid,
+              email: user.email || identity.email,
+              displayName: user.displayName || "Viajero ZODI",
+              loginAt: Date.now(),
+              onboardingData: identity.onboardingData,
+              astralProfile: identity.astralProfile,
+            });
+            import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
+              saveOnboardingProfile(user.uid, identity.onboardingData, identity.astralProfile)
+            ).catch(() => {});
+            if (!cancelled) setReady(true);
+            return;
+          }
+
+          // Sesión local con datos del mismo usuario (match uid/email)
           if ((sameUid || sameEmail) && currentSession.onboardingCompleted) {
             setLocalSession({ uid: user.uid, loginAt: Date.now() });
-            // Sincronizar a Firestore en background
             if (currentSession.onboardingData && currentSession.astralProfile) {
               import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
                 saveOnboardingProfile(user.uid, currentSession.onboardingData as any, currentSession.astralProfile as any)

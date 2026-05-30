@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
 import { ArrowLeft, AtSign, Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
-import { getLocalSession, setLocalSession } from "@/lib/session";
+import { getLocalSession, setLocalSession, getSavedIdentity } from "@/lib/session";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
@@ -158,7 +158,28 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       // Firebase no disponible — continuar con datos locales
     }
 
-    // ── Step 3: Firestore vacío pero hay sesión local con mismo usuario ──
+    // ── Step 3a: Comprobar también la identidad duradera (sobrevive clearLocalSession) ──
+    const identity = getSavedIdentity();
+    const identityMatch = !!(identity && (identity.uid === user.uid || identity.email === user.email) && identity.onboardingCompleted);
+
+    if (!firestoreDone && !sameUser && identityMatch && identity) {
+      setLocalSession({
+        isAuthenticated: true,
+        onboardingCompleted: true,
+        uid: user.uid,
+        email: user.email || identity.email,
+        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
+        loginAt: Date.now(),
+        onboardingData: identity.onboardingData,
+        astralProfile: identity.astralProfile,
+      });
+      import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
+        saveOnboardingProfile(user.uid, identity.onboardingData, identity.astralProfile)
+      ).catch(() => {});
+      firestoreDone = true;
+    }
+
+    // ── Step 3b: Firestore vacío pero hay sesión local con mismo usuario ──
     // Migrar UID al Firebase UID real y publicar datos a Firestore en background
     if (!firestoreDone && sameUser && preserved.onboardingCompleted) {
       setLocalSession({

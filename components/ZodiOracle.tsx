@@ -7,7 +7,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getLocalSession } from "@/lib/session";
 import { getGems, spendGems } from "@/lib/gamification";
-import { getFirebaseAuth } from "@/lib/firebase/client";
+import { getFirebaseToken } from "@/lib/firebase/client";
 
 type Message = { role: "user" | "zodi"; text: string };
 
@@ -38,12 +38,9 @@ export function ZodiOracle() {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    
-    const session = getLocalSession();
-    const auth = getFirebaseAuth();
-    const user = auth?.currentUser;
 
-    if (!session.isAuthenticated || !user) {
+    const session = getLocalSession();
+    if (!session.isAuthenticated) {
       alert("Debes iniciar sesión para consultar al oráculo.");
       return;
     }
@@ -52,9 +49,8 @@ export function ZodiOracle() {
     const today = new Date().toISOString().split('T')[0];
     const lastDaily = localStorage.getItem('zodi.daily_oracle_used');
     const hasDaily = lastDaily !== today;
-    
+
     if (!hasDaily) {
-      // Must use Gems (cost: 5 gems per question)
       const currentGems = getGems().total;
       if (currentGems < 5) {
         alert("Te has quedado sin energía libre y no tienes suficientes gemas (Cuesta 5). Ve a la tienda a comprar más Gemas.");
@@ -69,7 +65,7 @@ export function ZodiOracle() {
     setLoading(true);
 
     try {
-      const token = await user.getIdToken();
+      const token = await getFirebaseToken();
       // Slice history to the last 4 messages to save tokens
       const historyToKeep = newMessages.slice(-4);
       

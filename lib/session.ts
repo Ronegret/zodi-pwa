@@ -3,8 +3,9 @@
 import type { AstralProfile, OnboardingData, UserProfile } from "@/types/zodi";
 import { calculateSunSign } from "@/lib/astral";
 
-const SESSION_KEY = "zodi.session";
+const SESSION_KEY  = "zodi.session";
 const ONBOARDING_KEY = "zodi.onboarding";
+const IDENTITY_KEY = "zodi.identity"; // Sobrevive clearLocalSession — nunca se borra
 
 export type LocalZodiSession = {
   isAuthenticated: boolean;
@@ -49,18 +50,35 @@ export function setLocalSession(session: Partial<LocalZodiSession>) {
   const current = getLocalSession();
   const nextSession = { ...current, ...session };
   window.localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
-  
+
+  // Guardar identidad duradera cuando el onboarding está completo
+  if (nextSession.onboardingCompleted && nextSession.uid && nextSession.email) {
+    window.localStorage.setItem(IDENTITY_KEY, JSON.stringify({
+      uid: nextSession.uid,
+      email: nextSession.email,
+      onboardingCompleted: true,
+      onboardingData: nextSession.onboardingData ?? current.onboardingData,
+      astralProfile: nextSession.astralProfile ?? current.astralProfile,
+    }));
+  }
+
   // Sincronizar estado a cookies para el middleware (Next.js)
   if (nextSession.isAuthenticated) {
-    document.cookie = "zodi_auth=1; path=/; max-age=86400; SameSite=Lax";
+    document.cookie = "zodi_auth=1; path=/; max-age=2592000; SameSite=Lax";
     if (nextSession.onboardingCompleted) {
-      document.cookie = "zodi_onboarding=1; path=/; max-age=86400; SameSite=Lax";
+      document.cookie = "zodi_onboarding=1; path=/; max-age=2592000; SameSite=Lax";
     } else {
       document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
   } else {
     clearLocalSession();
   }
+}
+
+export function getSavedIdentity(): { uid: string; email: string; onboardingCompleted: boolean; onboardingData?: any; astralProfile?: any } | null {
+  if (typeof window === "undefined") return null;
+  try { return JSON.parse(window.localStorage.getItem(IDENTITY_KEY) || "null"); }
+  catch { return null; }
 }
 
 export function clearLocalSession() {

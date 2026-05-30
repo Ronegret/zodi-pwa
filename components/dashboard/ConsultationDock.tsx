@@ -185,18 +185,10 @@ export function ConsultationDock() {
     setLoading(true);
     setResult(null);
 
-    const auth = (await import('@/lib/firebase/client')).getFirebaseAuth();
-    const user = auth?.currentUser;
-    if (!user) {
-      alert("Debes iniciar sesión");
-      setLoading(false);
-      return;
-    }
-
+    const { getFirebaseToken } = await import('@/lib/firebase/client');
     const sessionProfile = getSessionProfile();
     const baseProfile = sessionProfile ?? demoProfile;
 
-    // Construir el input con el foco de dominio si se seleccionó
     const domainFocus = focus ?? active.focusDomain ?? undefined;
     const userInput = [
       active.input,
@@ -205,7 +197,7 @@ export function ConsultationDock() {
     ].filter(Boolean).join("\n");
 
     try {
-      const token = await user.getIdToken();
+      const token = await getFirebaseToken();
       const response = await fetch("/api/ai/reading", {
         method: "POST",
         headers: { 
