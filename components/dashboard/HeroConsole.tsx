@@ -113,13 +113,13 @@ export function HeroConsole() {
                 <Shimmer w="w-64" />
               </div>
             ) : firstName ? (
-              <h1 className="glitch mt-3 max-w-2xl text-4xl font-black leading-none sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
-                Hola, {firstName}.<br />
+              <h1 className="glitch mt-3 max-w-2xl text-4xl font-black leading-[1.06] sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
+                Hola, <span className="truncate inline-block max-w-[280px] sm:max-w-none align-bottom">{firstName}</span>.<br />
                 <span className="text-lime-300">{profile?.zodiac ?? "Tu signo"}</span>{" "}
                 tiene mucho que decirte.
               </h1>
             ) : (
-              <h1 className="glitch mt-3 max-w-2xl text-4xl font-black leading-none sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
+              <h1 className="glitch mt-3 max-w-2xl text-4xl font-black leading-[1.06] sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
                 Tu mapa astral, tus lecturas y tu energia en un solo lugar.
               </h1>
             )}
@@ -128,12 +128,12 @@ export function HeroConsole() {
             </p>
           </div>
           <div className="hidden sm:block shrink-0">
-            <Image 
-              src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.png" 
-              alt="ZODI Intenso" 
-              width={160} 
-              height={160} 
-              className="object-contain drop-shadow-[0_0_15px_rgba(184,255,23,0.2)]" 
+            <Image
+              src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.png"
+              alt="ZODI Intenso"
+              width={180}
+              height={220}
+              className="object-contain drop-shadow-[0_0_20px_rgba(184,255,23,0.25)]"
             />
           </div>
         </div>
@@ -191,7 +191,7 @@ export function HeroConsole() {
               </div>
               <div>
                 <p className="zodi-kicker">Perfil activo</p>
-                <h2 className="mt-1 text-2xl font-black" style={{ fontFamily: "var(--font-display)" }}>
+                <h2 className="mt-1 text-2xl font-black truncate max-w-[160px]" style={{ fontFamily: "var(--font-display)" }}>
                   {mounted ? (profile?.displayName ?? "—") : <Shimmer w="w-32" />}
                 </h2>
                 {mounted && (

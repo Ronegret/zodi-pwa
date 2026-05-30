@@ -31,7 +31,7 @@ const mainConsultas = [
   {
     title: "Horóscopo personal",
     body: "Abre el día con una lectura clara sobre amor, dinero, trabajo y energía. Sin sermones celestiales: señales útiles, humor ácido y una recomendación que puedas aplicar hoy.",
-    image: "/zodi-art/sections/horoscopo-diario.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-diario.png",
     action: "Ver horóscopos",
     href: "/auth/register",
     fit: "contain"
@@ -39,7 +39,7 @@ const mainConsultas = [
   {
     title: "Tarot y tiradas",
     body: "Haz una pregunta, elige el tono y deja que ZODI traduzca el caos: situación, bloqueo, consejo y esa verdad incómoda que probablemente ya sabías.",
-    image: "/zodi-art/sections/tarot-acido.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Tarot-acido.png",
     action: "Consultar tarot",
     href: "/auth/register",
     fit: "contain"
@@ -47,7 +47,7 @@ const mainConsultas = [
   {
     title: "Horóscopo chino",
     body: "Mira tu animal, elemento, ciclos y compatibilidades con una lectura visual amplia. Ideal para entender ritmos largos y no llamar \"destino\" a una mala costumbre.",
-    image: "/zodi-art/sections/horoscopo-chino.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-chino.png",
     action: "Descubrir mi ciclo",
     href: "/auth/register",
     fit: "contain"
@@ -55,7 +55,7 @@ const mainConsultas = [
   {
     title: "Numerología",
     body: "Calcula camino de vida, vibración del nombre y fechas clave. Los números no te van a salvar la vida, pero sí pueden delatar patrones con una precisión molesta.",
-    image: "/zodi-art/sections/numerologia.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Numerologia.png",
     action: "Calcular números",
     href: "/auth/register",
     fit: "contain"
@@ -223,7 +223,7 @@ export function MarketingHome() {
               aria-label="Ver imagen completa"
             >
               <Image
-                src="/zodi-art/home/hero-main.png"
+                src="/zodi-art/nuevas/2-Portada--Home/Hero-principal-portada.png"
                 alt="Oráculo cyberpunk de ZODI"
                 width={520}
                 height={520}
@@ -249,16 +249,16 @@ export function MarketingHome() {
           <div className="grid gap-0 sm:grid-cols-2">
             {/* Personaje completo */}
             <button
-              onClick={() => setLightbox("/zodi-art/zodi-us-full.png")}
+              onClick={() => setLightbox("/zodi-art/nuevas/1-Identidad-principal-de-marca/ZODI-Full-Detail.png")}
               className="group relative block overflow-hidden"
               aria-label="Ver personaje ZODI"
             >
               <Image
-                src="/zodi-art/zodi-us-full.png"
+                src="/zodi-art/nuevas/1-Identidad-principal-de-marca/ZODI-Full-Detail.png"
                 alt="Personaje ZODI completo"
                 width={700}
                 height={1200}
-                className="h-[420px] w-full object-cover object-top transition duration-500 group-hover:scale-105 sm:h-[540px]"
+                className="h-[420px] w-full object-contain bg-black/40 transition duration-500 group-hover:scale-105 sm:h-[540px]"
               />
               <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent p-4">
                 <div className="sm:hidden flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white/70 backdrop-blur-sm">
@@ -277,7 +277,7 @@ export function MarketingHome() {
                 alt="ZODI - Horóscopos. Humor Ácido. Destino con Sarcasmo."
                 width={700}
                 height={700}
-                className="h-[420px] w-full object-cover transition duration-500 group-hover:scale-105 sm:h-[540px]"
+                className="h-[420px] w-full object-contain bg-black/60 transition duration-500 group-hover:scale-105 sm:h-[540px]"
               />
             </button>
           </div>
@@ -445,11 +445,11 @@ export function MarketingHome() {
           <button
             type="button"
             aria-label="Ampliar numerologia ZODI"
-            onClick={() => setLightbox("/zodi-art/nuevas/7-Numerologia/Imagen-general-numerologia.png")}
+            onClick={() => setLightbox("/zodi-art/nuevas/3-Secciones-principales-de-la-web/Numerologia.png")}
             className="group relative block w-full overflow-hidden rounded-2xl glass-panel p-2"
           >
             <Image
-              src="/zodi-art/nuevas/7-Numerologia/Imagen-general-numerologia.png"
+              src="/zodi-art/nuevas/3-Secciones-principales-de-la-web/Numerologia.png"
               alt="Numerología ZODI"
               width={800}
               height={600}
@@ -465,9 +465,9 @@ export function MarketingHome() {
         <div className="absolute inset-0 bg-black/60" />
         <div className="relative mx-auto grid max-w-7xl gap-5 lg:grid-cols-3">
           {[
-            { img: "/zodi-art/home/zodi-cartas.png", title: "La verdad no viene suave", body: "Tarot visual con cartas, energía y respuestas directas. A veces abraza. A veces te mira fijo hasta que entiendes." },
-            { img: "/zodi-art/home/zodi-energia.png", title: "Rituales de todos los días", body: "Pequeñas misiones, rachas y recordatorios para ordenar la energía sin convertir tu agenda en un monasterio." },
-            { img: "/zodi-art/home/zodi-sarcasmo.png", title: "Humor ácido astrológico", body: "Lecturas con carácter, frases para compartir y esa dosis de sinceridad que duele poquito, pero ilumina bastante." }
+            { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-con-cartas-flotando.png", title: "La verdad no viene suave", body: "Tarot visual con cartas, energía y respuestas directas. A veces abraza. A veces te mira fijo hasta que entiendes." },
+            { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-con-energia-en-la-mano.png", title: "Rituales de todos los días", body: "Pequeñas misiones, rachas y recordatorios para ordenar la energía sin convertir tu agenda en un monasterio." },
+            { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-riendose-con-sarcasmo.png", title: "Humor ácido astrológico", body: "Lecturas con carácter, frases para compartir y esa dosis de sinceridad que duele poquito, pero ilumina bastante." }
           ].map((card, index) => (
             <FadeUp key={card.title} delay={index * 0.1}>
               <motion.article whileHover={{ y: -8 }} className="glass-panel group overflow-hidden rounded-md h-full">
@@ -523,11 +523,11 @@ export function MarketingHome() {
             <button
               type="button"
               aria-label="Ampliar vista del panel ZODI"
-              onClick={() => setLightbox("/zodi-art/ritual-wide.png")}
+              onClick={() => setLightbox("/zodi-art/nuevas/2-Portada--Home/Banner-horizontal-desktop.png")}
               className="relative block w-full overflow-hidden rounded-md"
             >
               <Image
-                src="/zodi-art/ritual-wide.png"
+                src="/zodi-art/nuevas/2-Portada--Home/Banner-horizontal-desktop.png"
                 alt="Vista mágica de ZODI"
                 width={1100}
                 height={700}
@@ -637,9 +637,15 @@ export function MarketingHome() {
 // ── Reusable scroll-triggered fade-up wrapper ──────────────────────────────
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   return (
-    <div className={className}>
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 

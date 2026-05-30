@@ -110,7 +110,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       const { getDoc, doc } = await import("firebase/firestore");
       const { getFirebaseDb } = await import("@/lib/firebase/client");
       const db = getFirebaseDb();
-      if (db && !forceNewUser) {
+      if (db) {
         const [userSnap, astralSnap] = await Promise.all([
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),

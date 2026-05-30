@@ -37,7 +37,7 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
     : buildReadingPrompt(params.kind, params.profile, params.input);
   const provider = resolveProvider(params.provider);
 
-  if (provider === "mock" || provider === "gemini") {
+  if (provider === "mock") {
     return localFallback(params.kind, params.profile, promptBundle, provider);
   }
 
@@ -45,6 +45,8 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
     const text =
       provider === "claude"
         ? await callClaude(promptBundle.system, promptBundle.user)
+        : provider === "gemini"
+        ? await callGemini(promptBundle.system, promptBundle.user)
         : await callOpenAI(promptBundle.system, promptBundle.user);
 
     return normalizeReading(text, params.kind, promptBundle, provider);
@@ -65,6 +67,10 @@ function resolveProvider(provider: AIProvider = "auto"): AIProvider {
 
   if (process.env.OPENAI_API_KEY) {
     return "openai";
+  }
+
+  if (process.env.GEMINI_API_KEY) {
+    return "gemini";
   }
 
   return "mock";
@@ -111,6 +117,30 @@ async function callClaude(system: string, user: string) {
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+async function callGemini(system: string, user: string) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("La señal astral no está activa.");
+  }
+
+  const { GoogleGenAI } = await import("@google/genai");
+  const ai = new GoogleGenAI({ apiKey });
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [{ role: "user", parts: [{ text: user }] }],
+    config: {
+      systemInstruction: system,
+      temperature: 0.85,
+      maxOutputTokens: 1400,
+    }
+  });
+
+  const text = response.text?.trim();
+  if (!text) throw new Error("La lectura llegó en silencio.");
+  return text;
 }
 
 async function callOpenAI(system: string, user: string) {

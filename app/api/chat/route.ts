@@ -25,12 +25,8 @@ export async function POST(req: Request) {
     }
 
     const token = authHeader.split("Bearer ")[1];
-    if (token !== "local_fallback" || process.env.NODE_ENV !== "development") {
-      const auth = getFirebaseAuth();
-      if (!auth) {
-        return NextResponse.json({ error: "Configuración de servidor incompleta." }, { status: 500 });
-      }
-
+    const auth = getFirebaseAuth();
+    if (auth) {
       try {
         await auth.verifyIdToken(token);
       } catch (e) {

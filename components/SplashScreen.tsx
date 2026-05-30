@@ -42,7 +42,7 @@ export function SplashScreen() {
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.8, ease: "easeInOut" }}
-        className="zodi-splash-container fixed inset-0 z-[100] flex flex-col items-center justify-end bg-black pb-12 overflow-hidden"
+        className="zodi-splash-container fixed inset-0 z-[100] flex flex-col items-center justify-end bg-black overflow-hidden" style={{ paddingBottom: "max(48px, env(safe-area-inset-bottom, 48px))" }}
       >
           {/* Fullscreen Video Background */}
           <video 

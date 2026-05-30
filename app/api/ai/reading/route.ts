@@ -24,14 +24,12 @@ export async function POST(request: Request) {
 
   const token = authHeader.split("Bearer ")[1];
   const auth = getFirebaseAuth();
-  if (!auth) {
-    return NextResponse.json({ error: "Server config error" }, { status: 500 });
-  }
-
-  try {
-    await auth.verifyIdToken(token);
-  } catch (e) {
-    return NextResponse.json({ error: "Token inválido" }, { status: 401 });
+  if (auth) {
+    try {
+      await auth.verifyIdToken(token);
+    } catch (e) {
+      return NextResponse.json({ error: "Token inválido" }, { status: 401 });
+    }
   }
 
   // Rate limit by IP or UID (for simplicity, keeping IP, but ideal is UID)

@@ -31,7 +31,7 @@ const consultas: Consulta[] = [
     title: "Horóscopo",
     label: "Lectura del día",
     body: "Energía actual, amor, dinero, trabajo y una recomendación directa para hoy.",
-    image: "/zodi-art/sections/horoscopo-diario.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-diario.png",
     icon: MoonStar,
     kind: "daily-horoscope",
     input: "Quiero mi horóscopo de hoy con amor, trabajo, dinero, energía y una advertencia clara.",
@@ -40,7 +40,7 @@ const consultas: Consulta[] = [
     title: "Tarot",
     label: "Tres cartas",
     body: "Una tirada rápida para entender la situación, el bloqueo y el siguiente paso.",
-    image: "/zodi-art/sections/tarot-acido.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Tarot-acido.png",
     icon: Sparkles,
     kind: "tarot",
     input: "Haz una tirada de tres cartas: situación, bloqueo y consejo final.",
@@ -49,7 +49,7 @@ const consultas: Consulta[] = [
     title: "Compatibilidad",
     label: "Conexión",
     body: "Compara signos, energía emocional, ritmo y puntos de conflicto.",
-    image: "/zodi-art/sections/compatibilidad.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Compatibilidad.png",
     icon: HeartHandshake,
     kind: "compatibility",
     input: "Analiza compatibilidad amorosa y emocional con una persona que me interesa.",
@@ -59,7 +59,7 @@ const consultas: Consulta[] = [
     title: "Sueños",
     label: "Interpretación",
     body: "Convierte símbolos raros en mensajes útiles para tu momento actual.",
-    image: "/zodi-art/sections/energia-actual.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Tu-energia-actual.png",
     icon: Waves,
     kind: "dream",
     input: "Interpreta un sueño extraño y conviértelo en un mensaje práctico.",
@@ -68,7 +68,7 @@ const consultas: Consulta[] = [
     title: "Chino",
     label: "Animal y ciclo",
     body: "Revisa animal, elemento, compatibilidades y energía del periodo.",
-    image: "/zodi-art/sections/horoscopo-chino.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-chino.png",
     icon: CalendarDays,
     kind: "chinese-horoscope",
     input: "Dame mi horóscopo chino con animal, elemento, energía actual y consejo.",
@@ -77,7 +77,7 @@ const consultas: Consulta[] = [
     title: "Numerología",
     label: "Camino vital",
     body: "Calcula número de vida, vibración del nombre y fechas con carga energética.",
-    image: "/zodi-art/sections/numerologia.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Numerologia.png",
     icon: WandSparkles,
     kind: "numerology",
     input: "Analiza mi numerología, camino de vida, vibración actual y recomendación.",
@@ -281,15 +281,15 @@ export function ConsultationDock() {
         {/* Panel derecho — configuración y resultado */}
         <article className="glass-panel neon-border grid overflow-hidden rounded-2xl md:grid-cols-[0.85fr_1.15fr]">
           {/* Imagen de la consulta */}
-          <div className="relative min-h-40 bg-black/60 md:min-h-full">
+          <div className="relative aspect-[16/9] md:aspect-auto md:min-h-full bg-black/60">
             <Image
               src={active.image}
               alt={active.title}
               fill
               sizes="(max-width: 768px) 100vw, 40vw"
-              className={active.kind === "chinese-horoscope" || active.kind === "numerology" ? "object-contain p-4" : "object-cover"}
+              className="object-contain p-3 transition-all duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent md:bg-gradient-to-r" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent md:bg-gradient-to-r md:from-black/60 md:via-transparent md:to-transparent" />
             {/* Badge del título sobre la imagen en mobile */}
             <div className="absolute bottom-3 left-3 md:hidden">
               <span className="rounded-full bg-black/60 px-3 py-1.5 text-sm font-bold text-lime-200 backdrop-blur-sm">
