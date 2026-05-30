@@ -24,6 +24,19 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [loading, setLoading] = useState(false);
   const explicitAuthFlow = useRef(false);
 
+  // ── Leer errores desde la URL (para callbacks del servidor) ─────────
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlError = params.get("error");
+      if (urlError) {
+        setMessage(`Error del servidor: ${urlError}`);
+        // Limpiar la URL para que no persista el error al recargar
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
+
   // ── Procesar redirect de Google al montar ─────────────────────────
   // IMPORTANTE: Siempre llamar getRedirectResult() en cada mount (recomendación Firebase).
   // En PWAs, Google puede redirigir en un contexto nuevo donde sessionStorage se pierde.
