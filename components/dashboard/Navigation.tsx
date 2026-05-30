@@ -142,6 +142,7 @@ export function Sidebar() {
             src="/zodi-logo.png"
             alt="ZODI"
             fill
+            sizes="280px"
             className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.55)] mix-blend-screen"
             priority
           />

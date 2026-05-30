@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect } from "firebase/auth";
 import { AtSign, Calendar, Chrome, Lock, UserRound } from "lucide-react";
 import { getFirebaseAuth, googleProvider, isFirebaseConfigured } from "@/lib/firebase/client";
 
@@ -19,7 +19,7 @@ export function AuthOnboarding() {
 
   async function submitEmail() {
     if (!auth) {
-      setMessage("La puerta está cerrada por un momento. Puedes seguir explorando y volver a intentarlo en unos minutos.");
+      setMessage("Firebase no está configurado. Revisa las variables NEXT_PUBLIC_FIREBASE_*.");
       return;
     }
 
@@ -37,15 +37,48 @@ export function AuthOnboarding() {
 
   async function submitGoogle() {
     if (!auth) {
-      setMessage("Google no está disponible en este momento. Prueba con correo o vuelve en unos minutos.");
+      setMessage("Firebase no está configurado. Revisa las variables NEXT_PUBLIC_FIREBASE_*.");
       return;
     }
 
     try {
       await signInWithPopup(auth, googleProvider);
       setMessage("Listo. Ya puedes completar tu perfil astral.");
-    } catch {
-      setMessage("Google se hizo el misterioso. Inténtalo otra vez en un momento.");
+    } catch (err: any) {
+      const code = err?.code ?? "";
+
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+        setMessage("Inicio con Google cancelado.");
+        return;
+      }
+
+      if (code === "auth/account-exists-with-different-credential") {
+        setMessage("Ese correo ya existe con otro método. Entra con email y contraseña.");
+        return;
+      }
+
+      if (code === "auth/unauthorized-domain") {
+        setMessage("Este dominio no está autorizado en Firebase Authentication.");
+        return;
+      }
+
+      if (code === "auth/operation-not-allowed") {
+        setMessage("Google no está habilitado como proveedor en Firebase Authentication.");
+        return;
+      }
+
+      try {
+        await signInWithRedirect(auth, googleProvider);
+      } catch (redirectErr: any) {
+        const redirectCode = redirectErr?.code ?? "";
+        if (redirectCode === "auth/unauthorized-domain") {
+          setMessage("Este dominio no está autorizado en Firebase Authentication.");
+        } else if (redirectCode === "auth/operation-not-allowed") {
+          setMessage("Google no está habilitado como proveedor en Firebase Authentication.");
+        } else {
+          setMessage(`No pudimos abrir Google: ${redirectErr?.message || redirectCode || "error desconocido"}`);
+        }
+      }
     }
   }
 

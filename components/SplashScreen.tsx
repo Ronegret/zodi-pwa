@@ -71,6 +71,7 @@ export function SplashScreen() {
                 src="/zodi-logo.png"
                 alt="ZODI"
                 fill
+                sizes="192px"
                 className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.4)] mix-blend-screen"
                 priority
               />

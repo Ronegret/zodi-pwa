@@ -302,7 +302,7 @@ export function OnboardingFlow() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="relative h-14 w-40 sm:h-16 sm:w-52">
-          <Image src="/zodi-logo.png" alt="ZODI" fill className="object-contain object-left mix-blend-screen" />
+          <Image src="/zodi-logo.png" alt="ZODI" fill sizes="(min-width: 640px) 208px, 160px" className="object-contain object-left mix-blend-screen" />
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5">
