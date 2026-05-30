@@ -3,9 +3,9 @@
 import type { AstralProfile, OnboardingData, UserProfile } from "@/types/zodi";
 import { calculateSunSign } from "@/lib/astral";
 
-const SESSION_KEY  = "zodi.session";
+const SESSION_KEY    = "zodi.session";
 const ONBOARDING_KEY = "zodi.onboarding";
-const IDENTITY_KEY = "zodi.identity"; // Sobrevive clearLocalSession — nunca se borra
+const IDENTITY_KEY   = "zodi.identity"; // Nunca se borra — sobrevive logout y expiración
 
 export type LocalZodiSession = {
   isAuthenticated: boolean;
@@ -30,7 +30,8 @@ export function getLocalSession(): LocalZodiSession {
   try { parsed = JSON.parse(raw) as LocalZodiSession; }
   catch { return { isAuthenticated: false, onboardingCompleted: false }; }
 
-  // Expiración de 30 días — conserva datos para match por email tras caducidad
+  // Expiración de 30 días — solo marca como no autenticado, CONSERVA los datos
+  // para que el match por email funcione en el próximo login
   if (parsed.isAuthenticated && parsed.loginAt) {
     const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
     if (Date.now() - parsed.loginAt > THIRTY_DAYS) {
@@ -62,7 +63,7 @@ export function setLocalSession(session: Partial<LocalZodiSession>) {
     }));
   }
 
-  // Sincronizar estado a cookies para el middleware (Next.js)
+  // Sincronizar cookies — NUNCA llamar clearLocalSession() desde aquí
   if (nextSession.isAuthenticated) {
     document.cookie = "zodi_auth=1; path=/; max-age=2592000; SameSite=Lax";
     if (nextSession.onboardingCompleted) {
@@ -71,7 +72,9 @@ export function setLocalSession(session: Partial<LocalZodiSession>) {
       document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     }
   } else {
-    clearLocalSession();
+    // Solo borrar cookies, NO los datos de localStorage
+    document.cookie = "zodi_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   }
 }
 
@@ -81,16 +84,32 @@ export function getSavedIdentity(): { uid: string; email: string; onboardingComp
   catch { return null; }
 }
 
+// Marca como no autenticado pero CONSERVA los datos de sesión y onboarding
+// para reconocer al usuario en el próximo login por email/uid
 export function clearLocalSession() {
   if (typeof window === "undefined") return;
-  window.localStorage.removeItem(SESSION_KEY);
+
+  const raw = window.localStorage.getItem(SESSION_KEY);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as LocalZodiSession;
+      // Preservar todos los datos, solo marcar como no autenticado
+      window.localStorage.setItem(SESSION_KEY, JSON.stringify({
+        ...parsed,
+        isAuthenticated: false,
+      }));
+    } catch {
+      window.localStorage.removeItem(SESSION_KEY);
+    }
+  }
+
   window.localStorage.removeItem(ONBOARDING_KEY);
   document.cookie = "zodi_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 }
 
 export async function signOutZodi() {
-  clearLocalSession();
+  clearLocalSession(); // Marca isAuthenticated: false, conserva datos
 
   try {
     const [{ signOut }, { getFirebaseAuth }] = await Promise.all([
@@ -102,16 +121,16 @@ export async function signOutZodi() {
       await signOut(auth);
     }
   } catch {
-    // Local session is already cleared; Firebase may be unavailable in local/dev.
+    // Sesión local ya marcada como inactiva
   }
 }
 
 export function completeLocalOnboarding(data: OnboardingData, astralProfile: AstralProfile) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(ONBOARDING_KEY, JSON.stringify({ data, astralProfile }));
-  
+
   const currentSession = getLocalSession();
-  
+
   setLocalSession({
     isAuthenticated: true,
     onboardingCompleted: true,
@@ -120,7 +139,6 @@ export function completeLocalOnboarding(data: OnboardingData, astralProfile: Ast
     astralProfile
   });
 
-  // Si estamos en modo local (sin firebase o como fallback), actualizamos la base de datos local
   if (currentSession.uid?.startsWith("local_")) {
     const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
     try {
@@ -146,7 +164,6 @@ export function getSessionProfile(): Partial<UserProfile> | null {
   const od = session.onboardingData;
   const ap = session.astralProfile;
 
-  // Auto-migrate: recalculate sunSign from birthDate to fix any old boundary bug
   const correctedSunSign = od?.birthDate ? calculateSunSign(od.birthDate) : ap.sunSign;
   if (correctedSunSign !== ap.sunSign) {
     setLocalSession({ astralProfile: { ...ap, sunSign: correctedSunSign } });
