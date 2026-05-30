@@ -3,17 +3,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import {
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  onAuthStateChanged,
-  type User
-} from "firebase/auth";
-import { ArrowLeft, AtSign, Chrome, Eye, EyeOff, Lock, UserRound } from "lucide-react";
+import { getRedirectResult, signInWithRedirect, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
+import { ArrowLeft, AtSign, Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { getFirebaseAuth, googleProvider, appleProvider } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession } from "@/lib/session";
 
@@ -39,7 +30,22 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     let handled = false;
 
-    // Solo escuchar cambios de auth state
+    // 1. Procesar el resultado del redirect ANTES de escuchar el auth state
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user && !handled) {
+          handled = true;
+          applyFirebaseUser(result.user);
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        if (err.code !== "auth/redirect-cancelled-by-user") {
+           setMessage(`Error de redirección (${err.code}): ${err.message}`);
+        }
+      });
+
+    // 2. Escuchar cambios normales de estado de sesión
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user && !handled) {
         handled = true;
@@ -153,15 +159,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setLoading(true);
       try {
         const providerObj = provider === "google" ? googleProvider : appleProvider;
-        await signInWithPopup(auth, providerObj);
+        // Obligatorio usar signInWithRedirect en móviles/PWAs para evitar el bloqueo
+        // de Safari/Chrome a las ventanas emergentes (popups) y cookies cruzadas.
+        await signInWithRedirect(auth, providerObj);
       } catch (err: any) {
         setLoading(false);
-        if (err.code === "auth/account-exists-with-different-credential") {
-           setMessage("Ya existe una cuenta con este correo. Usa el método original.");
-        } else if (err.code !== "auth/popup-closed-by-user") {
-           // Mostramos el error real para poder depurarlo
-           setMessage(`Error ${provider === "google" ? "Google" : "Apple"}: ${err.message || err.code || "Desconocido"}.`);
-        }
+        setMessage(`Error al iniciar redirección: ${err.message || err.code}`);
       }
       return;
     }
