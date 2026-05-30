@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { getRedirectResult, signInWithRedirect, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
 import { ArrowLeft, AtSign, Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession } from "@/lib/session";
@@ -30,22 +30,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     let handled = false;
 
-    // 1. Procesar el resultado del redirect ANTES de escuchar el auth state
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user && !handled) {
-          handled = true;
-          applyFirebaseUser(result.user);
-        }
-      })
-      .catch((err) => {
-        setLoading(false);
-        if (err.code !== "auth/redirect-cancelled-by-user") {
-           setMessage(`Error de redirección (${err.code}): ${err.message}`);
-        }
-      });
-
-    // 2. Escuchar cambios normales de estado de sesión
+    // Solo escuchar cambios normales de estado de sesión
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user && !handled) {
         handled = true;
@@ -155,10 +140,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       if (!auth) return;
       setLoading(true);
       try {
-        await signInWithRedirect(auth, googleProvider);
+        await signInWithPopup(auth, googleProvider);
       } catch (err: any) {
         setLoading(false);
-        setMessage(`Error al iniciar redirección: ${err.message || err.code}`);
+        if (err.code !== "auth/popup-closed-by-user") {
+           setMessage(`Error Google: ${err.message || err.code}`);
+        }
       }
       return;
     }
