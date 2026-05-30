@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { featureModules } from "@/lib/data";
 
 const statusStyles = {
@@ -31,15 +30,10 @@ export function FeatureGrid() {
         </span>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {featureModules.map((module, index) => (
-          <motion.div
+        {featureModules.map((module) => (
+          <div
             key={`${module.slug}-${module.title}`}
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ delay: Math.min(index * 0.015, 0.2) }}
-            whileHover={{ y: -4 }}
-            className="glass-panel group rounded-md p-4"
+            className="glass-panel group rounded-md p-4 transition-transform duration-200 hover:-translate-y-1"
           >
             <Link href={`/dashboard/${module.slug}`} className="flex items-start gap-3">
               <div
@@ -59,7 +53,7 @@ export function FeatureGrid() {
                 <p className="mt-2 text-sm leading-6 text-white/62">{module.description}</p>
               </div>
             </Link>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>

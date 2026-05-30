@@ -1,13 +1,29 @@
 import { NextResponse } from "next/server";
-import { getFirebaseAdmin } from "@/lib/firebase/admin";
+import { getFirebaseAdmin, getFirebaseAuth } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(request: Request) {
   try {
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const idToken = authHeader.split("Bearer ")[1];
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      return NextResponse.json({ error: "Server config error" }, { status: 500 });
+    }
+    let decoded;
+    try {
+      decoded = await auth.verifyIdToken(idToken);
+    } catch (e) {
+      return NextResponse.json({ error: "Token inválido" }, { status: 401 });
+    }
+
     const { referrerId, newUserId } = await request.json();
 
-    if (!referrerId || !newUserId) {
-      return NextResponse.json({ error: "Faltan parámetros" }, { status: 400 });
+    if (!referrerId || !newUserId || decoded.uid !== newUserId) {
+      return NextResponse.json({ error: "Faltan parámetros o sin permisos" }, { status: 400 });
     }
 
     const db = await getFirebaseAdmin();

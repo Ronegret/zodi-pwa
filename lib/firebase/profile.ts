@@ -137,12 +137,12 @@ export const zodiFirebaseSchema = firebaseCollections.map((collection) => {
     favorites: ["uid", "readingId", "createdAt"],
     history: ["uid", "eventType", "metadata", "createdAt"],
     subscriptions: ["uid", "plan", "status", "renewalDate"],
-    communityPosts: ["authorUid", "username", "zodiac", "body", "heat", "createdAt"],
-    dailyTopicComments: ["topic", "authorUid", "username", "body", "createdAt"],
-    comments: ["postId", "authorUid", "username", "body", "createdAt"],
+    communityPosts: ["authorId", "username", "zodiac", "body", "heat", "createdAt"],
+    dailyTopicComments: ["topic", "authorId", "username", "body", "createdAt"],
+    comments: ["postId", "authorId", "username", "body", "createdAt"],
     reactions: ["targetId", "targetType", "uid", "reaction"],
     friends: ["requesterUid", "receiverUid", "status"],
-    chatMessages: ["authorUid", "fromUsername", "toUsername", "body", "createdAt"],
+    chatMessages: ["userId", "authorId", "fromUsername", "toUsername", "body", "createdAt"],
     achievements: ["uid", "achievementId", "xp", "unlockedAt"],
     notifications: ["uid", "type", "title", "body", "read"]
   };

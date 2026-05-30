@@ -30,8 +30,11 @@ export async function saveCommunityPost(input: CommunityPostInput) {
   if (!db) return { ok: false };
 
   const auth = getFirebaseAuth();
+  const uid = auth?.currentUser?.uid;
+  if (!uid) return { ok: false, reason: "auth-required" };
+
   await addDoc(collection(db, "communityPosts"), {
-    authorUid: auth?.currentUser?.uid ?? null,
+    authorId: uid,
     username: input.username,
     zodiac: input.sign,
     body: input.body,
@@ -47,9 +50,12 @@ export async function saveCommunityComment(input: CommentInput) {
   if (!db) return { ok: false };
 
   const auth = getFirebaseAuth();
+  const uid = auth?.currentUser?.uid;
+  if (!uid) return { ok: false, reason: "auth-required" };
+
   await addDoc(collection(db, "comments"), {
     postId: input.postId,
-    authorUid: auth?.currentUser?.uid ?? null,
+    authorId: uid,
     username: input.username,
     body: input.body,
     createdAt: serverTimestamp()
@@ -63,9 +69,12 @@ export async function saveDailyTopicComment(input: TopicCommentInput) {
   if (!db) return { ok: false };
 
   const auth = getFirebaseAuth();
+  const uid = auth?.currentUser?.uid;
+  if (!uid) return { ok: false, reason: "auth-required" };
+
   await addDoc(collection(db, "dailyTopicComments"), {
     topic: input.topic,
-    authorUid: auth?.currentUser?.uid ?? null,
+    authorId: uid,
     username: input.username,
     body: input.body,
     createdAt: serverTimestamp()
@@ -79,8 +88,12 @@ export async function saveChatMessage(input: ChatMessageInput) {
   if (!db) return { ok: false };
 
   const auth = getFirebaseAuth();
+  const uid = auth?.currentUser?.uid;
+  if (!uid) return { ok: false, reason: "auth-required" };
+
   await addDoc(collection(db, "chatMessages"), {
-    authorUid: auth?.currentUser?.uid ?? null,
+    userId: uid,
+    authorId: uid,
     fromUsername: input.fromUsername,
     toUsername: input.toUsername,
     body: input.body,
@@ -101,7 +114,7 @@ export async function deletePrivateChat(fromUsername: string, toUsername: string
   const chatId = [fromUsername, toUsername].sort().join("--");
   await setDoc(
     doc(db, "deletedChats", `${uid}--${chatId}`),
-    { uid, fromUsername, toUsername, deletedAt: serverTimestamp() },
+    { userId: uid, fromUsername, toUsername, deletedAt: serverTimestamp() },
     { merge: true }
   );
 

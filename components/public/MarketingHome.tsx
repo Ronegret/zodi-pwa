@@ -292,6 +292,7 @@ export function MarketingHome() {
               <motion.div whileHover={{ y: -6 }} className="glass-panel group flex h-full flex-col overflow-hidden rounded-lg">
                 <button
                   type="button"
+                  aria-label={`Ampliar ${item.title}`}
                   className="relative block aspect-[4/3] w-full overflow-hidden border-b border-white/10"
                   onClick={() => setLightbox(item.image)}
                 >
@@ -377,6 +378,8 @@ export function MarketingHome() {
           ].map((card, idx) => (
             <FadeUp key={card} delay={idx * 0.1}>
               <button
+                type="button"
+                aria-label={`Ampliar carta ${card.replace(".png", "").replaceAll("-", " ")}`}
                 onClick={() => setLightbox(`/zodi-art/nuevas/8-Tarot-ZODI/${card}`)}
                 className="group relative block w-48 shrink-0 snap-center overflow-hidden rounded-xl glass-panel p-1.5 transition hover:border-lime-300/40"
               >
@@ -412,6 +415,8 @@ export function MarketingHome() {
           ].map((avatar, idx) => (
             <FadeUp key={avatar} delay={idx * 0.05}>
               <button
+                type="button"
+                aria-label={`Ampliar avatar ${avatar.replace(".png", "").replaceAll("_", " ")}`}
                 onClick={() => setLightbox(`/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${avatar}`)}
                 className="group relative block w-32 sm:w-40 shrink-0 snap-center overflow-hidden rounded-full glass-panel p-2 transition hover:border-lime-300/40 hover:scale-105"
               >
@@ -438,6 +443,8 @@ export function MarketingHome() {
             </p>
           </div>
           <button
+            type="button"
+            aria-label="Ampliar numerologia ZODI"
             onClick={() => setLightbox("/zodi-art/nuevas/7-Numerologia/Imagen-general-numerologia.png")}
             className="group relative block w-full overflow-hidden rounded-2xl glass-panel p-2"
           >
@@ -465,6 +472,8 @@ export function MarketingHome() {
             <FadeUp key={card.title} delay={index * 0.1}>
               <motion.article whileHover={{ y: -8 }} className="glass-panel group overflow-hidden rounded-md h-full">
                 <button
+                  type="button"
+                  aria-label={`Ampliar ${card.title}`}
                   onClick={() => setLightbox(card.img)}
                   className="relative block w-full overflow-hidden"
                 >
@@ -512,6 +521,8 @@ export function MarketingHome() {
         <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="glass-panel overflow-hidden rounded-md p-4">
             <button
+              type="button"
+              aria-label="Ampliar vista del panel ZODI"
               onClick={() => setLightbox("/zodi-art/ritual-wide.png")}
               className="relative block w-full overflow-hidden rounded-md"
             >
@@ -604,7 +615,7 @@ export function MarketingHome() {
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
           <div>
             <Link href="/" className="inline-block scale-110 origin-left">
-              <Image src="/zodi-logo-mark.png" alt="Logo de ZODI" width={200} height={92} className="h-auto w-48 drop-shadow-[0_0_15px_rgba(184,255,23,0.3)] mix-blend-screen" />
+              <Image src="/zodi-art/brand/isotipo.png" alt="Logo de ZODI" width={200} height={92} className="h-auto w-48 drop-shadow-[0_0_15px_rgba(184,255,23,0.3)] mix-blend-screen" />
             </Link>
             <p className="mt-6 max-w-sm text-sm leading-6 text-white/62">
               ZODI es un espacio místico, visual y social para consultar señales, guardar lecturas y reírte un poco de tus patrones. Con cariño. Con neón. Con cero ganas de venderte paz falsa.
@@ -626,15 +637,9 @@ export function MarketingHome() {
 // ── Reusable scroll-triggered fade-up wrapper ──────────────────────────────
 function FadeUp({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.1 }}
-      transition={{ duration: 0.5, ease: "easeOut", delay }}
-      className={className}
-    >
+    <div className={className}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -643,24 +648,12 @@ function Section({ id, kicker, title, children }: { id: string; kicker: string; 
   return (
     <section id={id} className="px-4 py-12 sm:py-16">
       <div className="mx-auto max-w-7xl">
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/70"
-        >
+        <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/70">
           {kicker}
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-          className="mt-3 mb-7 max-w-4xl text-3xl font-black leading-tight sm:text-5xl"
-        >
+        </p>
+        <h2 className="mt-3 mb-7 max-w-4xl text-3xl font-black leading-tight sm:text-5xl">
           {title}
-        </motion.h2>
+        </h2>
         {children}
       </div>
     </section>

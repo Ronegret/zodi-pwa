@@ -15,7 +15,7 @@ const zodiAssetsCache: RuntimeCaching = {
     return url.pathname.startsWith('/zodi-art/') || url.pathname.startsWith('/zodiac/');
   },
   handler: new CacheFirst({
-    cacheName: 'zodi-assets-v1',
+    cacheName: 'zodi-assets-v2',
     plugins: [
       new ExpirationPlugin({
         maxEntries: 200,

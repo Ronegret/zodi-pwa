@@ -3,9 +3,15 @@ import Stripe from "stripe";
 import { getFirebaseAdmin } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_test_123", {
-  apiVersion: "2024-04-10" as any,
-});
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return null;
+  }
+
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-04-10" as any,
+  });
+}
 
 export async function POST(req: Request) {
   const payload = await req.text();
@@ -15,9 +21,16 @@ export async function POST(req: Request) {
 
   try {
     if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      if (process.env.NODE_ENV === "production") {
+        return NextResponse.json({ error: "Missing Stripe Webhook Secret" }, { status: 500 });
+      }
       console.warn("Stripe webhook secret not configured, skipping signature verification.");
       event = JSON.parse(payload);
     } else {
+      const stripe = getStripe();
+      if (!stripe) {
+        return NextResponse.json({ error: "Missing Stripe Secret Key" }, { status: 500 });
+      }
       event = stripe.webhooks.constructEvent(payload, sig!, process.env.STRIPE_WEBHOOK_SECRET);
     }
   } catch (err: any) {

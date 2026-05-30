@@ -579,8 +579,20 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Hide fixed atmospheric bg images on mobile — they're <8% opacity and
      invisible, but keeping them as fixed layers forces full-page repaints */
-  .dashboard-bg {
+  .dashboard-bg,
+  body::after {
     display: none;
+  }
+
+  /* Disable expensive blend modes, backdrop filters and drop shadows globally on mobile */
+  * {
+    mix-blend-mode: normal !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  img, svg, video {
+    filter: none !important;
   }
 
   /* Kill all looping animations that compete with video on mobile */

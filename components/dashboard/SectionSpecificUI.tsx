@@ -75,12 +75,36 @@ function useConsult(section: DashboardSection) {
     setReply("");
     const fullInput = input + (lengthHints[length] ?? "");
     try {
+      let token = "";
+      try {
+        const { getFirebaseAuth } = await import("@/lib/firebase/client");
+        const auth = getFirebaseAuth();
+        if (auth?.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      } catch (e) {
+        // Ignorar si falla Firebase
+      }
+
+      if (!token) {
+        setReply("Necesitas iniciar sesión para consultar a ZODI.");
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch("/api/ai/reading", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ provider: "auto", kind: section.kind, input: fullInput, profile }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setReply(data.error || "Necesitas iniciar sesiÃ³n para consultar a ZODI.");
+        return;
+      }
       setReply(data.text || data.reading || "El universo tardó demasiado. Reintenta.");
     } catch {
       setReply("Señal cortada. El universo también tiene días de mala cobertura.");
@@ -2051,14 +2075,36 @@ function EmailSubscriptionBanner() {
     if (!email.includes("@")) return alert("Ingresa un correo válido");
     setLoading(true);
     try {
+      let token = "";
+      let uid = "user";
+      try {
+        const { getFirebaseAuth } = await import("@/lib/firebase/client");
+        const auth = getFirebaseAuth();
+        if (auth?.currentUser) {
+          token = await auth.currentUser.getIdToken();
+          uid = auth.currentUser.uid;
+        }
+      } catch (e) {}
+
+      if (!token) {
+        alert("Necesitas iniciar sesión para suscribirte.");
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch("/api/subscribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uid: "user", email, subscribe: true })
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ uid, email, subscribe: true })
       });
       if (res.ok) {
         setSubscribed(true);
         alert("¡Te has suscrito al caos diario de ZODI!");
+      } else {
+        alert("Hubo un error al procesar tu suscripción.");
       }
     } catch (e) { }
     setLoading(false);

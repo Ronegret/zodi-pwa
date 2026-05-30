@@ -85,7 +85,7 @@ export function HeroConsole() {
   }, []);
 
   const firstName = profile?.displayName?.split(" ")[0] ?? "";
-  const avatar = profile?.avatar ?? "/icons/icon-192.png";
+  const avatar = profile?.avatar ?? "/icons/icon-192-v3.png";
   const dailySignals = getDailySignals(ctx, profile?.zodiac ?? undefined);
   const { level, xpCurrent, xpNeeded, xpPercent, streak } = xpState;
   const levelTitle = getLevelTitle(level);
@@ -170,7 +170,7 @@ export function HeroConsole() {
       {/* Right panel — profile card */}
       <div className="glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
         <Image
-          src="/zodi-logo-mark.png"
+          src="/zodi-art/brand/isotipo.png"
           alt="ZODI sigil"
           width={380}
           height={380}

@@ -194,17 +194,29 @@ export function OnboardingFlow() {
       // Bonus por referido
       const refCode = localStorage.getItem("zodi_ref_code");
       if (refCode && session.uid && refCode !== session.uid) {
-        // Bono extra para el nuevo
-        gamification.addGems(200); 
-        
         // Notificar al backend para premiar al embajador (el que invitó)
-        fetch("/api/user/referral", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ referrerId: refCode, newUserId: session.uid })
-        }).catch(() => {});
+        let token = "";
+        try {
+          const { getFirebaseAuth } = await import("@/lib/firebase/client");
+          const auth = getFirebaseAuth();
+          if (auth?.currentUser) token = await auth.currentUser.getIdToken();
+        } catch (e) {}
 
-        localStorage.removeItem("zodi_ref_code");
+        if (token) {
+          const response = await fetch("/api/user/referral", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ referrerId: refCode, newUserId: session.uid })
+          });
+
+          if (response.ok) {
+            gamification.addGems(200);
+            localStorage.removeItem("zodi_ref_code");
+          }
+        }
       }
     } catch (e) { 
       console.warn("No se pudieron cargar las recompensas locales", e); 
@@ -241,7 +253,7 @@ export function OnboardingFlow() {
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             className="h-28 w-28 overflow-hidden rounded-full border-2 border-lime-300/50 shadow-[0_0_32px_rgba(184,255,23,0.35)]"
           >
-            <Image src="/zodi-logo-mark.png" alt="ZODI calculando" width={112} height={112} className="h-full w-full object-contain p-2 mix-blend-screen" />
+            <Image src="/zodi-art/brand/isotipo.png" alt="ZODI calculando" width={112} height={112} className="h-full w-full object-contain p-2 mix-blend-screen" />
           </motion.div>
           {/* Centro */}
           <div className="absolute inset-0 flex items-center justify-center">
@@ -290,7 +302,7 @@ export function OnboardingFlow() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="relative h-10 w-28">
-          <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain mix-blend-screen" />
+          <Image src="/zodi-art/brand/isotipo.png" alt="ZODI" fill className="object-contain mix-blend-screen" />
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5">

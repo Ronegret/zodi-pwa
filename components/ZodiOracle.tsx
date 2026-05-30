@@ -43,7 +43,7 @@ export function ZodiOracle() {
     const auth = getFirebaseAuth();
     const user = auth?.currentUser;
 
-    if (!session.isAuthenticated) {
+    if (!session.isAuthenticated || !user) {
       alert("Debes iniciar sesión para consultar al oráculo.");
       return;
     }
@@ -51,7 +51,7 @@ export function ZodiOracle() {
     // Check Daily Energy or Gems
     const today = new Date().toISOString().split('T')[0];
     const lastDaily = localStorage.getItem('zodi.daily_oracle_used');
-    let hasDaily = lastDaily !== today;
+    const hasDaily = lastDaily !== today;
     
     if (!hasDaily) {
       // Must use Gems (cost: 5 gems per question)
@@ -60,9 +60,6 @@ export function ZodiOracle() {
         alert("Te has quedado sin energía libre y no tienes suficientes gemas (Cuesta 5). Ve a la tienda a comprar más Gemas.");
         return;
       }
-      spendGems(5);
-    } else {
-      localStorage.setItem('zodi.daily_oracle_used', today);
     }
 
     const userMsg = input.trim();
@@ -72,10 +69,7 @@ export function ZodiOracle() {
     setLoading(true);
 
     try {
-      let token = "local_fallback";
-      if (user) {
-        token = await user.getIdToken();
-      }
+      const token = await user.getIdToken();
       // Slice history to the last 4 messages to save tokens
       const historyToKeep = newMessages.slice(-4);
       
@@ -92,6 +86,14 @@ export function ZodiOracle() {
       });
       
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "No se pudo consultar al orÃ¡culo.");
+      }
+      if (hasDaily) {
+        localStorage.setItem('zodi.daily_oracle_used', today);
+      } else {
+        spendGems(5);
+      }
       setMessages(prev => [...prev, { role: "zodi", text: data.text }]);
     } catch (e) {
       setMessages(prev => [...prev, { role: "zodi", text: "Error de red cósmico. Se me ha caído la bola de cristal." }]);
@@ -128,7 +130,7 @@ export function ZodiOracle() {
             <div className="flex items-center justify-between border-b border-lime-300/10 bg-black p-4">
               <div className="flex items-center gap-3">
                 <div className="relative h-10 w-10 overflow-hidden rounded-full border border-lime-300/30">
-                  <Image src="/zodi-logo-mark.png" alt="ZODI" fill className="object-contain p-1" />
+                  <Image src="/zodi-art/brand/isotipo.png" alt="ZODI" fill className="object-contain p-1" />
                 </div>
                 <div>
                   <h3 className="font-display font-black text-lime-300 text-xl tracking-wide">ZODI Oráculo</h3>

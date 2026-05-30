@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
 import { ArrowLeft, AtSign, Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
@@ -22,6 +22,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [remember, setRemember] = useState(true);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const explicitAuthFlow = useRef(false);
 
   // ── Detectar sesión activa de Firebase al montar ──────────────────
   useEffect(() => {
@@ -32,7 +33,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     // Solo escuchar cambios normales de estado de sesión
     const unsub = onAuthStateChanged(auth, (user) => {
-      if (user && !handled) {
+      if (user && !handled && !explicitAuthFlow.current) {
         handled = true;
         applyFirebaseUser(user);
       }
@@ -42,11 +43,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function applyFirebaseUser(user: User) {
+  async function applyFirebaseUser(user: User, forceNewUser: boolean = false) {
+    // ── Step 1: Default to what we have locally ──
     const preserved = getLocalSession();
+    let localDone = preserved.onboardingCompleted;
 
-    // ── Step 1: Check local session first (fast path) ──
-    const localDone = preserved.onboardingCompleted && Boolean(preserved.astralProfile);
+    if (forceNewUser) {
+      localDone = false;
+    }
 
     // ── Step 2: Always try to restore from Firestore (source of truth) ──
     let firestoreDone = false;
@@ -54,18 +58,18 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       const { getDoc, doc } = await import("firebase/firestore");
       const { getFirebaseDb } = await import("@/lib/firebase/client");
       const db = getFirebaseDb();
-      if (db) {
+      if (db && !forceNewUser) {
         const [userSnap, astralSnap] = await Promise.all([
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
 
-        if (userSnap.exists() && userSnap.data().onboardingCompleted) {
+        if (userSnap.exists() && userSnap.data().onboardingCompleted && astralSnap.exists()) {
           const userData = userSnap.data();
-          const astralData = astralSnap.exists() ? astralSnap.data() : null;
+          const astralData = astralSnap.data();
 
           // Restore full session from Firestore
-          const onboardingData = astralData ? {
+          const onboardingData = {
             displayName: userData.displayName ?? "",
             username: userData.username ?? "",
             avatar: userData.avatar ?? "/zodi-art/perfil/perfil-1.png",
@@ -77,9 +81,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             readingTone: userData.readingTone ?? "directo",
             favoriteTopics: userData.favoriteTopics ?? [],
             notificationPreferences: userData.notificationPreferences ?? { dailyHoroscope: true, weeklyReport: false, specialEvents: true },
-          } : preserved.onboardingData;
+          };
 
-          const astralProfile = astralData ? {
+          const astralProfile = {
             sunSign: astralData.sunSign ?? "",
             moonSign: astralData.moonSign ?? "",
             ascendant: astralData.ascendant ?? "",
@@ -87,7 +91,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             chineseZodiac: astralData.chineseZodiac ?? "",
             mayanSign: astralData.mayanSign ?? "",
             biorhythmBaseline: astralData.biorhythmBaseline ?? new Date().toISOString(),
-          } : preserved.astralProfile;
+          };
 
           setLocalSession({
             isAuthenticated: true,
@@ -137,14 +141,27 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     // ── Third-Party OAuth (Google) ────────────────────────────
     if (provider === "google") {
       const auth = getFirebaseAuth();
-      if (!auth) return;
+      if (!auth) {
+        setMessage("Firebase no estÃ¡ configurado para iniciar sesiÃ³n con Google.");
+        return;
+      }
       setLoading(true);
+      explicitAuthFlow.current = true;
       try {
-        await signInWithPopup(auth, googleProvider);
+        const { getAdditionalUserInfo } = await import("firebase/auth");
+        const result = await signInWithPopup(auth, googleProvider);
+        const details = getAdditionalUserInfo(result);
+
+        await applyFirebaseUser(result.user, details?.isNewUser);
       } catch (err: any) {
         setLoading(false);
+        explicitAuthFlow.current = false;
         if (err.code !== "auth/popup-closed-by-user") {
-           setMessage(`Error Google: ${err.message || err.code}`);
+          if (err.code === "auth/account-exists-with-different-credential") {
+            setMessage("Ese correo ya existe con otro mÃ©todo. Inicia sesiÃ³n con email y contraseÃ±a, o vincula Google desde tu cuenta.");
+          } else {
+            setMessage(`Error Google: ${err.message || err.code}`);
+          }
         }
       }
       return;
@@ -318,10 +335,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         {mode === "login" ? "Vuelve al oráculo." : "Crea tu cuenta astral."}
       </h1>
 
-      <div className="mt-4 sm:mt-8 grid gap-2 sm:gap-3">
+      <form id="zodi-auth-form" className="mt-4 sm:mt-8 grid gap-2 sm:gap-3" onSubmit={(event) => { event.preventDefault(); void continueFlow("email"); }}>
         {mode === "register" ? (
           <>
-            <Field icon={UserRound} label="Nombre" value={name} onChange={setName} type="text" placeholder="Tu nombre visible" />
+            <Field icon={UserRound} label="Nombre" value={name} onChange={setName} type="text" name="name" autoComplete="name" placeholder="Tu nombre visible" />
             <div className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3">
               <span className="mb-1 sm:mb-2 flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/45">
                  Idioma de la App
@@ -334,7 +351,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             </div>
           </>
         ) : null}
-        <Field icon={AtSign} label="Correo" value={email} onChange={setEmail} type="email" placeholder="tu@email.com" />
+        <Field icon={AtSign} label="Correo" value={email} onChange={setEmail} type="email" name="email" autoComplete="email" placeholder="tu@email.com" />
         <div className="relative">
           <Field
             icon={Lock}
@@ -342,6 +359,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             value={password}
             onChange={setPassword}
             type={showPwd ? "text" : "password"}
+            name={mode === "login" ? "current-password" : "new-password"}
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
             placeholder="Mínimo 6 caracteres"
           />
           <button
@@ -360,20 +379,22 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             value={confirm}
             onChange={setConfirm}
             type={showPwd ? "text" : "password"}
+            name="confirm-password"
+            autoComplete="new-password"
             placeholder="Repite tu contraseña"
           />
         ) : null}
-      </div>
+      </form>
 
       <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-xs sm:text-sm text-white/62">
         {mode === "login" ? (
           <label className="flex cursor-pointer items-center gap-2">
-            <input checked={remember} onChange={(e) => setRemember(e.target.checked)} type="checkbox" />
+            <input checked={remember} onChange={(e) => setRemember(e.target.checked)} type="checkbox" name="remember" />
             Recordar sesión
           </label>
         ) : (
           <label className="flex cursor-pointer items-center gap-2">
-            <input checked={terms} onChange={(e) => setTerms(e.target.checked)} type="checkbox" />
+            <input checked={terms} onChange={(e) => setTerms(e.target.checked)} type="checkbox" name="terms" />
             Aceptar términos
           </label>
         )}
@@ -385,7 +406,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       </div>
 
       <button
-        onClick={() => continueFlow("email")}
+        type="submit"
+        form="zodi-auth-form"
         disabled={loading}
         className="mt-4 sm:mt-6 w-full rounded-md bg-lime-300 px-4 py-2.5 sm:py-3 text-sm sm:text-base font-black text-black disabled:opacity-60 active:scale-95 transition"
       >
@@ -447,7 +469,9 @@ function Field({
   value,
   onChange,
   type,
-  placeholder
+  placeholder,
+  name,
+  autoComplete
 }: {
   icon: typeof AtSign;
   label: string;
@@ -455,6 +479,8 @@ function Field({
   onChange: (value: string) => void;
   type: string;
   placeholder?: string;
+  name: string;
+  autoComplete: string;
 }) {
   return (
     <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3 cursor-text">
@@ -464,6 +490,8 @@ function Field({
       <input
         className="w-full bg-transparent text-white outline-none placeholder:text-white/30 text-sm sm:text-base"
         type={type}
+        name={name}
+        autoComplete={autoComplete}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}

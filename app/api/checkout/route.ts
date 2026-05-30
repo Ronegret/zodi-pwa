@@ -3,9 +3,15 @@ import Stripe from "stripe";
 import { getFirebaseAuth } from "@/lib/firebase/admin";
 import { z } from "zod";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "sk_test_123", {
-  apiVersion: "2024-04-10" as any,
-});
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return null;
+  }
+
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2024-04-10" as any,
+  });
+}
 
 const CheckoutSchema = z.object({
   uid: z.string().min(5),
@@ -54,8 +60,15 @@ export async function POST(req: Request) {
     };
 
     const selectedPack = packs[packId] ?? packs["crisis"];
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const productImages = siteUrl.startsWith("https://") ? [`${siteUrl}/zodi-logo.png`] : undefined;
 
     // Set up the Stripe session
+    const stripe = getStripe();
+    if (!stripe) {
+      return NextResponse.json({ error: "Stripe no estÃ¡ configurado" }, { status: 500 });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "bizum"],
       customer_email: email,
@@ -71,7 +84,7 @@ export async function POST(req: Request) {
             product_data: {
               name: selectedPack.name,
               description: `Añade ${selectedPack.gems} Gemas a tu cuenta ZODI para consultar el oráculo libremente.`,
-              images: ["https://zodi.aibueno.es/zodi-logo-mark.png"],
+              images: productImages,
             },
             unit_amount: selectedPack.price, // in cents (1.99 EUR)
           },
@@ -79,8 +92,8 @@ export async function POST(req: Request) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/dashboard?payment=success&gems=${selectedPack.gems}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/dashboard/premium?payment=cancelled`,
+      success_url: `${siteUrl}/dashboard?payment=success&gems=${selectedPack.gems}`,
+      cancel_url: `${siteUrl}/dashboard/premium?payment=cancelled`,
     });
 
     return NextResponse.json({ sessionId: session.id, url: session.url });

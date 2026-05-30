@@ -46,6 +46,8 @@ export function MusicPlayer() {
         animate={{ opacity: 1, scale: 1 }}
         whileHover={{ scale: 1.1 }}
         onClick={togglePlay}
+        aria-label={isPlaying ? "Pausar musica ZODI" : "Reproducir musica ZODI"}
+        type="button"
         className="relative h-10 w-10 overflow-hidden rounded-full border border-lime-300/40 shadow-[0_0_15px_rgba(184,255,23,0.15)]"
       >
         {/* Vinilo girando si está reproduciendo */}

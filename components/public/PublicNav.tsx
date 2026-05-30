@@ -101,7 +101,7 @@ export function PublicNav() {
       >
         <div className="mx-auto flex w-full h-16 max-w-7xl items-center justify-between px-4">
           {/* ── LOGO ── */}
-          <Link href="/" className="shrink-0" onClick={() => setOpen(false)}>
+          <Link href="/" className="shrink-0 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-lime-300" onClick={() => setOpen(false)}>
             <span className="relative block h-14 w-40 sm:h-16 sm:w-48">
               <Image
                 src="/zodi-logo.png"
@@ -115,9 +115,9 @@ export function PublicNav() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden items-center gap-7 text-sm font-semibold text-white/55 md:flex">
+          <nav className="hidden items-center gap-2 text-sm font-semibold text-white/55 md:flex">
             {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="transition hover:text-lime-300">
+              <a key={link.href} href={link.href} className="rounded-md px-3 py-3 transition hover:text-lime-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-lime-300">
                 {link.label}
               </a>
             ))}
@@ -128,13 +128,13 @@ export function PublicNav() {
           <div className="flex items-center gap-2">
             <Link
               href="/auth/login"
-              className="rounded-lg border border-white/15 px-3 py-1.5 text-xs sm:text-sm font-bold text-white/75 transition hover:border-white/30"
+              className="rounded-lg border border-white/15 px-3 py-2.5 text-xs sm:text-sm font-bold text-white/75 transition hover:border-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-lime-300"
             >
               Entrar
             </Link>
             <Link
               href="/auth/register"
-              className="rounded-lg bg-lime-300 px-3 py-1.5 text-xs sm:text-sm font-black text-black transition hover:bg-lime-200"
+              className="rounded-lg bg-lime-300 px-3 py-2.5 text-xs sm:text-sm font-black text-black transition hover:bg-lime-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-lime-300"
             >
               Crear cuenta
             </Link>
