@@ -1,5 +1,5 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -49,7 +49,3 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 googleProvider.addScope("email");
 googleProvider.addScope("profile");
-
-export const appleProvider = new OAuthProvider("apple.com");
-appleProvider.addScope("email");
-appleProvider.addScope("name");
