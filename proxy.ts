@@ -17,7 +17,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/onboarding', request.url));
   }
 
-  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname === '/onboarding';
+  const isProtectedRoute = pathname === '/onboarding';
 
   if (isProtectedRoute && !isAuthenticated) {
     return NextResponse.redirect(new URL('/auth/login', request.url));

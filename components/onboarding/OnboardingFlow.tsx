@@ -301,8 +301,8 @@ export function OnboardingFlow() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <div className="relative h-10 w-28">
-          <Image src="/zodi-art/brand/isotipo.png" alt="ZODI" fill className="object-contain mix-blend-screen" />
+        <div className="relative h-14 w-40 sm:h-16 sm:w-52">
+          <Image src="/zodi-logo.png" alt="ZODI" fill className="object-contain object-left mix-blend-screen" />
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5">
@@ -359,8 +359,9 @@ export function OnboardingFlow() {
                       placeholder="Neon Bruja, La Scorpio, tu nombre real..."
                     />
                   </div>
-                  <Input label="Usuario (@)" value={data.username} onChange={(v) => update("username", v)} placeholder="@zodiserpiente" />
-                  <Input label="Género (opcional)" value={data.genderIdentity ?? ""} onChange={(v) => update("genderIdentity", v)} placeholder="Libre" />
+                  <div className="sm:col-span-2">
+                    <Input label="Usuario (@)" value={data.username} onChange={(v) => update("username", v)} placeholder="@zodiserpiente" />
+                  </div>
                 </div>
 
                 {/* Avatar */}

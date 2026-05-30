@@ -56,6 +56,7 @@ export const viewport: Viewport = {
 
 import { CookieBanner } from "@/components/public/CookieBanner";
 import { SplashScreen } from "@/components/SplashScreen";
+import { PwaBoot } from "@/components/pwa/PwaBoot";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const jsonLd = {
@@ -92,6 +93,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body suppressHydrationWarning>
+        <PwaBoot />
         <SplashScreen />
         {children}
         <ZodiOracle />

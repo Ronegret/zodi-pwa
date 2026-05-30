@@ -68,9 +68,8 @@ service cloud.firestore {
     // Para escribir, evitamos que sumen 10000 gemas manualmente; solo el Admin SDK o incrementos permitidos.
     match /gamification/{userId} {
       allow read: if isOwner(userId);
-      // Permitimos la creación si las gemas son 0 o 300 iniciales, pero lo ideal es que Firebase Admin las maneje.
-      // Como el Frontend está actualizando algunas, limitamos la manipulación brusca.
-      allow create, update: if isOwner(userId);
+      // Las escrituras de gemas, compras y referidos pasan solo por backend/Admin SDK.
+      allow create, update, delete: if false;
     }
 
     // Reglas de Comunidad y Chats

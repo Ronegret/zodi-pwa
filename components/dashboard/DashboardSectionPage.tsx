@@ -6,7 +6,6 @@ import { useState } from "react";
 import { CommunityHub } from "@/components/dashboard/CommunityHub";
 import { SectionSpecificUI } from "@/components/dashboard/SectionSpecificUI";
 import { plans } from "@/lib/data";
-import { GemStore } from "@/components/dashboard/GemStore";
 import { getDashboardSection } from "@/lib/dashboard-sections";
 
 // Maps section slugs to atmospheric background images
@@ -130,10 +129,6 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
         </section>
       )}
 
-      {/* Gem Store — only for premium section */}
-      {section.slug === "premium" && (
-        <GemStore />
-      )}
     </div>
   );
 }

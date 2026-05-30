@@ -192,7 +192,7 @@ export function MarketingHome() {
             <p className="stagger-1 mb-4 inline-block rounded-full border border-lime-300/30 bg-lime-300/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-lime-300">
               ✦ Oráculo Astral ZODI ✦
             </p>
-            <h1 className="glitch-text stagger-2 max-w-4xl text-5xl font-black leading-[1.02] sm:text-7xl lg:text-8xl"
+            <h1 className="glitch-text stagger-2 max-w-4xl text-5xl font-black leading-[1.04] sm:text-6xl lg:text-7xl"
               style={{ fontFamily:"var(--font-display)" }}>
               Zodi te lee el futuro y te juzga el presente.
             </h1>
@@ -614,8 +614,8 @@ export function MarketingHome() {
       <footer className="border-t border-white/10 px-4 py-10">
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
           <div>
-            <Link href="/" className="inline-block scale-110 origin-left">
-              <Image src="/zodi-art/brand/isotipo.png" alt="Logo de ZODI" width={200} height={92} className="h-auto w-48 drop-shadow-[0_0_15px_rgba(184,255,23,0.3)] mix-blend-screen" />
+            <Link href="/" className="inline-block origin-left">
+              <Image src="/zodi-logo.png" alt="Logo de ZODI" width={420} height={280} className="h-auto w-56 max-w-full drop-shadow-[0_0_15px_rgba(184,255,23,0.3)] mix-blend-screen" />
             </Link>
             <p className="mt-6 max-w-sm text-sm leading-6 text-white/62">
               ZODI es un espacio místico, visual y social para consultar señales, guardar lecturas y reírte un poco de tus patrones. Con cariño. Con neón. Con cero ganas de venderte paz falsa.

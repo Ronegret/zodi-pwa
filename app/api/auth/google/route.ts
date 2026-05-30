@@ -2,6 +2,18 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+function getSiteUrl(request: Request) {
+  return process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+}
+
+function getSafeNext(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/dashboard";
+  }
+
+  return value;
+}
+
 /**
  * GET /api/auth/google
  * Inicia el flujo OAuth de Google en el servidor.
@@ -13,12 +25,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "GOOGLE_CLIENT_ID no configurado en Vercel" }, { status: 500 });
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zodi-pwa.vercel.app";
+  const siteUrl = getSiteUrl(request);
   const redirectUri = `${siteUrl}/api/auth/callback`;
 
   // Obtener la URL de retorno después del login (por defecto: dashboard)
   const { searchParams } = new URL(request.url);
-  const next = searchParams.get("next") || "/dashboard";
+  const next = getSafeNext(searchParams.get("next"));
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -27,7 +39,7 @@ export async function GET(request: Request) {
     scope: "openid email profile",
     access_type: "offline",
     prompt: "select_account",
-    state: encodeURIComponent(next),
+    state: next,
   });
 
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;

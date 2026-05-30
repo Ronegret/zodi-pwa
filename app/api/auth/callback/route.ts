@@ -3,6 +3,18 @@ import { getFirebaseAuth } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
 
+function getSiteUrl(request: Request) {
+  return process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+}
+
+function getSafeNext(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/dashboard";
+  }
+
+  return value;
+}
+
 /**
  * GET /api/auth/callback
  * Recibe el código de autorización de Google, crea un Firebase custom token
@@ -13,9 +25,9 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const error = searchParams.get("error");
   const stateRaw = searchParams.get("state");
-  const next = stateRaw ? decodeURIComponent(stateRaw) : "/dashboard";
+  const next = getSafeNext(stateRaw);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://zodi-pwa.vercel.app";
+  const siteUrl = getSiteUrl(request);
   const failUrl = `${siteUrl}/auth/login?error=`;
 
   // Error directo de Google (ej: usuario canceló)

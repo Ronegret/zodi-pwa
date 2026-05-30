@@ -6,6 +6,13 @@ import { NextResponse } from "next/server";
  * Solo accesible en producción con header secret para seguridad mínima.
  */
 export async function GET(request: Request) {
+  const expectedSecret = process.env.AUTH_TEST_SECRET;
+  const providedSecret = request.headers.get("x-zodi-diagnostic-secret");
+
+  if ((process.env.NODE_ENV === "production" || expectedSecret) && (!expectedSecret || providedSecret !== expectedSecret)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 

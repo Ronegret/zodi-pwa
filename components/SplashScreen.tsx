@@ -1,33 +1,37 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function SplashScreen() {
   const [showSplash, setShowSplash] = useState(true);
 
+  const handleFinish = useCallback(() => {
+    sessionStorage.setItem("zodi.splash_seen", "true");
+    document.documentElement.classList.add("splash-seen");
+    document.body.style.overflow = "";
+    setShowSplash(false);
+  }, []);
+
   useEffect(() => {
     // Check if we already showed the splash in this session
     const hasSeenSplash = sessionStorage.getItem("zodi.splash_seen");
+    let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+
     if (hasSeenSplash) {
       setShowSplash(false);
     } else {
       // Prevent scrolling under the splash screen
       document.body.style.overflow = "hidden";
+      fallbackTimer = setTimeout(handleFinish, 9000);
     }
     
     return () => {
+      if (fallbackTimer) clearTimeout(fallbackTimer);
       document.body.style.overflow = "";
     };
-  }, []);
-
-  const handleFinish = () => {
-    sessionStorage.setItem("zodi.splash_seen", "true");
-    document.documentElement.classList.add("splash-seen");
-    document.body.style.overflow = "";
-    setShowSplash(false);
-  };
+  }, [handleFinish]);
 
   // No return null here, use AnimatePresence condition
   return (
@@ -46,6 +50,7 @@ export function SplashScreen() {
             muted 
             playsInline 
             onEnded={handleFinish}
+            onError={handleFinish}
             poster="/zodi-art/zodi-fondoo.png"
             className="absolute inset-0 h-full w-full object-cover md:object-contain bg-black"
           >
