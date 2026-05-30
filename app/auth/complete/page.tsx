@@ -111,7 +111,7 @@ function AuthCompleteContent() {
         } catch { /* ignore */ }
 
         const session = getLocalSession();
-        router.replace(session.onboardingCompleted ? "/dashboard" : "/onboarding");
+        window.location.href = session.onboardingCompleted ? "/dashboard" : "/onboarding";
       })
       .catch((err: any) => {
         console.error("[AUTH COMPLETE] Error con custom token:", err);
