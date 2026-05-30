@@ -5,87 +5,47 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  AlertCircle, Check, CheckCircle2, ChevronDown, ImagePlus, Loader2, MapPin,
-  Sparkles, Gem, Flame, UserCircle, X, XCircle
+  AlertCircle, Check, CheckCircle2, ChevronDown, ImagePlus, Loader2,
+  MapPin, Sparkles, Gem, Flame, UserCircle, X, XCircle
 } from "lucide-react";
 import { generateAstralProfile } from "@/lib/astral";
 import { completeLocalOnboarding, getLocalSession, signOutZodi } from "@/lib/session";
 import { COUNTRY_LIST, getCitiesForCountry } from "@/lib/places";
 import type { OnboardingData } from "@/types/zodi";
 
-// ── Avatares ───────────────────────────────────────────────────────────────────
-const zodiacAvatars: [string, string][] = [
-  ["Aries",       "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Aries.png"],
-  ["Tauro",       "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Tauro.png"],
-  ["Géminis",     "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Geminis.png"],
-  ["Cáncer",      "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Cancer.png"],
-  ["Leo",         "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Leo.png"],
-  ["Virgo",       "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Virgo.png"],
-  ["Libra",       "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Libra.png"],
-  ["Escorpio",    "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Escorpio.png"],
-  ["Sagitario",   "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Sagitario.png"],
-  ["Capricornio", "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Capricornio.png"],
-  ["Acuario",     "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Acuario.png"],
-  ["Piscis",      "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Piscis.png"]
-];
-
-const zodiAvatars: [string, string][] = [
-  ["ZODI 1", "/zodi-art/perfil/perfil-1.png"],
-  ["ZODI 2", "/zodi-art/perfil/perfil-2.png"],
-  ["ZODI 3", "/zodi-art/perfil/perfil-3.png"],
-  ["ZODI 4", "/zodi-art/perfil/perfil-4.png"],
-  ["ZODI 5", "/zodi-art/perfil/perfil-5.png"],
-  ["ZODI 6", "/zodi-art/perfil/perfil-6.png"],
-  ["ZODI 7", "/zodi-art/perfil/perfil-7.png"],
-  ["ZODI 8", "/zodi-art/perfil/perfil8.png"],
-  ["ZODI 9", "/zodi-art/perfil/perfil-9.png"],
-  ["ZODI 10", "/zodi-art/perfil/perfil-10.png"],
-  ["ZODI 11", "/zodi-art/perfil/perfil-11.png"],
-  ["ZODI 12", "/zodi-art/perfil/perfil-12.png"],
-  ["ZODI Mini", "/zodi-art/perfil/perfil-13.png"]
-];
-
-const chineseAvatars: [string, string][] = [
-  ["Rata", "/zodi-art/chino/C_rata.png"],
-  ["Buey", "/zodi-art/chino/C_buey.png"],
-  ["Tigre", "/zodi-art/chino/C_tigre.png"],
-  ["Conejo", "/zodi-art/chino/C_conejo.png"],
-  ["Dragón", "/zodi-art/chino/C_dragon.png"],
-  ["Serpiente", "/zodi-art/chino/C_serpiente.png"],
-  ["Caballo", "/zodi-art/chino/C_caballo.png"],
-  ["Cabra", "/zodi-art/chino/C_cabra.png"],
-  ["Mono", "/zodi-art/chino/C_mono.png"],
-  ["Gallo", "/zodi-art/chino/C_gallo.png"],
-  ["Perro", "/zodi-art/chino/C_perro.png"],
-  ["Cerdo", "/zodi-art/chino/C_cerdo.png"]
-];
-
 const topics = ["amor", "dinero", "trabajo", "espiritualidad", "futuro", "energía"] as const;
 const tones  = ["suave", "directo", "brutal", "sarcastico"] as const;
 
+const TOTAL_STEPS = 3;
 
-// ── Frases de ZODI mientras calcula el perfil ─────────────────────────────────
+// ── Mapa de signos: imagen + gradiente de fondo ───────────────────────────────
+const SIGN_META: Record<string, { img: string; gradient: string; element: string; emoji: string }> = {
+  "Aries":       { img: "/zodi-art/signos/aries.png",       gradient: "from-red-600/60 via-orange-500/40 to-transparent",      element: "Fuego 🔥", emoji: "♈" },
+  "Tauro":       { img: "/zodi-art/signos/tauro.png",       gradient: "from-emerald-700/60 via-green-600/40 to-transparent",   element: "Tierra 🌿", emoji: "♉" },
+  "Géminis":     { img: "/zodi-art/signos/geminis.png",     gradient: "from-yellow-500/60 via-amber-400/40 to-transparent",    element: "Aire 💨", emoji: "♊" },
+  "Cáncer":      { img: "/zodi-art/signos/cancer.png",      gradient: "from-slate-500/60 via-blue-400/40 to-transparent",      element: "Agua 🌊", emoji: "♋" },
+  "Leo":         { img: "/zodi-art/signos/leo.png",         gradient: "from-amber-500/60 via-yellow-400/40 to-transparent",    element: "Fuego 🔥", emoji: "♌" },
+  "Virgo":       { img: "/zodi-art/signos/virgo.png",       gradient: "from-green-700/60 via-lime-600/40 to-transparent",      element: "Tierra 🌿", emoji: "♍" },
+  "Libra":       { img: "/zodi-art/signos/libra.png",       gradient: "from-pink-500/60 via-rose-400/40 to-transparent",       element: "Aire 💨", emoji: "♎" },
+  "Escorpio":    { img: "/zodi-art/signos/escorpio.png",    gradient: "from-red-900/60 via-purple-700/40 to-transparent",      element: "Agua 🌊", emoji: "♏" },
+  "Sagitario":   { img: "/zodi-art/signos/sagitario.png",   gradient: "from-purple-600/60 via-violet-500/40 to-transparent",   element: "Fuego 🔥", emoji: "♐" },
+  "Capricornio": { img: "/zodi-art/signos/capricornio.png", gradient: "from-stone-700/60 via-zinc-600/40 to-transparent",      element: "Tierra 🌿", emoji: "♑" },
+  "Acuario":     { img: "/zodi-art/signos/acuario.png",     gradient: "from-cyan-600/60 via-sky-500/40 to-transparent",        element: "Aire 💨", emoji: "♒" },
+  "Piscis":      { img: "/zodi-art/signos/piscis.png",      gradient: "from-teal-600/60 via-purple-500/40 to-transparent",     element: "Agua 🌊", emoji: "♓" },
+};
+
 const CALC_PHRASES = [
-  "Consultando las constelaciones... sin prisa pero sin pausa.",
-  "Tu mapa astral está emergiendo de la oscuridad cósmica.",
-  "Los planetas están procesando. Mercurio también lo intenta.",
-  "Calculando lo que las estrellas saben de ti desde que naciste.",
-  "Tu carta astral tiene capas. ZODI las está leyendo sin llorar.",
+  "Consultando las constelaciones...",
+  "Tu mapa astral emergiendo del cosmos.",
+  "Los planetas procesando. Mercurio también lo intenta.",
+  "Calculando lo que las estrellas saben de ti.",
+  "Tu carta astral tiene capas. ZODI las está leyendo.",
 ];
 
-const TOTAL_STEPS = 5;
-
 const initialData: OnboardingData = {
-  displayName: "",
-  username: "",
-  avatar: "/zodi-art/perfil/perfil-1.png",
-  genderIdentity: "",
-  birthDate: "",
-  birthTime: "",
-  birthCity: "",
-  birthCountry: "",
-  currentCity: "",
-  currentCountry: "",
+  displayName: "", username: "", avatar: "/zodi-art/perfil/perfil-1.png",
+  genderIdentity: "", birthDate: "", birthTime: "", birthCity: "", birthCountry: "",
+  currentCity: "", currentCountry: "",
   readingTone: "sarcastico",
   favoriteTopics: ["amor", "futuro"],
   notificationPreferences: ["horoscopo diario", "alertas lunares"]
@@ -93,38 +53,38 @@ const initialData: OnboardingData = {
 
 function validateStep(step: number, data: OnboardingData, usernameStatus: string): string | null {
   if (step === 0) {
-    if (!data.displayName.trim()) return "¿Cómo te llamo? Necesito un nombre.";
-    if (usernameStatus === "taken") return "Ese usuario ya existe en el universo ZODI. Elige otro.";
-    if (usernameStatus === "checking") return "Espera, verificando si ese usuario está disponible...";
+    if (!data.displayName.trim()) return "¿Cómo te llamo? El cosmos necesita un nombre.";
+    if (usernameStatus === "taken") return "Ese usuario ya existe. El cosmos requiere unicidad.";
+    if (usernameStatus === "checking") return "Espera un segundo, verificando disponibilidad...";
   }
   if (step === 1) {
-    if (!data.birthDate) return "Sin fecha de nacimiento no puedo calcular nada, te lo juro.";
-    if (!data.birthCity.trim()) return "Dime dónde naciste. El cosmos también lo necesita.";
+    if (!data.birthDate) return "Sin fecha de nacimiento no puedo calcular nada.";
     if (!data.birthCountry.trim()) return "El país de nacimiento también cuenta para tu perfil astral.";
+    if (!data.birthCity.trim()) return "Dime dónde naciste. El cosmos también lo necesita.";
   }
   return null;
 }
 
 const slideVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? 48 : -48, opacity: 0 }),
+  enter: (dir: number) => ({ x: dir > 0 ? 56 : -56, opacity: 0 }),
   center: { x: 0, opacity: 1 },
-  exit:  (dir: number) => ({ x: dir > 0 ? -48 : 48, opacity: 0 })
+  exit: (dir: number) => ({ x: dir > 0 ? -56 : 56, opacity: 0 })
 };
 
 // ── Componente principal ───────────────────────────────────────────────────────
 export function OnboardingFlow() {
   const router = useRouter();
-  const [step, setStep]           = useState(0);
-  const [direction, setDirection] = useState(1);
-  const [data, setData]           = useState<OnboardingData>(initialData);
+  const [step, setStep]         = useState(0);
+  const [direction, setDir]     = useState(1);
+  const [data, setData]         = useState<OnboardingData>(initialData);
   const [finishing, setFinishing] = useState(false);
-  const [calculating, setCalc]    = useState(false);
+  const [calculating, setCalc]  = useState(false);
   const [phraseIdx, setPhraseIdx] = useState(0);
-  const [error, setError]         = useState<string | null>(null);
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const [error, setError]       = useState<string | null>(null);
+  const [usernameStatus, setUsernameStatus] = useState<"idle"|"checking"|"available"|"taken">("idle");
   const profile = useMemo(() => generateAstralProfile(data), [data]);
 
-  // Verificación de disponibilidad del username en Firestore
+  // Verificación de username en Firestore
   const checkUsername = useCallback(async (username: string) => {
     const clean = username.replace(/^@/, "").trim().toLowerCase();
     if (clean.length < 3) { setUsernameStatus("idle"); return; }
@@ -137,9 +97,7 @@ export function OnboardingFlow() {
       const q = query(collection(db, "users"), where("username", "==", clean));
       const snap = await getDocs(q);
       setUsernameStatus(snap.empty ? "available" : "taken");
-    } catch {
-      setUsernameStatus("idle");
-    }
+    } catch { setUsernameStatus("idle"); }
   }, []);
 
   useEffect(() => {
@@ -149,15 +107,15 @@ export function OnboardingFlow() {
   }, [data.username, checkUsername]);
 
   function update<K extends keyof OnboardingData>(key: K, value: OnboardingData[K]) {
-    setData((d) => ({ ...d, [key]: value }));
+    setData(d => ({ ...d, [key]: value }));
     setError(null);
   }
 
   function toggleTopic(value: string) {
-    setData((d) => ({
+    setData(d => ({
       ...d,
       favoriteTopics: d.favoriteTopics.includes(value)
-        ? d.favoriteTopics.filter((t) => t !== value)
+        ? d.favoriteTopics.filter(t => t !== value)
         : [...d.favoriteTopics, value]
     }));
   }
@@ -167,86 +125,57 @@ export function OnboardingFlow() {
     if (err) { setError(err); return; }
     setError(null);
 
-    // Animación de cálculo astral al pasar del paso 1 → 2
+    // Cálculo astral entre paso 1 → 2
     if (step === 1) {
       setCalc(true);
       let i = 0;
       const interval = setInterval(() => {
         i++;
-        setPhraseIdx((p) => (p + 1) % CALC_PHRASES.length);
-        if (i >= 3) {
+        setPhraseIdx(p => (p + 1) % CALC_PHRASES.length);
+        if (i >= 4) {
           clearInterval(interval);
           setCalc(false);
-          setDirection(1);
-          setStep((s) => Math.min(TOTAL_STEPS - 1, s + 1));
+          setDir(1);
+          setStep(2);
         }
-      }, 900);
+      }, 750);
       return;
     }
 
-    setDirection(1);
-    setStep((s) => Math.min(TOTAL_STEPS - 1, s + 1));
+    setDir(1);
+    setStep(s => Math.min(TOTAL_STEPS - 1, s + 1));
   }
 
   function goBack() {
     setError(null);
-    setDirection(-1);
-    setStep((s) => Math.max(0, s - 1));
+    setDir(-1);
+    setStep(s => Math.max(0, s - 1));
   }
 
   async function finish() {
     setFinishing(true);
-    completeLocalOnboarding(data, profile);
-
-    const session = getLocalSession();
-    if (session.uid) {
-      try {
-        const { saveOnboardingProfile } = await import("@/lib/firebase/profile");
-        await saveOnboardingProfile(session.uid, data, profile);
-      } catch { /* Firebase no configurado — localStorage es el fallback */ }
-    }
-
-    // ── GROWTH HACKING: Recompensas de bienvenida y referidos ──
     try {
-      const gamification = await import("@/lib/gamification");
-      const currentGems = gamification.getGems().total;
-      
-      // Bono de bienvenida
-      if (currentGems < 300) {
-        gamification.addGems(300 - currentGems); 
-      }
-      
-      // Bonus por referido
-      const refCode = localStorage.getItem("zodi_ref_code");
-      if (refCode && session.uid && refCode !== session.uid) {
-        // Notificar al backend para premiar al embajador (el que invitó)
-        let token = "";
-        try {
-          const { getFirebaseAuth } = await import("@/lib/firebase/client");
-          const auth = getFirebaseAuth();
-          if (auth?.currentUser) token = await auth.currentUser.getIdToken();
-        } catch (e) {}
+      completeLocalOnboarding(data, profile);
 
-        if (token) {
-          const response = await fetch("/api/user/referral", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ referrerId: refCode, newUserId: session.uid })
-          });
-
-          if (response.ok) {
-            gamification.addGems(200);
-            localStorage.removeItem("zodi_ref_code");
-          }
-        }
+      const session = getLocalSession();
+      // Guardar en Firestore en background (no bloquea la navegación)
+      if (session.uid) {
+        import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
+          saveOnboardingProfile(session.uid!, data, profile)
+        ).catch(() => {});
       }
-    } catch (e) { 
-      console.warn("No se pudieron cargar las recompensas locales", e); 
+
+      // Gemas de bienvenida
+      try {
+        const { getGems, addGems } = await import("@/lib/gamification");
+        if (getGems().total < 300) addGems(300 - getGems().total);
+      } catch { /* ignorar */ }
+
+    } catch (e) {
+      console.warn("Error en finish:", e);
     }
 
+    // Siempre navegar al dashboard, sin importar qué falló
     router.push("/dashboard");
   }
 
@@ -259,96 +188,73 @@ export function OnboardingFlow() {
     reader.readAsDataURL(file);
   }
 
-  // ── Render pantalla de cálculo astral ────────────────────────────────────────
+  // ── Pantalla de cálculo astral ────────────────────────────────────────────────
   if (calculating) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-ink px-4">
-        {/* Fondo de estrellas */}
         <div className="spark-field -z-10" />
-
-        {/* Logo girando como vinilo */}
         <div className="relative">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="absolute -inset-4 rounded-full border border-dashed border-lime-300/20"
+            className="absolute -inset-6 rounded-full border border-dashed border-lime-300/20"
           />
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            className="h-28 w-28 overflow-hidden rounded-full border-2 border-lime-300/50 shadow-[0_0_32px_rgba(184,255,23,0.35)]"
+            className="h-32 w-32 overflow-hidden rounded-full border-2 border-lime-300/50 shadow-[0_0_40px_rgba(184,255,23,0.4)]"
           >
-            <Image src="/zodi-art/brand/isotipo.png" alt="ZODI calculando" width={112} height={112} className="h-full w-full object-contain p-2 mix-blend-screen" />
+            <Image src="/zodi-art/brand/isotipo.png" alt="ZODI calculando" width={128} height={128} className="h-full w-full object-contain p-2 mix-blend-screen" />
           </motion.div>
-          {/* Centro */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-3 w-3 rounded-full bg-lime-300 shadow-[0_0_10px_rgba(184,255,23,0.90)]" />
+            <div className="h-3 w-3 rounded-full bg-lime-300 shadow-[0_0_12px_rgba(184,255,23,1)]" />
           </div>
         </div>
-
-        {/* Dots pulsantes */}
         <div className="flex gap-2">
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
-              animate={{ opacity: [0.2, 1, 0.2] }}
-              transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.22 }}
-              className="h-2 w-2 rounded-full bg-lime-300"
-            />
+          {[0,1,2].map(i => (
+            <motion.span key={i} animate={{ opacity: [0.2,1,0.2] }} transition={{ duration: 1.2, repeat: Infinity, delay: i*0.22 }}
+              className="h-2 w-2 rounded-full bg-lime-300" />
           ))}
         </div>
-
-        {/* Frase ácida */}
         <AnimatePresence mode="wait">
-          <motion.p
-            key={phraseIdx}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3 }}
-            className="max-w-sm text-center text-base leading-relaxed text-white/65 font-medium"
+          <motion.p key={phraseIdx}
+            initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-8 }}
+            transition={{ duration:0.3 }}
+            className="max-w-sm text-center text-base font-medium leading-relaxed text-white/65"
           >
             {CALC_PHRASES[phraseIdx]}
           </motion.p>
         </AnimatePresence>
-
-        <p className="text-[11px] uppercase tracking-widest text-lime-300/50">Calculando tu carta astral</p>
+        <p className="text-[11px] uppercase tracking-widest text-lime-300/50">Leyendo tu carta astral</p>
       </div>
     );
   }
 
-  // ── Render principal ─────────────────────────────────────────────────────────
+  const signMeta = SIGN_META[profile.sunSign] ?? SIGN_META["Acuario"];
+
   return (
-    <section className="relative mx-auto flex min-h-screen max-w-2xl flex-col px-4 py-8">
+    <section className="relative mx-auto flex min-h-dvh max-w-2xl flex-col px-4 py-6">
       {/* Fondo */}
-      <div className="absolute inset-0 -z-10 bg-[url('/zodi-art/oracle-frame-tall.png')] bg-cover bg-center opacity-15" />
+      <div className="absolute inset-0 -z-10 bg-[url('/zodi-art/oracle-frame-tall.png')] bg-cover bg-center opacity-10" />
       <div className="spark-field -z-10" />
 
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="relative h-14 w-40 sm:h-16 sm:w-52">
-          <Image src="/zodi-logo.png" alt="ZODI" fill sizes="(min-width: 640px) 208px, 160px" className="object-contain object-left mix-blend-screen" />
+      <div className="mb-5 flex items-center justify-between">
+        <div className="relative h-12 w-36">
+          <Image src="/zodi-logo.png" alt="ZODI" fill sizes="144px" className="object-contain object-left mix-blend-screen" />
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5">
+        <div className="flex items-center gap-3">
+          {/* Barra de progreso */}
+          <div className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5">
             {[...Array(TOTAL_STEPS)].map((_, i) => (
-              <span
-                key={i}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i <= step ? "w-6 bg-lime-300" : "w-1.5 bg-white/20"
-                }`}
-              />
+              <span key={i} className={`h-1.5 rounded-full transition-all duration-500 ${
+                i < step ? "w-4 bg-lime-300" : i === step ? "w-6 bg-lime-300" : "w-1.5 bg-white/20"
+              }`} />
             ))}
           </div>
-          <button
-            onClick={async () => {
-              await signOutZodi();
-              router.push("/");
-            }}
-            title="Cancelar y volver al inicio"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/50 transition hover:bg-white/10 hover:text-white"
-          >
-            <X className="h-5 w-5" />
+          <button onClick={async () => { await signOutZodi(); router.push("/"); }}
+            className="grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-black/40 text-white/50 transition hover:bg-white/10 hover:text-white">
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -356,272 +262,204 @@ export function OnboardingFlow() {
       {/* Card principal */}
       <div className="glass-panel flex-1 overflow-hidden rounded-2xl border border-white/08">
         <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={step}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="h-full p-6 sm:p-8"
+          <motion.div key={step} custom={direction}
+            variants={slideVariants} initial="enter" animate="center" exit="exit"
+            transition={{ duration: 0.28, ease: "easeOut" }}
+            className="h-full"
           >
-            {/* ── PASO 0: Identidad ── */}
+
+            {/* ─── PASO 0: Identidad + Preferencias ──────────────────────────── */}
             {step === 0 && (
-              <div>
+              <div className="p-6 sm:p-8 overflow-y-auto max-h-[75dvh] no-scrollbar">
                 <p className="zodi-kicker">Paso 1 de {TOTAL_STEPS}</p>
                 <h1 className="mt-2 text-3xl font-black leading-tight">
-                  ¿Cómo quieres<br />que te llame?
+                  ¿Quién eres<br />en este universo?
                 </h1>
-                <p className="mt-3 text-sm text-white/55">Elige un nombre, un alias, un apodo. Lo que uses en la calle.</p>
+                <p className="mt-2 text-sm text-white/50">Tu identidad y cómo quieres que ZODI te hable.</p>
 
-                <div className="mt-6 grid gap-4">
-                  <Input
-                    label="Nombre visible *"
-                    value={data.displayName}
-                    onChange={(v) => update("displayName", v)}
-                    placeholder="Neon Bruja, La Scorpio, tu nombre real..."
-                  />
+                <div className="mt-5 grid gap-3">
+                  <Input label="Nombre visible *" value={data.displayName} onChange={v => update("displayName",v)} placeholder="Tu nombre o alias astral..." />
 
-                  {/* Username con verificación en tiempo real */}
-                  <div className="relative">
+                  {/* Username con check */}
+                  <div>
                     <label className="block cursor-text rounded-xl border border-white/08 bg-black/35 p-3.5 transition focus-within:border-lime-300/40">
                       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/40">Usuario (@)</span>
                       <div className="flex items-center gap-2">
-                        <input
-                          className="flex-1 bg-transparent text-white outline-none placeholder:text-white/25"
-                          value={data.username}
-                          placeholder="@zodiserpiente"
-                          onChange={(e) => update("username", e.target.value)}
-                        />
-                        {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-white/40 shrink-0" />}
+                        <input className="flex-1 bg-transparent text-white outline-none placeholder:text-white/25"
+                          value={data.username} placeholder="@zodiserpiente"
+                          onChange={e => update("username", e.target.value)} autoComplete="off" />
+                        {usernameStatus === "checking"  && <Loader2 className="h-4 w-4 animate-spin text-white/40 shrink-0" />}
                         {usernameStatus === "available" && <CheckCircle2 className="h-4 w-4 text-lime-300 shrink-0" />}
-                        {usernameStatus === "taken" && <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
+                        {usernameStatus === "taken"     && <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
                       </div>
                     </label>
-                    {usernameStatus === "available" && (
-                      <p className="mt-1 text-[11px] text-lime-300/70">¡Disponible! Nadie más tiene ese alias.</p>
-                    )}
-                    {usernameStatus === "taken" && (
-                      <p className="mt-1 text-[11px] text-red-400/80">Ese usuario ya existe. El cosmos requiere unicidad.</p>
-                    )}
+                    {usernameStatus === "available" && <p className="mt-1 text-[11px] text-lime-300/70">¡Disponible!</p>}
+                    {usernameStatus === "taken"     && <p className="mt-1 text-[11px] text-red-400/80">Ya existe. Elige otro alias.</p>}
                   </div>
-                </div>
 
-                {/* Foto de perfil — opcional */}
-                <div className="mt-6">
-                  <p className="mb-1 text-sm font-bold text-white/70">Foto de perfil <span className="text-white/35 font-normal">(opcional)</span></p>
-                  <p className="mb-4 text-xs text-white/40">Si no subes ninguna, usaremos un avatar ZODI por defecto. Puedes cambiarlo después.</p>
-
-                  <label className="group flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-white/15 bg-white/03 p-6 transition hover:border-lime-300/40 hover:bg-lime-300/05">
-                    {data.avatar.startsWith("data:") ? (
-                      <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-lime-300/50">
+                  {/* Foto opcional */}
+                  <label className="group flex cursor-pointer items-center gap-4 rounded-xl border border-dashed border-white/15 bg-white/03 p-4 transition hover:border-lime-300/40">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/15 bg-black/40">
+                      {data.avatar.startsWith("data:") ? (
                         <img src={data.avatar} alt="Avatar" className="h-full w-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/05">
-                        <UserCircle className="h-8 w-8 text-white/30" />
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 text-sm font-bold text-white/60 group-hover:text-lime-200 transition">
-                      <ImagePlus className="h-4 w-4" />
-                      {data.avatar.startsWith("data:") ? "Cambiar foto" : "Subir foto"}
+                      ) : (
+                        <UserCircle className="h-full w-full p-2 text-white/30" />
+                      )}
                     </div>
-                    <p className="text-[11px] text-white/30">JPG, PNG o GIF · Máx. 5 MB</p>
-                    <input className="hidden" type="file" accept="image/*" onChange={(e) => uploadAvatar(e.target.files?.[0])} />
+                    <div>
+                      <p className="text-sm font-bold text-white/70 group-hover:text-lime-200 transition">
+                        {data.avatar.startsWith("data:") ? "Cambiar foto" : "Subir foto"} <span className="text-white/35 font-normal text-xs">(opcional)</span>
+                      </p>
+                      <p className="text-[11px] text-white/35">Si no subes, usamos un avatar ZODI por defecto</p>
+                    </div>
+                    <ImagePlus className="ml-auto h-5 w-5 text-white/30 group-hover:text-lime-300 transition shrink-0" />
+                    <input className="hidden" type="file" accept="image/*" onChange={e => uploadAvatar(e.target.files?.[0])} />
                   </label>
                 </div>
-              </div>
-            )}
 
-            {/* ── PASO 1: Nacimiento (mínimo necesario) ── */}
-            {step === 1 && (
-              <div>
-                <p className="zodi-kicker">Paso 2 de {TOTAL_STEPS}</p>
-                <h1 className="mt-2 text-3xl font-black leading-tight">
-                  ¿Cuándo y dónde<br />llegaste a este mundo?
-                </h1>
-                <p className="mt-3 text-sm text-white/55">
-                  Con esto calculo tu signo solar, lunar, ascendente y carta natal. La hora exacta mejora el ascendente.
-                </p>
-
-                <div className="mt-6 grid gap-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Input label="Fecha de nacimiento *" value={data.birthDate} onChange={(v) => update("birthDate", v)} type="date" />
-                    <div>
-                      <Input label="Hora (opcional — mejora el ascendente)" value={data.birthTime} onChange={(v) => update("birthTime", v)} type="time" />
-                      <p className="mt-1 text-[11px] text-white/35">Sin hora exacta, calculo igual pero el ascendente será aproximado.</p>
-                    </div>
-                  </div>
-                  <PlacePicker
-                    countryLabel="País de nacimiento *"
-                    countryValue={data.birthCountry}
-                    onCountryChange={(v) => { update("birthCountry", v); update("birthCity", ""); }}
-                    cityLabel="Ciudad de nacimiento *"
-                    cityValue={data.birthCity}
-                    onCityChange={(v) => update("birthCity", v)}
-                  />
-                  <PlacePicker
-                    countryLabel="País actual (opcional)"
-                    countryValue={data.currentCountry}
-                    onCountryChange={(v) => { update("currentCountry", v); update("currentCity", ""); }}
-                    cityLabel="Ciudad actual (opcional)"
-                    cityValue={data.currentCity}
-                    onCityChange={(v) => update("currentCity", v)}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ── PASO 2: Cálculos (resultado astral) ── */}
-            {step === 2 && (
-              <div>
-                <p className="zodi-kicker">Paso 3 de {TOTAL_STEPS}</p>
-                <h1 className="mt-2 text-3xl font-black leading-tight">
-                  Tu firma astral
-                </h1>
-                <p className="mt-3 text-sm text-white/55">
-                  Esto es lo que el cosmos sabe de ti. Puede que te incomode un poco. Es normal.
-                </p>
-
-                <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {([
-                    ["☀️ Signo solar",    profile.sunSign],
-                    ["🌙 Signo lunar",    profile.moonSign],
-                    ["⬆️ Ascendente",     profile.ascendant],
-                    ["🔢 Camino de vida", profile.lifePathNumber.toString()],
-                    ["🐉 Chino",         profile.chineseZodiac],
-                    ["🌿 Maya",           profile.mayanSign],
-                    ["⚡ Biorritmo",      profile.biorhythmBaseline],
-                    ["🗺️ Carta base",    profile.natalChartBase],
-                  ] as [string, string][]).map(([label, value]) => (
-                    <motion.div
-                      key={label}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.05 }}
-                      className="rounded-xl border border-white/08 bg-white/03 p-3"
-                    >
-                      <p className="text-xs text-white/40">{label}</p>
-                      <p className="mt-1 text-base font-black text-lime-100">{value}</p>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="mt-5 rounded-xl border border-violet-400/20 bg-violet-500/08 p-4">
-                  <p className="text-sm font-bold text-violet-200">Resumen de tu perfil</p>
-                  <p className="mt-2 text-sm leading-6 text-white/65">{profile.summary}</p>
-                </div>
-              </div>
-            )}
-
-            {/* ── PASO 3: Preferencias ── */}
-            {step === 3 && (
-              <div>
-                <p className="zodi-kicker">Paso 4 de {TOTAL_STEPS}</p>
-                <h1 className="mt-2 text-3xl font-black leading-tight">
-                  ¿Cómo quieres<br />que te hable?
-                </h1>
-                <p className="mt-3 text-sm text-white/55">
-                  ZODI adapta el tono a ti. Y los temas que más te interesan para personalizar tus lecturas.
-                </p>
-
-                <div className="mt-6">
-                  <p className="mb-3 text-sm font-bold text-white/70">Tono de lectura</p>
-                  <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
-                    {tones.map((tone) => (
-                      <button
-                        key={tone}
-                        onClick={() => update("readingTone", tone)}
-                        className={`rounded-xl py-3 px-5 text-sm font-bold capitalize transition ${
+                {/* Tono */}
+                <div className="mt-5">
+                  <p className="mb-2 text-sm font-bold text-white/70">¿Cómo quieres que ZODI te hable?</p>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {tones.map(tone => (
+                      <button key={tone} onClick={() => update("readingTone", tone)}
+                        className={`rounded-xl py-3 text-sm font-bold capitalize transition ${
                           data.readingTone === tone
-                            ? "bg-lime-300 text-black shadow-[0_0_16px_rgba(184,255,23,0.30)]"
-                            : "border border-white/12 text-white/65 hover:border-lime-300/30 hover:text-white"
-                        }`}
-                      >
+                            ? "bg-lime-300 text-black shadow-[0_0_16px_rgba(184,255,23,0.3)]"
+                            : "border border-white/12 text-white/60 hover:border-lime-300/30 hover:text-white"
+                        }`}>
                         {tone}
                       </button>
                     ))}
                   </div>
+                </div>
 
-                  <div className="mt-6">
-                    <p className="mb-3 text-sm font-bold text-white/70">Temas que más te interesan</p>
-                    <div className="flex flex-wrap gap-2">
-                      {topics.map((topic) => (
-                        <button
-                          key={topic}
-                          onClick={() => toggleTopic(topic)}
-                          className={`rounded-full px-4 py-2 text-sm font-bold capitalize transition ${
-                            data.favoriteTopics.includes(topic)
-                              ? "bg-violet-500/80 text-white shadow-[0_0_12px_rgba(155,77,255,0.30)]"
-                              : "border border-white/12 text-white/60 hover:border-violet-400/40"
-                          }`}
+                {/* Temas */}
+                <div className="mt-4">
+                  <p className="mb-2 text-sm font-bold text-white/70">Temas que más te importan</p>
+                  <div className="flex flex-wrap gap-2">
+                    {topics.map(topic => (
+                      <button key={topic} onClick={() => toggleTopic(topic)}
+                        className={`rounded-full px-4 py-2 text-sm font-bold capitalize transition ${
+                          data.favoriteTopics.includes(topic)
+                            ? "bg-violet-500/80 text-white shadow-[0_0_12px_rgba(155,77,255,0.3)]"
+                            : "border border-white/12 text-white/60 hover:border-violet-400/40"
+                        }`}>
+                        {topic}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ─── PASO 1: Nacimiento ─────────────────────────────────────────── */}
+            {step === 1 && (
+              <div className="p-6 sm:p-8 overflow-y-auto max-h-[75dvh] no-scrollbar">
+                <p className="zodi-kicker">Paso 2 de {TOTAL_STEPS}</p>
+                <h1 className="mt-2 text-3xl font-black leading-tight">
+                  ¿Cuándo y dónde<br />llegaste a este mundo?
+                </h1>
+                <p className="mt-2 text-sm text-white/50">Con esto calculo tu signo solar, lunar, ascendente y carta natal.</p>
+
+                <div className="mt-5 grid gap-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Input label="Fecha de nacimiento *" value={data.birthDate} onChange={v => update("birthDate",v)} type="date" />
+                    <div>
+                      <Input label="Hora (mejora el ascendente)" value={data.birthTime} onChange={v => update("birthTime",v)} type="time" />
+                      <p className="mt-1 text-[11px] text-white/35">Sin hora, calculo igual pero el ascendente será aproximado.</p>
+                    </div>
+                  </div>
+                  <PlacePicker
+                    countryLabel="País de nacimiento *" countryValue={data.birthCountry}
+                    onCountryChange={v => { update("birthCountry",v); update("birthCity",""); }}
+                    cityLabel="Ciudad de nacimiento *" cityValue={data.birthCity}
+                    onCityChange={v => update("birthCity",v)}
+                  />
+                  <PlacePicker
+                    countryLabel="País actual (opcional)" countryValue={data.currentCountry}
+                    onCountryChange={v => { update("currentCountry",v); update("currentCity",""); }}
+                    cityLabel="Ciudad actual (opcional)" cityValue={data.currentCity}
+                    onCityChange={v => update("currentCity",v)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* ─── PASO 2: Reveal astral ──────────────────────────────────────── */}
+            {step === 2 && (
+              <div className="relative flex h-full min-h-[520px] flex-col overflow-hidden rounded-2xl">
+                {/* Imagen de fondo del signo */}
+                <div className="absolute inset-0">
+                  <Image src={signMeta.img} alt={profile.sunSign} fill
+                    sizes="100vw" className="object-cover object-top opacity-45" priority />
+                  <div className={`absolute inset-0 bg-gradient-to-t ${signMeta.gradient} via-black/60 to-black/90`} />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/90" />
+                </div>
+
+                {/* Contenido */}
+                <div className="relative z-10 flex flex-1 flex-col justify-between p-6 sm:p-8">
+                  {/* Sign reveal */}
+                  <motion.div initial={{ opacity:0, scale:0.85 }} animate={{ opacity:1, scale:1 }} transition={{ duration:0.7, ease:[0.22,1,0.36,1] }}>
+                    <p className="zodi-kicker">Paso 3 de {TOTAL_STEPS} · Tu firma astral</p>
+                    <div className="mt-3 flex items-center gap-3">
+                      <span className="text-5xl sm:text-6xl">{signMeta.emoji}</span>
+                      <div>
+                        <h1 className="text-5xl font-black leading-none sm:text-7xl glitch" style={{ fontFamily:"var(--font-display)" }}>
+                          {profile.sunSign}
+                        </h1>
+                        <p className="mt-1 text-sm text-white/60">{signMeta.element} · Camino {profile.lifePathNumber}</p>
+                      </div>
+                    </div>
+
+                    {/* Mini stats */}
+                    <div className="mt-5 grid grid-cols-3 gap-2">
+                      {[
+                        ["🌙 Luna", profile.moonSign],
+                        ["⬆️ Ascendente", profile.ascendant],
+                        ["🐉 Chino", profile.chineseZodiac],
+                      ].map(([label, value]) => (
+                        <motion.div key={label as string}
+                          initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.3, duration:0.4 }}
+                          className="rounded-xl border border-white/10 bg-black/50 p-3 backdrop-blur-sm text-center"
                         >
-                          {topic}
-                        </button>
+                          <p className="text-[10px] text-white/45">{label}</p>
+                          <p className="mt-0.5 text-sm font-black text-lime-100">{value}</p>
+                        </motion.div>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
+
+                  {/* Resumen + confirm */}
+                  <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.5, duration:0.5 }}>
+                    <div className="rounded-xl border border-violet-400/20 bg-black/60 p-4 backdrop-blur-sm">
+                      <p className="text-xs font-bold text-violet-300">✦ Tu resumen ZODI</p>
+                      <p className="mt-1.5 text-sm leading-6 text-white/75">{profile.summary}</p>
+                    </div>
+
+                    {/* Identity confirm */}
+                    <div className="mt-3 flex items-center gap-3 rounded-xl border border-lime-300/20 bg-black/60 p-3 backdrop-blur-sm">
+                      <div className="relative h-12 w-12 overflow-hidden rounded-xl border border-lime-300/30 shrink-0">
+                        {data.avatar.startsWith("data:") ? (
+                          <img src={data.avatar} alt="Avatar" className="h-full w-full object-cover" />
+                        ) : (
+                          <Image src={data.avatar} alt="Avatar" fill className="object-cover" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-black text-lime-100">{data.displayName}</p>
+                        {data.username && <p className="text-xs text-lime-200/50">@{data.username}</p>}
+                      </div>
+                      <div className="ml-auto flex items-center gap-1.5 rounded-full border border-lime-300/20 bg-lime-300/10 px-2.5 py-1">
+                        <Gem className="h-3 w-3 text-lime-300" />
+                        <span className="text-xs font-black text-lime-200">+300 gemas</span>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
             )}
 
-            {/* ── PASO 4: Resumen final ── */}
-            {step === 4 && (
-              <div>
-                <p className="zodi-kicker">Paso 5 de {TOTAL_STEPS}</p>
-                <h1 className="mt-2 text-3xl font-black leading-tight">
-                  Tu portal está<br />listo, {data.displayName.split(" ")[0] || "viajero"}.
-                </h1>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {/* Avatar + nombre */}
-                  <div className="flex items-center gap-3 rounded-xl border border-lime-300/20 bg-lime-300/06 p-4">
-                    <div className="relative h-14 w-14 overflow-hidden rounded-xl border border-lime-300/40 shrink-0">
-                      {data.avatar.startsWith("data:") ? (
-                        <img src={data.avatar} alt="Avatar" className="h-full w-full object-cover" />
-                      ) : (
-                        <Image src={data.avatar} alt="Avatar" fill className="object-cover" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs text-lime-200/60">Identidad</p>
-                      <p className="font-black text-lime-100">{data.displayName}</p>
-                      {data.username && <p className="text-xs text-lime-200/50">@{data.username}</p>}
-                    </div>
-                  </div>
-
-                  {/* Signo */}
-                  <div className="rounded-xl border border-violet-400/20 bg-violet-500/08 p-4">
-                    <p className="text-xs text-violet-200/60">Tu signo solar</p>
-                    <p className="mt-1 text-2xl font-black text-lime-100 glitch">{profile.sunSign}</p>
-                    <p className="text-xs text-white/50">Luna {profile.moonSign} · Asc. {profile.ascendant}</p>
-                  </div>
-
-                  {/* Gemas de bienvenida */}
-                  <div className="sm:col-span-2 flex items-center gap-3 rounded-xl border border-yellow-400/20 bg-yellow-400/06 p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow-400/15">
-                      <Gem className="h-5 w-5 text-yellow-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-yellow-200">Regalo de bienvenida</p>
-                      <p className="text-xs text-white/55">Recibirás <strong className="text-yellow-300">50 gemas</strong> al entrar por primera vez. Úsalas para desbloquear lecturas especiales.</p>
-                    </div>
-                  </div>
-
-                  {/* Racha */}
-                  <div className="sm:col-span-2 flex items-center gap-3 rounded-xl border border-orange-400/20 bg-orange-400/06 p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-400/15">
-                      <Flame className="h-5 w-5 text-orange-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-orange-200">Empieza tu racha hoy</p>
-                      <p className="text-xs text-white/55">Cada día que uses ZODI suma a tu racha. 7 días seguidos = 10 gemas extra.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -629,53 +467,34 @@ export function OnboardingFlow() {
       {/* Error */}
       <AnimatePresence>
         {error && (
-          <motion.div
-            key="error"
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
+          <motion.div key="error"
+            initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
             className="mt-3 flex items-center gap-2 rounded-xl border border-orange-400/25 bg-orange-400/10 px-4 py-3 text-sm text-orange-200"
           >
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            {error}
+            <AlertCircle className="h-4 w-4 shrink-0" /> {error}
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Navegación */}
       <div className="mt-4 flex items-center justify-between gap-3" style={{ paddingBottom: "env(safe-area-inset-bottom, 8px)" }}>
-        <button
-          disabled={step === 0}
-          onClick={goBack}
-          className="rounded-xl border border-white/12 px-5 py-3.5 font-bold text-white/60 transition hover:border-white/25 disabled:opacity-30"
-        >
+        <button disabled={step === 0} onClick={goBack}
+          className="rounded-xl border border-white/12 px-5 py-3.5 font-bold text-white/60 transition hover:border-white/25 disabled:opacity-30">
           Atrás
         </button>
 
         {step < TOTAL_STEPS - 1 ? (
-          <button
-            onClick={goNext}
-            className="flex items-center gap-2 rounded-xl bg-lime-300 px-6 py-3.5 font-black text-black transition hover:bg-lime-200 active:scale-95"
-          >
-            Continuar
-            <span className="text-xs opacity-60">{step + 1}/{TOTAL_STEPS}</span>
+          <button onClick={goNext}
+            className="flex items-center gap-2 rounded-xl bg-lime-300 px-7 py-3.5 font-black text-black transition hover:bg-lime-200 active:scale-95">
+            Continuar <span className="text-xs opacity-60">{step+1}/{TOTAL_STEPS}</span>
           </button>
         ) : (
-          <button
-            onClick={finish}
-            disabled={finishing}
-            className="flex items-center gap-2 rounded-xl bg-lime-300 px-6 py-3.5 font-black text-black transition hover:bg-lime-200 active:scale-95 disabled:opacity-60"
-          >
+          <button onClick={finish} disabled={finishing}
+            className="flex items-center gap-2 rounded-xl bg-lime-300 px-7 py-3.5 font-black text-black transition hover:bg-lime-200 active:scale-95 disabled:opacity-60">
             {finishing ? (
-              <>
-                <span className="h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-                Abriendo portal...
-              </>
+              <><Loader2 className="h-4 w-4 animate-spin" /> Abriendo portal...</>
             ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                Entrar a ZODI
-              </>
+              <><Sparkles className="h-4 w-4" /> Entrar a ZODI</>
             )}
           </button>
         )}
@@ -692,34 +511,21 @@ function Input({ label, value, onChange, type = "text", placeholder }: {
   return (
     <label className="block cursor-text rounded-xl border border-white/08 bg-black/35 p-3.5 transition focus-within:border-lime-300/40">
       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/40">{label}</span>
-      <input
-        className="w-full bg-transparent text-white outline-none placeholder:text-white/25"
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <input className="w-full bg-transparent text-white outline-none placeholder:text-white/25"
+        type={type} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />
     </label>
   );
 }
 
-// ── SearchSelect: combobox accesible con filtro ────────────────────────────────
 function SearchSelect({ label, value, onChange, options, placeholder, icon: Icon }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-  placeholder?: string;
-  icon?: React.ElementType;
+  label: string; value: string; onChange: (v: string) => void;
+  options: string[]; placeholder?: string; icon?: React.ElementType;
 }) {
   const [query, setQuery] = useState(value);
   const [open, setOpen]   = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Sincronizar query cuando value cambia externamente
   useEffect(() => { setQuery(value); }, [value]);
-
-  // Cerrar al hacer click fuera
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -728,78 +534,45 @@ function SearchSelect({ label, value, onChange, options, placeholder, icon: Icon
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const filtered = query.length === 0
-    ? options
-    : options.filter(o => o.toLowerCase().includes(query.toLowerCase()));
+  const filtered = query.length === 0 ? options : options.filter(o => o.toLowerCase().includes(query.toLowerCase()));
 
-  function select(opt: string) {
-    onChange(opt);
-    setQuery(opt);
-    setOpen(false);
-  }
-
-  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
-    setQuery(e.target.value);
-    onChange(e.target.value);
-    setOpen(true);
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Escape") { setOpen(false); }
-    if (e.key === "Enter" && filtered.length === 1) { select(filtered[0]); e.preventDefault(); }
-  }
+  function select(opt: string) { onChange(opt); setQuery(opt); setOpen(false); }
 
   return (
     <div ref={ref} className="relative">
-      <div
-        className={`flex cursor-text flex-col rounded-xl border bg-black/35 p-3.5 transition ${open ? "border-lime-300/50" : "border-white/08 hover:border-white/20"}`}
-        onClick={() => { setOpen(true); }}
-      >
+      <div className={`flex cursor-text flex-col rounded-xl border bg-black/35 p-3.5 transition ${open ? "border-lime-300/50" : "border-white/08 hover:border-white/20"}`}
+        onClick={() => setOpen(true)}>
         <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40">
-          {Icon && <Icon className="h-3 w-3" />}
-          {label}
+          {Icon && <Icon className="h-3 w-3" />} {label}
         </span>
         <div className="flex items-center gap-2">
-          <input
-            className="flex-1 bg-transparent text-white outline-none placeholder:text-white/25"
-            value={query}
-            placeholder={placeholder ?? "Buscar..."}
-            onChange={handleInput}
+          <input className="flex-1 bg-transparent text-white outline-none placeholder:text-white/25"
+            value={query} placeholder={placeholder ?? "Buscar..."} autoComplete="off"
+            onChange={e => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
-            onKeyDown={handleKeyDown}
-            autoComplete="off"
+            onKeyDown={e => {
+              if (e.key === "Escape") setOpen(false);
+              if (e.key === "Enter" && filtered.length === 1) { select(filtered[0]); e.preventDefault(); }
+            }}
           />
           <ChevronDown className={`h-4 w-4 shrink-0 text-white/30 transition-transform ${open ? "rotate-180" : ""}`} />
         </div>
       </div>
-
       <AnimatePresence>
         {open && (
-          <motion.ul
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.15 }}
-            className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-52 overflow-y-auto rounded-xl border border-white/10 bg-[#0e0e14] shadow-2xl no-scrollbar"
-          >
+          <motion.ul initial={{ opacity:0, y:-4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-4 }}
+            transition={{ duration:0.15 }}
+            className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-[#0e0e14] shadow-2xl no-scrollbar">
             {filtered.length === 0 ? (
-              <li className="px-4 py-3 text-sm text-white/40">
-                No encontrado — puedes escribirlo libremente
+              <li className="px-4 py-3 text-sm text-white/40">No encontrado — escríbelo libremente</li>
+            ) : filtered.map(opt => (
+              <li key={opt}>
+                <button type="button" onClick={() => select(opt)}
+                  className={`w-full px-4 py-2.5 text-left text-sm transition hover:bg-lime-300/10 hover:text-lime-200 ${opt === value ? "bg-lime-300/08 text-lime-300" : "text-white/80"}`}>
+                  {opt === value && <Check className="mr-2 inline h-3 w-3 text-lime-300" />}{opt}
+                </button>
               </li>
-            ) : (
-              filtered.map((opt) => (
-                <li key={opt}>
-                  <button
-                    type="button"
-                    className={`w-full px-4 py-2.5 text-left text-sm transition hover:bg-lime-300/10 hover:text-lime-200 ${opt === value ? "bg-lime-300/08 text-lime-300" : "text-white/80"}`}
-                    onClick={() => select(opt)}
-                  >
-                    {opt === value && <Check className="mr-2 inline h-3 w-3 text-lime-300" />}
-                    {opt}
-                  </button>
-                </li>
-              ))
-            )}
+            ))}
           </motion.ul>
         )}
       </AnimatePresence>
@@ -807,30 +580,16 @@ function SearchSelect({ label, value, onChange, options, placeholder, icon: Icon
   );
 }
 
-// ── PlacePicker: país → ciudad encadenados ─────────────────────────────────────
 function PlacePicker({ countryLabel, countryValue, onCountryChange, cityLabel, cityValue, onCityChange }: {
   countryLabel: string; countryValue: string; onCountryChange: (v: string) => void;
   cityLabel: string;    cityValue: string;    onCityChange: (v: string) => void;
 }) {
   const cities = getCitiesForCountry(countryValue);
-
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      <SearchSelect
-        label={countryLabel}
-        value={countryValue}
-        onChange={onCountryChange}
-        options={COUNTRY_LIST}
-        placeholder="Buscar país..."
-      />
-      <SearchSelect
-        label={cityLabel}
-        value={cityValue}
-        onChange={onCityChange}
-        options={cities}
-        placeholder={countryValue ? "Buscar ciudad..." : "Selecciona el país primero"}
-        icon={MapPin}
-      />
+      <SearchSelect label={countryLabel} value={countryValue} onChange={onCountryChange} options={COUNTRY_LIST} placeholder="Buscar país..." />
+      <SearchSelect label={cityLabel} value={cityValue} onChange={onCityChange} options={cities}
+        placeholder={countryValue ? "Buscar ciudad..." : "Selecciona el país primero"} icon={MapPin} />
     </div>
   );
 }
