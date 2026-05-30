@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatedShell } from "@/components/AnimatedShell";
 import { PublicNav } from "@/components/public/PublicNav";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import Image from "next/image";
 
 export default function Error({
   error,
@@ -21,8 +22,16 @@ export default function Error({
   return (
     <AnimatedShell>
       <PublicNav />
-      <div className="relative min-h-[calc(100vh-68px)] flex items-center justify-center p-4">
-        <div className="absolute inset-0 -z-10 bg-[url('/zodi-art/oracle-frame-tall.png')] bg-cover bg-center opacity-10" />
+      <div className="relative min-h-[100dvh] flex items-center justify-center p-4">
+        <div className="absolute inset-0 -z-20">
+          <Image
+            src="/zodi-art/oracle-frame-tall.png"
+            alt="Fondo de error"
+            fill
+            className="object-cover object-center opacity-10"
+            sizes="100vw"
+          />
+        </div>
         <div className="spark-field -z-10" />
 
         <div className="text-center glass-panel p-8 md:p-12 rounded-2xl max-w-lg mx-auto relative border border-red-500/20 bg-red-500/5">

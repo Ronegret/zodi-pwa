@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
  */
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative min-h-screen" style={{ isolation: "isolate" }}>
+    <div className="relative min-h-[100dvh]" style={{ isolation: "isolate" }}>
       {/* Atmospheric bg layers — hidden on mobile to prevent repaint */}
       <div
         className="dashboard-bg pointer-events-none fixed inset-0 -z-20 bg-cover bg-center"
