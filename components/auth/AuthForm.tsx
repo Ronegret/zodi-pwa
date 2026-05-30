@@ -172,78 +172,19 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     router.push(done ? "/dashboard" : "/onboarding");
   }
 
-
   async function continueFlow(provider: "email" | "google") {
     setMessage("");
 
     // ── Third-Party OAuth (Google) ────────────────────────────
     if (provider === "google") {
-      const auth = getFirebaseAuth();
-      if (!auth) {
-        setMessage("Firebase no está configurado. Contacta al administrador.");
-        return;
-      }
       setLoading(true);
-      explicitAuthFlow.current = true;
 
-      // Móvil: los popups son bloqueados por el OS → redirect
-      const isMobile = /android|iphone|ipad|ipod|mobile/i.test(
-        typeof navigator !== "undefined" ? navigator.userAgent : ""
-      );
-
-      if (isMobile) {
-        try {
-          sessionStorage.setItem("zodi.google_redirect_pending", "1");
-          await signInWithRedirect(auth, googleProvider);
-        } catch (err: any) {
-          sessionStorage.removeItem("zodi.google_redirect_pending");
-          setLoading(false);
-          explicitAuthFlow.current = false;
-          setMessage(`Error Google: ${err.message || err.code}`);
-        }
-        return;
-      }
-
-      // Desktop: popup (Google Cloud Console tiene zodi-pwa.vercel.app autorizado)
-      try {
-        const { getAdditionalUserInfo } = await import("firebase/auth");
-        const result = await signInWithPopup(auth, googleProvider);
-        const details = getAdditionalUserInfo(result);
-        await applyFirebaseUser(result.user, details?.isNewUser ?? false);
-      } catch (err: any) {
-        explicitAuthFlow.current = false;
-        setLoading(false);
-        // Log completo para diagnóstico
-        console.error("[ZODI AUTH] Google popup error:", {
-          code: err.code,
-          message: err.message,
-          customData: err.customData,
-          name: err.name,
-          stack: err.stack?.slice(0, 300)
-        });
-        if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
-          return;
-        }
-        if (err.code === "auth/popup-blocked") {
-          // Popup bloqueado → redirect
-          try {
-            sessionStorage.setItem("zodi.google_redirect_pending", "1");
-            explicitAuthFlow.current = true;
-            setLoading(true);
-            await signInWithRedirect(auth, googleProvider);
-          } catch {
-            sessionStorage.removeItem("zodi.google_redirect_pending");
-            explicitAuthFlow.current = false;
-            setLoading(false);
-            setMessage("No se pudo abrir Google. Permite popups para este sitio.");
-          }
-        } else {
-          // Mostrar error exacto para diagnóstico
-          setMessage(`Error [${err.code}]: ${err.message}`);
-        }
-      }
+      // Usar flujo OAuth del servidor (bypass del auth/handler de Firebase)
+      // Requiere GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en Vercel
+      window.location.href = "/api/auth/google";
       return;
     }
+
 
     // ── Validaciones email / contraseña ───────────────────────────────
     if (!email.trim()) {
