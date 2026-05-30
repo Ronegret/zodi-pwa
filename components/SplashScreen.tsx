@@ -12,12 +12,20 @@ export function SplashScreen() {
     const hasSeenSplash = sessionStorage.getItem("zodi.splash_seen");
     if (hasSeenSplash) {
       setShowSplash(false);
+    } else {
+      // Prevent scrolling under the splash screen
+      document.body.style.overflow = "hidden";
     }
+    
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
   const handleFinish = () => {
     sessionStorage.setItem("zodi.splash_seen", "true");
     document.documentElement.classList.add("splash-seen");
+    document.body.style.overflow = "";
     setShowSplash(false);
   };
 

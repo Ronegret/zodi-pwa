@@ -14,7 +14,7 @@ import {
   type User
 } from "firebase/auth";
 import { ArrowLeft, AtSign, Chrome, Eye, EyeOff, Lock, UserRound } from "lucide-react";
-import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
+import { getFirebaseAuth, googleProvider, appleProvider } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession } from "@/lib/session";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
@@ -33,34 +33,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [loading, setLoading] = useState(false);
 
   // ── Detectar sesión activa de Firebase al montar ──────────────────
-  // Cubre 3 casos:
-  //   1. Usuario ya estaba autenticado (Firebase persiste la sesión)
-  //   2. Retorno de signInWithRedirect (por si el popup fue bloqueado)
-  //   3. Recarga de página tras login reciente
   useEffect(() => {
     const auth = getFirebaseAuth();
     if (!auth) return;
 
-    let handled = false; // evitar doble redirect
+    let handled = false;
 
-    // Primero verificar si hay resultado de redirect pendiente
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user && !handled) {
-          handled = true;
-          applyFirebaseUser(result.user);
-        }
-      })
-      .catch((err) => {
-        const code = err?.code;
-        if (code === "auth/account-exists-with-different-credential") {
-          setMessage("Ya existe una cuenta con este correo (probablemente usaste contraseña). Inicia sesión con tu correo y contraseña.");
-        } else {
-          setMessage("Hubo un problema al iniciar sesión con Google. Inténtalo de nuevo.");
-        }
-      });
-
-    // Luego escuchar cambios de auth state (cubre sesión persistida y popup)
+    // Solo escuchar cambios de auth state
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user && !handled) {
         handled = true;
@@ -161,11 +140,11 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
 
-  async function continueFlow(provider: "email" | "google") {
+  async function continueFlow(provider: "email" | "google" | "apple") {
     setMessage("");
 
-    // ── Google OAuth ──────────────────────────────────────────────────
-    if (provider === "google") {
+    // ── Third-Party OAuth (Google / Apple) ────────────────────────────
+    if (provider === "google" || provider === "apple") {
       const auth = getFirebaseAuth();
       if (!auth) {
         setMessage("Firebase no está disponible. Inténtalo más tarde.");
@@ -173,12 +152,15 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       }
       setLoading(true);
       try {
-        // En móviles y PWA, signInWithRedirect es mucho más fluido y evita bloqueadores de popups.
-        // Redirige inmediatamente a Google y vuelve a la app.
-        await signInWithRedirect(auth, googleProvider);
-      } catch (err) {
+        const providerObj = provider === "google" ? googleProvider : appleProvider;
+        await signInWithPopup(auth, providerObj);
+      } catch (err: any) {
         setLoading(false);
-        setMessage("No se pudo iniciar el acceso con Google. Inténtalo de nuevo.");
+        if (err.code === "auth/account-exists-with-different-credential") {
+           setMessage("Ya existe una cuenta con este correo. Usa el método original.");
+        } else if (err.code !== "auth/popup-closed-by-user") {
+           setMessage(`No se pudo iniciar sesión con ${provider === "google" ? "Google" : "Apple"}. Inténtalo de nuevo.`);
+        }
       }
       return;
     }
@@ -431,20 +413,33 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <div className="h-px flex-1 bg-white/10" />
       </div>
 
-      {/* ── Botón Google al final ── */}
-      <button
-        onClick={() => continueFlow("google")}
-        disabled={loading}
-        className="flex w-full items-center justify-center gap-3 rounded-md border border-white/20 bg-white/5 px-4 py-3 font-bold text-white disabled:opacity-60 hover:bg-white/10 active:scale-95 transition"
-      >
-        <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        {loading ? "Conectando..." : "Continuar con Google"}
-      </button>
+      {/* ── Botones sociales al final ── */}
+      <div className="flex flex-col sm:flex-row gap-3 w-full">
+        <button
+          onClick={() => continueFlow("google")}
+          disabled={loading}
+          className="flex flex-1 items-center justify-center gap-2.5 rounded-md border border-white/20 bg-white/5 px-4 py-3 font-bold text-white disabled:opacity-60 hover:bg-white/10 active:scale-95 transition"
+        >
+          <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Google
+        </button>
+
+        <button
+          onClick={() => continueFlow("apple")}
+          disabled={loading}
+          className="flex flex-1 items-center justify-center gap-2.5 rounded-md border border-white/20 bg-black px-4 py-3 font-bold text-white disabled:opacity-60 hover:bg-white/5 active:scale-95 transition"
+        >
+          <svg className="h-5 w-5 shrink-0" viewBox="0 0 384 512" fill="currentColor">
+             <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.1-44.6-35.9-2.8-74.3 22.7-95.1 22.7-20.3 0-51.2-22.1-80-22.1-40.3 0-82.6 23.3-104.9 66.8-46.7 92.1-13.4 229.4 34.6 295 24 33.3 54.3 72.8 90.9 71.3 35.1-1.5 48.7-22.4 90.6-22.4 41.9 0 54 22.4 91.6 21.8 38.6-.6 64.9-36.7 88.5-70.8 28.3-40.9 40-80.9 41.5-83-1.2-.5-76.3-29.2-76.6-118zM245.9 83c20.3-24.8 34-58.4 30.2-91-28.7 1.2-65 18.2-86.4 43.1-17.6 20.3-33.8 55.2-29 89.3 32.5 2.5 65-16.7 85.2-41.4z"/>
+          </svg>
+          Apple
+        </button>
+      </div>
 
       {message ? (
         <p className="mt-4 rounded-md border border-lime-300/20 bg-lime-300/10 p-3 text-sm text-lime-100">
