@@ -24,50 +24,48 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [loading, setLoading] = useState(false);
   const explicitAuthFlow = useRef(false);
 
-  // ── Detectar sesión activa de Firebase al montar ──────────────────
-  // ── Capturar resultado de signInWithRedirect (solo si se inició un redirect) ─
+  // ── Procesar resultado del redirect de Google ─────────────────────
   useEffect(() => {
-    // Solo procesar si realmente iniciamos un redirect (marcado en sessionStorage)
-    const redirectPending = sessionStorage.getItem("zodi.google_redirect_pending");
-    if (!redirectPending) return;
-
     const auth = getFirebaseAuth();
     if (!auth) return;
 
-    explicitAuthFlow.current = true;
-    setLoading(true);
+    const redirectPending = sessionStorage.getItem("zodi.google_redirect_pending");
 
-    getRedirectResult(auth)
-      .then(async (result) => {
-        sessionStorage.removeItem("zodi.google_redirect_pending");
-        if (result?.user) {
-          const { getAdditionalUserInfo } = await import("firebase/auth");
-          const details = getAdditionalUserInfo(result);
-          await applyFirebaseUser(result.user, details?.isNewUser ?? false);
-        } else {
+    if (redirectPending) {
+      // Hay un redirect pendiente: marcar como flujo explícito ANTES
+      // de que onAuthStateChanged pueda dispararse
+      explicitAuthFlow.current = true;
+      setLoading(true);
+
+      getRedirectResult(auth)
+        .then(async (result) => {
+          sessionStorage.removeItem("zodi.google_redirect_pending");
+          if (result?.user) {
+            // Google devolvió el usuario correctamente
+            const { getAdditionalUserInfo } = await import("firebase/auth");
+            const details = getAdditionalUserInfo(result);
+            await applyFirebaseUser(result.user, details?.isNewUser ?? false);
+          } else {
+            // Firebase ya tiene sesión activa (el redirect ya fue procesado antes)
+            // onAuthStateChanged lo capturará
+            explicitAuthFlow.current = false;
+            setLoading(false);
+          }
+        })
+        .catch((err: any) => {
+          sessionStorage.removeItem("zodi.google_redirect_pending");
           explicitAuthFlow.current = false;
           setLoading(false);
-        }
-      })
-      .catch((err: any) => {
-        sessionStorage.removeItem("zodi.google_redirect_pending");
-        explicitAuthFlow.current = false;
-        setLoading(false);
-        if (err?.code && err.code !== "auth/popup-closed-by-user" && err.code !== "auth/internal-error") {
-          setMessage(`Error Google: ${err.message || err.code}`);
-        }
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+          if (err?.code && err.code !== "auth/popup-closed-by-user") {
+            setMessage(`Error Google: ${err.message || err.code}`);
+          }
+        });
+    }
 
-  useEffect(() => {
-    const auth = getFirebaseAuth();
-    if (!auth) return;
-
+    // ── Sesión activa previa (usuario ya logueado) ────────────────
     let handled = false;
-
-    // Solo escuchar cambios normales de estado de sesión
     const unsub = onAuthStateChanged(auth, (user) => {
+      // Solo actuar si NO hay un flujo explícito en marcha
       if (user && !handled && !explicitAuthFlow.current) {
         handled = true;
         applyFirebaseUser(user);
