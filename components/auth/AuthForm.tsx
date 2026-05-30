@@ -159,7 +159,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         if (err.code === "auth/account-exists-with-different-credential") {
            setMessage("Ya existe una cuenta con este correo. Usa el método original.");
         } else if (err.code !== "auth/popup-closed-by-user") {
-           setMessage(`No se pudo iniciar sesión con ${provider === "google" ? "Google" : "Apple"}. Inténtalo de nuevo.`);
+           // Mostramos el error real para poder depurarlo
+           setMessage(`Error ${provider === "google" ? "Google" : "Apple"}: ${err.message || err.code || "Desconocido"}.`);
         }
       }
       return;
