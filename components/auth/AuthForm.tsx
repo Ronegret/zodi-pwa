@@ -146,7 +146,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
 
-  async function continueFlow(provider: "email" | "google" | "apple") {
   async function continueFlow(provider: "email" | "google") {
     setMessage("");
 
