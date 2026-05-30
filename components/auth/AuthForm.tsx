@@ -32,8 +32,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const redirectPending = sessionStorage.getItem("zodi.google_redirect_pending");
 
     if (redirectPending) {
-      // Hay un redirect pendiente: marcar como flujo explícito ANTES
-      // de que onAuthStateChanged pueda dispararse
+      // Marcar flujo explícito ANTES de que onAuthStateChanged pueda dispararse
       explicitAuthFlow.current = true;
       setLoading(true);
 
@@ -41,34 +40,38 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         .then(async (result) => {
           sessionStorage.removeItem("zodi.google_redirect_pending");
           if (result?.user) {
-            // Google devolvió el usuario correctamente
+            // Redirect completado correctamente — procesar usuario
             const { getAdditionalUserInfo } = await import("firebase/auth");
             const details = getAdditionalUserInfo(result);
             await applyFirebaseUser(result.user, details?.isNewUser ?? false);
           } else {
-            // Firebase ya tiene sesión activa (el redirect ya fue procesado antes)
-            // onAuthStateChanged lo capturará
+            // getRedirectResult devuelve null pero el redirect ocurrió.
+            // onAuthStateChanged ya tiene al usuario — liberar el lock.
             explicitAuthFlow.current = false;
             setLoading(false);
           }
         })
         .catch((err: any) => {
           sessionStorage.removeItem("zodi.google_redirect_pending");
+          // auth/internal-error: Firebase no pudo procesar el estado del redirect,
+          // PERO el usuario puede estar ya logueado en onAuthStateChanged.
+          // Liberamos el lock para que onAuthStateChanged lo maneje.
           explicitAuthFlow.current = false;
           setLoading(false);
-          if (err?.code && err.code !== "auth/popup-closed-by-user") {
+          // Solo mostrar error si NO es el error interno de Firebase (que se recupera vía onAuthStateChanged)
+          if (err?.code && err.code !== "auth/popup-closed-by-user" && err.code !== "auth/internal-error") {
             setMessage(`Error Google: ${err.message || err.code}`);
           }
         });
     }
 
-    // ── Sesión activa previa (usuario ya logueado) ────────────────
+    // ── Sesión activa (pre-existente o recuperada tras redirect) ─────
     let handled = false;
-    const unsub = onAuthStateChanged(auth, (user) => {
-      // Solo actuar si NO hay un flujo explícito en marcha
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      // Actuar si hay usuario Y no hay flujo explícito activo
       if (user && !handled && !explicitAuthFlow.current) {
         handled = true;
-        applyFirebaseUser(user);
+        await applyFirebaseUser(user);
       }
     });
 
