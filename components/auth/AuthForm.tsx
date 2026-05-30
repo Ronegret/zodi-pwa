@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
-import { ArrowLeft, AtSign, Eye, EyeOff, Lock, UserRound } from "lucide-react";
+import { signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, type User } from "firebase/auth";
+import { ArrowLeft, AtSign, CheckCircle2, Eye, EyeOff, Loader2, Lock, UserRound, XCircle } from "lucide-react";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession, getSavedIdentity } from "@/lib/session";
 
@@ -22,7 +22,26 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [remember, setRemember] = useState(true);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<"idle"|"checking"|"available"|"taken">("idle");
   const explicitAuthFlow = useRef(false);
+
+  // Verificar disponibilidad del email en modo registro (debounce 700ms)
+  useEffect(() => {
+    if (mode !== "register") return;
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isValid) { setEmailStatus("idle"); return; }
+
+    setEmailStatus("checking");
+    const t = setTimeout(async () => {
+      try {
+        const auth = getFirebaseAuth();
+        if (!auth) { setEmailStatus("idle"); return; }
+        const methods = await fetchSignInMethodsForEmail(auth, email);
+        setEmailStatus(methods.length > 0 ? "taken" : "available");
+      } catch { setEmailStatus("idle"); }
+    }, 700);
+    return () => clearTimeout(t);
+  }, [email, mode]);
 
   // ── Leer errores desde la URL (para callbacks del servidor) ─────────
   useEffect(() => {
@@ -292,6 +311,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
     if (mode === "register") {
+      if (emailStatus === "taken") {
+        setMessage("Ese correo ya tiene una cuenta. Usa otro o inicia sesión.");
+        return;
+      }
+      if (emailStatus === "checking") {
+        setMessage("Espera un momento, verificando disponibilidad del correo...");
+        return;
+      }
       if (password.length < 6) {
         setMessage("La contraseña necesita al menos 6 caracteres.");
         return;
@@ -462,7 +489,34 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             </div>
           </>
         ) : null}
-        <Field icon={AtSign} label="Correo" value={email} onChange={setEmail} type="email" name="email" autoComplete="email" placeholder="tu@email.com" />
+        {/* Campo email con verificación en tiempo real (solo en registro) */}
+        {mode === "register" ? (
+          <div>
+            <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3 cursor-text transition focus-within:border-lime-300/40">
+              <span className="mb-1 sm:mb-2 flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/45">
+                <AtSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Correo
+              </span>
+              <div className="flex items-center gap-2">
+                <input
+                  className="flex-1 bg-transparent text-white outline-none placeholder:text-white/30 text-sm sm:text-base"
+                  type="email" name="email" autoComplete="email" value={email}
+                  placeholder="tu@email.com" onChange={(e) => setEmail(e.target.value)}
+                />
+                {emailStatus === "checking"  && <Loader2 className="h-4 w-4 animate-spin text-white/40 shrink-0" />}
+                {emailStatus === "available" && <CheckCircle2 className="h-4 w-4 text-lime-300 shrink-0" />}
+                {emailStatus === "taken"     && <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
+              </div>
+            </label>
+            {emailStatus === "available" && (
+              <p className="mt-1 text-[11px] text-lime-300/70 pl-1">✓ Email disponible</p>
+            )}
+            {emailStatus === "taken" && (
+              <p className="mt-1 text-[11px] text-red-400/80 pl-1">Este correo ya tiene una cuenta. ¿Quieres <a href="/auth/login" className="underline">iniciar sesión</a>?</p>
+            )}
+          </div>
+        ) : (
+          <Field icon={AtSign} label="Correo" value={email} onChange={setEmail} type="email" name="email" autoComplete="email" placeholder="tu@email.com" />
+        )}
         <div className="relative">
           <Field
             icon={Lock}
