@@ -191,10 +191,49 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     // ── Third-Party OAuth (Google) ────────────────────────────
     if (provider === "google") {
       setLoading(true);
+      explicitAuthFlow.current = true;
 
-      // Usar flujo OAuth del servidor (bypass del auth/handler de Firebase)
-      // Requiere GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en Vercel
-      window.location.href = "/api/auth/google";
+      try {
+        const auth = getFirebaseAuth();
+        if (!auth) {
+          setMessage("Firebase no está configurado. Revisa las variables NEXT_PUBLIC_FIREBASE_*.");
+          return;
+        }
+
+        try {
+          const result = await signInWithPopup(auth, googleProvider);
+          const { getAdditionalUserInfo } = await import("firebase/auth");
+          const details = getAdditionalUserInfo(result);
+          await applyFirebaseUser(result.user, details?.isNewUser ?? false);
+        } catch (popupErr: any) {
+          const code = popupErr?.code ?? "";
+          if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+            setMessage("Inicio con Google cancelado.");
+            return;
+          }
+
+          if (code === "auth/account-exists-with-different-credential") {
+            setMessage("Ese correo ya existe con otro método. Entra con email y contraseña.");
+            return;
+          }
+
+          sessionStorage.setItem("zodi.google_redirect_pending", "1");
+          await signInWithRedirect(auth, googleProvider);
+        }
+      } catch (err: any) {
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        const code = err?.code ?? "";
+        if (code === "auth/unauthorized-domain") {
+          setMessage("Este dominio no está autorizado en Firebase Authentication.");
+        } else if (code === "auth/operation-not-allowed") {
+          setMessage("Google no está habilitado como proveedor en Firebase Authentication.");
+        } else {
+          setMessage(`No pudimos abrir Google: ${err?.message || code || "error desconocido"}`);
+        }
+      } finally {
+        explicitAuthFlow.current = false;
+        setLoading(false);
+      }
       return;
     }
 
