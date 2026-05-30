@@ -17,6 +17,14 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"]
   },
+  async rewrites() {
+    return [
+      {
+        source: "/__/auth/:path*",
+        destination: "https://zodi-2.firebaseapp.com/__/auth/:path*",
+      },
+    ];
+  },
   async headers() {
     return [
       {
