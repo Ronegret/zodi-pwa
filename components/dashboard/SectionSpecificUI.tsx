@@ -894,7 +894,7 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
         {/* Large centered image */}
         <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[500px] bg-black">
           <Image
-            src={`/zodi-art/numerologia/${targetNumber}.png`}
+            src={`/zodi-art/nuevas/7-Numerologia/${targetNumber}.png`}
             alt={`Número ${targetNumber}`}
             fill
             className="object-contain"
@@ -953,7 +953,7 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
                     targetNumber === n ? "border-lime-300 ring-2 ring-lime-300 shadow-[0_0_15px_rgba(184,255,23,0.3)] scale-105" : "border-white/10 opacity-70 hover:opacity-100 hover:border-lime-300/40"
                   }`}
                 >
-                  <Image src={`/zodi-art/numerologia/${n}.png`} alt={`Número ${n}`} fill className="object-cover" />
+                  <Image src={`/zodi-art/nuevas/7-Numerologia/${n}.png`} alt={`Número ${n}`} fill className="object-cover" />
                 </button>
               ))}
             </div>
@@ -1472,7 +1472,7 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
     { key: "senal",    label: "Señal",   emoji: "🔮" },
   ];
 
-  const normalizeSign = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalizeSign = (s: string) => { const n = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); return n.charAt(0).toUpperCase() + n.slice(1); };
   const currentImg = `${normalizeSign(targetSign)}.png`;
 
   useEffect(() => {
@@ -1497,7 +1497,7 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
       <div className="glass-panel rounded-md overflow-hidden">
         <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[500px] bg-black">
           <Image
-            src={`/zodi-art/horoscopo/${currentImg}`}
+            src={`/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${currentImg}`}
             alt={targetSign}
             fill
             className="object-contain"
@@ -1782,7 +1782,7 @@ function PerfilUI() {
               { label: "Signo solar", value: ap.sunSign ?? "–", type: "zodiac", img: `/zodiac/${ap.sunSign?.toLowerCase() === 'piscis' ? 'picis' : ap.sunSign?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()}.png` },
               { label: "Luna",        value: ap.moonSign ?? "–",   emoji: "🌙" },
               { label: "Ascendente",  value: ap.ascendant ?? "–",  emoji: "⬆️" },
-              { label: "Camino vida", value: String(ap.lifePathNumber ?? "–"), type: "numerology", img: `/zodi-art/numerologia/${ap.lifePathNumber}.png` },
+              { label: "Camino vida", value: String(ap.lifePathNumber ?? "–"), type: "numerology", img: `/zodi-art/nuevas/7-Numerologia/${ap.lifePathNumber}.png` },
               { label: "Chino",       value: ap.chineseZodiac ?? "–", type: "chinese", img: `/zodi-art/chino/C_${ap.chineseZodiac ? ap.chineseZodiac.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""}.png` },
               { label: "Maya",        value: ap.mayanSign ?? "–",  emoji: "🌿" },
             ].map(item => (

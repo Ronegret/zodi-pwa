@@ -15,18 +15,18 @@ import type { OnboardingData } from "@/types/zodi";
 
 // ── Avatares ───────────────────────────────────────────────────────────────────
 const zodiacAvatars: [string, string][] = [
-  ["Aries",       "/zodi-art/avatars/aries.png"],
-  ["Tauro",       "/zodi-art/avatars/tauro.png"],
-  ["Géminis",     "/zodi-art/avatars/geminis.png"],
-  ["Cáncer",      "/zodi-art/avatars/cancer.png"],
-  ["Leo",         "/zodi-art/avatars/leo.png"],
-  ["Virgo",       "/zodi-art/avatars/virgo.png"],
-  ["Libra",       "/zodi-art/avatars/libra.png"],
-  ["Escorpio",    "/zodi-art/avatars/escorpio.png"],
-  ["Sagitario",   "/zodi-art/avatars/sagitario.png"],
-  ["Capricornio", "/zodi-art/avatars/capricornio.png"],
-  ["Acuario",     "/zodi-art/avatars/acuario.png"],
-  ["Piscis",      "/zodi-art/avatars/piscis.png"]
+  ["Aries",       "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Aries.png"],
+  ["Tauro",       "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Tauro.png"],
+  ["Géminis",     "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Geminis.png"],
+  ["Cáncer",      "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Cancer.png"],
+  ["Leo",         "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Leo.png"],
+  ["Virgo",       "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Virgo.png"],
+  ["Libra",       "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Libra.png"],
+  ["Escorpio",    "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Escorpio.png"],
+  ["Sagitario",   "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Sagitario.png"],
+  ["Capricornio", "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Capricornio.png"],
+  ["Acuario",     "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Acuario.png"],
+  ["Piscis",      "/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/Avatar_Piscis.png"]
 ];
 
 const zodiAvatars: [string, string][] = [
