@@ -5,7 +5,7 @@ import { Bot, Check, Copy, Send, Share2, Star } from "lucide-react";
 import { getLocalSession, getSessionProfile } from "@/lib/session";
 import { demoProfile } from "@/lib/data";
 import { addXp, updateStreak } from "@/lib/gamification";
-import { getFirebaseAuth } from "@/lib/firebase/client";
+import { getFirebaseToken } from "@/lib/firebase/client";
 
 // ── Inline markdown renderer ───────────────────────────────────────────────
 function MarkdownText({ text }: { text: string }) {
@@ -79,13 +79,6 @@ export function AIAssistant() {
     const query = (text ?? input).trim();
     if (!query) return;
 
-    const auth = getFirebaseAuth();
-    const user = auth?.currentUser;
-    if (!user) {
-      alert("Debes iniciar sesión");
-      return;
-    }
-
     setLoading(true);
     setReply("");
     setSaved(false);
@@ -93,7 +86,7 @@ export function AIAssistant() {
     const profile = sessionProfile ?? demoProfile;
     const fullQuery = query + (lengthHints[length] ?? "");
     try {
-      const token = await user.getIdToken();
+      const token = await getFirebaseToken();
       const response = await fetch("/api/ai/reading", {
         method: "POST",
         headers: { 
@@ -115,7 +108,7 @@ export function AIAssistant() {
       const data = await response.json();
       const text = data.text || `${data.reading ?? ""} ${data.roast ?? ""}`.trim() || "ZODI no encontro respuesta esta vez. Reintenta.";
       setReply(text);
-      if (text && !text.startsWith("ZODI")) { addXp("Oráculo personal"); updateStreak(); }
+      if (text) { addXp("Oráculo personal"); updateStreak(); }
     } catch {
       setReply("ZODI perdio senal por un momento. Vuelve a preguntar.");
     } finally {

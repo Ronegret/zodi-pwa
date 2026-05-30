@@ -14,16 +14,10 @@ export function PremiumUI() {
       return;
     }
 
-    const auth = (await import('@/lib/firebase/client')).getFirebaseAuth();
-    const user = auth?.currentUser;
-    if (!user) {
-      alert("Sesión no válida");
-      return;
-    }
-
     setLoadingId(packId);
     try {
-      const token = await user.getIdToken();
+      const { getFirebaseToken } = await import('@/lib/firebase/client');
+      const token = await getFirebaseToken();
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { 
@@ -122,9 +116,9 @@ export function PremiumUI() {
                 return;
               }
               window.open('https://instagram.com/zodi.elcrack', '_blank');
-              setTimeout(() => {
-                const gamification = require('@/lib/gamification');
-                gamification.addGems(20);
+              setTimeout(async () => {
+                const { addGems } = await import('@/lib/gamification');
+                addGems(20);
                 localStorage.setItem('zodi.ig_rewarded', 'true');
                 alert('¡Has recibido 20 Gemas por seguir a ZODI en Instagram!');
                 window.location.reload();

@@ -248,15 +248,15 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-4 left-4 right-4 z-40 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] lg:hidden"
+      className="fixed bottom-2 left-2 right-2 z-40 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] lg:hidden sm:bottom-4 sm:left-4 sm:right-4"
       style={{
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) / 2)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
         background: "rgb(8, 8, 14)",
         transform: "translateZ(0)",
         willChange: "auto",
       }}
     >
-      <div className="grid grid-cols-5 items-center justify-between px-2" style={{ height: "68px" }}>
+      <div className="grid grid-cols-5 items-center justify-between px-1 sm:px-2" style={{ height: "64px" }}>
         {bottomNav.map((item, i) => {
           const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           const isOracle = item.href === "/dashboard/oraculo";

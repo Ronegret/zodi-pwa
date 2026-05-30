@@ -75,22 +75,8 @@ function useConsult(section: DashboardSection) {
     setReply("");
     const fullInput = input + (lengthHints[length] ?? "");
     try {
-      let token = "";
-      try {
-        const { getFirebaseAuth } = await import("@/lib/firebase/client");
-        const auth = getFirebaseAuth();
-        if (auth?.currentUser) {
-          token = await auth.currentUser.getIdToken();
-        }
-      } catch (e) {
-        // Ignorar si falla Firebase
-      }
-
-      if (!token) {
-        setReply("Necesitas iniciar sesión para consultar a ZODI.");
-        setLoading(false);
-        return;
-      }
+      const { getFirebaseToken } = await import("@/lib/firebase/client");
+      const token = await getFirebaseToken();
 
       const res = await fetch("/api/ai/reading", {
         method: "POST",

@@ -22,7 +22,7 @@ const SECTION_BG: Record<string, string> = {
   mano:         "/zodi-art/oracle-close.png",
   roast:        "/zodi-art/poster-chaos.png",
   "carta-natal":"/zodi-art/zodi-character-full.png",
-  numerologia:  "/zodi-art/numerologia/fondo-numeros-misticos.png",
+  numerologia:  "/zodi-art/nuevas/7-Numerologia/Fondo-numeros-misticos.png",
   nombre:       "/zodi-art/zodi-us.png",
   compatibilidad:"/zodi-art/zodi-us-full.png",
   amigos:       "/zodi-art/zodi-us-full.png",
