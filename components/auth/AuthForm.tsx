@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
+import { signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, type User } from "firebase/auth";
 import { ArrowLeft, AtSign, Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession } from "@/lib/session";
@@ -183,48 +183,17 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setLoading(true);
       explicitAuthFlow.current = true;
 
-      // Móvil: popups bloqueados por el OS → usar redirect
-      const isMobile = /android|iphone|ipad|ipod|mobile/i.test(
-        typeof navigator !== "undefined" ? navigator.userAgent : ""
-      );
-
-      if (isMobile) {
-        try {
-          sessionStorage.setItem("zodi.google_redirect_pending", "1");
-          await signInWithRedirect(auth, googleProvider);
-        } catch (err: any) {
-          sessionStorage.removeItem("zodi.google_redirect_pending");
-          setLoading(false);
-          explicitAuthFlow.current = false;
-          setMessage(`Error Google: ${err.message || err.code}`);
-        }
-        return;
-      }
-
-      // Desktop: popup normal
+      // Siempre usar redirect: evita problemas con Google Cloud Console OAuth origins
+      // en dominios de Vercel/producción. El redirect pasa por zodi-2.firebaseapp.com
+      // que ya está autorizado en todos los entornos.
       try {
-        const { getAdditionalUserInfo } = await import("firebase/auth");
-        const result = await signInWithPopup(auth, googleProvider);
-        const details = getAdditionalUserInfo(result);
-        await applyFirebaseUser(result.user, details?.isNewUser ?? false);
+        sessionStorage.setItem("zodi.google_redirect_pending", "1");
+        await signInWithRedirect(auth, googleProvider);
       } catch (err: any) {
+        sessionStorage.removeItem("zodi.google_redirect_pending");
         setLoading(false);
         explicitAuthFlow.current = false;
-        if (err.code !== "auth/popup-closed-by-user") {
-          if (err.code === "auth/account-exists-with-different-credential") {
-            setMessage("Ese correo ya existe con otro método. Inicia sesión con email y contraseña, o vincula Google desde tu cuenta.");
-          } else if (err.code === "auth/popup-blocked") {
-            try {
-              sessionStorage.setItem("zodi.google_redirect_pending", "1");
-              await signInWithRedirect(auth, googleProvider);
-            } catch {
-              sessionStorage.removeItem("zodi.google_redirect_pending");
-              setMessage("El navegador bloqueó el popup. Permite popups para este sitio e inténtalo de nuevo.");
-            }
-          } else {
-            setMessage(`Error Google: ${err.message || err.code}`);
-          }
-        }
+        setMessage(`Error Google: ${err.message || err.code}`);
       }
       return;
     }
