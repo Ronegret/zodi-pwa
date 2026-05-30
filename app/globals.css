@@ -609,6 +609,145 @@ h1, h2, h3, h4, h5, h6 {
 
 
 
+/* ── ZODI Game-feel animations ───────────────────────────────────────────── */
+
+/* Level-up burst — usar en badges de nivel */
+@keyframes level-up {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.4) rotate(-4deg); filter: brightness(1.5); }
+  60%  { transform: scale(0.92) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Gem sparkle — para gemas ganadas */
+@keyframes gem-pop {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(4deg);  opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Número subiendo — para contadores */
+@keyframes count-up {
+  from { transform: translateY(6px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Card flip 3D */
+@keyframes card-flip {
+  0%   { transform: perspective(600px) rotateY(90deg); opacity: 0; }
+  100% { transform: perspective(600px) rotateY(0deg);  opacity: 1; }
+}
+
+/* Pulsing neon border — para cards activas/premium */
+@keyframes neon-pulse-border {
+  0%,100% { box-shadow: 0 0 8px rgba(184,255,23,0.3), 0 0 20px rgba(184,255,23,0.1); }
+  50%      { box-shadow: 0 0 18px rgba(184,255,23,0.6), 0 0 40px rgba(184,255,23,0.25), 0 0 60px rgba(184,255,23,0.1); }
+}
+
+/* Oracle orb floating glow */
+@keyframes oracle-glow {
+  0%,100% { box-shadow: 0 0 20px rgba(184,255,23,0.4), 0 0 40px rgba(155,77,255,0.2); }
+  33%      { box-shadow: 0 0 30px rgba(155,77,255,0.6), 0 0 60px rgba(184,255,23,0.2); }
+  66%      { box-shadow: 0 0 25px rgba(255,43,214,0.4), 0 0 50px rgba(184,255,23,0.3); }
+}
+
+/* XP bar fill */
+@keyframes xp-fill {
+  from { width: 0; }
+}
+
+/* Floating particles — estrellas ZODI */
+@keyframes float-particle {
+  0%,100% { transform: translateY(0) translateX(0) scale(1);   opacity: 0.7; }
+  25%      { transform: translateY(-12px) translateX(4px) scale(1.2); opacity: 1; }
+  75%      { transform: translateY(-6px) translateX(-4px) scale(0.9); opacity: 0.4; }
+}
+
+/* Slide-in desde abajo para mobile sheets */
+@keyframes slide-from-bottom {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Bounce-in para toasts/logros */
+@keyframes bounce-in {
+  0%   { transform: scale(0.3) translateY(30px); opacity: 0; }
+  50%  { transform: scale(1.08) translateY(-4px); opacity: 1; }
+  70%  { transform: scale(0.96); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* Shake — para errores/advertencias */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-6px); }
+  40%     { transform: translateX(6px); }
+  60%     { transform: translateX(-4px); }
+  80%     { transform: translateX(4px); }
+}
+
+/* Cosmic trail para elementos especiales */
+.cosmic-glow {
+  animation: oracle-glow 4s ease-in-out infinite;
+}
+
+.neon-pulse {
+  animation: neon-pulse-border 2.5s ease-in-out infinite;
+}
+
+.gem-pop {
+  animation: gem-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.card-flip {
+  animation: card-flip 0.4s ease-out both;
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+.animate-float-particle {
+  animation: float-particle 5s ease-in-out infinite;
+}
+
+/* ── Game card styles ─────────────────────────────────────────────────────── */
+
+.game-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+
+@media (hover: hover) {
+  .game-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.7),
+      0 0 30px rgba(184, 255, 23, 0.15);
+  }
+}
+
+/* Floating stars background para el dashboard */
+.star-field::before {
+  content: "✦ ✧ ✦ ✧ ✦ ✧ ✦";
+  position: absolute;
+  inset: 0;
+  font-size: 8px;
+  letter-spacing: 18px;
+  line-height: 28px;
+  color: rgba(184, 255, 23, 0.08);
+  pointer-events: none;
+  animation: spark-drift 30s linear infinite;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow: hidden;
+}
+
 /* ── Reduced Motion ──────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

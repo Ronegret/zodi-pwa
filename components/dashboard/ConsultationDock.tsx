@@ -298,29 +298,27 @@ export function ConsultationDock() {
             </h3>
             <p className="mt-3 text-sm leading-6 text-white/60">{active.body}</p>
 
-            {/* Selector de área de enfoque (solo para horóscopo diario) */}
-            {active.kind === "daily-horoscope" && (
-              <div className="mt-4">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Enfocar en</p>
-                <div className="flex flex-wrap gap-1.5">
+            {/* Selector de área de enfoque — siempre visible, Todos por defecto */}
+            <div className="mt-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Enfocar en</p>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => setFocus(null)}
+                  className={`zodi-chip transition ${!focus ? "zodi-chip-active" : "hover:border-white/20"}`}
+                >
+                  ✦ Todos
+                </button>
+                {FOCUS_OPTIONS.map((opt) => (
                   <button
-                    onClick={() => setFocus(null)}
-                    className={`zodi-chip transition ${!focus ? "zodi-chip-active" : "hover:border-white/20"}`}
+                    key={opt}
+                    onClick={() => setFocus(focus === opt ? null : opt)}
+                    className={`zodi-chip transition ${focus === opt ? "zodi-chip-active" : "hover:border-white/20"}`}
                   >
-                    Todo
+                    {opt}
                   </button>
-                  {FOCUS_OPTIONS.map((opt) => (
-                    <button
-                      key={opt}
-                      onClick={() => setFocus(focus === opt ? null : opt)}
-                      className={`zodi-chip transition ${focus === opt ? "zodi-chip-active" : "hover:border-white/20"}`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
+                ))}
               </div>
-            )}
+            </div>
 
             {/* Selector de tono */}
             <div className="mt-4">

@@ -132,7 +132,7 @@ export function Sidebar() {
   }, []);
 
   return (
-    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-52 shrink-0 flex-col rounded-xl border border-white/07 shadow-[0_0_40px_rgba(184,255,23,0.06)] lg:flex overflow-hidden"
+    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-56 shrink-0 flex-col rounded-xl border border-white/07 shadow-[0_0_40px_rgba(184,255,23,0.06)] lg:flex overflow-hidden"
       style={{ background: "linear-gradient(180deg, rgb(12,12,20) 0%, rgb(8,8,16) 100%)" }}
     >
       {/* Logo — click lleva al inicio */}
@@ -181,7 +181,7 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto py-2 no-scrollbar">
         {sidebarGroups.map((group) => (
           <div key={group.label} className="mb-2">
-            <p className="px-3 pb-1 pt-2 text-[9px] font-black uppercase tracking-[0.28em] text-white/25">
+            <p className="px-3 pb-1 pt-2 text-[10px] font-black uppercase tracking-[0.28em] text-white/30">
               {group.label}
             </p>
             {group.items.map((item) => {
@@ -197,7 +197,7 @@ export function Sidebar() {
                     className="flex w-full items-center gap-2.5 px-3 py-1.5 text-sm transition-all text-white/55 hover:text-lime-100 hover:bg-white/[0.035] font-medium text-left"
                   >
                     <item.icon className="h-3.5 w-3.5 shrink-0 text-white/40" />
-                    <span className="truncate text-[13px]">{item.label}</span>
+                    <span className="truncate text-sm">{item.label}</span>
                   </button>
                 );
               }
@@ -213,8 +213,8 @@ export function Sidebar() {
                       : "text-white/55 hover:text-lime-100 hover:bg-white/[0.035] font-medium"
                   }`}
                 >
-                  <item.icon className={`h-3.5 w-3.5 shrink-0 ${active ? "text-lime-300" : "text-white/40"}`} />
-                  <span className="truncate text-[13px]">{item.label}</span>
+                  <item.icon className={`h-4 w-4 shrink-0 ${active ? "text-lime-300" : "text-white/40"}`} />
+                  <span className="truncate text-sm">{item.label}</span>
                 </Link>
               );
             })}

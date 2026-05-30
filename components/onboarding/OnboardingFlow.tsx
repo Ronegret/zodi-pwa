@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  AlertCircle, Check, ChevronDown, ImagePlus, MapPin,
-  Sparkles, Gem, Flame, X
+  AlertCircle, Check, CheckCircle2, ChevronDown, ImagePlus, Loader2, MapPin,
+  Sparkles, Gem, Flame, UserCircle, X, XCircle
 } from "lucide-react";
 import { generateAstralProfile } from "@/lib/astral";
 import { completeLocalOnboarding, getLocalSession, signOutZodi } from "@/lib/session";
@@ -91,9 +91,11 @@ const initialData: OnboardingData = {
   notificationPreferences: ["horoscopo diario", "alertas lunares"]
 };
 
-function validateStep(step: number, data: OnboardingData): string | null {
+function validateStep(step: number, data: OnboardingData, usernameStatus: string): string | null {
   if (step === 0) {
     if (!data.displayName.trim()) return "¿Cómo te llamo? Necesito un nombre.";
+    if (usernameStatus === "taken") return "Ese usuario ya existe en el universo ZODI. Elige otro.";
+    if (usernameStatus === "checking") return "Espera, verificando si ese usuario está disponible...";
   }
   if (step === 1) {
     if (!data.birthDate) return "Sin fecha de nacimiento no puedo calcular nada, te lo juro.";
@@ -119,7 +121,32 @@ export function OnboardingFlow() {
   const [calculating, setCalc]    = useState(false);
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [error, setError]         = useState<string | null>(null);
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const profile = useMemo(() => generateAstralProfile(data), [data]);
+
+  // Verificación de disponibilidad del username en Firestore
+  const checkUsername = useCallback(async (username: string) => {
+    const clean = username.replace(/^@/, "").trim().toLowerCase();
+    if (clean.length < 3) { setUsernameStatus("idle"); return; }
+    setUsernameStatus("checking");
+    try {
+      const { getFirebaseDb } = await import("@/lib/firebase/client");
+      const { collection, query, where, getDocs } = await import("firebase/firestore");
+      const db = getFirebaseDb();
+      if (!db) { setUsernameStatus("idle"); return; }
+      const q = query(collection(db, "users"), where("username", "==", clean));
+      const snap = await getDocs(q);
+      setUsernameStatus(snap.empty ? "available" : "taken");
+    } catch {
+      setUsernameStatus("idle");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!data.username) { setUsernameStatus("idle"); return; }
+    const t = setTimeout(() => checkUsername(data.username), 600);
+    return () => clearTimeout(t);
+  }, [data.username, checkUsername]);
 
   function update<K extends keyof OnboardingData>(key: K, value: OnboardingData[K]) {
     setData((d) => ({ ...d, [key]: value }));
@@ -136,7 +163,7 @@ export function OnboardingFlow() {
   }
 
   function goNext() {
-    const err = validateStep(step, data);
+    const err = validateStep(step, data, usernameStatus);
     if (err) { setError(err); return; }
     setError(null);
 
@@ -348,67 +375,61 @@ export function OnboardingFlow() {
                 </h1>
                 <p className="mt-3 text-sm text-white/55">Elige un nombre, un alias, un apodo. Lo que uses en la calle.</p>
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <Input
-                      label="Nombre visible *"
-                      value={data.displayName}
-                      onChange={(v) => update("displayName", v)}
-                      placeholder="Neon Bruja, La Scorpio, tu nombre real..."
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Input label="Usuario (@)" value={data.username} onChange={(v) => update("username", v)} placeholder="@zodiserpiente" />
+                <div className="mt-6 grid gap-4">
+                  <Input
+                    label="Nombre visible *"
+                    value={data.displayName}
+                    onChange={(v) => update("displayName", v)}
+                    placeholder="Neon Bruja, La Scorpio, tu nombre real..."
+                  />
+
+                  {/* Username con verificación en tiempo real */}
+                  <div className="relative">
+                    <label className="block cursor-text rounded-xl border border-white/08 bg-black/35 p-3.5 transition focus-within:border-lime-300/40">
+                      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/40">Usuario (@)</span>
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="flex-1 bg-transparent text-white outline-none placeholder:text-white/25"
+                          value={data.username}
+                          placeholder="@zodiserpiente"
+                          onChange={(e) => update("username", e.target.value)}
+                        />
+                        {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-white/40 shrink-0" />}
+                        {usernameStatus === "available" && <CheckCircle2 className="h-4 w-4 text-lime-300 shrink-0" />}
+                        {usernameStatus === "taken" && <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
+                      </div>
+                    </label>
+                    {usernameStatus === "available" && (
+                      <p className="mt-1 text-[11px] text-lime-300/70">¡Disponible! Nadie más tiene ese alias.</p>
+                    )}
+                    {usernameStatus === "taken" && (
+                      <p className="mt-1 text-[11px] text-red-400/80">Ese usuario ya existe. El cosmos requiere unicidad.</p>
+                    )}
                   </div>
                 </div>
 
-                {/* Avatar */}
+                {/* Foto de perfil — opcional */}
                 <div className="mt-6">
-                  <p className="mb-3 text-sm font-bold text-white/70">Elige tu imagen de perfil</p>
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="relative h-16 w-16 overflow-hidden rounded-xl border-2 border-lime-300/50">
-                      {data.avatar.startsWith("data:") ? (
+                  <p className="mb-1 text-sm font-bold text-white/70">Foto de perfil <span className="text-white/35 font-normal">(opcional)</span></p>
+                  <p className="mb-4 text-xs text-white/40">Si no subes ninguna, usaremos un avatar ZODI por defecto. Puedes cambiarlo después.</p>
+
+                  <label className="group flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-white/15 bg-white/03 p-6 transition hover:border-lime-300/40 hover:bg-lime-300/05">
+                    {data.avatar.startsWith("data:") ? (
+                      <div className="relative h-20 w-20 overflow-hidden rounded-xl border-2 border-lime-300/50">
                         <img src={data.avatar} alt="Avatar" className="h-full w-full object-cover" />
-                      ) : (
-                        <Image src={data.avatar} alt="Avatar" fill className="object-cover" />
-                      )}
-                    </div>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-white/05 px-4 py-2 text-sm font-bold text-white/70 transition hover:bg-white/10">
+                      </div>
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-white/15 bg-white/05">
+                        <UserCircle className="h-8 w-8 text-white/30" />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-sm font-bold text-white/60 group-hover:text-lime-200 transition">
                       <ImagePlus className="h-4 w-4" />
-                      Subir foto
-                      <input className="hidden" type="file" accept="image/*" onChange={(e) => uploadAvatar(e.target.files?.[0])} />
-                    </label>
-                  </div>
-
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/35">Por signo</p>
-                  <div className="mb-4 grid grid-cols-6 gap-1.5 sm:grid-cols-12">
-                    {zodiacAvatars.map(([label, src]) => (
-                      <button key={src} type="button" title={label} onClick={() => update("avatar", src)}
-                        className={`relative aspect-square overflow-hidden rounded-lg border transition ${data.avatar === src ? "border-lime-300 shadow-[0_0_16px_rgba(184,255,23,0.30)]" : "border-white/10 opacity-70 hover:opacity-100 hover:border-white/30"}`}>
-                        <Image src={src} alt={label} fill sizes="48px" className="object-cover" />
-                      </button>
-                    ))}
-                  </div>
-
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/35">Estilo ZODI</p>
-                  <div className="mb-4 grid grid-cols-4 gap-1.5 sm:grid-cols-8">
-                    {zodiAvatars.map(([label, src]) => (
-                      <button key={src} type="button" title={label} onClick={() => update("avatar", src)}
-                        className={`relative aspect-square overflow-hidden rounded-lg border transition ${data.avatar === src ? "border-lime-300 shadow-[0_0_16px_rgba(184,255,23,0.30)]" : "border-white/10 opacity-70 hover:opacity-100 hover:border-white/30"}`}>
-                        <Image src={src} alt={label} fill sizes="48px" className="object-cover" />
-                      </button>
-                    ))}
-                  </div>
-
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/35">Zodiaco Chino</p>
-                  <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-12">
-                    {chineseAvatars.map(([label, src]) => (
-                      <button key={src} type="button" title={label} onClick={() => update("avatar", src)}
-                        className={`relative aspect-square overflow-hidden rounded-lg border transition ${data.avatar === src ? "border-lime-300 shadow-[0_0_16px_rgba(184,255,23,0.30)]" : "border-white/10 opacity-70 hover:opacity-100 hover:border-white/30"}`}>
-                        <Image src={src} alt={label} fill sizes="48px" className="object-cover" />
-                      </button>
-                    ))}
-                  </div>
+                      {data.avatar.startsWith("data:") ? "Cambiar foto" : "Subir foto"}
+                    </div>
+                    <p className="text-[11px] text-white/30">JPG, PNG o GIF · Máx. 5 MB</p>
+                    <input className="hidden" type="file" accept="image/*" onChange={(e) => uploadAvatar(e.target.files?.[0])} />
+                  </label>
                 </div>
               </div>
             )}
