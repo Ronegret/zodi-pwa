@@ -66,6 +66,23 @@ export function clearLocalSession() {
   document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 }
 
+export async function signOutZodi() {
+  clearLocalSession();
+
+  try {
+    const [{ signOut }, { getFirebaseAuth }] = await Promise.all([
+      import("firebase/auth"),
+      import("@/lib/firebase/client")
+    ]);
+    const auth = getFirebaseAuth();
+    if (auth) {
+      await signOut(auth);
+    }
+  } catch {
+    // Local session is already cleared; Firebase may be unavailable in local/dev.
+  }
+}
+
 export function completeLocalOnboarding(data: OnboardingData, astralProfile: AstralProfile) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(ONBOARDING_KEY, JSON.stringify({ data, astralProfile }));

@@ -10,7 +10,7 @@ import {
   Copy, Share2, BookOpen, AlertTriangle, Sparkles, ChartNoAxesCombined,
   Waves, NotebookPen, Gem
 } from "lucide-react";
-import { getLocalSession, setLocalSession, clearLocalSession } from "@/lib/session";
+import { getLocalSession, setLocalSession, signOutZodi } from "@/lib/session";
 import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
@@ -1628,9 +1628,9 @@ function PerfilUI() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  function signOut() {
-    clearLocalSession();
-    router.push("/auth/login");
+  async function signOut() {
+    await signOutZodi();
+    router.push("/");
   }
 
   async function deleteAccount() {

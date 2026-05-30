@@ -97,7 +97,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   async function applyFirebaseUser(user: User, forceNewUser: boolean = false) {
     // ── Step 1: Default to what we have locally ──
     const preserved = getLocalSession();
-    let localDone = preserved.onboardingCompleted;
+    const sameLocalUser = preserved.uid === user.uid;
+    let localDone = sameLocalUser ? preserved.onboardingCompleted : false;
 
     if (forceNewUser) {
       localDone = false;
@@ -167,10 +168,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setLocalSession({
         isAuthenticated: true,
         onboardingCompleted: localDone,
-        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
-        email: user.email || preserved.email || "",
+        displayName: user.displayName || (sameLocalUser ? preserved.displayName : "") || "Viajero ZODI",
+        email: user.email || (sameLocalUser ? preserved.email : "") || "",
         uid: user.uid,
         loginAt: Date.now(),
+        astralProfile: sameLocalUser ? preserved.astralProfile : undefined,
+        onboardingData: sameLocalUser ? preserved.onboardingData : undefined,
       });
     }
 
