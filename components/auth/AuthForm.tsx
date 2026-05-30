@@ -95,16 +95,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }, []);
 
   async function applyFirebaseUser(user: User, forceNewUser: boolean = false) {
-    // ── Step 1: Default to what we have locally ──
+    // ── Step 1: Leer sesión local y detectar si es el mismo usuario ──
     const preserved = getLocalSession();
-    const sameLocalUser = preserved.uid === user.uid;
-    let localDone = sameLocalUser ? preserved.onboardingCompleted : false;
+    const sameUid   = preserved.uid === user.uid;
+    const sameEmail = !!(user.email && preserved.email && user.email === preserved.email);
+    const sameUser  = sameUid || sameEmail;
 
-    if (forceNewUser) {
-      localDone = false;
-    }
+    let localDone = sameUser ? preserved.onboardingCompleted : false;
+    if (forceNewUser) localDone = false;
 
-    // ── Step 2: Always try to restore from Firestore (source of truth) ──
+    // ── Step 2: Siempre consultar Firestore (fuente de verdad) ──
     let firestoreDone = false;
     try {
       const { getDoc, doc } = await import("firebase/firestore");
@@ -120,31 +120,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           const userData = userSnap.data();
           const astralData = astralSnap.data();
 
-          // Restore full session from Firestore
-          const onboardingData = {
-            displayName: userData.displayName ?? "",
-            username: userData.username ?? "",
-            avatar: userData.avatar ?? "/zodi-art/perfil/perfil-1.png",
-            genderIdentity: userData.genderIdentity ?? "",
-            birthDate: astralData.birthDate ?? "",
-            birthTime: astralData.birthTime ?? "",
-            birthCity: astralData.birthCity ?? "",
-            birthCountry: astralData.birthCountry ?? "",
-            readingTone: userData.readingTone ?? "directo",
-            favoriteTopics: userData.favoriteTopics ?? [],
-            notificationPreferences: userData.notificationPreferences ?? { dailyHoroscope: true, weeklyReport: false, specialEvents: true },
-          };
-
-          const astralProfile = {
-            sunSign: astralData.sunSign ?? "",
-            moonSign: astralData.moonSign ?? "",
-            ascendant: astralData.ascendant ?? "",
-            lifePathNumber: astralData.lifePathNumber ?? 1,
-            chineseZodiac: astralData.chineseZodiac ?? "",
-            mayanSign: astralData.mayanSign ?? "",
-            biorhythmBaseline: astralData.biorhythmBaseline ?? new Date().toISOString(),
-          };
-
           setLocalSession({
             isAuthenticated: true,
             onboardingCompleted: true,
@@ -152,37 +127,78 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             email: user.email || preserved.email || "",
             uid: user.uid,
             loginAt: Date.now(),
-            astralProfile: astralProfile as any,
-            onboardingData: onboardingData as any,
+            astralProfile: {
+              sunSign: astralData.sunSign ?? "",
+              moonSign: astralData.moonSign ?? "",
+              ascendant: astralData.ascendant ?? "",
+              lifePathNumber: astralData.lifePathNumber ?? 1,
+              chineseZodiac: astralData.chineseZodiac ?? "",
+              mayanSign: astralData.mayanSign ?? "",
+              biorhythmBaseline: astralData.biorhythmBaseline ?? new Date().toISOString(),
+            } as any,
+            onboardingData: {
+              displayName: userData.displayName ?? "",
+              username: userData.username ?? "",
+              avatar: userData.avatar ?? "/zodi-art/perfil/perfil-1.png",
+              genderIdentity: userData.genderIdentity ?? "",
+              birthDate: astralData.birthDate ?? "",
+              birthTime: astralData.birthTime ?? "",
+              birthCity: astralData.birthCity ?? "",
+              birthCountry: astralData.birthCountry ?? "",
+              readingTone: userData.readingTone ?? "directo",
+              favoriteTopics: userData.favoriteTopics ?? [],
+              notificationPreferences: userData.notificationPreferences ?? [],
+            } as any,
           });
 
           firestoreDone = true;
         }
       }
     } catch {
-      // Firebase unavailable — fall back to local data
+      // Firebase no disponible — continuar con datos locales
     }
 
-    // ── Step 3: If Firestore didn't resolve, use local data ──
+    // ── Step 3: Firestore vacío pero hay sesión local con mismo usuario ──
+    // Migrar UID al Firebase UID real y publicar datos a Firestore en background
+    if (!firestoreDone && sameUser && preserved.onboardingCompleted) {
+      setLocalSession({
+        isAuthenticated: true,
+        onboardingCompleted: true,
+        uid: user.uid,
+        email: user.email || preserved.email || "",
+        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
+        loginAt: Date.now(),
+        astralProfile: preserved.astralProfile,
+        onboardingData: preserved.onboardingData,
+      });
+
+      // Intentar sincronizar a Firestore en background sin bloquear el flujo
+      if (preserved.onboardingData && preserved.astralProfile) {
+        import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
+          saveOnboardingProfile(user.uid, preserved.onboardingData as any, preserved.astralProfile as any)
+        ).catch(() => { /* ignorar — se reintentará en próximo login */ });
+      }
+
+      firestoreDone = true;
+    }
+
+    // ── Step 4: Usuario genuinamente nuevo — guardar mínimo en local ──
     if (!firestoreDone) {
       setLocalSession({
         isAuthenticated: true,
-        onboardingCompleted: localDone,
-        displayName: user.displayName || (sameLocalUser ? preserved.displayName : "") || "Viajero ZODI",
-        email: user.email || (sameLocalUser ? preserved.email : "") || "",
+        onboardingCompleted: false,
+        displayName: user.displayName || "Viajero ZODI",
+        email: user.email || "",
         uid: user.uid,
         loginAt: Date.now(),
-        astralProfile: sameLocalUser ? preserved.astralProfile : undefined,
-        onboardingData: sameLocalUser ? preserved.onboardingData : undefined,
       });
     }
 
-    // Give initial gems if none
+    // Dar gemas iniciales si no tiene
     try {
       const gamification = await import("@/lib/gamification");
-      const currentGems = gamification.getGems().total;
-      if (currentGems === 0) gamification.addGems(15);
-    } catch { /* ignore */ }
+      if (gamification.getGems().total === 0) gamification.addGems(15);
+    } catch { /* ignorar */ }
 
     const done = firestoreDone || localDone;
     router.push(done ? "/dashboard" : "/onboarding");

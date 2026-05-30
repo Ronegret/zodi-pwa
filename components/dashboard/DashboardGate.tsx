@@ -107,11 +107,36 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             return;
           }
 
+          // Renovar loginAt para mantener la sesión activa
+          const currentSession = getLocalSession();
+          const sameUid   = currentSession.uid === user.uid;
+          const sameEmail = !!(user.email && currentSession.email && user.email === currentSession.email);
+
+          if ((sameUid || sameEmail) && currentSession.onboardingCompleted) {
+            // Sesión local válida — renovar timestamp y continuar
+            setLocalSession({ uid: user.uid, loginAt: Date.now() });
+            if (!cancelled) setReady(true);
+            return;
+          }
+
           const restored = await restoreFromFirestore(user);
           if (cancelled) return;
 
           if (restored) {
             setReady(true);
+            return;
+          }
+
+          // Firestore vacío pero sesión local tiene datos del mismo usuario (match email)
+          if ((sameUid || sameEmail) && currentSession.onboardingCompleted) {
+            setLocalSession({ uid: user.uid, loginAt: Date.now() });
+            // Sincronizar a Firestore en background
+            if (currentSession.onboardingData && currentSession.astralProfile) {
+              import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
+                saveOnboardingProfile(user.uid, currentSession.onboardingData as any, currentSession.astralProfile as any)
+              ).catch(() => {});
+            }
+            if (!cancelled) setReady(true);
             return;
           }
 

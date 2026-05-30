@@ -27,10 +27,10 @@ export function getLocalSession(): LocalZodiSession {
   
   const parsed = JSON.parse(raw) as LocalZodiSession;
   
-  // Expiración de 24 horas (86400000 ms)
+  // Expiración de 30 días
   if (parsed.isAuthenticated && parsed.loginAt) {
-    const ONE_DAY = 24 * 60 * 60 * 1000;
-    if (Date.now() - parsed.loginAt > ONE_DAY) {
+    const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+    if (Date.now() - parsed.loginAt > THIRTY_DAYS) {
       clearLocalSession();
       return { isAuthenticated: false, onboardingCompleted: false };
     }
