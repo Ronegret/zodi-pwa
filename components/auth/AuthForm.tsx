@@ -213,11 +213,19 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       } catch (err: any) {
         explicitAuthFlow.current = false;
         setLoading(false);
+        // Log completo para diagnóstico
+        console.error("[ZODI AUTH] Google popup error:", {
+          code: err.code,
+          message: err.message,
+          customData: err.customData,
+          name: err.name,
+          stack: err.stack?.slice(0, 300)
+        });
         if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
-          return; // Usuario canceló — no mostrar error
+          return;
         }
-        if (err.code === "auth/popup-blocked" || err.code === "auth/internal-error") {
-          // Popup bloqueado → fallback a redirect
+        if (err.code === "auth/popup-blocked") {
+          // Popup bloqueado → redirect
           try {
             sessionStorage.setItem("zodi.google_redirect_pending", "1");
             explicitAuthFlow.current = true;
@@ -227,12 +235,11 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             sessionStorage.removeItem("zodi.google_redirect_pending");
             explicitAuthFlow.current = false;
             setLoading(false);
-            setMessage("No se pudo abrir Google. Verifica que los popups estén permitidos.");
+            setMessage("No se pudo abrir Google. Permite popups para este sitio.");
           }
-        } else if (err.code === "auth/account-exists-with-different-credential") {
-          setMessage("Ese correo ya existe con otro método. Usa email/contraseña.");
         } else {
-          setMessage(`Error Google: ${err.message || err.code}`);
+          // Mostrar error exacto para diagnóstico
+          setMessage(`Error [${err.code}]: ${err.message}`);
         }
       }
       return;
