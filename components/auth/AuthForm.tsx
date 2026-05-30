@@ -24,51 +24,53 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [loading, setLoading] = useState(false);
   const explicitAuthFlow = useRef(false);
 
-  // ── Procesar resultado del redirect de Google ─────────────────────
+  // ── Procesar redirect de Google al montar ─────────────────────────
+  // IMPORTANTE: Siempre llamar getRedirectResult() en cada mount (recomendación Firebase).
+  // En PWAs, Google puede redirigir en un contexto nuevo donde sessionStorage se pierde.
   useEffect(() => {
     const auth = getFirebaseAuth();
     if (!auth) return;
 
     const redirectPending = sessionStorage.getItem("zodi.google_redirect_pending");
 
+    // Si hay un redirect pendiente (o siempre, para cubrir el caso PWA), marcamos el flujo
+    // ANTES de que onAuthStateChanged pueda dispararse.
     if (redirectPending) {
-      // Marcar flujo explícito ANTES de que onAuthStateChanged pueda dispararse
       explicitAuthFlow.current = true;
       setLoading(true);
+    }
 
-      getRedirectResult(auth)
-        .then(async (result) => {
-          sessionStorage.removeItem("zodi.google_redirect_pending");
-          if (result?.user) {
-            // Redirect completado correctamente — procesar usuario
-            const { getAdditionalUserInfo } = await import("firebase/auth");
-            const details = getAdditionalUserInfo(result);
-            await applyFirebaseUser(result.user, details?.isNewUser ?? false);
-          } else {
-            // getRedirectResult devuelve null pero el redirect ocurrió.
-            // onAuthStateChanged ya tiene al usuario — liberar el lock.
+    // Siempre intentar procesar el resultado del redirect — no solo cuando hay flag en sessionStorage
+    getRedirectResult(auth)
+      .then(async (result) => {
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        if (result?.user) {
+          // ✅ Redirect completado correctamente — procesar usuario
+          const { getAdditionalUserInfo } = await import("firebase/auth");
+          const details = getAdditionalUserInfo(result);
+          await applyFirebaseUser(result.user, details?.isNewUser ?? false);
+        } else {
+          // No había redirect pendiente o ya fue procesado — liberar lock
+          if (redirectPending) {
             explicitAuthFlow.current = false;
             setLoading(false);
           }
-        })
-        .catch((err: any) => {
-          sessionStorage.removeItem("zodi.google_redirect_pending");
-          // auth/internal-error: Firebase no pudo procesar el estado del redirect,
-          // PERO el usuario puede estar ya logueado en onAuthStateChanged.
-          // Liberamos el lock para que onAuthStateChanged lo maneje.
-          explicitAuthFlow.current = false;
-          setLoading(false);
-          // Solo mostrar error si NO es el error interno de Firebase (que se recupera vía onAuthStateChanged)
-          if (err?.code && err.code !== "auth/popup-closed-by-user" && err.code !== "auth/internal-error") {
-            setMessage(`Error Google: ${err.message || err.code}`);
-          }
-        });
-    }
+        }
+      })
+      .catch((err: any) => {
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        explicitAuthFlow.current = false;
+        setLoading(false);
+        // auth/internal-error se silencia: el usuario puede estar autenticado
+        // y onAuthStateChanged lo capturará a continuación
+        if (err?.code && err.code !== "auth/popup-closed-by-user" && err.code !== "auth/internal-error") {
+          setMessage(`Error Google: ${err.message || err.code}`);
+        }
+      });
 
-    // ── Sesión activa (pre-existente o recuperada tras redirect) ─────
+    // ── Sesión activa (previa o recuperada tras redirect) ─────────────
     let handled = false;
     const unsub = onAuthStateChanged(auth, async (user) => {
-      // Actuar si hay usuario Y no hay flujo explícito activo
       if (user && !handled && !explicitAuthFlow.current) {
         handled = true;
         await applyFirebaseUser(user);
