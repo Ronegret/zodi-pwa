@@ -29,12 +29,11 @@ export function SplashScreen() {
     setShowSplash(false);
   };
 
-  // If React knows it should be hidden, unmount it to save memory.
-  if (!showSplash) return null;
-
+  // No return null here, use AnimatePresence condition
   return (
     <AnimatePresence>
-      <motion.div
+      {showSplash && (
+        <motion.div
         key="splash"
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -48,15 +47,15 @@ export function SplashScreen() {
             playsInline 
             onEnded={handleFinish}
             poster="/zodi-art/zodi-fondoo.png"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover md:object-contain bg-black"
           >
             <source src="/zodi-art/splash-zodi.mp4" type="video/mp4" />
           </video>
           
           {/* Gradient Overlay to make text readable */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none" />
           
-          <div className="relative w-full px-6 text-center z-10 flex flex-col items-center">
+          <div className="relative w-full px-6 text-center z-10 flex flex-col items-center pointer-events-auto">
             <motion.div 
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -82,13 +81,18 @@ export function SplashScreen() {
             </motion.p>
             
             <button 
-              onClick={handleFinish}
-              className="mt-10 rounded-full border border-white/20 bg-black/40 backdrop-blur-md px-8 py-3 text-sm font-bold text-white/70 hover:bg-white/10 hover:text-white transition"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleFinish();
+              }}
+              className="mt-10 rounded-full border border-white/20 bg-black/40 backdrop-blur-md px-8 py-3 text-sm font-bold text-white/70 hover:bg-white/10 hover:text-white transition relative z-50 cursor-pointer"
             >
               Saltar intro
             </button>
           </div>
         </motion.div>
+      )}
     </AnimatePresence>
   );
 }
