@@ -1,17 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithCustomToken } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession } from "@/lib/session";
 
-/**
- * /auth/complete
- * Recibe el custom token del servidor, completa el sign-in en Firebase
- * y navega al destino final.
- */
-export default function AuthCompletePage() {
+function AuthCompleteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"loading" | "error">("loading");
@@ -156,5 +151,26 @@ export default function AuthCompletePage() {
       <p style={{ opacity: 0.7 }}>Completando autenticación...</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
+  );
+}
+
+export default function AuthCompletePage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "center", minHeight: "100vh", gap: "1rem",
+        background: "#0a0a0f", color: "#fff", fontFamily: "sans-serif"
+      }}>
+        <div style={{
+          width: 48, height: 48, border: "3px solid #b4f542",
+          borderTopColor: "transparent", borderRadius: "50%",
+          animation: "spin 0.8s linear infinite"
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    }>
+      <AuthCompleteContent />
+    </Suspense>
   );
 }
