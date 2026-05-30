@@ -53,14 +53,14 @@ const initialData: OnboardingData = {
 
 function validateStep(step: number, data: OnboardingData, usernameStatus: string): string | null {
   if (step === 0) {
-    if (!data.displayName.trim()) return "¿Cómo te llamo? El cosmos necesita un nombre.";
-    if (usernameStatus === "taken") return "Ese usuario ya existe. El cosmos requiere unicidad.";
-    if (usernameStatus === "checking") return "Espera un segundo, verificando disponibilidad...";
+    if (!data.displayName.trim()) return "ZODI necesita un nombre para llamarte. No 'Usuario' ni 'Yo'. Un nombre.";
+    if (usernameStatus === "taken") return "Ese alias ya existe. ZODI no repite usuarios, solo errores del universo.";
+    if (usernameStatus === "checking") return "El oráculo está verificando ese usuario. Paciencia, Mercurio retrogradó.";
   }
   if (step === 1) {
-    if (!data.birthDate) return "Sin fecha de nacimiento no puedo calcular nada.";
-    if (!data.birthCountry.trim()) return "El país de nacimiento también cuenta para tu perfil astral.";
-    if (!data.birthCity.trim()) return "Dime dónde naciste. El cosmos también lo necesita.";
+    if (!data.birthDate) return "Sin fecha de nacimiento, ZODI te lee como 'error cósmico'. Dame la fecha.";
+    if (!data.birthCountry.trim()) return "¿País de nacimiento? El planeta también cuenta, no solo el horóscopo.";
+    if (!data.birthCity.trim()) return "La ciudad de nacimiento importa. Las estrellas son geográficas, no vagas.";
   }
   return null;
 }
@@ -293,8 +293,15 @@ export function OnboardingFlow() {
                         {usernameStatus === "taken"     && <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
                       </div>
                     </label>
-                    {usernameStatus === "available" && <p className="mt-1 text-[11px] text-lime-300/70">¡Disponible!</p>}
-                    {usernameStatus === "taken"     && <p className="mt-1 text-[11px] text-red-400/80">Ya existe. Elige otro alias.</p>}
+                    {usernameStatus === "available" && (
+                      <p className="mt-1.5 text-[11px] text-lime-300/80">✦ Nadie más tiene ese alias. El universo es tuyo.</p>
+                    )}
+                    {usernameStatus === "taken" && (
+                      <div className="mt-2 rounded-xl border border-orange-400/25 bg-orange-400/08 p-3">
+                        <p className="text-sm font-bold text-orange-200">Ese alias ya lo reclamó alguien. 👻</p>
+                        <p className="mt-0.5 text-xs text-white/55">El cosmos no te esperó, cariño. Prueba con otro: añade un número, una inicial, lo que sea. Sé creativo.</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Foto opcional */}

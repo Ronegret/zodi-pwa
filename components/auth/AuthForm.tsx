@@ -299,36 +299,36 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     // ── Validaciones email / contraseña ───────────────────────────────
     if (!email.trim()) {
-      setMessage("Escribe tu correo para continuar.");
+      setMessage("El cosmos necesita tu correo. No funciona con telepastía.");
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setMessage("El correo no tiene un formato válido.");
+      setMessage("Ese correo tiene más errores que un horóscopo genérico. Revísalo.");
       return;
     }
     if (!password) {
-      setMessage("La contraseña no puede estar vacía.");
+      setMessage("Contraseña vacía. El universo también necesita seguridad.");
       return;
     }
     if (mode === "register") {
       if (emailStatus === "taken") {
-        setMessage("Ese correo ya tiene una cuenta. Usa otro o inicia sesión.");
+        setMessage("Ese correo ya pertenece al cosmos ZODI. Entra o recupera tu contraseña. 👆");
         return;
       }
       if (emailStatus === "checking") {
-        setMessage("Espera un momento, verificando disponibilidad del correo...");
+        setMessage("El oráculo verifica tu correo. Mercurio retrogradó, dale un segundo.");
         return;
       }
       if (password.length < 6) {
-        setMessage("La contraseña necesita al menos 6 caracteres.");
+        setMessage("6 caracteres mínimo. Tu contraseña actual es más débil que un horóscopo genérico.");
         return;
       }
       if (password !== confirm) {
-        setMessage("Las contraseñas no coinciden. El cosmos exige consistencia.");
+        setMessage("Las contraseñas no coinciden. El cosmos exige consistencia, aunque tú no la tengas.");
         return;
       }
       if (!terms) {
-        setMessage("Acepta los términos para abrir el portal.");
+        setMessage("Acepta los términos o el portal permanece cerrado. No hay negociación astral.");
         return;
       }
     }
@@ -397,7 +397,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           // Login mode local
           const user = users.find(u => u.email === email && u.password === password);
           if (!user) {
-            setMessage("Correo o contraseña incorrectos. Revisa tus datos.");
+            setMessage("Correo o contraseña incorrectos. El cosmos no miente, tú sí escribiste algo mal. 🤨");
             setLoading(false);
             return;
           }
@@ -418,12 +418,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     } catch (err) {
       const code = (err as { code?: string }).code ?? "";
       if (code === "auth/email-already-in-use") {
-        setMessage("Tu alma ya pertenece a este universo. Redirigiendo a inicio de sesión...");
-        setTimeout(() => router.push("/auth/login"), 2500);
+        setMessage("Ese correo ya tiene portal abierto. Te llevamos a la entrada... 🔮");
+        setTimeout(() => router.push("/auth/login"), 2200);
       } else if (code === "auth/too-many-requests") {
-        setMessage("Demasiados intentos. Espera unos minutos antes de volver a intentarlo.");
+        setMessage("Demasiados intentos fallidos. ZODI necesita respirar. Vuelve en unos minutos. ☕");
+      } else if (code === "auth/wrong-password") {
+        setMessage("Contraseña incorrecta. El cosmos lo recuerda aunque tú no. Prueba recuperarla. 🌀");
+      } else if (code === "auth/user-not-found") {
+        setMessage("Ese correo no existe en el cosmos ZODI. ¿Registrarte quizás? El universo tiene hueco. ✨");
       } else {
-        setMessage("No pudimos abrir esa puerta. Revisa tus datos e inténtalo de nuevo.");
+        setMessage("El portal tembló. Revisa tus datos e inténtalo de nuevo. Si persiste, Mercurio manda. 🪐");
       }
     } finally {
       setLoading(false);
@@ -508,10 +512,23 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               </div>
             </label>
             {emailStatus === "available" && (
-              <p className="mt-1 text-[11px] text-lime-300/70 pl-1">✓ Email disponible</p>
+              <p className="mt-1.5 text-[11px] text-lime-300/80 pl-1">✦ Correo libre. El cosmos te estaba esperando.</p>
             )}
             {emailStatus === "taken" && (
-              <p className="mt-1 text-[11px] text-red-400/80 pl-1">Este correo ya tiene una cuenta. ¿Quieres <a href="/auth/login" className="underline">iniciar sesión</a>?</p>
+              <div className="mt-2 rounded-xl border border-orange-400/25 bg-orange-400/08 p-3">
+                <p className="text-sm font-bold text-orange-200">Ajá. Tu alma YA pertenece al cosmos ZODI. 🔮</p>
+                <p className="mt-0.5 text-xs text-white/55">Este correo ya tiene cuenta. ¿Lo olvidaste o esto fue un accidente cósmico? Sin juicio, pasa.</p>
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  <a href="/auth/login"
+                    className="rounded-lg bg-lime-300 px-3 py-1.5 text-xs font-black text-black transition hover:bg-lime-200">
+                    Volver a entrar
+                  </a>
+                  <button type="button" onClick={() => { void resetPassword(); }}
+                    className="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-bold text-white/70 transition hover:bg-white/10">
+                    Olvidé mi contraseña
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         ) : (
