@@ -436,8 +436,37 @@ export function HeroConsole() {
             </span>
           </div>
 
+          {/* ── Mobile profile strip — solo en mobile (oculto en lg+) ── */}
+          {mounted && (
+            <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 lg:hidden">
+              <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-lime-300/25">
+                {avatar.startsWith("data:") ? (
+                  <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <Image src={avatar} alt="Avatar" fill className="object-cover" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-black truncate leading-tight">{profile?.displayName ?? "—"}</p>
+                <p className="text-[10px] text-white/50 mt-0.5">
+                  {sign ? `${sign} · Nivel ${level}` : levelTitle}
+                </p>
+              </div>
+              {streak > 0 && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <Flame className="h-3 w-3 text-orange-400" />
+                  <span className="text-xs font-black text-orange-300">{streak}d</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1 shrink-0">
+                <Gem className="h-3 w-3 text-lime-300" />
+                <span className="text-xs font-black text-lime-200">{gems}</span>
+              </div>
+            </div>
+          )}
+
           {/* CTAs */}
-          <div className="mt-5 flex flex-wrap gap-2.5">
+          <div className="mt-4 flex flex-wrap gap-2.5">
             <Link
               href="/dashboard/horoscopo"
               className="group flex items-center gap-2 rounded-xl bg-lime-300 px-4 py-2.5 text-sm font-black text-black transition hover:bg-lime-200 active:scale-95"
@@ -462,8 +491,8 @@ export function HeroConsole() {
         </div>
       </div>
 
-      {/* ── RIGHT: Profile card compacta ─────────────────────────────────── */}
-      <div className="glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
+      {/* ── RIGHT: Profile card — solo en desktop (lg+) ─────────────────── */}
+      <div className="hidden lg:flex glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 flex-col gap-4">
         {/* Decorative sigil */}
         <Image
           src="/zodi-art/brand/isotipo.png"

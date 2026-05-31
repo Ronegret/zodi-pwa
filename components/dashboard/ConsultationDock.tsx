@@ -331,28 +331,28 @@ export function ConsultationDock() {
         {/* Panel izquierdo — selector de consultas */}
         <div className="glass-panel rounded-2xl p-4">
           <p className="zodi-kicker mb-3">Consulta rápida</p>
-          <h2 className="mb-4 text-xl font-black" style={{ fontFamily: "var(--font-display)" }}>
+          <h2 className="mb-3 text-base sm:text-lg lg:text-xl font-black" style={{ fontFamily: "var(--font-display)" }}>
             ¿Qué te atormenta hoy?
           </h2>
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+          <div className="grid gap-2 grid-cols-2 xl:grid-cols-1">
             {consultas.map((consulta) => {
               const isActive = active.title === consulta.title;
               return (
                   <button
                   key={consulta.title}
                   onClick={() => { setActive(consulta); setResult(null); setFocus(null); setCotilleoSign(""); setSelectedPerson(null); setAddingPerson(false); }}
-                  className={`hover-bubble flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${
+                  className={`hover-bubble flex items-center gap-2 xl:gap-3 rounded-xl border p-2.5 xl:p-3 text-left transition-all w-full ${
                     isActive
                       ? "border-lime-300/50 bg-lime-300/10 text-lime-100 shadow-[0_0_16px_rgba(184,255,23,0.08)]"
                       : "border-white/06 bg-white/[0.025] text-white/70 hover:border-white/15 hover:bg-white/[0.04]"
                   }`}
                 >
-                  <div className={`relative h-9 w-9 shrink-0 overflow-hidden rounded-lg ${isActive ? "border border-lime-300" : "border border-transparent opacity-60"}`}>
+                  <div className={`relative h-8 w-8 shrink-0 overflow-hidden rounded-lg ${isActive ? "border border-lime-300" : "border border-transparent opacity-60"}`}>
                     <Image src={consulta.image} alt={consulta.title} fill className="object-cover" />
                   </div>
-                  <span>
-                    <span className="block text-sm font-bold leading-tight">{consulta.title}</span>
-                    <span className="text-xs opacity-60">{consulta.label}</span>
+                  <span className="min-w-0">
+                    <span className="block text-xs sm:text-sm font-bold leading-tight truncate">{consulta.title}</span>
+                    <span className="hidden sm:block text-xs opacity-60 truncate">{consulta.label}</span>
                   </span>
                 </button>
               );

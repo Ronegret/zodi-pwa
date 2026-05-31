@@ -22,7 +22,7 @@ export function DashboardLaunchpad() {
       <div className="mb-4 flex items-end justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.32em] text-lime-200/70">Tus herramientas del caos</p>
-          <h2 className="text-2xl font-black">¿Qué destino quieres tentar hoy?</h2>
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-black leading-tight">¿Qué destino<br className="sm:hidden" /> quieres tentar hoy?</h2>
         </div>
         <Link href="/dashboard/premium" className="hidden rounded-xl border border-lime-300/25 px-3 py-2 text-xs font-black text-lime-200 transition hover:bg-lime-300/10 sm:inline">
           Ver planes ✦
@@ -77,7 +77,7 @@ export function DashboardLaunchpad() {
                   {/* Text — pushed to bottom */}
                   <div className="mt-auto">
                     <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50">{section.kicker}</p>
-                    <h3 className="mt-1 text-base sm:text-lg lg:text-xl font-black leading-tight text-white">{section.title}</h3>
+                    <h3 className="mt-1 text-sm sm:text-base lg:text-lg font-black leading-tight text-white line-clamp-2">{section.title}</h3>
                     <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-white/60">{section.description}</p>
 
                     {/* CTA row */}
