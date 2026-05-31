@@ -69,6 +69,7 @@ html {
   -webkit-text-size-adjust: 100%;
   overflow-x: clip; /* clip is better than hidden for mobile scroll performance */
   overscroll-behavior-y: none; /* prevent iOS scroll bounce flashing */
+  scrollbar-gutter: stable; /* reserve space for scrollbar — prevents layout shift */
 }
 
 body {
@@ -596,11 +597,15 @@ h1, h2, h3, h4, h5, h6 {
     filter: none !important;
   }
 
-  /* Kill all looping animations that compete with video on mobile */
+  /* Kill all looping animations on mobile — compete with rendering budget */
   .magic-float,
   .magic-pulse,
   .spell-ring,
-  .spark-field {
+  .spark-field,
+  .oracle-pulse-ring,
+  .cosmic-glow,
+  .neon-pulse,
+  .animate-float-particle {
     animation: none !important;
     transform: none !important;
     filter: none !important;
@@ -767,3 +772,56 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 html.splash-seen .zodi-splash-container { display: none !important; }
+
+/* ── Oracle button glow — CSS animation (desactivada en móvil via media query) */
+@keyframes oracle-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50%       { opacity: 0.55; transform: scale(1.06); }
+}
+
+.oracle-pulse-ring {
+  animation: oracle-pulse 3.5s ease-in-out infinite;
+}
+
+/* ── Contenedores fijos con aceleración GPU ──────────────────────────────── */
+/* Fuerza compositing layer para el bottom nav y sidebar (evita repaints) */
+.fixed-layer {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ── Transiciones de página suaves ──────────────────────────────────────── */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: page-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Scroll suave en contenedores internos ───────────────────────────────── */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Evitar texto cortado en cards ──────────────────────────────────────── */
+.text-safe {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Inputs no desborden su contenedor */
+input, textarea, select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ── Bottom nav GPU layer ────────────────────────────────────────────────── */
+nav[style*="translateZ"] {
+  contain: layout style;
+}

@@ -201,9 +201,14 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   if (!ready) {
-    // Pantalla invisible — evita el flash de "Cargando dashboard..." antes de renderizar
-    return <div className="min-h-[100dvh]" aria-hidden="true" />;
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center" aria-hidden="true">
+        <div className="flex flex-col items-center gap-3 opacity-40">
+          <div className="h-8 w-8 rounded-full border-2 border-lime-300 border-t-transparent animate-spin" />
+        </div>
+      </div>
+    );
   }
 
-  return <>{children}</>;
+  return <div className="animate-in fade-in duration-200">{children}</div>;
 }

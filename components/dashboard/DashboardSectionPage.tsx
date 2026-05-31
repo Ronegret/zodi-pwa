@@ -39,11 +39,10 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
   const Icon = section.icon;
   const sectionBg = SECTION_BG[sectionSlug];
 
-  // Hero banner — shared across all sections (hidden for perfil which has its own layout)
   const showHero = section.slug !== "perfil";
 
   return (
-    <div className="relative grid gap-5">
+    <div className="relative grid gap-5 page-enter">
       {/* Top back button — highly visible to prevent users from feeling stranded */}
       <div className="flex items-center">
         <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-sm font-bold text-white/80 shadow-lg backdrop-blur-md transition hover:bg-white/10 hover:text-white">

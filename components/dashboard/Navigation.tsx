@@ -270,11 +270,8 @@ export function BottomNav() {
               >
                 <div className="relative flex h-12 w-12 items-center justify-center rounded-xl transition-all bg-white/08 border border-white/12">
                   <item.icon className="h-5 w-5" />
-                  <motion.span
-                    animate={{ opacity: [0.3, 0.8, 0.3], scale: [1, 1.08, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute inset-0 rounded-xl border border-lime-300/30"
-                  />
+                  {/* CSS animation — menos costosa que Framer Motion infinite, desactivada en móvil via media query */}
+                  <span className="oracle-pulse-ring absolute inset-0 rounded-xl border border-lime-300/30 pointer-events-none" />
                 </div>
                 <span className="text-[10px] font-semibold leading-tight mt-0.5">
                   {item.label}

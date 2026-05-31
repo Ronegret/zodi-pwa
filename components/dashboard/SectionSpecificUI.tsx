@@ -1845,12 +1845,15 @@ function PerfilUI() {
   return (
     <div className="grid gap-5">
       {/* ── Información personal ── */}
-      <div className="glass-panel rounded-md p-5 relative">
-        <div className="absolute top-5 right-5 flex items-center gap-1.5 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1 shadow-[0_0_15px_rgba(184,255,23,0.2)]">
-          <Gem className="h-4 w-4 text-lime-300" />
-          <span className="text-sm font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>{gems}</span>
+      <div className="glass-panel rounded-md p-5">
+        {/* Header row: título + badge de gemas */}
+        <div className="flex items-start justify-between gap-3 mb-1 min-w-0">
+          <h2 className="text-xl font-black leading-tight min-w-0 truncate">Información personal</h2>
+          <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1">
+            <Gem className="h-3.5 w-3.5 text-lime-300" />
+            <span className="text-sm font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>{gems}</span>
+          </div>
         </div>
-        <h2 className="text-xl font-black mb-1">Información personal</h2>
         <p className="text-xs text-white/40 mb-5">El correo no puede modificarse por seguridad. Todo lo demás, sí.</p>
         <div className="grid gap-4">
           {/* Avatar */}
@@ -1877,15 +1880,17 @@ function PerfilUI() {
                 <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
               </div>
             </div>
-            <div className="mt-3 grid grid-cols-7 gap-1.5 sm:grid-cols-13">
+            <div className="mt-3 grid grid-cols-[repeat(7,minmax(0,1fr))] sm:grid-cols-[repeat(13,minmax(0,1fr))] gap-1.5">
               {AVATAR_PRESETS.map((src, i) => (
                 <button
                   key={src}
                   type="button"
                   onClick={() => setAvatar(src)}
                   title={`Avatar ${i + 1}`}
-                  className={`relative aspect-square w-full rounded-lg overflow-hidden transition ${
-                    avatar === src ? "ring-2 ring-lime-300 scale-105 shadow-[0_0_10px_rgba(184,255,23,0.4)]" : "opacity-60 hover:opacity-100 hover:scale-105"
+                  className={`relative aspect-square w-full rounded-lg overflow-hidden transition-all duration-200 ${
+                    avatar === src
+                      ? "ring-2 ring-lime-300 scale-105 shadow-[0_0_10px_rgba(184,255,23,0.4)]"
+                      : "opacity-60 hover:opacity-100 hover:scale-105"
                   }`}
                 >
                   <Image src={src} alt={`Avatar ${i + 1}`} fill className="object-cover" />
@@ -1897,8 +1902,8 @@ function PerfilUI() {
           {/* Email — solo lectura */}
           <div>
             <span className="text-xs uppercase tracking-widest text-white/40">Correo electrónico</span>
-            <div className="mt-1 flex items-center gap-2 rounded-md border border-white/10 bg-black/25 px-4 py-3">
-              <span className="flex-1 text-sm text-white/50">{email || "Sin correo registrado"}</span>
+            <div className="mt-1 flex items-center gap-2 rounded-md border border-white/10 bg-black/25 px-4 py-3 overflow-hidden">
+              <span className="flex-1 text-sm text-white/50 truncate min-w-0">{email || "Sin correo registrado"}</span>
               <Lock className="h-3.5 w-3.5 text-white/25 shrink-0" />
             </div>
           </div>
