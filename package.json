@@ -2,6 +2,9 @@
   "name": "zodi-pwa",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=18.17.0"
+  },
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",

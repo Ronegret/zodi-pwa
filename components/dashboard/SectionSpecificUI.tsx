@@ -65,9 +65,10 @@ function useConsult(section: DashboardSection) {
   const lengthRef  = useRef(length);
   const sectionRef = useRef(section);
   const profileRef = useRef(profile);
-  lengthRef.current  = length;   // actualizar sin useEffect (synchronous)
+  lengthRef.current  = length;
   sectionRef.current = section;
-  // profileRef.current nunca cambia (inicializado una sola vez)
+  // Reconstruir perfil en cada render para reflejar cambios del usuario (fecha, tono, etc.)
+  profileRef.current = buildProfile(getLocalSession());
 
   const consult = useCallback(async (input: string) => {
     const sec  = sectionRef.current;
@@ -1630,6 +1631,31 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 11. PERFIL UI (full editor + sign out)
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Extraído fuera de PerfilUI para evitar recreación en cada render (anti-pattern React)
+function ProfileSaveBtn({ onClick, saving, saved, label = "Guardar cambios" }: {
+  onClick: () => void;
+  saving: boolean;
+  saved: boolean;
+  label?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={saving}
+      className={`flex items-center gap-2 rounded-md px-6 py-3 font-black text-sm transition disabled:opacity-60 ${
+        saved ? "bg-green-400 text-black" : "bg-lime-300 text-black hover:bg-lime-200"
+      }`}
+    >
+      {saved
+        ? <><Check className="h-4 w-4" /> Guardado</>
+        : saving
+        ? <><RefreshCw className="h-4 w-4 animate-spin" /> Guardando...</>
+        : <><Save className="h-4 w-4" /> {label}</>}
+    </button>
+  );
+}
+
 // Avatares disponibles en /public/zodi-art/perfil/
 const AVATAR_PRESETS = [
   "/zodi-art/perfil/perfil-1.png",
@@ -1683,6 +1709,11 @@ function PerfilUI() {
   function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Imagen demasiado grande. Máximo 2 MB. Prueba con una imagen más pequeña.");
+      e.target.value = "";
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => { if (typeof reader.result === "string") setAvatar(reader.result); };
     reader.readAsDataURL(file);
@@ -1811,22 +1842,6 @@ function PerfilUI() {
 
   const sunSign = birthDate ? calculateSunSign(birthDate) : ap?.sunSign;
 
-  const SaveBtn = ({ label = "Guardar cambios" }: { label?: string }) => (
-    <button
-      onClick={saveProfile}
-      disabled={saving}
-      className={`flex items-center gap-2 rounded-md px-6 py-3 font-black text-sm transition disabled:opacity-60 ${
-        saved ? "bg-green-400 text-black" : "bg-lime-300 text-black hover:bg-lime-200"
-      }`}
-    >
-      {saved
-        ? <><Check className="h-4 w-4" /> Guardado</>
-        : saving
-        ? <><RefreshCw className="h-4 w-4 animate-spin" /> Guardando...</>
-        : <><Save className="h-4 w-4" /> {label}</>}
-    </button>
-  );
-
   return (
     <div className="grid gap-5">
       {/* ── Información personal ── */}
@@ -1910,7 +1925,7 @@ function PerfilUI() {
             </label>
           </div>
         </div>
-        <div className="mt-5"><SaveBtn /></div>
+        <div className="mt-5"><ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} /></div>
       </div>
 
       {/* ── Datos de nacimiento ── */}
@@ -1963,7 +1978,7 @@ function PerfilUI() {
           </div>
         )}
         <div className="mt-5 flex flex-wrap gap-3">
-          <SaveBtn label="Guardar datos" />
+          <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar datos" />
           <a href="/onboarding" className="flex items-center gap-2 rounded-md border border-white/15 px-5 py-3 text-sm font-bold text-white/60 hover:text-white/90 transition">
             <RefreshCw className="h-4 w-4" /> Recalcular mi destino
           </a>
@@ -1990,7 +2005,7 @@ function PerfilUI() {
             );
           })}
         </div>
-        <SaveBtn label="Guardar preferencias" />
+        <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar preferencias" />
       </div>
 
       {/* PWA Install Card (will return null if not installable or dismissed) */}

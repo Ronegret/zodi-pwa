@@ -33,13 +33,15 @@ export async function GET(req: Request) {
       let horoscopeText = "Las estrellas están confusas hoy, pero tú sigues siendo un caos.";
       try {
         const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: "gemini-1.5-flash",
           contents: `Genera un horóscopo súper corto (2 oraciones máximo) y muy directo para ${name}, que es de signo ${sign}. Tono: sarcástico, místico, ácido. No uses introducciones.`
         });
         if (response.text) {
-          horoscopeText = response.text;
+          horoscopeText = response.text.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("[ZODI cron] Gemini horoscope generation failed:", e);
+      }
 
       const htmlTemplate = `
 <body style="margin: 0; padding: 0; background-color: #060608; font-family: Helvetica, Arial, sans-serif;">
@@ -109,13 +111,16 @@ export async function GET(req: Request) {
 </body>
 `;
 
-      await sendZodiEmail({
-        to: user.email,
-        subject: `🔮 ZODI: Tu veredicto de hoy (${sign})`,
-        html: htmlTemplate,
-      });
-
-      emailsSent.push(user.email);
+      try {
+        await sendZodiEmail({
+          to: user.email,
+          subject: `🔮 ZODI: Tu veredicto de hoy (${sign})`,
+          html: htmlTemplate,
+        });
+        emailsSent.push(user.email);
+      } catch (emailErr) {
+        console.error(`[ZODI cron] Failed to send email to ${user.email}:`, emailErr);
+      }
     }
 
     return NextResponse.json({ success: true, sentTo: emailsSent });

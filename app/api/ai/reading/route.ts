@@ -10,7 +10,7 @@ export const maxDuration = 30;
 const requests = new Map<string, { count: number; resetAt: number }>();
 
 const ReadingSchema = z.object({
-  provider: z.enum(["auto", "gemini", "anthropic", "openai"]).optional(),
+  provider: z.enum(["auto", "gemini", "anthropic", "claude", "openai"]).optional(),
   kind: z.string().optional(),
   input: z.string().optional(),
   profile: z.record(z.string(), z.unknown()).optional(),
