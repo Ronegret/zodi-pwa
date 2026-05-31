@@ -296,7 +296,7 @@ export function HeroConsole() {
         </motion.div>
       )}
 
-      <section className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
+      <section className="grid gap-4 lg:grid-cols-[1.4fr_0.6fr]">
       {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
       <div className="glass-panel neon-border overflow-hidden rounded-2xl relative">
         <CrystalBallBg />

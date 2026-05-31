@@ -112,15 +112,15 @@ export function ZodiOracle() {
 
   return (
     <>
-      {/* Botón Flotante: La Bola de Cristal */}
+      {/* Botón Flotante: Oráculo — diseño limpio, un solo anillo */}
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.08, transition: { duration: 0.15 } }}
+        whileTap={{ scale: 0.94 }}
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 hidden md:flex h-16 w-16 items-center justify-center rounded-full border-2 border-lime-300/40 shadow-[0_0_25px_rgba(184,255,23,0.35)] transition sm:h-20 sm:w-20"
-        style={{ background: "rgb(8, 8, 14)" }}
+        className="fixed bottom-24 right-4 z-50 hidden md:flex h-14 w-14 items-center justify-center rounded-2xl border border-lime-300/30 bg-[rgb(8,8,14)] shadow-[0_4px_20px_rgba(0,0,0,0.7)] transition-colors hover:border-lime-300/60 hover:bg-[rgb(10,10,18)]"
+        aria-label="Abrir oráculo"
       >
-        <WandSparkles className="h-7 w-7 text-lime-300 sm:h-9 sm:w-9" />
+        <WandSparkles className="h-6 w-6 text-lime-300" />
       </motion.button>
 
       {/* Modal de Chat */}

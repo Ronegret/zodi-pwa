@@ -327,7 +327,7 @@ export function ConsultationDock() {
     <>
       <GemsToast amount={GEMS_PER_EVENT.reading} show={showGems} />
 
-      <section className="mt-5 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+      <section className="mt-6 sm:mt-8 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
         {/* Panel izquierdo — selector de consultas */}
         <div className="glass-panel rounded-2xl p-4">
           <p className="zodi-kicker mb-3">Consulta rápida</p>

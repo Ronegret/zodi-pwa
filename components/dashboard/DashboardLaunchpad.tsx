@@ -18,7 +18,7 @@ const featured = [
 
 export function DashboardLaunchpad() {
   return (
-    <section className="mt-5">
+    <section className="mt-6 sm:mt-8">
       <div className="mb-4 flex items-end justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.32em] text-lime-200/70">Tus herramientas del caos</p>
@@ -29,7 +29,7 @@ export function DashboardLaunchpad() {
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {featured.map(({ slug, badge, color }, index) => {
           const section = dashboardSections.find(s => s.slug === slug);
           if (!section) return null;

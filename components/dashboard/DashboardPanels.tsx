@@ -29,7 +29,7 @@ export function DashboardPanels() {
   }, []);
 
   return (
-    <section className="mt-5 grid min-w-0 gap-4 xl:grid-cols-[1fr_0.85fr_0.85fr]">
+    <section className="mt-6 grid min-w-0 gap-4 lg:grid-cols-2 xl:grid-cols-[1fr_0.85fr_0.85fr]">
       <Panel title="Mazo de tarot" kicker="Toca una carta · Destino al azar" action={{ label: "Tirada completa →", href: "/dashboard/tarot" }}>
         <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto pb-2">
           {TAROT_DECK.map((card, index) => (
