@@ -21,8 +21,10 @@ export function ZodiOracle() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Solo mostrar en las rutas del dashboard, NUNCA en la página de inicio (landing)
+  // Solo en dashboard, NUNCA en landing ni en la página del oráculo
+  // (que ya es el oráculo dedicado — tener dos sería redundante)
   const isDashboard = pathname?.startsWith("/dashboard");
+  const isOraclePage = pathname === "/dashboard/oraculo";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -34,7 +36,7 @@ export function ZodiOracle() {
     return () => window.removeEventListener("open-oracle", handleOpen);
   }, []);
 
-  if (!isDashboard) return null;
+  if (!isDashboard || isOraclePage) return null;
 
   const handleSend = async () => {
     if (!input.trim()) return;

@@ -78,17 +78,35 @@ function useConsult(section: DashboardSection) {
       const { getFirebaseToken } = await import("@/lib/firebase/client");
       const token = await getFirebaseToken();
 
-      const res = await fetch("/api/ai/reading", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ provider: "auto", kind: section.kind, input: fullInput, profile }),
-      });
-      const data = await res.json();
+      let res: Response;
+      try {
+        res = await fetch("/api/ai/reading", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ provider: "auto", kind: section.kind, input: fullInput, profile }),
+          signal: AbortSignal.timeout(25000),
+        });
+      } catch (fetchErr: any) {
+        const isTimeout = fetchErr?.name === "TimeoutError";
+        setReply(isTimeout
+          ? "Los astros tardaron demasiado. Reintenta en un momento. ⏳"
+          : "Sin conexión con el servidor. Si estás en local, asegúrate de tener npm run dev activo. 🔌");
+        return;
+      }
+
+      let data: any;
+      try {
+        data = await res.json();
+      } catch {
+        setReply("El servidor respondió algo raro. Recarga la página e inténtalo de nuevo. 🔄");
+        return;
+      }
+
       if (!res.ok) {
-        setReply(data.error || "Necesitas iniciar sesión para consultar a ZODI.");
+        setReply(data?.error || data?.text || "Error del servidor. Reintenta en un momento.");
         return;
       }
       setReply(data.text || data.reading || "El universo tardó demasiado. Reintenta.");
