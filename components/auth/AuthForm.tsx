@@ -118,7 +118,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     } catch { /* Firestore no disponible */ }
 
     // Paso 2: Identidad duradera local
-    if (!firestoreDone) {
+    // Solo para usuarios que regresan (forceNewUser=false) — nunca para registros nuevos
+    if (!firestoreDone && !forceNewUser) {
       const identity = getSavedIdentity();
       const idMatch = identity && (identity.uid === user.uid || identity.email === user.email) && identity.onboardingCompleted;
       if (idMatch && identity) {
@@ -138,7 +139,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     }
 
     // Paso 3: Sesión local del mismo usuario
-    if (!firestoreDone && sameUser && preserved.onboardingCompleted) {
+    // Solo para usuarios que regresan (forceNewUser=false)
+    if (!firestoreDone && !forceNewUser && sameUser && preserved.onboardingCompleted) {
       setLocalSession({
         isAuthenticated: true, onboardingCompleted: true,
         uid: user.uid, email: user.email || preserved.email || "",

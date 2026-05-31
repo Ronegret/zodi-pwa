@@ -1621,29 +1621,54 @@ function PerfilUI() {
 
   async function deleteAccount() {
     if (deleteConfirm !== "ELIMINAR") return;
-    
+
     try {
-      const auth = (await import('@/lib/firebase/client')).getFirebaseAuth();
+      const [
+        { getFirebaseAuth, getFirebaseDb },
+        { deleteUser },
+        { deleteDoc, doc },
+      ] = await Promise.all([
+        import("@/lib/firebase/client"),
+        import("firebase/auth"),
+        import("firebase/firestore"),
+      ]);
+
+      const auth = getFirebaseAuth();
+      const db   = getFirebaseDb();
       const user = auth?.currentUser;
-      if (user) {
-        const token = await user.getIdToken();
-        const res = await fetch("/api/user/delete", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          }
-        });
-        if (!res.ok) {
-          throw new Error("Failed to delete from server");
-        }
+
+      if (!user) {
+        // Sin sesión Firebase — solo limpiar datos locales
+        localStorage.clear();
+        router.push("/");
+        return;
       }
-    } catch (e) {
-      console.error(e);
-      alert("Hubo un error al eliminar tu cuenta en el servidor.");
+
+      const uid = user.uid;
+
+      // 1. Borrar datos de Firestore (no requiere Admin, solo auth de cliente)
+      if (db) {
+        await Promise.allSettled([
+          deleteDoc(doc(db, "users", uid)),
+          deleteDoc(doc(db, "astralProfiles", uid)),
+        ]);
+      }
+
+      // 2. Borrar la cuenta de Firebase Auth (cliente, sin Admin)
+      await deleteUser(user);
+
+    } catch (e: any) {
+      console.error("[ZODI] deleteAccount error:", e);
+      // auth/requires-recent-login: pedir que vuelva a autenticarse
+      if (e?.code === "auth/requires-recent-login") {
+        alert("Por seguridad, vuelve a iniciar sesión antes de eliminar tu cuenta.");
+      } else {
+        alert("No se pudo eliminar la cuenta. Intenta de nuevo.");
+      }
       return;
     }
 
+    // 3. Limpiar todo local y redirigir
     localStorage.clear();
     router.push("/");
   }
