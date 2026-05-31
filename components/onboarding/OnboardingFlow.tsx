@@ -126,8 +126,19 @@ export function OnboardingFlow() {
     setError(null);
 
     // Cálculo astral entre paso 1 → 2
+    // Aprovechamos los 3s de animación para guardar en Firestore en paralelo
     if (step === 1) {
       setCalc(true);
+
+      // Disparar el guardado en Firestore YA — no esperar al finish()
+      // Así los 3 segundos de animación sirven para que Firestore responda
+      const currentSession = getLocalSession();
+      if (currentSession.uid && !currentSession.uid.startsWith("local_")) {
+        import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
+          saveOnboardingProfile(currentSession.uid!, data, profile)
+        ).catch((e) => console.warn("[ZODI] Early Firestore save failed:", e));
+      }
+
       let i = 0;
       const interval = setInterval(() => {
         i++;
@@ -154,28 +165,34 @@ export function OnboardingFlow() {
 
   async function finish() {
     setFinishing(true);
-    try {
-      completeLocalOnboarding(data, profile);
 
-      const session = getLocalSession();
-      // Guardar en Firestore en background (no bloquea la navegación)
-      if (session.uid) {
-        import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
-          saveOnboardingProfile(session.uid!, data, profile)
-        ).catch(() => {});
-      }
+    // Paso 1: Guardar siempre en localStorage primero (nunca falla)
+    completeLocalOnboarding(data, profile);
 
-      // Gemas de bienvenida
+    // Paso 2: Guardar en Firestore — AWAITED con timeout de 6s
+    // Si falla, los datos están en localStorage de todos modos
+    const session = getLocalSession();
+    if (session.uid && !session.uid.startsWith("local_")) {
       try {
-        const { getGems, addGems } = await import("@/lib/gamification");
-        if (getGems().total < 300) addGems(300 - getGems().total);
-      } catch { /* ignorar */ }
-
-    } catch (e) {
-      console.warn("Error en finish:", e);
+        const { saveOnboardingProfile } = await import("@/lib/firebase/profile");
+        await Promise.race([
+          saveOnboardingProfile(session.uid!, data, profile),
+          new Promise<void>((_, reject) =>
+            setTimeout(() => reject(new Error("Firestore timeout")), 6000)
+          ),
+        ]);
+      } catch (e) {
+        // No bloquear al usuario por un fallo de red — localStorage ya tiene los datos
+        console.warn("[ZODI] Firestore save failed in finish():", e);
+      }
     }
 
-    // Siempre navegar al dashboard, sin importar qué falló
+    // Paso 3: Gemas de bienvenida
+    try {
+      const { getGems, addGems } = await import("@/lib/gamification");
+      if (getGems().total < 300) addGems(300 - getGems().total);
+    } catch { /* ignorar */ }
+
     router.push("/dashboard");
   }
 

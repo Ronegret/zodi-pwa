@@ -50,6 +50,13 @@ export async function saveOnboardingProfile(uid: string, data: OnboardingData, a
       readingTone: data.readingTone,
       favoriteTopics: data.favoriteTopics,
       notificationPreferences: data.notificationPreferences,
+      // Guardar datos clave también en users como respaldo (permite recuperar si astralProfiles falla)
+      birthDate: data.birthDate ?? null,
+      birthTime: data.birthTime ?? null,
+      birthCity: data.birthCity ?? null,
+      birthCountry: data.birthCountry ?? null,
+      currentCity: data.currentCity ?? null,
+      currentCountry: data.currentCountry ?? null,
       referralCode,
       updatedAt: serverTimestamp()
     }, { merge: true }),

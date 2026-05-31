@@ -30,12 +30,14 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
 
-        if (!userSnap.exists() || !userSnap.data().onboardingCompleted || !astralSnap.exists()) {
+        if (!userSnap.exists() || !userSnap.data().onboardingCompleted) {
           return false;
         }
 
         const userData = userSnap.data();
-        const astralData = astralSnap.data();
+        // astralProfiles es opcional: puede faltar si el save fue parcial
+        // En ese caso usamos los campos de respaldo guardados en users
+        const astralData = astralSnap.exists() ? astralSnap.data() : userData;
 
         setLocalSession({
           isAuthenticated: true,
@@ -60,12 +62,13 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             username: userData.username ?? "",
             avatar: userData.avatar ?? "/zodi-art/perfil/perfil-1.png",
             genderIdentity: userData.genderIdentity ?? "",
-            birthDate: astralData.birthDate ?? "",
-            birthTime: astralData.birthTime ?? "",
-            birthCity: astralData.birthCity ?? "",
-            birthCountry: astralData.birthCountry ?? "",
-            currentCity: astralData.currentCity ?? "",
-            currentCountry: astralData.currentCountry ?? "",
+            // birthDate en astralProfiles O en users (respaldo)
+            birthDate: astralData.birthDate ?? userData.birthDate ?? "",
+            birthTime: astralData.birthTime ?? userData.birthTime ?? "",
+            birthCity: astralData.birthCity ?? userData.birthCity ?? "",
+            birthCountry: astralData.birthCountry ?? userData.birthCountry ?? "",
+            currentCity: astralData.currentCity ?? userData.currentCity ?? "",
+            currentCountry: astralData.currentCountry ?? userData.currentCountry ?? "",
             readingTone: userData.readingTone ?? "directo",
             favoriteTopics: userData.favoriteTopics ?? [],
             notificationPreferences: userData.notificationPreferences ?? [],

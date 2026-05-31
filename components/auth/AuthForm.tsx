@@ -86,27 +86,40 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
-        if (uSnap.exists() && uSnap.data().onboardingCompleted && aSnap.exists()) {
+
+        // Recuperar si users existe con onboardingCompleted — astralProfiles es opcional
+        // (puede faltar si el guardado en Firestore falló parcialmente)
+        if (uSnap.exists() && uSnap.data().onboardingCompleted) {
           const ud = uSnap.data();
-          const ad = aSnap.data();
+          // Fusionar: datos del astralProfiles doc si existe, si no, los del users doc como fallback
+          const ad = aSnap.exists() ? aSnap.data() : ud;
+
           setLocalSession({
             isAuthenticated: true, onboardingCompleted: true,
             displayName: ud.displayName || user.displayName || preserved.displayName || "Viajero ZODI",
             email: user.email || preserved.email || "",
             uid: user.uid, loginAt: Date.now(),
             astralProfile: {
-              sunSign: ad.sunSign ?? "", moonSign: ad.moonSign ?? "",
-              ascendant: ad.ascendant ?? "", lifePathNumber: ad.lifePathNumber ?? 1,
-              chineseZodiac: ad.chineseZodiac ?? "", mayanSign: ad.mayanSign ?? "",
+              sunSign: ad.sunSign ?? preserved.astralProfile?.sunSign ?? "",
+              moonSign: ad.moonSign ?? preserved.astralProfile?.moonSign ?? "",
+              ascendant: ad.ascendant ?? preserved.astralProfile?.ascendant ?? "",
+              lifePathNumber: ad.lifePathNumber ?? preserved.astralProfile?.lifePathNumber ?? 1,
+              chineseZodiac: ad.chineseZodiac ?? preserved.astralProfile?.chineseZodiac ?? "",
+              mayanSign: ad.mayanSign ?? preserved.astralProfile?.mayanSign ?? "",
               biorhythmBaseline: ad.biorhythmBaseline ?? new Date().toISOString(),
             } as any,
             onboardingData: {
-              displayName: ud.displayName ?? "", username: ud.username ?? "",
+              displayName: ud.displayName ?? "",
+              username: ud.username ?? "",
               avatar: ud.avatar ?? "/zodi-art/perfil/perfil-1.png",
               genderIdentity: ud.genderIdentity ?? "",
-              birthDate: ad.birthDate ?? "", birthTime: ad.birthTime ?? "",
-              birthCity: ad.birthCity ?? "", birthCountry: ad.birthCountry ?? "",
-              currentCity: ad.currentCity ?? "", currentCountry: ad.currentCountry ?? "",
+              // birthDate en users (respaldo) O en astralProfiles
+              birthDate: ad.birthDate ?? ud.birthDate ?? preserved.onboardingData?.birthDate ?? "",
+              birthTime: ad.birthTime ?? ud.birthTime ?? preserved.onboardingData?.birthTime ?? "",
+              birthCity: ad.birthCity ?? ud.birthCity ?? preserved.onboardingData?.birthCity ?? "",
+              birthCountry: ad.birthCountry ?? ud.birthCountry ?? preserved.onboardingData?.birthCountry ?? "",
+              currentCity: ad.currentCity ?? ud.currentCity ?? "",
+              currentCountry: ad.currentCountry ?? ud.currentCountry ?? "",
               readingTone: ud.readingTone ?? "directo",
               favoriteTopics: ud.favoriteTopics ?? [],
               notificationPreferences: ud.notificationPreferences ?? [],
