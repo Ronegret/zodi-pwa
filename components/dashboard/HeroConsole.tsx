@@ -123,7 +123,7 @@ function energyColor(score: number): string {
 function CrystalBallBg() {
   return (
     <div
-      className="absolute inset-0 -z-10 overflow-hidden rounded-2xl flex items-center justify-center pointer-events-none select-none"
+      className="absolute inset-0 overflow-hidden rounded-2xl flex items-center justify-center pointer-events-none select-none"
       aria-hidden
     >
       {/* Gradiente base oscuro-violeta */}
@@ -298,11 +298,14 @@ export function HeroConsole() {
 
       <section className="grid gap-4 lg:grid-cols-[1.4fr_0.6fr]">
       {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
-      <div className="glass-panel neon-border overflow-hidden rounded-2xl relative">
+      {/* Fondo semi-transparente propio para que la bola de cristal sea visible */}
+      <div
+        className="neon-border overflow-hidden rounded-2xl relative"
+        style={{ background: "linear-gradient(145deg, rgba(8,8,16,0.88), rgba(5,5,12,0.85))", border: "1px solid rgba(255,255,255,0.07)" }}
+      >
         <CrystalBallBg />
-        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-transparent -z-10 rounded-2xl" />
 
-        <div className="p-5 sm:p-7">
+        <div className="p-5 sm:p-7 relative z-[1]">
           {/* Kicker */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="zodi-kicker">{timeGreeting} · ZODI panel astral</p>

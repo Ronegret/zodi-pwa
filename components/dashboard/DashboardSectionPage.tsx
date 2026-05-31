@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { CommunityHub } from "@/components/dashboard/CommunityHub";
 import { SectionSpecificUI } from "@/components/dashboard/SectionSpecificUI";
+import { PremiumUI } from "@/components/dashboard/PremiumUI";
 import { plans } from "@/lib/data";
 import { getDashboardSection } from "@/lib/dashboard-sections";
 
@@ -99,9 +100,12 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
         <SectionSpecificUI section={section} />
       )}
 
+      {/* Tienda de gemas con Stripe — solo en sección premium */}
+      {section.slug === "premium" && <PremiumUI />}
+
       {/* Plans grid — only for premium section */}
       {section.slug === "premium" && (
-        <section className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        <section className="mt-2 grid gap-4 grid-cols-1 sm:grid-cols-2">
           {plans.map((plan) => (
             <article
               key={plan.name}

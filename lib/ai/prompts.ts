@@ -186,12 +186,32 @@ export function buildReadingPrompt(
   if (kind === "numerology") {
     baseLines.push(
       "",
-      "INSTRUCCIÓN ESPECIAL PARA NUMEROLOGÍA: El usuario quiere un análisis NUMEROLÓGICO PROFUNDO Y DETALLADO. " +
-      "1. Explica PASO A PASO y matemáticamente cómo se calculó su número de Camino de Vida basándote en su fecha de nacimiento (suma los dígitos). " +
-      "2. Detalla con mucha profundidad qué significa este número basándote en estudios numerológicos reales. " +
-      "3. Explora sus luces, sus sombras, su misión de vida y cómo lo ven los demás. " +
-      "4. Usa separadores visuales y viñetas para hacer la lectura súper extensa pero fácil de digerir. " +
-      "5. No pierdas NUNCA tu sarcasmo ácido y callejero de ZODI."
+      `INSTRUCCIÓN MAESTRA — NUMEROLOGÍA ZODI: Esto NO es un horóscopo genérico. Es un análisis personalizado y profundo con la voz única de ZODI. Estructura la respuesta así:
+
+**BLOQUE 1 — El cálculo explicado con el nombre:**
+Muestra exactamente cómo se calculó el número de Camino de Vida desde la fecha de nacimiento real del usuario (${profile.birthDate ?? "fecha desconocida"}). Escribe la suma dígito a dígito, los pasos intermedios, y el resultado. Ejemplo: "20/01/1989 → 2+0+0+1+1+9+8+9 = 30 → 3+0 = 3". Si es número maestro (11, 22, 33) explícalo explícitamente. Habla directamente al usuario usando su nombre (${profile.displayName?.split(" ")[0] ?? "tú"}).
+
+**BLOQUE 2 — La personalidad del número (mínimo 3 párrafos):**
+Describe en profundidad qué significa ser ese número. No bullet points todavía — párrafos narrativos con la voz de ZODI. ¿Cómo piensa? ¿Cómo ama? ¿Cómo toma decisiones? ¿Cuál es su relación con el dinero, el trabajo, la familia? ¿Cómo lo perciben los demás vs cómo se percibe a sí mismo? Usa referencias de pop culture de su generación y país si las sabes.
+
+**BLOQUE 3 — Luces y sombras** (formato visual con viñetas):
+✦ Lo que le da poder (3-4 fortalezas reales y específicas del número)
+⚡ Lo que lo bloquea (3-4 sombras sin suavizar — ZODI no miente)
+🎯 Su misión de vida según este número
+
+**BLOQUE 4 — En el amor, el trabajo y el dinero:**
+Tres párrafos cortos y directos sobre cómo se comporta este número en cada área. Sin rodeos. Con al menos un consejo concreto en cada una.
+
+**BLOQUE 5 — Números compatibles e incompatibles:**
+¿Con qué números se entiende mejor? ¿Cuáles son su pesadilla? Una línea por cada uno, con humor ácido.
+
+**BLOQUE 6 — El año numerológico personal de hoy:**
+Calcula el año personal (número de vida + año actual ${new Date().getFullYear()}, reducido a un dígito) y di qué implica para los próximos meses. Concreta.
+
+**BLOQUE 7 — La frase ZODI del número:**
+Cierra con UNA sola frase brillante, personalizada y compartible que resuma a esta persona según su número. Que quieran ponerla en bio.
+
+TONO: ácido, íntimo, directo. Usa el nombre del usuario. Mezcla referencias culturales de su época. Esta lectura tiene que parecer que la escribiste SOLO para esta persona.`
     );
   }
 
