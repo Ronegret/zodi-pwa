@@ -4,74 +4,134 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { RadioTower, Sparkles, Gem, Flame } from "lucide-react";
+import { RadioTower, Sparkles, Gem, Flame, Zap, ArrowRight } from "lucide-react";
 import { getTodaysAstralContext } from "@/lib/astral";
-import { getSessionProfile } from "@/lib/session";
+import { getSessionProfile, getLocalSession } from "@/lib/session";
 import { getXpData, getStreak, getLevel, xpToNextLevel, getGems, getLevelTitle } from "@/lib/gamification";
 import type { UserProfile } from "@/types/zodi";
 
 type AstralCtx = ReturnType<typeof getTodaysAstralContext>;
 
-function getDailySignals(ctx: AstralCtx, sign?: string): string[] {
+// ── Frases diarias por signo — rotan cada día con personalidad ZODI ────────────
+const SIGN_PHRASES: Record<string, string[]> = {
+  Aries:       ["No te pida permiso el cosmos. Muévete tú primero.",       "Tu energía hoy no admite espera. O la usas o la pierdes.",       "El fuego está activo. Apunta antes de lanzar.",                   "Hoy tienes ventaja. No la desperdicies siendo educado.",         "Impulso sin dirección es solo ruido. Enfoca."],
+  Tauro:       ["Lento y concreto gana. Lo apresurado hoy cuesta el doble.","Tu intuición sobre el dinero hoy está afinada. Escúchala.",       "Venus te cuida, pero no toma las decisiones por ti.",             "La paciencia no es rendirse. Hoy eso importa.",                  "Lo que construyes con calma dura. Lo de hoy puede ser de esos."],
+  Géminis:     ["Dos opciones, dos voces. Hoy escoge una y actúa.",          "La mente acelerada es tu poder y tu trampa. Úsala bien hoy.",     "Comunicación en modo máximo. Di lo que realmente piensas.",       "Mercurio activo. Tus palabras hoy tienen más peso del habitual.", "Eres el más adaptable de todos. Hoy eso vale oro."],
+  Cáncer:      ["Tu instinto no miente. Confía en lo que sientes sin explicarlo.", "El hogar emocional primero. El resto puede esperar.",             "Luna te mueve. Hoy es día de sentir, no solo de hacer.",          "Lo que cuidas con amor siempre vuelve.",                          "Intuición al 100%. No la ignores por miedo a parecer sensible."],
+  Leo:         ["Hoy el escenario es tuyo. No llegues tarde a tu propio show.", "El sol en ti brilla cuando actúas desde la autenticidad.",        "Energía de liderazgo alta. Úsala para elevar, no para demostrar.","Tu presencia ya es poder. No necesitas probarlo.",                "La generosidad de Leo hoy tiene retorno multiplicado."],
+  Virgo:       ["El detalle que nadie ve es el que tú ya notaste. Actúa.",    "La perfección es enemiga del progreso. Hoy, entrega.",            "Tu análisis es preciso hoy. No sobre-pienses lo que ya sabes.",   "Mercurio afilado. Una solución que llevas semanas buscando llega.", "La crítica más útil es la que ya tienes en mente."],
+  Libra:       ["La indecisión tiene fecha de caducidad. Hoy es el día.",     "Equilibrar no significa complacer. Recuerda la diferencia.",       "Venus te da carisma extra hoy. Úsalo para lo que importa.",       "La justicia que buscas en otros empieza en ti.",                  "Armonía no es ausencia de conflicto. Es gestión inteligente."],
+  Escorpio:    ["Lo que no has querido ver, hoy lo ves. Prepárate.",          "Tu radar emocional está en modo experto. Fíate.",                 "La intensidad es tu idioma. Hoy habla sin filtros.",              "Lo que transformas no vuelve. Asegúrate de que vale.",            "El poder que no usas se vuelve en tu contra. Hora de actuar."],
+  Sagitario:   ["La aventura sin propósito es solo movimiento. Apunta lejos.","Tu optimismo hoy no es ingenuidad. Es visión. Expándela.",         "Júpiter activo. Las oportunidades llegan a quien está en marcha.","La verdad incómoda dicha hoy vale más que mil verdades cómodas.", "No hay mapa perfecto. Sal igual."],
+  Capricornio: ["La constancia hoy da frutos que el impulso no da.",          "Tu estructura mental es tu activo más valioso. Úsala.",           "Saturno te respalda cuando actúas con intención.",                "Lo que construyes en silencio impresiona en voz alta más tarde.", "Hoy no es día de atajos. Pero el camino largo tiene recompensa."],
+  Acuario:     ["La idea que tienes desde hace semanas merece luz hoy.",       "Tu visión del futuro es correcta. El timing es lo que falta.",    "Urano activo. Los cambios raros de hoy tienen sentido mañana.",   "Diferente no es equivocado. Es pionero.",                         "La distancia emocional que sientes es información. Procésala."],
+  Piscis:      ["Tu intuición hoy supera a cualquier análisis. Confía.",       "Lo que sueñas en modo despierto suele ser la respuesta real.",    "Neptuno activo. Las señales que ignoras hoy vuelven amplificadas.","La empatía es poder cuando tiene dirección.",                     "Fluir no es rendirse. Hoy distingue ambas cosas."],
+};
+
+// ── Modificadores por fase lunar ──────────────────────────────────────────────
+const MOON_SUFFIX: Record<string, string> = {
+  "Luna Nueva":       "Ciclo en cero. Lo que plantas hoy crece.",
+  "Luna Creciente":   "Energía en aumento. Apóyate en eso.",
+  "Cuarto Creciente": "Momento de ajuste o acción. Elige.",
+  "Gibosa Creciente": "Casi en el pico. Refina, no abandones.",
+  "Luna Llena":       "Claridad máxima. Lo que ves hoy, es real.",
+  "Gibosa Menguante": "Suelta lo que pesa. El espacio libre es poder.",
+  "Cuarto Menguante": "Cierra ciclos. Libera energía para lo nuevo.",
+  "Luna Menguante":   "Modo recarga. La quietud ahora es inversión.",
+};
+
+// ── Energy score para el signo hoy (determinístico por fecha) ─────────────────
+function getSignEnergyToday(sign: string, ctx: AstralCtx): number {
+  const isSunSeason = ctx.sunTransit === sign;
   const moonName = ctx.moonPhase.replace(/\p{Emoji}/gu, "").trim();
+  const isHighMoon = ["Luna Llena", "Gibosa Creciente", "Luna Creciente"].includes(moonName);
+  const isFireSign = ["Aries", "Leo", "Sagitario"].includes(sign);
+  const isEarthSign = ["Tauro", "Virgo", "Capricornio"].includes(sign);
 
-  const moonMsgs: Record<string, string> = {
-    "Luna Nueva":       "Energia de inicio. Planta intenciones, no decisiones impulsivas.",
-    "Luna Creciente":   "La energia crece. Ahora lo que empieces tiene mas impulso.",
-    "Cuarto Creciente": "Momento de accion o revision. No sigas si algo no cuadra.",
-    "Gibosa Creciente": "Casi listo. Refina lo que ya esta en marcha.",
-    "Luna Llena":       "Claridad maxima. Lo que no has querido ver, hoy lo ves.",
-    "Gibosa Menguante": "Suelta lo que ya cumplio su funcion. El espacio libre es poder.",
-    "Cuarto Menguante": "Corta lo que drena. Esta semana toca limpiar.",
-    "Luna Menguante":   "Recarga interior. No toda quietud es retroceso.",
-  };
+  let score = 62;
+  if (isSunSeason) score += 15;
+  if (isHighMoon) score += 8;
+  if (ctx.dayVibration === 1 || ctx.dayVibration === 8) score += 7;
+  if (ctx.dayVibration === 7) score += 5;
+  // Deterministic jitter por día del año
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  score += ((dayOfYear * 7 + sign.charCodeAt(0)) % 13);
+  if (isFireSign && isHighMoon) score += 3;
+  if (isEarthSign && !isHighMoon) score += 2;
 
-  const vibMsgs: Record<number, string> = {
-    1:  "Dia 1: actua primero, analiza despues.",
-    2:  "Dia 2: escucha el doble de lo que hablas.",
-    3:  "Dia 3: creatividad alta. Una idea aplicada hoy vale diez guardadas.",
-    4:  "Dia 4: estructura primero. Los atajos de hoy cuestan mas tarde.",
-    5:  "Dia 5: cambio en movimiento. Resiste o aprovecha, pero no ignores.",
-    6:  "Dia 6: tus vinculos piden atencion. La conversacion dificil puede ser la buena.",
-    7:  "Dia 7: introspection activa. La respuesta que buscas ya la tienes.",
-    8:  "Dia 8: lo que gestionas hoy tiene retorno multiplicado.",
-    9:  "Dia 9: cierra algo. Cada final libera energia para lo que viene.",
-    11: "Dia 11: intuicion en maximos. No ignores las señales silenciosas.",
-    22: "Dia 22 maestro: potencial real si actuas con intencion clara.",
-    33: "Dia 33 maestro: tu acto mas pequeno hoy tiene eco largo.",
-  };
-
-  const transitMsg = sign
-    ? (sign === ctx.sunTransit
-        ? `Sol en ${ctx.sunTransit}: es tu temporada astral. Mas visibilidad, mas presion.`
-        : `Sol en ${ctx.sunTransit}. No es tu temporada, pero la temporada igual te afecta.`)
-    : `Sol en ${ctx.sunTransit}. Transito que marca el ritmo colectivo esta semana.`;
-
-  return [
-    moonMsgs[moonName] ?? `${ctx.moonPhase}: revisa tu energia antes de tomar decisiones.`,
-    vibMsgs[ctx.dayVibration] ?? `Vibracion ${ctx.dayVibration} hoy. Consulta para saber que significa.`,
-    transitMsg,
-  ];
+  return Math.min(99, Math.max(58, score));
 }
 
-// ── Skeleton shimmer for unloaded values ──────────────────────────────────────
+// ── Frase diaria personalizada ─────────────────────────────────────────────────
+function getDailyPhrase(
+  sign: string,
+  ctx: AstralCtx,
+  tone: string
+): { phrase: string; moonLine: string } {
+  const phrases = SIGN_PHRASES[sign] ?? SIGN_PHRASES["Aries"];
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  const moonName = ctx.moonPhase.replace(/\p{Emoji}/gu, "").trim();
+  const moonLine = MOON_SUFFIX[moonName] ?? `${ctx.moonPhase} · Energía en movimiento.`;
+
+  let phrase = phrases[dayOfYear % phrases.length];
+
+  // Adaptar tono si es brutal o sarcástico — añadir coda
+  if (tone === "brutal" || tone === "sarcastico") {
+    const codas = [
+      " Y eso no es opcional.",
+      " Sin excusas.",
+      " Punto.",
+      " El cosmos no negocia.",
+      " Tómalo o déjalo.",
+    ];
+    phrase += codas[dayOfYear % codas.length];
+  }
+
+  return { phrase, moonLine };
+}
+
+// ── Saludo según hora del día ─────────────────────────────────────────────────
+function getTimeGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 6)  return "Madrugada de señales";
+  if (h < 12) return "Buenos días";
+  if (h < 18) return "Buenas tardes";
+  if (h < 22) return "Buenas noches";
+  return "Ya es tarde";
+}
+
+// ── Skeleton shimmer ──────────────────────────────────────────────────────────
 function Shimmer({ w = "w-24" }: { w?: string }) {
-  return <span className={`inline-block ${w} h-4 animate-pulse rounded bg-white/10`} />;
+  return <span className={`inline-block ${w} h-5 animate-pulse rounded-md bg-white/10`} />;
 }
+
+// ── Energy bar color ──────────────────────────────────────────────────────────
+function energyColor(score: number): string {
+  if (score >= 88) return "from-lime-300 to-emerald-400";
+  if (score >= 75) return "from-cyan-300 to-lime-300";
+  if (score >= 65) return "from-violet-400 to-cyan-300";
+  return "from-orange-400 to-yellow-300";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function HeroConsole() {
   const ctx = getTodaysAstralContext();
 
-  // All state starts null/zero — populated in a single useEffect to avoid
-  // the "demo profile flash" (showing fake data before real data loads).
   const [profile, setProfile] = useState<Partial<UserProfile> | null>(null);
   const [xpState, setXpState] = useState({
     level: 1, xpCurrent: 0, xpNeeded: 200, xpPercent: 0, streak: 0,
   });
   const [mounted, setMounted] = useState(false);
+  const [gems, setGems] = useState(0);
 
   useEffect(() => {
     const sessionProfile = getSessionProfile();
+    const session = getLocalSession();
     const xpData = getXpData();
     const streakData = getStreak();
     const gemsData = getGems();
@@ -79,174 +139,289 @@ export function HeroConsole() {
     const lvl = getLevel(totalXp);
     const { current, needed, percent } = xpToNextLevel(totalXp);
 
-    setProfile(sessionProfile);
+    // Si el perfil no tiene tono, leer del onboardingData
+    const tone = session.onboardingData?.readingTone ?? "directo";
+    const mergedProfile = sessionProfile
+      ? { ...sessionProfile, readingTone: sessionProfile.readingTone ?? tone }
+      : null;
+
+    setProfile(mergedProfile);
+    setGems(gemsData.total);
     setXpState({ level: lvl, xpCurrent: current, xpNeeded: needed, xpPercent: percent, streak: streakData.count });
     setMounted(true);
   }, []);
 
-  const firstName = profile?.displayName?.split(" ")[0] ?? "";
-  const avatar = profile?.avatar ?? "/icons/icon-192-v3.png";
-  const dailySignals = getDailySignals(ctx, profile?.zodiac ?? undefined);
+  const firstName  = profile?.displayName?.split(" ")[0] ?? "";
+  const sign       = profile?.zodiac ?? "";
+  const tone       = profile?.readingTone ?? "directo";
+  const avatar     = profile?.avatar ?? "/icons/icon-192-v3.png";
   const { level, xpCurrent, xpNeeded, xpPercent, streak } = xpState;
   const levelTitle = getLevelTitle(level);
-  const gems = mounted ? getGems().total : 0;
+
+  const energyScore = mounted && sign ? getSignEnergyToday(sign, ctx) : 0;
+  const { phrase, moonLine } = mounted && sign
+    ? getDailyPhrase(sign, ctx, tone)
+    : { phrase: "", moonLine: "" };
+
+  const timeGreeting = getTimeGreeting();
 
   return (
-    <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-      {/* Left panel */}
-      <div className="glass-panel neon-border overflow-hidden rounded-2xl p-4 sm:p-7 relative">
-        {/* Higgsfield video background */}
+    <section className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
+
+      {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
+      <div className="glass-panel neon-border overflow-hidden rounded-2xl relative">
+        {/* Atmospheric video background */}
         <video
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.25] -z-10 rounded-2xl"
+          className="absolute inset-0 h-full w-full object-cover opacity-[0.18] -z-10 rounded-2xl"
           autoPlay muted loop playsInline
         >
           <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent -z-10 rounded-2xl" />
-        
-        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-          <div className="flex-1">
-            <p className="zodi-kicker mb-3">ZODI / Panel astral</p>
-            {!mounted ? (
-              <div className="mt-3 space-y-2">
-                <Shimmer w="w-48" />
-                <Shimmer w="w-64" />
-              </div>
-            ) : firstName ? (
-              <h1 className="glitch mt-3 max-w-2xl text-4xl font-black leading-[1.06] sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
-                Hola, <span className="truncate inline-block max-w-[280px] sm:max-w-none align-bottom">{firstName}</span>.<br />
-                <span className="text-lime-300">{profile?.zodiac ?? "Tu signo"}</span>{" "}
-                tiene mucho que decirte.
-              </h1>
-            ) : (
-              <h1 className="glitch mt-3 max-w-2xl text-4xl font-black leading-[1.06] sm:text-6xl" style={{ fontFamily: "var(--font-display)" }}>
-                Tu mapa astral, tus lecturas y tu energia en un solo lugar.
-              </h1>
+        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-transparent -z-10 rounded-2xl" />
+
+        <div className="p-5 sm:p-7">
+          {/* Kicker */}
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p className="zodi-kicker">{timeGreeting} · ZODI panel astral</p>
+            {mounted && sign && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                className="flex items-center gap-2 rounded-full border border-white/15 bg-black/50 px-3 py-1.5"
+              >
+                <Zap className="h-3.5 w-3.5 text-lime-300 shrink-0" />
+                <span className="text-[11px] font-black uppercase tracking-wider text-lime-200">
+                  {sign} · {energyScore}% energía hoy
+                </span>
+              </motion.div>
             )}
-            <p className="mt-4 text-sm text-white/55">
-              {ctx.moonPhase} &nbsp;·&nbsp; Sol en {ctx.sunTransit} &nbsp;·&nbsp; Vibracion {ctx.dayVibration}
-            </p>
           </div>
-          <div className="hidden sm:block shrink-0">
-            <Image
-              src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.png"
-              alt="ZODI Intenso"
-              width={180}
-              height={220}
-              className="object-contain drop-shadow-[0_0_20px_rgba(184,255,23,0.25)]"
+
+          {/* Main greeting */}
+          <div className="mt-4 flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              {!mounted ? (
+                <div className="space-y-3 mt-2">
+                  <Shimmer w="w-56" />
+                  <Shimmer w="w-72" />
+                  <Shimmer w="w-48" />
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {firstName && (
+                    <h1
+                      className="text-4xl sm:text-5xl font-black leading-[1.05] tracking-tight"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {firstName},
+                    </h1>
+                  )}
+                  {phrase ? (
+                    <motion.p
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15, duration: 0.5 }}
+                      className="mt-2 text-lg sm:text-xl font-bold leading-snug text-white/90 max-w-xl"
+                    >
+                      {phrase}
+                    </motion.p>
+                  ) : (
+                    <p className="mt-2 text-lg sm:text-xl font-bold leading-snug text-white/90 max-w-xl">
+                      Tu mapa astral, tus lecturas y tu energía en un solo lugar.
+                    </p>
+                  )}
+                  {moonLine && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3, duration: 0.4 }}
+                      className="mt-2 text-sm text-lime-200/70 font-medium"
+                    >
+                      {ctx.moonPhase} · {moonLine}
+                    </motion.p>
+                  )}
+                </motion.div>
+              )}
+            </div>
+
+            {/* ZODI character */}
+            <div className="hidden md:block shrink-0 -mt-2 -mr-2 sm:-mr-4">
+              <Image
+                src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.png"
+                alt="ZODI"
+                width={160}
+                height={200}
+                className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.3)]"
+              />
+            </div>
+          </div>
+
+          {/* Energy bar for sign */}
+          {mounted && sign && (
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+              className="mt-5 origin-left"
+            >
+              <div className="flex items-center justify-between mb-1.5 text-xs text-white/50">
+                <span className="font-bold uppercase tracking-widest">Energía {sign} hoy</span>
+                <span className="font-black text-white/80">{energyScore}%</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                <motion.div
+                  className={`h-full rounded-full bg-gradient-to-r ${energyColor(energyScore)}`}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${energyScore}%` }}
+                  transition={{ delay: 0.5, duration: 0.9, ease: "easeOut" }}
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Daily context pills */}
+          <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/50">
+            <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 font-medium">
+              ☀️ Sol en {ctx.sunTransit}
+            </span>
+            <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 font-medium">
+              {ctx.moonPhase}
+            </span>
+            <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 font-medium">
+              🔢 Vibración {ctx.dayVibration}
+            </span>
+          </div>
+
+          {/* CTAs */}
+          <div className="mt-5 flex flex-wrap gap-2.5">
+            <Link
+              href="/dashboard/horoscopo"
+              className="group flex items-center gap-2 rounded-xl bg-lime-300 px-4 py-2.5 text-sm font-black text-black transition hover:bg-lime-200 active:scale-95"
+            >
+              <Sparkles className="h-4 w-4" />
+              Tu lectura del día
+              <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/dashboard/oraculo"
+              className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/40 px-4 py-2.5 text-sm font-bold text-white/80 transition hover:border-white/30 hover:text-white active:scale-95"
+            >
+              Consulta libre
+            </Link>
+            <Link
+              href="/dashboard/tarot"
+              className="flex items-center gap-2 rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-2.5 text-sm font-bold text-violet-200/80 transition hover:border-violet-400/50 hover:text-violet-100 active:scale-95"
+            >
+              Tirada rápida
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT: Profile card compacta ─────────────────────────────────── */}
+      <div className="glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
+        {/* Decorative sigil */}
+        <Image
+          src="/zodi-art/brand/isotipo.png"
+          alt=""
+          aria-hidden="true"
+          width={280}
+          height={280}
+          className="pointer-events-none absolute -right-14 -bottom-14 h-48 w-48 opacity-[0.07] mix-blend-screen"
+        />
+
+        {/* Avatar + name */}
+        <div className="relative flex items-center gap-3">
+          <div className="relative h-14 w-14 overflow-hidden rounded-2xl border-2 border-lime-300/35 shrink-0">
+            {!mounted ? (
+              <div className="h-full w-full animate-pulse bg-white/10" />
+            ) : avatar.startsWith("data:") ? (
+              <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
+            ) : (
+              <Image src={avatar} alt="Avatar" fill className="object-cover" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="zodi-kicker">Perfil activo</p>
+            <h2
+              className="mt-0.5 text-xl font-black truncate"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {mounted ? (profile?.displayName ?? "—") : <Shimmer w="w-28" />}
+            </h2>
+            {mounted && (
+              <p className="text-[10px] font-black uppercase tracking-widest text-lime-200/80 mt-0.5">
+                {levelTitle}
+              </p>
+            )}
+          </div>
+          {/* Gems + streak badges */}
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 rounded-full border border-lime-300/25 bg-lime-300/08 px-2.5 py-1">
+              <Gem className="h-3 w-3 text-lime-300" />
+              <span className="text-xs font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>
+                {mounted ? gems : 0}
+              </span>
+            </div>
+            {streak > 0 && (
+              <div className="flex items-center gap-1 rounded-full border border-orange-400/25 bg-orange-400/08 px-2.5 py-1">
+                <Flame className="h-3 w-3 text-orange-400" />
+                <span className="text-xs font-bold text-orange-200" style={{ fontFamily: "var(--font-mono)" }}>
+                  {streak}d
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sign + Moon */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-xl border border-white/08 bg-black/35 p-3">
+            <p className="zodi-kicker mb-1">Signo</p>
+            <p className="text-base font-black">{mounted ? (profile?.zodiac ?? "—") : "—"}</p>
+          </div>
+          <div className="rounded-xl border border-white/08 bg-black/35 p-3">
+            <p className="zodi-kicker mb-1">Luna</p>
+            <p className="text-base font-black">{mounted ? (profile?.moonSign ?? "—") : "—"}</p>
+          </div>
+        </div>
+
+        {/* XP bar */}
+        <div>
+          <div className="mb-1.5 flex items-center justify-between text-xs text-white/55">
+            <span className="font-bold text-white/75">Nivel {level}</span>
+            <span style={{ fontFamily: "var(--font-mono)" }}>{xpCurrent}/{xpNeeded} XP</span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-black/60 border border-white/10 p-0.5">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-lime-300 via-fuchsia-400 to-cyan-300"
+              initial={{ width: 0 }}
+              animate={{ width: `${xpPercent}%` }}
+              transition={{ delay: 0.6, duration: 1.2, ease: "easeOut" }}
             />
           </div>
         </div>
 
-        {/* Daily signal cards */}
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          {dailySignals.map((line, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.07, duration: 0.35 }}
-              className="rounded-xl border border-white/10 bg-black/40 p-4 text-sm text-white/80 shadow-[0_0_15px_rgba(0,0,0,0.5)]"
-            >
-              {line}
-            </motion.div>
-          ))}
+        {/* Jupiter/Saturn line */}
+        <div className="flex items-center gap-2.5 rounded-xl border border-violet-400/18 bg-violet-500/08 px-3 py-2.5">
+          <RadioTower className="h-4 w-4 shrink-0 text-violet-300" />
+          <span className="text-xs font-medium text-white/75 leading-snug">
+            Júpiter en {ctx.jupiterSign} · Saturno en {ctx.saturnSign}
+          </span>
         </div>
 
-        {/* Quick actions */}
-        <div className="mt-6 flex flex-wrap gap-2">
-          <Link href="/dashboard/horoscopo" className="zodi-chip zodi-chip-active">
-            Lectura del dia
-          </Link>
-          <Link href="/dashboard/tarot" className="zodi-chip hover:border-violet-400/30">
-            Tirada rapida
-          </Link>
-          <Link href="/dashboard/oraculo" className="zodi-chip">
-            Consulta libre
-          </Link>
-        </div>
-      </div>
-
-      {/* Right panel — profile card */}
-      <div className="glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-        <Image
-          src="/zodi-art/brand/isotipo.png"
-          alt="ZODI sigil"
-          width={380}
-          height={380}
-          className="absolute -right-20 -bottom-20 h-64 w-64 opacity-10 mix-blend-screen"
-          priority
-        />
-        <div className="relative">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="relative h-16 w-16 overflow-hidden rounded-2xl border-2 border-lime-300/40 shrink-0">
-                {!mounted ? (
-                  <div className="h-full w-full bg-white/10 animate-pulse" />
-                ) : avatar.startsWith("data:") ? (
-                  <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
-                ) : (
-                  <Image src={avatar} alt="Avatar" fill className="object-cover" />
-                )}
-              </div>
-              <div>
-                <p className="zodi-kicker">Perfil activo</p>
-                <h2 className="mt-1 text-2xl font-black truncate max-w-[160px]" style={{ fontFamily: "var(--font-display)" }}>
-                  {mounted ? (profile?.displayName ?? "—") : <Shimmer w="w-32" />}
-                </h2>
-                {mounted && (
-                  <p className="text-[11px] uppercase tracking-widest text-lime-200 mt-1" style={{ fontFamily: "var(--font-mono)" }}>
-                    {levelTitle}
-                  </p>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-end gap-2">
-              <div className="flex items-center gap-1.5 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1">
-                <Gem className="h-3.5 w-3.5 text-lime-300" />
-                <span className="text-sm font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>
-                  {mounted ? gems : 0}
-                </span>
-              </div>
-              {streak > 0 && (
-                <div className="flex items-center gap-1.5 rounded-full border border-orange-400/30 bg-orange-400/10 px-3 py-1">
-                  <Flame className="h-3.5 w-3.5 text-orange-400" />
-                  <span className="text-sm font-bold text-orange-200" style={{ fontFamily: "var(--font-mono)" }}>
-                    {streak}d
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <Metric label="Signo"  value={mounted ? (profile?.zodiac    ?? "—") : "—"} />
-            <Metric label="Luna"   value={mounted ? (profile?.moonSign  ?? "—") : "—"} />
-          </div>
-          <div className="mt-6">
-            <div className="mb-2 flex justify-between text-xs text-white/60">
-              <span className="font-bold text-white/80">Nivel {level}</span>
-              <span style={{ fontFamily: "var(--font-mono)" }}>{xpCurrent} / {xpNeeded} XP</span>
-            </div>
-            <div className="h-3 overflow-hidden rounded-full bg-black/60 border border-white/10 p-0.5">
-              <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-lime-300 via-fuchsia-400 to-cyan-300"
-                initial={{ width: 0 }}
-                animate={{ width: `${xpPercent}%` }}
-                transition={{ duration: 1.2, ease: "easeOut" }}
-              />
-            </div>
-          </div>
-          <div className="mt-6 flex items-center gap-3 rounded-xl border border-violet-400/20 bg-violet-500/10 p-4 shadow-[inset_0_0_20px_rgba(155,77,255,0.05)]">
-            <RadioTower className="h-6 w-6 shrink-0 text-violet-300" />
-            <span className="text-sm font-medium text-white/85 leading-snug">
-              Júpiter en {ctx.jupiterSign} · Saturno en {ctx.saturnSign}
-            </span>
-          </div>
-          <Link href="/dashboard/perfil" className="mt-5 block text-center text-[11px] font-bold uppercase tracking-widest text-white/40 transition hover:text-lime-200/80">
-            Configurar perfil
-          </Link>
-        </div>
+        {/* Edit profile link */}
+        <Link
+          href="/dashboard/perfil"
+          className="mt-auto block text-center text-[11px] font-bold uppercase tracking-widest text-white/35 transition hover:text-lime-200/70"
+        >
+          Editar perfil
+        </Link>
       </div>
     </section>
   );
@@ -254,7 +429,7 @@ export function HeroConsole() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-white/08 bg-black/40 p-3.5 shadow-inner">
+    <div className="rounded-xl border border-white/08 bg-black/40 p-3.5">
       <p className="zodi-kicker mb-1">{label}</p>
       <p className="text-lg font-black text-white">{value}</p>
     </div>
