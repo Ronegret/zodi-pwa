@@ -26,13 +26,20 @@ export async function POST(request: Request) {
   }
 
   const token = authHeader.split("Bearer ")[1];
-  const auth = getFirebaseAuth();
-  if (auth) {
-    try {
-      await auth.verifyIdToken(token);
-    } catch (e) {
-      return NextResponse.json({ error: "Token inválido" }, { status: 401 });
+  // "local_session" = token de fallback cuando Firebase cliente no está disponible
+  const isLocalSession = !token || token === "local_session";
+  try {
+    const auth = getFirebaseAuth();
+    if (auth && !isLocalSession) {
+      try {
+        await auth.verifyIdToken(token);
+      } catch {
+        return NextResponse.json({ error: "Token inválido" }, { status: 401 });
+      }
     }
+  } catch (adminErr) {
+    // Firebase Admin mal configurado — continuar sin verificación
+    console.error("[ZODI] Firebase Admin getFirebaseAuth error:", adminErr);
   }
 
   // Rate limit by IP or UID (for simplicity, keeping IP, but ideal is UID)

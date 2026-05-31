@@ -29,7 +29,6 @@ import {
   Sparkles,
   Star,
   Swords,
-  Trophy,
   UserRound,
   Users,
   Waves,
@@ -81,7 +80,8 @@ const sidebarGroups: { label: string; items: NavItem[] }[] = [
       { label: "Runas",     icon: Swords,     href: "/dashboard/runas" },
       { label: "Cristales", icon: Gem,        href: "/dashboard/cristales" },
       { label: "Palma",     icon: Hand,       href: "/dashboard/mano" },
-      { label: "Roast",     icon: Flame,      href: "/dashboard/roast" }
+      { label: "Roast",     icon: Flame,      href: "/dashboard/roast" },
+      { label: "Rituales",  icon: Sparkles,   href: "/dashboard/ranking" }
     ]
   },
   {
@@ -98,8 +98,7 @@ const sidebarGroups: { label: string; items: NavItem[] }[] = [
     label: "Social",
     items: [
       { label: "Comunidad", icon: MessageCircle, href: "/dashboard/comunidad" },
-      { label: "Amigos",    icon: Users,         href: "/dashboard/amigos" },
-      { label: "Ranking",   icon: Trophy,        href: "/dashboard/ranking" }
+      { label: "Amigos",    icon: Users,         href: "/dashboard/amigos" }
     ]
   },
   {

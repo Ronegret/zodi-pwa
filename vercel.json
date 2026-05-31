@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/ai/reading/route.ts": {
+      "maxDuration": 30
+    }
+  }
+}

@@ -43,6 +43,7 @@ export async function saveOnboardingProfile(uid: string, data: OnboardingData, a
   await Promise.all([
     setDoc(doc(db, "users", uid), {
       displayName: data.displayName,
+      lastName: data.lastName ?? null,
       username: data.username,
       avatar: data.avatar,
       genderIdentity: data.genderIdentity ?? null,

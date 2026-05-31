@@ -7,13 +7,13 @@ import {
   Send, RefreshCw, Star, Zap, Heart, Brain,
   LogOut, Trash2, Save, Camera, Check, X, Shuffle,
   Copy, Share2, BookOpen, AlertTriangle, Sparkles, ChartNoAxesCombined,
-  Waves, NotebookPen, Gem
+  Waves, NotebookPen, Gem, Lock
 } from "lucide-react";
 import { getLocalSession, setLocalSession, signOutZodi } from "@/lib/session";
 import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
-import { addXp, updateStreak, XP_PER_ACTION } from "@/lib/gamification";
+import { addXp, updateStreak, XP_PER_ACTION, getGems } from "@/lib/gamification";
 import { InstallPwaCard } from "@/components/pwa/PwaBoot";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1630,21 +1630,125 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 11. PERFIL UI (full editor + sign out)
 // ─────────────────────────────────────────────────────────────────────────────
+// Avatares disponibles en /public/zodi-art/perfil/
+const AVATAR_PRESETS = [
+  "/zodi-art/perfil/perfil-1.png",
+  "/zodi-art/perfil/perfil-2.png",
+  "/zodi-art/perfil/perfil-3.png",
+  "/zodi-art/perfil/perfil-4.png",
+  "/zodi-art/perfil/perfil-5.png",
+  "/zodi-art/perfil/perfil-6.png",
+  "/zodi-art/perfil/perfil-7.png",
+  "/zodi-art/perfil/perfil8.png",
+  "/zodi-art/perfil/perfil-9.png",
+  "/zodi-art/perfil/perfil-10.png",
+  "/zodi-art/perfil/perfil-11.png",
+  "/zodi-art/perfil/perfil-12.png",
+  "/zodi-art/perfil/perfil-13.png",
+];
+
 function PerfilUI() {
   const router = useRouter();
   const session = getLocalSession();
-  const [displayName, setDisplayName] = useState(session.displayName ?? "");
-  const [email, setEmail] = useState(session.email ?? "");
+  const od = session.onboardingData;
+
+  // Editable: identidad
+  const [displayName, setDisplayName] = useState(od?.displayName ?? session.displayName ?? "");
+  const [lastName, setLastName] = useState(od?.lastName ?? "");
+  const [avatar, setAvatar] = useState(od?.avatar ?? "/zodi-art/perfil/perfil-1.png");
+  // Editable: nacimiento
+  const [birthDate, setBirthDate] = useState(od?.birthDate ?? "");
+  const [birthTime, setBirthTime] = useState(od?.birthTime ?? "");
+  const [birthCity, setBirthCity] = useState(od?.birthCity ?? "");
+  const [birthCountry, setBirthCountry] = useState(od?.birthCountry ?? "");
+  // Editable: tono
+  const [readingTone, setReadingTone] = useState<"suave" | "directo" | "brutal" | "sarcastico">(od?.readingTone ?? "directo");
+
+  // Solo lectura
+  const email = session.email ?? "";
+
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [gems, setGems] = useState(0);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const ap = session.astralProfile;
 
-  function saveProfile() {
-    setLocalSession({ displayName, email });
+  useEffect(() => {
+    try { setGems(getGems().total); } catch { /* ignore */ }
+  }, []);
+
+  function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { if (typeof reader.result === "string") setAvatar(reader.result); };
+    reader.readAsDataURL(file);
+  }
+
+  async function saveProfile() {
+    setSaving(true);
+    const name = displayName.trim() || "Viajero ZODI";
+    const newOd = {
+      displayName: name,
+      lastName: lastName.trim(),
+      username: od?.username ?? "",
+      avatar,
+      genderIdentity: od?.genderIdentity ?? "",
+      birthDate,
+      birthTime,
+      birthCity,
+      birthCountry,
+      currentCity: od?.currentCity ?? "",
+      currentCountry: od?.currentCountry ?? "",
+      readingTone,
+      favoriteTopics: od?.favoriteTopics ?? [],
+      notificationPreferences: od?.notificationPreferences ?? [],
+    };
+    setLocalSession({ displayName: name, onboardingData: newOd });
+
+    try {
+      const [
+        { getFirebaseAuth, getFirebaseDb },
+        { doc, setDoc, serverTimestamp },
+      ] = await Promise.all([
+        import("@/lib/firebase/client"),
+        import("firebase/firestore"),
+      ]);
+      const auth = getFirebaseAuth();
+      const db = getFirebaseDb();
+      const uid = auth?.currentUser?.uid ?? session.uid;
+      if (db && uid) {
+        await Promise.all([
+          setDoc(doc(db, "users", uid), {
+            displayName: name,
+            lastName: lastName.trim(),
+            avatar,
+            birthDate,
+            birthTime,
+            birthCity,
+            birthCountry,
+            readingTone,
+            updatedAt: serverTimestamp(),
+          }, { merge: true }),
+          setDoc(doc(db, "astralProfiles", uid), {
+            birthDate,
+            birthTime,
+            birthCity,
+            birthCountry,
+            updatedAt: serverTimestamp(),
+          }, { merge: true }),
+        ]);
+      }
+    } catch (e) {
+      console.error("[ZODI] Profile update error:", e);
+    }
+
+    setSaving(false);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => setSaved(false), 2500);
   }
 
   async function signOut() {
@@ -1701,51 +1805,192 @@ function PerfilUI() {
       return;
     }
 
-    // 3. Limpiar todo local y redirigir
     localStorage.clear();
     router.push("/");
   }
 
+  const sunSign = birthDate ? calculateSunSign(birthDate) : ap?.sunSign;
+
+  const SaveBtn = ({ label = "Guardar cambios" }: { label?: string }) => (
+    <button
+      onClick={saveProfile}
+      disabled={saving}
+      className={`flex items-center gap-2 rounded-md px-6 py-3 font-black text-sm transition disabled:opacity-60 ${
+        saved ? "bg-green-400 text-black" : "bg-lime-300 text-black hover:bg-lime-200"
+      }`}
+    >
+      {saved
+        ? <><Check className="h-4 w-4" /> Guardado</>
+        : saving
+        ? <><RefreshCw className="h-4 w-4 animate-spin" /> Guardando...</>
+        : <><Save className="h-4 w-4" /> {label}</>}
+    </button>
+  );
+
   return (
     <div className="grid gap-5">
-      {/* Profile info */}
+      {/* ── Información personal ── */}
       <div className="glass-panel rounded-md p-5 relative">
-        <div className="absolute top-5 right-5 flex flex-col items-end gap-2">
-          <div className="flex items-center gap-1.5 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1 shadow-[0_0_15px_rgba(184,255,23,0.2)]">
-            <Gem className="h-4 w-4 text-lime-300" />
-            <span className="text-sm font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>
-              {getLocalSession().isAuthenticated ? 200 : 0}
-            </span>
+        <div className="absolute top-5 right-5 flex items-center gap-1.5 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1 shadow-[0_0_15px_rgba(184,255,23,0.2)]">
+          <Gem className="h-4 w-4 text-lime-300" />
+          <span className="text-sm font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>{gems}</span>
+        </div>
+        <h2 className="text-xl font-black mb-1">Información personal</h2>
+        <p className="text-xs text-white/40 mb-5">El correo no puede modificarse por seguridad. Todo lo demás, sí.</p>
+        <div className="grid gap-4">
+          {/* Avatar */}
+          <div>
+            <span className="text-xs uppercase tracking-widest text-white/40">Imagen de perfil</span>
+            <div className="mt-2 flex items-center gap-4">
+              <div className="relative h-16 w-16 shrink-0 rounded-xl overflow-hidden border-2 border-lime-300/40">
+                <Image
+                  src={avatar.startsWith("data:") ? avatar : avatar}
+                  alt="Avatar"
+                  fill
+                  className="object-cover"
+                  unoptimized={avatar.startsWith("data:")}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="text-xs font-bold text-lime-200/80 hover:text-lime-200 transition underline"
+                >
+                  Subir foto propia
+                </button>
+                <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
+              </div>
+            </div>
+            <div className="mt-3 grid grid-cols-7 gap-1.5 sm:grid-cols-13">
+              {AVATAR_PRESETS.map((src, i) => (
+                <button
+                  key={src}
+                  type="button"
+                  onClick={() => setAvatar(src)}
+                  title={`Avatar ${i + 1}`}
+                  className={`relative aspect-square w-full rounded-lg overflow-hidden transition ${
+                    avatar === src ? "ring-2 ring-lime-300 scale-105 shadow-[0_0_10px_rgba(184,255,23,0.4)]" : "opacity-60 hover:opacity-100 hover:scale-105"
+                  }`}
+                >
+                  <Image src={src} alt={`Avatar ${i + 1}`} fill className="object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Email — solo lectura */}
+          <div>
+            <span className="text-xs uppercase tracking-widest text-white/40">Correo electrónico</span>
+            <div className="mt-1 flex items-center gap-2 rounded-md border border-white/10 bg-black/25 px-4 py-3">
+              <span className="flex-1 text-sm text-white/50">{email || "Sin correo registrado"}</span>
+              <Lock className="h-3.5 w-3.5 text-white/25 shrink-0" />
+            </div>
+          </div>
+          {/* Nombre + Apellido */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="text-xs uppercase tracking-widest text-white/40">Nombre</span>
+              <input
+                value={displayName}
+                onChange={e => setDisplayName(e.target.value)}
+                placeholder="Tu nombre o apodo"
+                className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs uppercase tracking-widest text-white/40">Apellido(s)</span>
+              <input
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                placeholder="Tu apellido (linaje, origen)"
+                className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55"
+              />
+              <p className="mt-1 text-[10px] text-white/30">Para análisis de nombre y genealogía astral</p>
+            </label>
           </div>
         </div>
-        <h2 className="text-xl font-black mb-5">Tu perfil (o lo que crees que eres)</h2>
-        <div className="grid gap-4">
+        <div className="mt-5"><SaveBtn /></div>
+      </div>
+
+      {/* ── Datos de nacimiento ── */}
+      <div className="glass-panel rounded-md p-5">
+        <h2 className="text-xl font-black mb-1">Datos de nacimiento</h2>
+        <p className="text-xs text-white/40 mb-5">ZODI usa estos datos para calcular tus lecturas astrológicas personalizadas.</p>
+        <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="text-xs uppercase tracking-widest text-white/40">Cómo quieres que te llame</span>
+            <span className="text-xs uppercase tracking-widest text-white/40">Fecha de nacimiento</span>
             <input
-              value={displayName}
-              onChange={e => setDisplayName(e.target.value)}
+              type="date"
+              value={birthDate}
+              onChange={e => setBirthDate(e.target.value)}
+              className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55 [color-scheme:dark]"
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs uppercase tracking-widest text-white/40">Hora de nacimiento</span>
+            <input
+              type="time"
+              value={birthTime}
+              onChange={e => setBirthTime(e.target.value)}
+              className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55 [color-scheme:dark]"
+            />
+            <p className="mt-1 text-[10px] text-white/30">Opcional, mejora el cálculo del ascendente</p>
+          </label>
+          <label className="block">
+            <span className="text-xs uppercase tracking-widest text-white/40">Ciudad de nacimiento</span>
+            <input
+              value={birthCity}
+              onChange={e => setBirthCity(e.target.value)}
+              placeholder="Ej: Ciudad de México"
               className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55"
             />
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-widest text-white/40">Correo electrónico</span>
+            <span className="text-xs uppercase tracking-widest text-white/40">País de nacimiento</span>
             <input
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              type="email"
+              value={birthCountry}
+              onChange={e => setBirthCountry(e.target.value)}
+              placeholder="Ej: México"
               className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55"
             />
           </label>
         </div>
-        <button
-          onClick={saveProfile}
-          className={`mt-4 flex items-center gap-2 rounded-md px-6 py-3 font-black text-sm transition ${
-            saved ? "bg-green-400 text-black" : "bg-lime-300 text-black hover:bg-lime-200"
-          }`}
-        >
-          {saved ? <><Check className="h-4 w-4" /> Guardado</> : <><Save className="h-4 w-4" /> Guardar cambios</>}
-        </button>
+        {sunSign && (
+          <div className="mt-4 flex items-center gap-2 rounded-md border border-lime-300/20 bg-lime-300/5 px-3 py-2 text-sm">
+            <span className="text-white/60">Signo solar calculado:</span>
+            <span className="font-black text-lime-300">{sunSign}</span>
+          </div>
+        )}
+        <div className="mt-5 flex flex-wrap gap-3">
+          <SaveBtn label="Guardar datos" />
+          <a href="/onboarding" className="flex items-center gap-2 rounded-md border border-white/15 px-5 py-3 text-sm font-bold text-white/60 hover:text-white/90 transition">
+            <RefreshCw className="h-4 w-4" /> Recalcular mi destino
+          </a>
+        </div>
+      </div>
+
+      {/* ── Tono de lecturas ── */}
+      <div className="glass-panel rounded-md p-5">
+        <h2 className="text-xl font-black mb-1">Tono de lecturas</h2>
+        <p className="text-xs text-white/40 mb-4">Cómo quieres que ZODI te hable.</p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {(["suave", "directo", "brutal", "sarcastico"] as const).map(t => {
+            const labels: Record<string, string> = {
+              suave: "🌙 Suave", directo: "⚡ Directo", brutal: "🔥 Brutal", sarcastico: "💀 Sarcástico"
+            };
+            return (
+              <button key={t} onClick={() => setReadingTone(t)}
+                className={`rounded-md px-4 py-2 text-sm font-bold transition ${
+                  readingTone === t ? "bg-lime-300 text-black" : "border border-white/10 text-white/60 hover:border-lime-300/40"
+                }`}
+              >
+                {labels[t]}
+              </button>
+            );
+          })}
+        </div>
+        <SaveBtn label="Guardar preferencias" />
       </div>
 
       {/* PWA Install Card (will return null if not installable or dismissed) */}

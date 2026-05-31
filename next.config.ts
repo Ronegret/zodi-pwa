@@ -16,7 +16,8 @@ const CSP = [
   "img-src 'self' data: https://firebasestorage.googleapis.com https://lh3.googleusercontent.com",
   "connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com " +
     "https://securetoken.googleapis.com wss://*.firebaseio.com https://zodi-2.firebaseapp.com " +
-    "https://www.googleapis.com https://oauth2.googleapis.com",
+    "https://www.googleapis.com https://oauth2.googleapis.com " +
+    "https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com",
   "frame-src 'self' https://zodi.aibueno.es https://zodi-2.firebaseapp.com " +
     "https://apis.google.com https://accounts.google.com",
 ].join("; ");

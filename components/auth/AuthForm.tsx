@@ -25,6 +25,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [showPwd, setShowPwd]   = useState(false);
   const [terms, setTerms]       = useState(true);
   const [message, setMessage]   = useState("");
+  const [msgType, setMsgType]   = useState<"info" | "success" | "error">("info");
   const [loading, setLoading]   = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailStatus, setEmailStatus]     = useState<"idle"|"checking"|"available"|"taken">("idle");
@@ -397,18 +398,18 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       authHandledRef.current = false; // Permitir reintento en error
       const code = (err as { code?: string }).code ?? "";
       if (code === "auth/email-already-in-use") {
-        setMessage("Ese correo ya tiene portal. Te llevamos al login...");
+        setMessage("Ese correo ya tiene portal. Te llevamos al login..."); setMsgType("info");
         setTimeout(() => router.push("/auth/login"), 2000);
       } else if (code === "auth/too-many-requests") {
-        setMessage("Demasiados intentos. Vuelve en unos minutos. ☕");
+        setMessage("Demasiados intentos. Vuelve en unos minutos. ☕"); setMsgType("error");
       } else if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
-        setMessage("Contraseña incorrecta. Prueba recuperarla abajo.");
+        setMessage("Contraseña incorrecta. Prueba recuperarla abajo."); setMsgType("error");
       } else if (code === "auth/user-not-found") {
-        setMessage("Ese correo no existe en ZODI. ¿Registrarte quizás?");
+        setMessage("Ese correo no existe en ZODI. ¿Registrarte quizás?"); setMsgType("error");
       } else if (code === "auth/invalid-email") {
-        setMessage("Formato de correo inválido.");
+        setMessage("Formato de correo inválido."); setMsgType("error");
       } else {
-        setMessage("Algo falló. Revisa tus datos e inténtalo de nuevo.");
+        setMessage("Algo falló. Revisa tus datos e inténtalo de nuevo."); setMsgType("error");
       }
     } finally {
       setLoading(false);
@@ -416,19 +417,28 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
   async function resetPassword() {
-    if (!email.trim()) { setMessage("Escribe tu correo primero."); return; }
+    if (!email.trim()) {
+      setMessage("Escribe tu correo arriba y luego pulsa este enlace.");
+      setMsgType("info");
+      return;
+    }
     try {
       const auth = getFirebaseAuth();
       if (auth) {
         await sendPasswordResetEmail(auth, email);
-        setMessage("Correo de recuperación enviado. Revisa también el spam. ✉️");
+        setMessage("Correo de recuperación enviado a " + email + ". Revisa también el spam. ✉️");
+        setMsgType("success");
       } else {
         const users = JSON.parse(localStorage.getItem("zodi.local_users") || "[]");
         setMessage(users.find((u: any) => u.email === email)
           ? "Modo local: cuenta existe, recuerda tu contraseña."
           : "Modo local: esa cuenta no existe.");
+        setMsgType("info");
       }
-    } catch { setMessage("No se pudo enviar el correo."); }
+    } catch {
+      setMessage("No se pudo enviar el correo. Verifica que el correo sea correcto.");
+      setMsgType("error");
+    }
   }
 
   const hasGoogleMethod = existingMethods.includes("google.com");
@@ -605,11 +615,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       {message && (
         <div className={`mt-4 flex items-start gap-2.5 rounded-md border p-3 text-sm ${
-          message.startsWith("⚠️")
+          msgType === "success"
+            ? "border-green-400/30 bg-green-400/10 text-green-100"
+            : (msgType === "error" || message.startsWith("⚠️"))
             ? "border-orange-400/30 bg-orange-400/10 text-orange-100"
             : "border-lime-300/20 bg-lime-300/10 text-lime-100"
         }`}>
-          {message.startsWith("⚠️") && <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-orange-400" />}
+          {(msgType === "error" || message.startsWith("⚠️")) && <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-orange-400" />}
           <span>{message}</span>
         </div>
       )}

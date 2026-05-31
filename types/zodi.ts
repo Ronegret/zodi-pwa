@@ -73,6 +73,7 @@ export type UserProfile = {
 
 export type OnboardingData = {
   displayName: string;
+  lastName?: string;
   username: string;
   avatar: string;
   genderIdentity?: string;
