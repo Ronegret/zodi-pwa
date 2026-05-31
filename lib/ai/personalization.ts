@@ -216,6 +216,180 @@ export function getNameMeaning(displayName?: string): string | null {
   return meaning;
 }
 
+// ── Pop culture por generación y país ────────────────────────────────────────
+// Referenciamos lo que marcó sus 10-18 años (época de formación)
+
+interface PopCultureEra {
+  music: string;      // Artistas y canciones de su época
+  tvFilms: string;    // Series y pelis que todo el mundo vio
+  school: string;     // Experiencias del cole/instituto/universidad
+  tech: string;       // Tecnología de su era
+  phrases: string;    // Frases/expresiones de moda
+}
+
+const POP_CULTURE: Record<string, Record<string, PopCultureEra>> = {
+  "España": {
+    "boomer": {
+      music: "Camilo Sesto, Julio Iglesias, Rocío Jurado, Los Pekenikes, el flamenco de verdad",
+      tvFilms: "El Cordobés, Curro Jiménez, la TVE en blanco y negro, el NO-DO",
+      school: "el pupitre de madera, la cartilla escolar, los curas en clase, las enciclopedias Larousse",
+      tech: "el primer televisor en casa, la radio de transistores",
+      phrases: "'¡Hombre ya!', 'ni hablar del peluquín', 'más raro que un perro verde'"
+    },
+    "x": {
+      music: "Mecano, Heroes del Silencio, La Guardia, Hombres G, Los Rodríguez, Duncan Dhu, Siniestro Total",
+      tvFilms: "La bola de cristal, El equipo A, MacGyver, Falcon Crest, Los Locos Addams, E.T.",
+      school: "los recreos con cromos de la Liga, el chupa-chups en la lengua, el 'Doraemon' antes del cole",
+      tech: "los cassettes pirateados, el Spectrum, el Amiga 500, los primeros CD",
+      phrases: "'¿Cuánto cuesta?', 'qué fuerte tío', 'estoy flipando', 'me mola mogollón'"
+    },
+    "millennial": {
+      music: "Operación Triunfo 2001, La Oreja de Van Gogh, Estopa, Amaral, Alejandro Sanz, David Bisbal, El Canto del Loco, Bisbal vs Chenoa",
+      tvFilms: "Los Serrano, Aquí no hay quien viva, Compañeros, Dragon Ball Z, Los Simpson, El Internado, Física o Química, Los Hombres de Paco",
+      school: "las libretas con TipEx, el 'tú me gustas' escrito en una hoja doblada, el bocadillo de nocilla, las gomas con olor a frutas",
+      tech: "Tuenti (no Facebook, TUENTI), MSN Messenger, el Nokia 3310 indestructible, el Fotolog, los primeros iPod",
+      phrases: "'¿Qué fuerte, tío?', 'en plan', 'o sea', 'estoy como loco', 'flipas en colores', 'cómo mola'"
+    },
+    "z": {
+      music: "Bad Bunny, Rosalía, C. Tangana, Bizarrap, Quevedo, Rauw Alejandro, J Balvin, Daddy Yankee",
+      tvFilms: "La Casa de Papel, Élite, Stranger Things, Euphoria, Squid Game, Encanto, todo lo de Netflix",
+      school: "los Airpods en clase a escondidas, el grupo de WhatsApp, TikTok en el baño, el 'profe, que me estás llamando mal'",
+      tech: "Instagram Stories, BeReal (que ya nadie usa), Spotify, Discord, Twitch",
+      phrases: "'Es un tok', 'no te creo', 'qué random', 'es que me flipa', 'uff qué cansino', 'literalmente'"
+    }
+  },
+  "México": {
+    "boomer": {
+      music: "Pedro Infante (en la tele de los abuelos), Agustín Lara, Los Panchos, Javier Solís",
+      tvFilms: "El Chavo del 8 en sus primeras temporadas, Chabelo, las telenovelas de Verónica Castro",
+      school: "el recreo con la señora de los chicharrones, el cuaderno profesional, las sandalias de cuero",
+      tech: "la primera tele en blanco y negro, la rockola en la esquina",
+      phrases: "'¡Híjole!', '¿Qué pasó?', 'no hay rollo', 'ahorita (= nunca)'"
+    },
+    "x": {
+      music: "Juan Gabriel, Los Bukis, Timbiriche, Soda Stereo, Los Yonics, Ana Gabriel",
+      tvFilms: "El Chapulín Colorado, Chabelo todos los domingos, las telenovelas de Televisa, Robotech",
+      school: "el lonche de la mamá, el cuadernito de apuntes con portada de la Barbie, el 'maestro me presta su pluma'",
+      tech: "el Atari, los cassettes pirata de tepito, las primeras computadoras verdes",
+      phrases: "'Órale pues', '¡Aguas!', '¿Qué onda?', 'está de pelos', '¡No manches!'"
+    },
+    "millennial": {
+      music: "RBD (era religión), Jaguares, Café Tacvba, Julieta Venegas, Jenni Rivera, La Arrolladora, Daddy Yankee en sus inicios",
+      tvFilms: "Dragon Ball Z (sagrado), Caballeros del Zodiaco, El Chavo animado, Rebelde, Acorralada, La familia P. Luche",
+      school: "el puesto de antojitos afuera de la escuela, los folderes con divisiones, el 'me puedes echar un borrador', los balazos con Pelikan",
+      tech: "Hi5 (antes que Facebook), MSN con el nick raro, los Motorolas de tapita, bajar mp3 del LimeWire",
+      phrases: "'Wey', 'chido/chida', '¡Qué pedo!', 'está chido', 'no manches wey', 'a huevo'"
+    },
+    "z": {
+      music: "Bad Bunny, Natanael Cano, Peso Pluma, Los Tucanes (irónicamente), Rauw Alejandro, Karol G",
+      tvFilms: "La rosa de Guadalupe (modo meme), Narcos, Club de Cuervos, todo lo de Netflix México",
+      school: "el TikTok en el baño, los Airpods, el 'profe ya se acabó la clase', los memes del grupo de WhatsApp",
+      tech: "TikTok, VSCO, Spotify, los memes de formato mexicano, el SHEIN como religión",
+      phrases: "'Es que sí', 'le puse', '¿ya viste?', 'no mames', 'ta bien culero', '¡Asco!'"
+    }
+  },
+  "Argentina": {
+    "boomer": {
+      music: "Palito Ortega, Sandro, Mercedes Sosa, Astor Piazzolla, folklore en todos los asados",
+      tvFilms: "la tele en blanco y negro del 78, el Mundial de Argentina — el más memorable, Pol-Ka de los primeros",
+      school: "los cuadernos Rivadavia, la regla de madera, el delantal blanco",
+      tech: "el primer televisor color, la radio AM toda la noche",
+      phrases: "'Dale', 'qué sé yo', 'me parece bárbaro', 'ni ahí'"
+    },
+    "x": {
+      music: "Soda Stereo (dios), Los Fabulosos Cadillacs, Virus, Los Twist, Sumo, Charly García",
+      tvFilms: "Crónica TV a toda hora, Videomatch, El show de Xuxa, Condorito, la época oscura del rock",
+      school: "el recreo con medias 3/4 y zapatillas Topper, el cuaderno Gloria, el boleto estudiantil",
+      tech: "el Amiga, los cassettes, el primer Motorola ladrillo, el diskette de 3½",
+      phrases: "'Re', 'copado/a', 'qué garcha', 'grosso', 'posta', '¿viste?'"
+    },
+    "millennial": {
+      music: "Soda Stereo (religión), Los Piojos, Bersuit, La Vela Puerca, El Cuarteto de Nos, El Mató a un Policía Motorizado, Kevin Johansen",
+      tvFilms: "Chiquititas, Cebollitas, Son Amores, Dragon Ball Z, Los Simpson (doblaje rioplatense), Rebelde Way",
+      school: "el Fotolog con frase de Los Piojos, el recreo con Mogul, los sándwiches de miga, el cuaderno Gloria cuadriculado",
+      tech: "el ICQ, el Fotolog como red social antes de las redes, MSN con 'pañuelo en mano', bajar del Ares o Kazaa",
+      phrases: "'Re', 'posta', 'qué copado', 'me flashé', 'estoy podrido/a', 'che boludo/a (con cariño)'"
+    },
+    "z": {
+      music: "Bizarrap, Duki, Wos, Bad Bunny, Nicki Nicole, Trueno, María Becerra",
+      tvFilms: "Okupas (redescubierto), Stranger Things, Euphoria, el anime en general, El marginal",
+      school: "el Tinder desde los 18, el TikTok en el colectivo, las stories de Instagram como diario",
+      tech: "Discord, Spotify, Twitch, el streaming como forma de vida, el Wordle argentinizado",
+      phrases: "'Nos vemos', 'está buenísimaaa', 'qué re copado', 're loco', 'full', 'literal'"
+    }
+  },
+  "Colombia": {
+    "millennial": {
+      music: "Carlos Vives, Shakira (antes del Barça), Juanes, Fonseca, La Barra, Joe Arroyo en las fiestas familiares",
+      tvFilms: "Betty la fea (orgullo nacional), El Cartel de los Sapos, Padres e Hijos, Yo soy Betty",
+      school: "el recreo con chitos y papas margarita, el saludo con beso, el 'llave, préstame la copia'",
+      tech: "el MSN con nick de Shakira, el primer Nokia de prepago, el internet por minutos",
+      phrases: "'Parce', 'uy qué chimba', 'bacano/a', 'marica (con cariño)', '¿Qué más?'"
+    },
+    "z": {
+      music: "Maluma, J Balvin, Karol G (BICHOTA), Ryan Castro, Rauw Alejandro, Bad Bunny",
+      tvFilms: "Narcos (con rabia), La reina del flow, Todo es amor, el reggaeton como BSO de la vida",
+      school: "el parche en el patio, los Airpods, el TikTok como pasatiempo oficial",
+      tech: "Instagram, TikTok, Spotify, los memes de 'ay parce'",
+      phrases: "'Chimba', 'parce', 'bacano', 'qué nota', 'uy llave'"
+    }
+  },
+  "Chile": {
+    "millennial": {
+      music: "Los Bunkers, Joe Vasconcellos, Javiera Mena, Francisca Valenzuela, Chancho en Piedra, La Ley",
+      tvFilms: "31 minutos (ZODI también conoce a Tulio), Morandé con Compañía, Mea Culpa, Aquí hay fantasmas",
+      school: "el recreo con sopaipillas, la once sagrada, el cuaderno de 7 líneas, el 'ya po profe'",
+      tech: "el Portal Mágico (antes de YouTube), el Hi5 chileno, el primer Motorola con antena",
+      phrases: "'Po', 'weon/weona', 'la raja', 'fome', 'no seas fome', 'bacán', 'al tiro'"
+    },
+    "z": {
+      music: "Bad Bunny, Mon Laferte, Paloma Mami, Cami, Benjamín Leftheriotis, Duki",
+      tvFilms: "Élite, La Casa de Papel, todo Netflix, Los 80 (nostalgia de papás)",
+      school: "el TikTok en la sala, los Airpods, las pruebas PAES como trauma generacional",
+      tech: "Instagram, TikTok, Spotify, los memes de Wena Profe",
+      phrases: "'Wena', 'ta' bien', 'no te creo', 'qué random', 'literal'"
+    }
+  },
+  "Perú": {
+    "millennial": {
+      music: "Bareto, Libido, Mar de Copas, Eva Ayllón (en casa), Los Mojarras, Pedro Suárez Vértiz",
+      tvFilms: "El especial del humor (viernes sagrado), Al fondo hay sitio, Los Cómicos Ambulantes",
+      school: "el recreo con chifles y anticuchos, el cuaderno Justus, el 'causa préstame tu borrador'",
+      tech: "el Ares para descargar música, el Hi5 peruano, los primeros Nokia con antena",
+      phrases: "'Causa', 'pata (amigo)', 'bacán', 'al toque', 'qué hay de nuevo, causa'"
+    }
+  }
+};
+
+function getGenerationKey(birthDate?: string): string {
+  if (!birthDate) return "millennial";
+  const year = parseInt(birthDate.split("-")[0]);
+  if (year <= 1964) return "boomer";
+  if (year <= 1980) return "x";
+  if (year <= 1996) return "millennial";
+  return "z";
+}
+
+export function getPopCultureContext(birthDate?: string, country?: string): string | null {
+  if (!birthDate || !country) return null;
+
+  const genKey = getGenerationKey(birthDate);
+  const countryData = POP_CULTURE[country];
+  if (!countryData) return null;
+
+  const era = countryData[genKey];
+  if (!era) return null;
+
+  return `REFERENCIAS POP CULTURE DE SU ÉPOCA (úsalas cuando encaje natural, no forzado):
+🎵 Música de su era: ${era.music}
+📺 Series y pelis: ${era.tvFilms}
+🏫 Recuerdos del cole/uni: ${era.school}
+📱 Tecnología de su época: ${era.tech}
+💬 Frases que usaban: ${era.phrases}
+
+Úsalas como un amigo que vivió lo mismo — "¿te acuerdas cuando...?", "esto es como cuando...", "eso lo hacías mientras escuchabas a...". Que se sienta nostalgia real, no Wikipedia.`;
+}
+
 // ── Bloque completo de personalización para el prompt ────────────────────────
 export interface PersonalizationData {
   displayName?: string;
@@ -240,6 +414,12 @@ export function buildPersonalizationBlock(data: PersonalizationData): string {
   const gen = getGeneration(data.birthDate);
   if (gen) {
     parts.push(`GENERACIÓN: ${gen.label} — ${gen.context}`);
+  }
+
+  // Pop culture de su época y país
+  const popCtx = getPopCultureContext(data.birthDate, data.birthCountry);
+  if (popCtx) {
+    parts.push(popCtx);
   }
 
   // Origen
