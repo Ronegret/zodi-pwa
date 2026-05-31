@@ -161,15 +161,18 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             return;
           }
 
+          // Último recurso: Firebase user autenticado pero sin datos en ningún lado.
+          // Dejarlo entrar al dashboard (mejor que mandarlo a onboarding en loop).
+          // Si su perfil astral está vacío, el dashboard lo maneja gracefully.
           setLocalSession({
             isAuthenticated: true,
-            onboardingCompleted: false,
+            onboardingCompleted: true,
             displayName: user.displayName || "Viajero ZODI",
             email: user.email || "",
             uid: user.uid,
             loginAt: Date.now(),
           });
-          router.replace("/onboarding");
+          if (!cancelled) setReady(true);
         });
       } catch {
         router.replace("/auth/login");

@@ -154,12 +154,21 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       firestoreDone = true;
     }
 
-    // Paso 4: Usuario genuinamente nuevo
+    // Paso 4: No encontramos datos en ningún lado
+    // - forceNewUser = true  → usuario genuinamente nuevo → onboarding
+    // - forceNewUser = false → usuario existente que ya completó → dashboard
+    //   (prefiero que llegue al dashboard sin datos a que quede en loop de onboarding)
+    const existingUserFallback = !forceNewUser;
     if (!firestoreDone) {
       setLocalSession({
-        isAuthenticated: true, onboardingCompleted: false,
-        displayName: user.displayName || "Viajero ZODI",
-        email: user.email || "", uid: user.uid, loginAt: Date.now(),
+        isAuthenticated: true,
+        onboardingCompleted: existingUserFallback,
+        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
+        email: user.email || preserved.email || "",
+        uid: user.uid,
+        loginAt: Date.now(),
+        astralProfile: preserved.astralProfile,
+        onboardingData: preserved.onboardingData,
       });
     }
 
@@ -168,7 +177,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       if (g.getGems().total === 0) g.addGems(15);
     } catch { /* ignorar */ }
 
-    const done = firestoreDone || localDone;
+    const done = firestoreDone || localDone || existingUserFallback;
     router.push(done ? "/dashboard" : "/onboarding");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
@@ -213,7 +222,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user && !authHandledRef.current) {
         authHandledRef.current = true;
-        await applyFirebaseUser(user);
+        try {
+          await applyFirebaseUser(user);
+        } catch (e) {
+          // Si falla, resetear para que el usuario pueda intentar manualmente
+          authHandledRef.current = false;
+          console.error("[ZODI] onAuthStateChanged applyFirebaseUser error:", e);
+        }
       }
     });
 
