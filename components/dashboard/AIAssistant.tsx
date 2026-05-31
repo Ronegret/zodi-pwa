@@ -87,30 +87,55 @@ export function AIAssistant() {
     const fullQuery = query + (lengthHints[length] ?? "");
     try {
       const token = await getFirebaseToken();
-      const response = await fetch("/api/ai/reading", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          provider: "auto",
-          kind: "assistant",
-          input: fullQuery,
-          profile: {
-            zodiac: profile.zodiac,
-            level: profile.level,
-            readingTone: profile.readingTone ?? "sarcastico",
-            displayName: profile.displayName,
+      let response: Response;
+      try {
+        response = await fetch("/api/ai/reading", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
-        }),
-      });
-      const data = await response.json();
-      const text = data.text || `${data.reading ?? ""} ${data.roast ?? ""}`.trim() || "ZODI no encontro respuesta esta vez. Reintenta.";
+          body: JSON.stringify({
+            provider: "auto",
+            kind: "assistant",
+            input: fullQuery,
+            profile: {
+              zodiac: profile.zodiac,
+              level: profile.level,
+              readingTone: profile.readingTone ?? "sarcastico",
+              displayName: profile.displayName,
+            },
+          }),
+          signal: AbortSignal.timeout(20000),
+        });
+      } catch (fetchErr: any) {
+        // Error de red o timeout
+        const isTimeout = fetchErr?.name === "TimeoutError";
+        setReply(isTimeout
+          ? "El oráculo tardó demasiado. Puede que los astros estén ocupados. Reintenta. ⏳"
+          : "No hay conexión con el servidor. Asegúrate de que la app está corriendo. 🔌");
+        return;
+      }
+
+      let data: any;
+      try {
+        data = await response.json();
+      } catch {
+        setReply("El servidor respondió algo raro. Recarga la página e inténtalo de nuevo. 🔄");
+        return;
+      }
+
+      if (!response.ok) {
+        const errMsg = data?.error || data?.text || "Error del servidor";
+        setReply(`ZODI tuvo un problema: ${errMsg}. Reintenta en un momento.`);
+        return;
+      }
+
+      const text = data.text || `${data.reading ?? ""} ${data.roast ?? ""}`.trim() || "ZODI no encontró respuesta esta vez. Reintenta.";
       setReply(text);
       if (text) { addXp("Oráculo personal"); updateStreak(); }
     } catch {
-      setReply("ZODI perdio senal por un momento. Vuelve a preguntar.");
+      setReply("Algo falló en la consulta. Recarga la página si persiste. 🔮");
     } finally {
       setLoading(false);
     }

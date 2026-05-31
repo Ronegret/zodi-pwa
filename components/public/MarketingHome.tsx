@@ -258,7 +258,8 @@ export function MarketingHome() {
                 alt="Personaje ZODI completo"
                 width={700}
                 height={1200}
-                className="h-[420px] w-full object-contain bg-black/40 transition duration-500 group-hover:scale-105 sm:h-[540px]"
+                className="h-[480px] w-full object-contain transition duration-500 group-hover:scale-105 sm:h-[620px]"
+                style={{ background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.3))" }}
               />
               <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent p-4">
                 <div className="sm:hidden flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white/70 backdrop-blur-sm">
@@ -277,7 +278,8 @@ export function MarketingHome() {
                 alt="ZODI - Horóscopos. Humor Ácido. Destino con Sarcasmo."
                 width={700}
                 height={700}
-                className="h-[420px] w-full object-contain bg-black/60 transition duration-500 group-hover:scale-105 sm:h-[540px]"
+                className="h-[480px] w-full object-contain transition duration-500 group-hover:scale-105 sm:h-[620px]"
+                style={{ background: "radial-gradient(ellipse at center, rgba(184,255,23,0.06) 0%, transparent 70%)" }}
               />
             </button>
           </div>
@@ -300,9 +302,9 @@ export function MarketingHome() {
                     <Image
                       src={item.image}
                       alt={item.title}
-                      width={800}
-                      height={900}
-                      className={`h-full w-full transition duration-700 group-hover:scale-105 ${item.fit === "contain" ? "object-contain bg-black/40" : "object-cover"}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                      className="object-cover transition duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition duration-300 group-hover:bg-black/30">

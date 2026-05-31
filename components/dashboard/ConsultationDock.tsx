@@ -198,36 +198,57 @@ export function ConsultationDock() {
 
     try {
       const token = await getFirebaseToken();
-      const response = await fetch("/api/ai/reading", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          provider: "auto",
-          kind: active.kind,
-          input: userInput,
-          focusDomain: domainFocus,
-          profile: {
-            ...baseProfile,
-            readingTone: tone === "sarcástico" ? "sarcastico" : tone
-          }
-        })
-      });
+      let response: Response;
+      try {
+        response = await fetch("/api/ai/reading", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            provider: "auto",
+            kind: active.kind,
+            input: userInput,
+            focusDomain: domainFocus,
+            profile: {
+              ...baseProfile,
+              readingTone: tone === "sarcástico" ? "sarcastico" : tone
+            }
+          }),
+          signal: AbortSignal.timeout(20000),
+        });
+      } catch (fetchErr: any) {
+        const isTimeout = fetchErr?.name === "TimeoutError";
+        setResult(isTimeout
+          ? "El oráculo tardó demasiado. Los astros están lentos hoy. Reintenta. ⏳"
+          : "Sin conexión con el servidor. Asegúrate de que la app está corriendo. 🔌");
+        return;
+      }
 
-      const data = await response.json();
+      let data: any;
+      try {
+        data = await response.json();
+      } catch {
+        setResult("El servidor respondió algo extraño. Recarga e inténtalo de nuevo. 🔄");
+        return;
+      }
+
+      if (!response.ok) {
+        setResult(data?.error || data?.text || "Error del servidor. Reintenta en un momento.");
+        return;
+      }
+
       const text = data.text || [data.reading, data.warning, data.ritual, data.roast].filter(Boolean).join("\n\n");
-      setResult(text);
+      setResult(text || "ZODI no encontró respuesta. Reintenta con otra pregunta.");
 
-      // Recompensar con XP y gemas
       try {
         addXp(active.title);
         addGems(GEMS_PER_EVENT.reading);
         setShowGems(true);
       } catch { /* ignore */ }
     } catch {
-      setResult("La consulta no pudo salir. Revisa conexión y vuelve a intentarlo.");
+      setResult("Algo falló. Recarga la página si persiste. 🔮");
     } finally {
       setLoading(false);
     }
@@ -273,15 +294,15 @@ export function ConsultationDock() {
         {/* Panel derecho — configuración y resultado */}
         <article className="glass-panel neon-border grid overflow-hidden rounded-2xl md:grid-cols-[0.85fr_1.15fr]">
           {/* Imagen de la consulta */}
-          <div className="relative aspect-[16/9] md:aspect-auto md:min-h-full bg-black/60">
+          <div className="relative min-h-56 md:min-h-full md:aspect-auto">
             <Image
               src={active.image}
               alt={active.title}
               fill
               sizes="(max-width: 768px) 100vw, 40vw"
-              className="object-contain p-3 transition-all duration-500"
+              className="object-cover transition-all duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent md:bg-gradient-to-r md:from-black/60 md:via-transparent md:to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent md:bg-gradient-to-r md:from-black/65 md:via-black/10 md:to-transparent" />
             {/* Badge del título sobre la imagen en mobile */}
             <div className="absolute bottom-3 left-3 md:hidden">
               <span className="rounded-full bg-black/60 px-3 py-1.5 text-sm font-bold text-lime-200 backdrop-blur-sm">

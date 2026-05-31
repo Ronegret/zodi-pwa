@@ -3,33 +3,40 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { signInWithPopup, signInWithRedirect, getRedirectResult, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, fetchSignInMethodsForEmail, onAuthStateChanged, type User } from "firebase/auth";
+import {
+  signInWithPopup, signInWithRedirect, getRedirectResult,
+  signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendPasswordResetEmail, fetchSignInMethodsForEmail,
+  onAuthStateChanged, type User
+} from "firebase/auth";
 import { ArrowLeft, AtSign, CheckCircle2, Eye, EyeOff, Loader2, Lock, UserRound, XCircle } from "lucide-react";
 import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession, getSavedIdentity } from "@/lib/session";
 
+// ── AuthForm ──────────────────────────────────────────────────────────────────
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref");
-  
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [showPwd, setShowPwd] = useState(false);
-  const [terms, setTerms] = useState(true);
-  const [remember, setRemember] = useState(true);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const [name, setName]           = useState("");
+  const [email, setEmail]         = useState("");
+  const [password, setPassword]   = useState("");
+  const [confirm, setConfirm]     = useState("");
+  const [showPwd, setShowPwd]     = useState(false);
+  const [terms, setTerms]         = useState(true);
+  const [remember, setRemember]   = useState(true);
+  const [message, setMessage]     = useState("");
+  const [loading, setLoading]     = useState(false);
   const [emailStatus, setEmailStatus] = useState<"idle"|"checking"|"available"|"taken">("idle");
+  const [existingMethods, setExistingMethods] = useState<string[]>([]);
   const explicitAuthFlow = useRef(false);
 
-  // Verificar disponibilidad del email en modo registro (debounce 700ms)
+  // ── Verificar disponibilidad del email en modo registro (debounce 700ms) ──
   useEffect(() => {
     if (mode !== "register") return;
     const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!isValid) { setEmailStatus("idle"); return; }
+    if (!isValid) { setEmailStatus("idle"); setExistingMethods([]); return; }
 
     setEmailStatus("checking");
     const t = setTimeout(async () => {
@@ -37,52 +44,43 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         const auth = getFirebaseAuth();
         if (!auth) { setEmailStatus("idle"); return; }
         const methods = await fetchSignInMethodsForEmail(auth, email);
+        setExistingMethods(methods);
         setEmailStatus(methods.length > 0 ? "taken" : "available");
       } catch { setEmailStatus("idle"); }
     }, 700);
     return () => clearTimeout(t);
   }, [email, mode]);
 
-  // ── Leer errores desde la URL (para callbacks del servidor) ─────────
+  // ── Leer errores desde URL ────────────────────────────────────────────────
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const urlError = params.get("error");
-      if (urlError) {
-        setMessage(`Error del servidor: ${urlError}`);
-        // Limpiar la URL para que no persista el error al recargar
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const urlError = params.get("error");
+    if (urlError) {
+      setMessage(`Error del servidor: ${urlError}`);
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
-  // ── Procesar redirect de Google al montar ─────────────────────────
-  // IMPORTANTE: Siempre llamar getRedirectResult() en cada mount (recomendación Firebase).
-  // En PWAs, Google puede redirigir en un contexto nuevo donde sessionStorage se pierde.
+  // ── Procesar redirect de Google al montar ─────────────────────────────────
   useEffect(() => {
     const auth = getFirebaseAuth();
     if (!auth) return;
 
     const redirectPending = sessionStorage.getItem("zodi.google_redirect_pending");
-
-    // Si hay un redirect pendiente (o siempre, para cubrir el caso PWA), marcamos el flujo
-    // ANTES de que onAuthStateChanged pueda dispararse.
     if (redirectPending) {
       explicitAuthFlow.current = true;
       setLoading(true);
     }
 
-    // Siempre intentar procesar el resultado del redirect — no solo cuando hay flag en sessionStorage
     getRedirectResult(auth)
       .then(async (result) => {
         sessionStorage.removeItem("zodi.google_redirect_pending");
         if (result?.user) {
-          // ✅ Redirect completado correctamente — procesar usuario
           const { getAdditionalUserInfo } = await import("firebase/auth");
           const details = getAdditionalUserInfo(result);
           await applyFirebaseUser(result.user, details?.isNewUser ?? false);
         } else {
-          // No había redirect pendiente o ya fue procesado — liberar lock
           if (redirectPending) {
             explicitAuthFlow.current = false;
             setLoading(false);
@@ -93,14 +91,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         sessionStorage.removeItem("zodi.google_redirect_pending");
         explicitAuthFlow.current = false;
         setLoading(false);
-        // auth/internal-error se silencia: el usuario puede estar autenticado
-        // y onAuthStateChanged lo capturará a continuación
         if (err?.code && err.code !== "auth/popup-closed-by-user" && err.code !== "auth/internal-error") {
           setMessage(`Error Google: ${err.message || err.code}`);
         }
       });
 
-    // ── Sesión activa (previa o recuperada tras redirect) ─────────────
+    // ── Sesión activa (pre-cargada o recuperada tras redirect) ──────────────
     let handled = false;
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user && !handled && !explicitAuthFlow.current) {
@@ -113,8 +109,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function applyFirebaseUser(user: User, forceNewUser: boolean = false) {
-    // ── Step 1: Leer sesión local y detectar si es el mismo usuario ──
+  // ── applyFirebaseUser — fuente de verdad para redirigir tras auth ─────────
+  async function applyFirebaseUser(user: User, forceNewUser = false) {
     const preserved = getLocalSession();
     const sameUid   = preserved.uid === user.uid;
     const sameEmail = !!(user.email && preserved.email && user.email === preserved.email);
@@ -123,7 +119,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     let localDone = sameUser ? preserved.onboardingCompleted : false;
     if (forceNewUser) localDone = false;
 
-    // ── Step 2: Siempre consultar Firestore (fuente de verdad) ──
+    // Step 1: Consultar Firestore (fuente de verdad remota)
     let firestoreDone = false;
     try {
       const { getDoc, doc } = await import("firebase/firestore");
@@ -134,59 +130,44 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
-
         if (userSnap.exists() && userSnap.data().onboardingCompleted && astralSnap.exists()) {
-          const userData = userSnap.data();
-          const astralData = astralSnap.data();
-
+          const ud = userSnap.data();
+          const ad = astralSnap.data();
           setLocalSession({
-            isAuthenticated: true,
-            onboardingCompleted: true,
-            displayName: userData.displayName || user.displayName || preserved.displayName || "Viajero ZODI",
+            isAuthenticated: true, onboardingCompleted: true,
+            displayName: ud.displayName || user.displayName || preserved.displayName || "Viajero ZODI",
             email: user.email || preserved.email || "",
-            uid: user.uid,
-            loginAt: Date.now(),
+            uid: user.uid, loginAt: Date.now(),
             astralProfile: {
-              sunSign: astralData.sunSign ?? "",
-              moonSign: astralData.moonSign ?? "",
-              ascendant: astralData.ascendant ?? "",
-              lifePathNumber: astralData.lifePathNumber ?? 1,
-              chineseZodiac: astralData.chineseZodiac ?? "",
-              mayanSign: astralData.mayanSign ?? "",
-              biorhythmBaseline: astralData.biorhythmBaseline ?? new Date().toISOString(),
+              sunSign: ad.sunSign ?? "", moonSign: ad.moonSign ?? "",
+              ascendant: ad.ascendant ?? "", lifePathNumber: ad.lifePathNumber ?? 1,
+              chineseZodiac: ad.chineseZodiac ?? "", mayanSign: ad.mayanSign ?? "",
+              biorhythmBaseline: ad.biorhythmBaseline ?? new Date().toISOString(),
             } as any,
             onboardingData: {
-              displayName: userData.displayName ?? "",
-              username: userData.username ?? "",
-              avatar: userData.avatar ?? "/zodi-art/perfil/perfil-1.png",
-              genderIdentity: userData.genderIdentity ?? "",
-              birthDate: astralData.birthDate ?? "",
-              birthTime: astralData.birthTime ?? "",
-              birthCity: astralData.birthCity ?? "",
-              birthCountry: astralData.birthCountry ?? "",
-              readingTone: userData.readingTone ?? "directo",
-              favoriteTopics: userData.favoriteTopics ?? [],
-              notificationPreferences: userData.notificationPreferences ?? [],
+              displayName: ud.displayName ?? "", username: ud.username ?? "",
+              avatar: ud.avatar ?? "/zodi-art/perfil/perfil-1.png",
+              genderIdentity: ud.genderIdentity ?? "",
+              birthDate: ad.birthDate ?? "", birthTime: ad.birthTime ?? "",
+              birthCity: ad.birthCity ?? "", birthCountry: ad.birthCountry ?? "",
+              currentCity: ad.currentCity ?? "", currentCountry: ad.currentCountry ?? "",
+              readingTone: ud.readingTone ?? "directo",
+              favoriteTopics: ud.favoriteTopics ?? [],
+              notificationPreferences: ud.notificationPreferences ?? [],
             } as any,
           });
-
           firestoreDone = true;
         }
       }
-    } catch {
-      // Firebase no disponible — continuar con datos locales
-    }
+    } catch { /* Firestore no disponible — continuar con datos locales */ }
 
-    // ── Step 3a: Comprobar también la identidad duradera (sobrevive clearLocalSession) ──
+    // Step 2: Identidad duradera (sobrevive logout)
     const identity = getSavedIdentity();
     const identityMatch = !!(identity && (identity.uid === user.uid || identity.email === user.email) && identity.onboardingCompleted);
-
     if (!firestoreDone && !sameUser && identityMatch && identity) {
       setLocalSession({
-        isAuthenticated: true,
-        onboardingCompleted: true,
-        uid: user.uid,
-        email: user.email || identity.email,
+        isAuthenticated: true, onboardingCompleted: true,
+        uid: user.uid, email: user.email || identity.email,
         displayName: user.displayName || preserved.displayName || "Viajero ZODI",
         loginAt: Date.now(),
         onboardingData: identity.onboardingData,
@@ -198,43 +179,32 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       firestoreDone = true;
     }
 
-    // ── Step 3b: Firestore vacío pero hay sesión local con mismo usuario ──
-    // Migrar UID al Firebase UID real y publicar datos a Firestore en background
+    // Step 3: Sesión local misma cuenta
     if (!firestoreDone && sameUser && preserved.onboardingCompleted) {
       setLocalSession({
-        isAuthenticated: true,
-        onboardingCompleted: true,
-        uid: user.uid,
-        email: user.email || preserved.email || "",
+        isAuthenticated: true, onboardingCompleted: true,
+        uid: user.uid, email: user.email || preserved.email || "",
         displayName: user.displayName || preserved.displayName || "Viajero ZODI",
-        loginAt: Date.now(),
-        astralProfile: preserved.astralProfile,
+        loginAt: Date.now(), astralProfile: preserved.astralProfile,
         onboardingData: preserved.onboardingData,
       });
-
-      // Intentar sincronizar a Firestore en background sin bloquear el flujo
       if (preserved.onboardingData && preserved.astralProfile) {
         import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
           saveOnboardingProfile(user.uid, preserved.onboardingData as any, preserved.astralProfile as any)
-        ).catch(() => { /* ignorar — se reintentará en próximo login */ });
+        ).catch(() => {});
       }
-
       firestoreDone = true;
     }
 
-    // ── Step 4: Usuario genuinamente nuevo — guardar mínimo en local ──
+    // Step 4: Usuario nuevo
     if (!firestoreDone) {
       setLocalSession({
-        isAuthenticated: true,
-        onboardingCompleted: false,
+        isAuthenticated: true, onboardingCompleted: false,
         displayName: user.displayName || "Viajero ZODI",
-        email: user.email || "",
-        uid: user.uid,
-        loginAt: Date.now(),
+        email: user.email || "", uid: user.uid, loginAt: Date.now(),
       });
     }
 
-    // Dar gemas iniciales si no tiene
     try {
       const gamification = await import("@/lib/gamification");
       if (gamification.getGems().total === 0) gamification.addGems(15);
@@ -244,214 +214,177 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     router.push(done ? "/dashboard" : "/onboarding");
   }
 
-  async function continueFlow(provider: "email" | "google") {
+  // ── Google OAuth ──────────────────────────────────────────────────────────
+  async function loginWithGoogle() {
     setMessage("");
-
-    // ── Third-Party OAuth (Google) ────────────────────────────
-    if (provider === "google") {
-      setLoading(true);
-      explicitAuthFlow.current = true;
-
+    setLoading(true);
+    explicitAuthFlow.current = true;
+    try {
+      const auth = getFirebaseAuth();
+      if (!auth) {
+        setMessage("Firebase no está configurado. Revisa las variables NEXT_PUBLIC_FIREBASE_*.");
+        return;
+      }
       try {
-        const auth = getFirebaseAuth();
-        if (!auth) {
-          setMessage("Firebase no está configurado. Revisa las variables NEXT_PUBLIC_FIREBASE_*.");
-          return;
-        }
-
+        const result = await signInWithPopup(auth, googleProvider);
+        // Popup OK — manejar perfil por separado para no caer en redirect si falla
         try {
-          const result = await signInWithPopup(auth, googleProvider);
           const { getAdditionalUserInfo } = await import("firebase/auth");
           const details = getAdditionalUserInfo(result);
           await applyFirebaseUser(result.user, details?.isNewUser ?? false);
-        } catch (popupErr: any) {
-          const code = popupErr?.code ?? "";
-          if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-            setMessage("Inicio con Google cancelado.");
-            return;
-          }
-
-          if (code === "auth/account-exists-with-different-credential") {
-            setMessage("Ese correo ya existe con otro método. Entra con email y contraseña.");
-            return;
-          }
-
-          sessionStorage.setItem("zodi.google_redirect_pending", "1");
-          await signInWithRedirect(auth, googleProvider);
+        } catch (profileErr) {
+          console.error("[ZODI] Error cargando perfil post-Google:", profileErr);
+          setLocalSession({
+            isAuthenticated: true, onboardingCompleted: false,
+            uid: result.user.uid, email: result.user.email || "",
+            displayName: result.user.displayName || "Viajero ZODI", loginAt: Date.now(),
+          });
+          router.push("/onboarding");
         }
-      } catch (err: any) {
-        sessionStorage.removeItem("zodi.google_redirect_pending");
-        const code = err?.code ?? "";
+        return; // No caer al redirect
+      } catch (popupErr: any) {
+        const code = popupErr?.code ?? "";
+        if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+          setMessage("Inicio con Google cancelado. Sin drama cósmico.");
+          return;
+        }
+        if (code === "auth/account-exists-with-different-credential") {
+          setMessage("Ese correo ya existe con otro método. Entra con email y contraseña.");
+          return;
+        }
         if (code === "auth/unauthorized-domain") {
-          setMessage("Este dominio no está autorizado en Firebase Authentication.");
-        } else if (code === "auth/operation-not-allowed") {
-          setMessage("Google no está habilitado como proveedor en Firebase Authentication.");
-        } else {
-          setMessage(`No pudimos abrir Google: ${err?.message || code || "error desconocido"}`);
+          setMessage("Este dominio no está autorizado en Firebase. Contacta al soporte.");
+          return;
         }
-      } finally {
-        explicitAuthFlow.current = false;
-        setLoading(false);
+        // Popup bloqueado por el browser → intentar redirect
+        sessionStorage.setItem("zodi.google_redirect_pending", "1");
+        await signInWithRedirect(auth, googleProvider);
       }
-      return;
+    } catch (err: any) {
+      const code = err?.code ?? "";
+      if (code === "auth/unauthorized-domain") {
+        setMessage("Este dominio no está autorizado en Firebase Authentication.");
+      } else {
+        setMessage(`No pudimos abrir Google: ${err?.message || code || "error desconocido"}`);
+      }
+    } finally {
+      explicitAuthFlow.current = false;
+      setLoading(false);
     }
+  }
 
+  // ── Email / contraseña ────────────────────────────────────────────────────
+  async function continueWithEmail() {
+    setMessage("");
 
-    // ── Validaciones email / contraseña ───────────────────────────────
-    if (!email.trim()) {
-      setMessage("El cosmos necesita tu correo. No funciona con telepastía.");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setMessage("Ese correo tiene más errores que un horóscopo genérico. Revísalo.");
-      return;
-    }
-    if (!password) {
-      setMessage("Contraseña vacía. El universo también necesita seguridad.");
-      return;
-    }
+    if (!email.trim()) { setMessage("El cosmos necesita tu correo. No funciona con telepatía."); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setMessage("Ese correo tiene más errores que un horóscopo genérico."); return; }
+    if (!password) { setMessage("Contraseña vacía. El universo también necesita seguridad."); return; }
+
     if (mode === "register") {
-      if (emailStatus === "taken") {
-        setMessage("Ese correo ya pertenece al cosmos ZODI. Entra o recupera tu contraseña. 👆");
-        return;
-      }
-      if (emailStatus === "checking") {
-        setMessage("El oráculo verifica tu correo. Mercurio retrogradó, dale un segundo.");
-        return;
-      }
-      if (password.length < 6) {
-        setMessage("6 caracteres mínimo. Tu contraseña actual es más débil que un horóscopo genérico.");
-        return;
-      }
-      if (password !== confirm) {
-        setMessage("Las contraseñas no coinciden. El cosmos exige consistencia, aunque tú no la tengas.");
-        return;
-      }
-      if (!terms) {
-        setMessage("Acepta los términos o el portal permanece cerrado. No hay negociación astral.");
-        return;
-      }
+      if (emailStatus === "taken") { setMessage("Ese correo ya tiene cuenta. Usa la opción de arriba para entrar."); return; }
+      if (emailStatus === "checking") { setMessage("Verificando tu correo... espera un segundo."); return; }
+      if (password.length < 6) { setMessage("6 caracteres mínimo. Tu contraseña actual es más débil que un horóscopo genérico."); return; }
+      if (password !== confirm) { setMessage("Las contraseñas no coinciden. El cosmos exige consistencia."); return; }
+      if (!terms) { setMessage("Acepta los términos o el portal permanece cerrado."); return; }
     }
 
     setLoading(true);
+    explicitAuthFlow.current = true;
     try {
       const auth = getFirebaseAuth();
-      let firebaseSuccess = false;
-
       if (auth) {
         try {
           if (mode === "register") {
             setLocalSession({ isAuthenticated: false, onboardingCompleted: false, astralProfile: undefined, onboardingData: undefined });
             if (refCode) localStorage.setItem("zodi_ref_code", refCode);
-            await createUserWithEmailAndPassword(auth, email, password);
+            const cred = await createUserWithEmailAndPassword(auth, email, password);
+            await applyFirebaseUser(cred.user, true);
+            return;
           } else {
-            await signInWithEmailAndPassword(auth, email, password);
+            const cred = await signInWithEmailAndPassword(auth, email, password);
+            await applyFirebaseUser(cred.user, false);
+            return;
           }
-          firebaseSuccess = true;
-          // Si Firebase tuvo éxito, el onAuthStateChanged (arriba) se encargará del redirect.
-          return;
         } catch (firebaseErr: any) {
-          // Si es registro y el email ya está en Firebase, lanzamos el error
-          if (mode === "register" && firebaseErr.code === "auth/email-already-in-use") {
-            throw firebaseErr;
-          }
-          // Si no, ignoramos y probamos el fallback local por si la cuenta existe en localStorage
-          console.warn("Firebase auth falló, intentando fallback local...", firebaseErr);
+          if (mode === "register" && firebaseErr.code === "auth/email-already-in-use") throw firebaseErr;
+          console.warn("[ZODI] Firebase auth falló, probando fallback local:", firebaseErr.code);
         }
       }
 
-      // FALLBACK LOCAL
-      if (!firebaseSuccess) {
-        const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
-        let users: any[] = [];
-        try { users = JSON.parse(usersStr); } catch(e) {}
+      // ── Fallback local ────────────────────────────────────────────────────
+      const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
+      let users: any[] = [];
+      try { users = JSON.parse(usersStr); } catch { /* ignore */ }
 
-        if (mode === "register") {
-          if (users.find(u => u.email === email)) {
-            setMessage("Tu alma ya pertenece a este universo. Usa otro correo o inicia sesión.");
-            setLoading(false);
-            return;
-          }
-          const newUser = {
-            email,
-            password,
-            displayName: name.trim() || "Viajero ZODI",
-            uid: "local_" + Date.now(),
-            astralProfile: null,
-            onboardingData: null,
-            onboardingCompleted: false
-          };
-          users.push(newUser);
-          window.localStorage.setItem("zodi.local_users", JSON.stringify(users));
-
-          setLocalSession({
-            isAuthenticated: true,
-            onboardingCompleted: false,
-            displayName: newUser.displayName,
-            email: newUser.email,
-            uid: newUser.uid,
-            loginAt: Date.now(),
-          });
-          router.push("/onboarding");
-        } else {
-          // Login mode local
-          const user = users.find(u => u.email === email && u.password === password);
-          if (!user) {
-            setMessage("Correo o contraseña incorrectos. El cosmos no miente, tú sí escribiste algo mal. 🤨");
-            setLoading(false);
-            return;
-          }
-          
-          setLocalSession({
-            isAuthenticated: true,
-            onboardingCompleted: user.onboardingCompleted,
-            displayName: user.displayName,
-            email: user.email,
-            uid: user.uid,
-            loginAt: Date.now(),
-            astralProfile: user.astralProfile,
-            onboardingData: user.onboardingData
-          });
-          router.push(user.onboardingCompleted ? "/dashboard" : "/onboarding");
+      if (mode === "register") {
+        if (users.find((u: any) => u.email === email)) {
+          setMessage("Tu alma ya pertenece a este universo. Entra o recupera tu contraseña.");
+          return;
         }
+        const newUser = {
+          email, password,
+          displayName: name.trim() || "Viajero ZODI",
+          uid: "local_" + Date.now(),
+          astralProfile: null, onboardingData: null, onboardingCompleted: false,
+        };
+        users.push(newUser);
+        window.localStorage.setItem("zodi.local_users", JSON.stringify(users));
+        setLocalSession({
+          isAuthenticated: true, onboardingCompleted: false,
+          displayName: newUser.displayName, email: newUser.email,
+          uid: newUser.uid, loginAt: Date.now(),
+        });
+        router.push("/onboarding");
+      } else {
+        const user = users.find((u: any) => u.email === email && u.password === password);
+        if (!user) {
+          setMessage("Correo o contraseña incorrectos. El cosmos no miente, tú sí escribiste algo mal.");
+          return;
+        }
+        setLocalSession({
+          isAuthenticated: true, onboardingCompleted: user.onboardingCompleted,
+          displayName: user.displayName, email: user.email, uid: user.uid,
+          loginAt: Date.now(), astralProfile: user.astralProfile, onboardingData: user.onboardingData,
+        });
+        router.push(user.onboardingCompleted ? "/dashboard" : "/onboarding");
       }
-    } catch (err) {
+    } catch (err: any) {
       const code = (err as { code?: string }).code ?? "";
       if (code === "auth/email-already-in-use") {
-        setMessage("Ese correo ya tiene portal abierto. Te llevamos a la entrada... 🔮");
-        setTimeout(() => router.push("/auth/login"), 2200);
+        setMessage("Ese correo ya tiene portal abierto. Entrando al login... 🔮");
+        setTimeout(() => router.push("/auth/login"), 2000);
       } else if (code === "auth/too-many-requests") {
-        setMessage("Demasiados intentos fallidos. ZODI necesita respirar. Vuelve en unos minutos. ☕");
-      } else if (code === "auth/wrong-password") {
-        setMessage("Contraseña incorrecta. El cosmos lo recuerda aunque tú no. Prueba recuperarla. 🌀");
+        setMessage("Demasiados intentos. ZODI necesita respirar. Vuelve en unos minutos. ☕");
+      } else if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        setMessage("Contraseña incorrecta. El cosmos lo recuerda aunque tú no. Prueba recuperarla.");
       } else if (code === "auth/user-not-found") {
-        setMessage("Ese correo no existe en el cosmos ZODI. ¿Registrarte quizás? El universo tiene hueco. ✨");
+        setMessage("Ese correo no existe en el cosmos ZODI. ¿Registrarte quizás?");
+      } else if (code === "auth/invalid-email") {
+        setMessage("Formato de correo inválido. Revísalo.");
       } else {
-        setMessage("El portal tembló. Revisa tus datos e inténtalo de nuevo. Si persiste, Mercurio manda. 🪐");
+        setMessage("El portal tembló. Revisa tus datos e inténtalo de nuevo.");
       }
     } finally {
+      explicitAuthFlow.current = false;
       setLoading(false);
     }
   }
 
   async function resetPassword() {
-    if (!email.trim()) {
-      setMessage("Escribe tu correo primero.");
-      return;
-    }
+    if (!email.trim()) { setMessage("Escribe tu correo primero para recuperar la contraseña."); return; }
     try {
       const auth = getFirebaseAuth();
       if (auth) {
         await sendPasswordResetEmail(auth, email);
-        setMessage("Correo de recuperación enviado. Revisa tu bandeja (y el spam, por si acaso).");
+        setMessage("Correo de recuperación enviado. Revisa tu bandeja (y el spam, por si acaso). ✉️");
       } else {
         const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
-        let users: any[] = [];
-        try { users = JSON.parse(usersStr); } catch(e) {}
-        if (users.find(u => u.email === email)) {
-          setMessage("Modo Local: No podemos enviar correos. Tu cuenta existe, ¡recuerda tu contraseña!");
+        const users = JSON.parse(usersStr);
+        if (users.find((u: any) => u.email === email)) {
+          setMessage("Modo local: tu cuenta existe pero no podemos enviar correos. Recuerda tu contraseña.");
         } else {
-          setMessage("Modo Local: Esta cuenta no existe en nuestros registros.");
+          setMessage("Modo local: esa cuenta no existe en este dispositivo.");
         }
       }
     } catch {
@@ -459,13 +392,11 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     }
   }
 
+  const hasGoogleMethod = existingMethods.includes("google.com");
+
   return (
     <div className="glass-panel neon-border w-full max-w-xl rounded-md p-4 sm:p-7">
-      {/* Back to home — always visible */}
-      <Link
-        href="/"
-        className="mb-5 inline-flex items-center gap-2 text-sm text-white/50 hover:text-lime-300 transition group"
-      >
+      <Link href="/" className="mb-5 inline-flex items-center gap-2 text-sm text-white/50 hover:text-lime-300 transition group">
         <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
         Volver al inicio
       </Link>
@@ -477,13 +408,43 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         {mode === "login" ? "Vuelve al oráculo." : "Crea tu cuenta astral."}
       </h1>
 
-      <form id="zodi-auth-form" className="mt-4 sm:mt-8 grid gap-2 sm:gap-3" onSubmit={(event) => { event.preventDefault(); void continueFlow("email"); }}>
-        {mode === "register" ? (
+      {/* ── Botón Google — arriba porque es la forma más rápida ── */}
+      <button
+        onClick={loginWithGoogle}
+        disabled={loading}
+        className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-md border border-white/20 bg-white/5 px-4 py-3 font-bold text-white disabled:opacity-60 hover:bg-white/10 active:scale-95 transition"
+      >
+        {loading && explicitAuthFlow.current ? (
+          <Loader2 className="h-5 w-5 animate-spin shrink-0" />
+        ) : (
+          <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+        )}
+        {loading && explicitAuthFlow.current ? "Conectando con Google..." : "Continuar con Google"}
+      </button>
+
+      <div className="my-4 sm:my-5 flex items-center gap-3">
+        <div className="h-px flex-1 bg-white/10" />
+        <span className="text-[10px] sm:text-xs text-white/40">o con email</span>
+        <div className="h-px flex-1 bg-white/10" />
+      </div>
+
+      {/* ── Formulario email/contraseña ── */}
+      <form
+        id="zodi-auth-form"
+        className="grid gap-2 sm:gap-3"
+        onSubmit={(e) => { e.preventDefault(); void continueWithEmail(); }}
+      >
+        {mode === "register" && (
           <>
             <Field icon={UserRound} label="Nombre" value={name} onChange={setName} type="text" name="name" autoComplete="name" placeholder="Tu nombre visible" />
             <div className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3">
               <span className="mb-1 sm:mb-2 flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/45">
-                 Idioma de la App
+                Idioma de la App
               </span>
               <select className="w-full bg-transparent text-white outline-none text-sm sm:text-base" defaultValue="es">
                 <option value="es" className="bg-black text-white">Español</option>
@@ -492,8 +453,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               </select>
             </div>
           </>
-        ) : null}
-        {/* Campo email con verificación en tiempo real (solo en registro) */}
+        )}
+
+        {/* ── Campo email con verificación en registro ── */}
         {mode === "register" ? (
           <div>
             <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3 cursor-text transition focus-within:border-lime-300/40">
@@ -508,23 +470,50 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
                 />
                 {emailStatus === "checking"  && <Loader2 className="h-4 w-4 animate-spin text-white/40 shrink-0" />}
                 {emailStatus === "available" && <CheckCircle2 className="h-4 w-4 text-lime-300 shrink-0" />}
-                {emailStatus === "taken"     && <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
+                {emailStatus === "taken"     && <XCircle className="h-4 w-4 text-orange-400 shrink-0" />}
               </div>
             </label>
+
             {emailStatus === "available" && (
               <p className="mt-1.5 text-[11px] text-lime-300/80 pl-1">✦ Correo libre. El cosmos te estaba esperando.</p>
             )}
+
+            {/* ── Email ya registrado — UI prominente con opciones ── */}
             {emailStatus === "taken" && (
-              <div className="mt-2 rounded-xl border border-orange-400/25 bg-orange-400/08 p-3">
-                <p className="text-sm font-bold text-orange-200">Ajá. Tu alma YA pertenece al cosmos ZODI. 🔮</p>
-                <p className="mt-0.5 text-xs text-white/55">Este correo ya tiene cuenta. ¿Lo olvidaste o esto fue un accidente cósmico? Sin juicio, pasa.</p>
-                <div className="mt-2.5 flex flex-wrap gap-2">
-                  <a href="/auth/login"
-                    className="rounded-lg bg-lime-300 px-3 py-1.5 text-xs font-black text-black transition hover:bg-lime-200">
-                    Volver a entrar
-                  </a>
-                  <button type="button" onClick={() => { void resetPassword(); }}
-                    className="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-bold text-white/70 transition hover:bg-white/10">
+              <div className="mt-2 rounded-xl border border-orange-400/30 bg-orange-400/08 p-4">
+                <p className="text-sm font-black text-orange-200">
+                  {hasGoogleMethod ? "⚡ Esta cuenta usa Google para entrar." : "🔮 Este correo ya tiene cuenta en ZODI."}
+                </p>
+                <p className="mt-1 text-xs text-white/55">
+                  {hasGoogleMethod
+                    ? "Usa el botón de Google de arriba para acceder. Es más rápido, po."
+                    : "Ya tienes un portal abierto. ¿Lo olvidaste o fue un accidente cósmico? Sin juicio, pasa."}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {hasGoogleMethod ? (
+                    <button
+                      type="button"
+                      onClick={loginWithGoogle}
+                      className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-black text-black transition hover:bg-white/90"
+                    >
+                      <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                      </svg>
+                      Entrar con Google
+                    </button>
+                  ) : (
+                    <a href="/auth/login" className="rounded-lg bg-lime-300 px-3 py-2 text-xs font-black text-black transition hover:bg-lime-200">
+                      Entrar a mi cuenta
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => { void resetPassword(); }}
+                    className="rounded-lg border border-white/20 px-3 py-2 text-xs font-bold text-white/70 transition hover:bg-white/10"
+                  >
                     Olvidé mi contraseña
                   </button>
                 </div>
@@ -534,108 +523,78 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         ) : (
           <Field icon={AtSign} label="Correo" value={email} onChange={setEmail} type="email" name="email" autoComplete="email" placeholder="tu@email.com" />
         )}
+
         <div className="relative">
           <Field
-            icon={Lock}
-            label="Contraseña"
-            value={password}
-            onChange={setPassword}
+            icon={Lock} label="Contraseña" value={password} onChange={setPassword}
             type={showPwd ? "text" : "password"}
             name={mode === "login" ? "current-password" : "new-password"}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             placeholder="Mínimo 6 caracteres"
           />
           <button
-            type="button"
-            onClick={() => setShowPwd((v) => !v)}
+            type="button" onClick={() => setShowPwd(v => !v)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
             aria-label={showPwd ? "Ocultar contraseña" : "Mostrar contraseña"}
           >
             {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        {mode === "register" ? (
-          <Field
-            icon={Lock}
-            label="Confirmar contraseña"
-            value={confirm}
-            onChange={setConfirm}
-            type={showPwd ? "text" : "password"}
-            name="confirm-password"
-            autoComplete="new-password"
+
+        {mode === "register" && (
+          <Field icon={Lock} label="Confirmar contraseña" value={confirm} onChange={setConfirm}
+            type={showPwd ? "text" : "password"} name="confirm-password" autoComplete="new-password"
             placeholder="Repite tu contraseña"
           />
-        ) : null}
+        )}
       </form>
 
       <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-between gap-2 sm:gap-3 text-xs sm:text-sm text-white/62">
         {mode === "login" ? (
           <label className="flex cursor-pointer items-center gap-2">
-            <input checked={remember} onChange={(e) => setRemember(e.target.checked)} type="checkbox" name="remember" />
+            <input checked={remember} onChange={e => setRemember(e.target.checked)} type="checkbox" name="remember" />
             Recordar sesión
           </label>
         ) : (
           <label className="flex cursor-pointer items-center gap-2">
-            <input checked={terms} onChange={(e) => setTerms(e.target.checked)} type="checkbox" name="terms" />
-            Aceptar términos
+            <input checked={terms} onChange={e => setTerms(e.target.checked)} type="checkbox" name="terms" />
+            Aceptar <Link href="/legal/terminos" className="text-lime-200 hover:underline">términos</Link>
           </label>
         )}
-        {mode === "login" ? (
+        {mode === "login" && (
           <button onClick={resetPassword} type="button" className="text-lime-200 hover:underline">
             Olvidé mi contraseña
           </button>
-        ) : null}
+        )}
       </div>
 
       <button
-        type="submit"
-        form="zodi-auth-form"
-        disabled={loading}
-        className="mt-4 sm:mt-6 w-full rounded-md bg-lime-300 px-4 py-2.5 sm:py-3 text-sm sm:text-base font-black text-black disabled:opacity-60 active:scale-95 transition"
+        type="submit" form="zodi-auth-form" disabled={loading}
+        className="mt-4 sm:mt-5 w-full rounded-md bg-lime-300 px-4 py-2.5 sm:py-3 text-sm sm:text-base font-black text-black disabled:opacity-60 active:scale-95 transition"
       >
-        {loading ? "Abriendo portal..." : mode === "login" ? "Entrar" : "Crear cuenta"}
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {mode === "login" ? "Abriendo portal..." : "Creando cuenta..."}
+          </span>
+        ) : (
+          mode === "login" ? "Entrar" : "Crear cuenta"
+        )}
       </button>
 
-      <div className="my-4 sm:my-6 flex items-center gap-3">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-[10px] sm:text-xs text-white/40">o</span>
-        <div className="h-px flex-1 bg-white/10" />
-      </div>
-
-      {/* ── Botones sociales al final ── */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full">
-        <button
-          onClick={() => continueFlow("google")}
-          disabled={loading}
-          className="flex flex-1 items-center justify-center gap-2.5 rounded-md border border-white/20 bg-white/5 px-4 py-3 font-bold text-white disabled:opacity-60 hover:bg-white/10 active:scale-95 transition"
-        >
-          <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          Google
-        </button>
-      </div>
-
-      {message ? (
+      {message && (
         <p className="mt-4 rounded-md border border-lime-300/20 bg-lime-300/10 p-3 text-sm text-lime-100">
           {message}
         </p>
-      ) : null}
+      )}
 
-      <p className="mt-6 text-sm text-white/55">
+      <p className="mt-5 text-sm text-white/55">
         {mode === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
-        <Link
-          className="text-lime-200 hover:underline"
-          href={mode === "login" ? "/auth/register" : "/auth/login"}
-        >
-          {mode === "login" ? "Crear cuenta" : "Entrar"}
+        <Link className="text-lime-200 hover:underline" href={mode === "login" ? "/auth/register" : "/auth/login"}>
+          {mode === "login" ? "Crear cuenta gratis" : "Entrar"}
         </Link>
       </p>
 
-      {/* Extra escape hatch */}
       <div className="mt-4 pt-4 border-t border-white/08 text-center">
         <Link href="/" className="text-xs text-white/35 hover:text-white/60 transition">
           ← Regresar a la web principal sin iniciar sesión
@@ -645,38 +604,23 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   );
 }
 
+// ── Field ─────────────────────────────────────────────────────────────────────
 function Field({
-  icon: Icon,
-  label,
-  value,
-  onChange,
-  type,
-  placeholder,
-  name,
-  autoComplete
+  icon: Icon, label, value, onChange, type, placeholder, name, autoComplete
 }: {
-  icon: typeof AtSign;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type: string;
-  placeholder?: string;
-  name: string;
-  autoComplete: string;
+  icon: typeof AtSign; label: string; value: string;
+  onChange: (v: string) => void; type: string;
+  placeholder?: string; name: string; autoComplete: string;
 }) {
   return (
-    <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3 cursor-text">
+    <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3 cursor-text transition focus-within:border-lime-300/40">
       <span className="mb-1 sm:mb-2 flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/45">
         <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {label}
       </span>
       <input
         className="w-full bg-transparent text-white outline-none placeholder:text-white/30 text-sm sm:text-base"
-        type={type}
-        name={name}
-        autoComplete={autoComplete}
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        type={type} name={name} autoComplete={autoComplete} value={value}
+        placeholder={placeholder} onChange={e => onChange(e.target.value)}
       />
     </label>
   );

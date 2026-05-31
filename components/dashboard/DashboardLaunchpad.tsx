@@ -49,7 +49,7 @@ export function DashboardLaunchpad() {
                 className={`group relative flex min-h-52 flex-col overflow-hidden rounded-2xl border border-white/08 bg-gradient-to-br ${color} shadow-lg transition-all duration-300 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]`}
               >
                 {/* Background section image */}
-                <div className="absolute inset-0 opacity-20 transition-opacity duration-500 group-hover:opacity-35">
+                <div className="absolute inset-0 opacity-35 transition-opacity duration-500 group-hover:opacity-55">
                   <Image
                     src={section.image}
                     alt={section.title}

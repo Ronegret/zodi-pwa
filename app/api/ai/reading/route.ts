@@ -61,22 +61,36 @@ export async function POST(request: Request) {
     userContext?: Record<string, unknown>;
   };
 
-  const response = await generateReading({
-    provider: body.provider ?? "auto",
-    kind: body.kind ?? "daily-horoscope",
-    input: body.input ?? "Genera mi lectura ZODI.",
-    profile: body.profile ?? {},
-    system: body.system,
-    prompt: body.prompt,
-    userContext: body.userContext
-  });
+  try {
+    const response = await generateReading({
+      provider: body.provider ?? "auto",
+      kind: body.kind ?? "daily-horoscope",
+      input: body.input ?? "Genera mi lectura ZODI.",
+      profile: body.profile ?? {},
+      system: body.system,
+      prompt: body.prompt,
+      userContext: body.userContext
+    });
 
-  const { provider, prompt, reason, ...publicReading } = response;
-  void provider;
-  void prompt;
-  void reason;
+    const { provider, prompt, reason, ...publicReading } = response;
+    void provider;
+    void prompt;
+    void reason;
 
-  return NextResponse.json(publicReading);
+    return NextResponse.json(publicReading);
+  } catch (err) {
+    console.error("[ZODI] generateReading unhandled error:", err);
+    return NextResponse.json({
+      status: "fallback",
+      text: "El oráculo tuvo un problema técnico. Recarga e inténtalo de nuevo. 🔮",
+      reading: "",
+      warning: "",
+      ritual: "",
+      roast: "",
+      title: "Error del oráculo",
+      vibeScore: 0,
+    });
+  }
 }
 
 function isRateLimited(clientId: string) {

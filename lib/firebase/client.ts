@@ -54,10 +54,16 @@ export async function getFirebaseToken(): Promise<string> {
 
   return new Promise((resolve) => {
     const timeout = setTimeout(() => { unsub(); resolve("local_session"); }, 3000);
-    const unsub = onAuthStateChanged(auth, async (user) => {
+    const unsub = onAuthStateChanged(auth, (user) => {
       clearTimeout(timeout);
       unsub();
-      resolve(user ? await user.getIdToken() : "local_session");
+      if (user) {
+        user.getIdToken()
+          .then(token => resolve(token))
+          .catch(() => resolve("local_session")); // nunca swallow la excepción
+      } else {
+        resolve("local_session");
+      }
     });
   });
 }
