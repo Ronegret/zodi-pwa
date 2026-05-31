@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getFirebaseAuth } from "@/lib/firebase/admin";
 import { zodiChatPrompt } from "@/lib/ai/prompts";
+import { buildPersonalizationBlock } from "@/lib/ai/personalization";
 import { z } from "zod";
 
 const ChatSchema = z.object({
@@ -9,26 +10,40 @@ const ChatSchema = z.object({
     text: z.string().min(1).max(2000)
   })).min(1).max(50),
   userProfile: z.object({
-    sunSign:    z.string().optional(),
-    moonSign:   z.string().optional(),
-    ascendant:  z.string().optional(),
-    displayName: z.string().optional(),
+    sunSign:       z.string().optional(),
+    moonSign:      z.string().optional(),
+    ascendant:     z.string().optional(),
+    displayName:   z.string().optional(),
+    birthDate:     z.string().optional(),
+    birthCity:     z.string().optional(),
+    birthCountry:  z.string().optional(),
+    currentCity:   z.string().optional(),
+    currentCountry: z.string().optional(),
   }).optional()
 });
 
 // ── Construir system prompt personalizado ────────────────────────────────────
-function buildSystemPrompt(profile?: { sunSign?: string; moonSign?: string; ascendant?: string; displayName?: string }) {
-  const name  = profile?.displayName ? `, ${profile.displayName}` : "";
+function buildSystemPrompt(profile?: z.infer<typeof ChatSchema>["userProfile"]) {
   const signs = [
-    profile?.sunSign    ? `Signo solar: ${profile.sunSign}`     : null,
-    profile?.moonSign   ? `Luna en: ${profile.moonSign}`        : null,
-    profile?.ascendant  ? `Ascendente: ${profile.ascendant}`    : null,
+    profile?.sunSign   ? `Signo solar: ${profile.sunSign}`    : null,
+    profile?.moonSign  ? `Luna en: ${profile.moonSign}`       : null,
+    profile?.ascendant ? `Ascendente: ${profile.ascendant}`   : null,
   ].filter(Boolean).join(" | ");
 
-  return `${zodiChatPrompt}
+  const personalization = buildPersonalizationBlock({
+    displayName:    profile?.displayName,
+    birthDate:      profile?.birthDate,
+    birthCity:      profile?.birthCity,
+    birthCountry:   profile?.birthCountry,
+    currentCity:    profile?.currentCity,
+    currentCountry: profile?.currentCountry,
+  });
 
-${signs ? `PERFIL ASTRAL DEL USUARIO: ${signs}` : "Perfil astral: desconocido — pide los datos si son relevantes."}
-Nombre del usuario${name || ": desconocido"}.`;
+  return [
+    zodiChatPrompt,
+    signs ? `PERFIL ASTRAL: ${signs}` : "Perfil astral desconocido — pídelo si es relevante.",
+    personalization
+  ].filter(Boolean).join("\n");
 }
 
 // ── Llamada a Claude (Anthropic) ─────────────────────────────────────────────

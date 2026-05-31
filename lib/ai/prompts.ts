@@ -1,5 +1,6 @@
 import { getTodaysAstralContext } from "@/lib/astral";
 import { getRegionalHumorContext } from "@/lib/gamification";
+import { buildPersonalizationBlock } from "@/lib/ai/personalization";
 import type { ReadingKind, UserProfile } from "@/types/zodi";
 
 // ── PERSONALIDAD ZODI — El oráculo callejero con corazón ────────────────────
@@ -57,14 +58,19 @@ export function buildReadingPrompt(
   focusDomain?: string
 ) {
   const ctx = getTodaysAstralContext();
-  const countryOrigin = profile.birthCountry ?? profile.currentCountry ?? "";
-  const regionalHumor = getRegionalHumorContext(countryOrigin);
 
-  // ── Sistema: se enriquece con el contexto regional del usuario
-  const system = [
-    zodiSystemPrompt,
-    `CONTEXTO REGIONAL: ${regionalHumor}`
-  ].join(" | ");
+  // ── Bloque de personalización cultural del usuario
+  const personalization = buildPersonalizationBlock({
+    displayName:    profile.displayName,
+    birthDate:      profile.birthDate,
+    birthCity:      profile.birthCity,
+    birthCountry:   profile.birthCountry,
+    currentCity:    profile.currentCity,
+    currentCountry: profile.currentCountry,
+  });
+
+  // ── Sistema enriquecido con personalización
+  const system = [zodiSystemPrompt, personalization].filter(Boolean).join("\n");
 
   // ── Instrucción de foco de dominio (cuando el usuario pide algo específico)
   const domainInstruction = focusDomain

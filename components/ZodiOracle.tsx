@@ -75,9 +75,19 @@ export function ZodiOracle() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           messages: historyToKeep,
-          userProfile: session.astralProfile || { sunSign: "Desconocido" }
+          userProfile: {
+            sunSign:       session.astralProfile?.sunSign,
+            moonSign:      session.astralProfile?.moonSign,
+            ascendant:     session.astralProfile?.ascendant,
+            displayName:   session.displayName,
+            birthDate:     session.onboardingData?.birthDate,
+            birthCity:     session.onboardingData?.birthCity,
+            birthCountry:  session.onboardingData?.birthCountry,
+            currentCity:   session.onboardingData?.currentCity,
+            currentCountry: session.onboardingData?.currentCountry,
+          }
         })
       });
       
