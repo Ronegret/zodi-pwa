@@ -138,71 +138,84 @@ function CrystalBallBg() {
         }}
       />
 
-      {/* ── Anillo exterior — sentido horario ─────────────────────────── */}
+      {/* ── Anillo exterior — orbita grande, lime ─────────────────────── */}
+      {/* Logo ~112px → primer anillo ~200px, segundo ~280px, tercero ~360px */}
       <motion.div
-        className="absolute h-56 w-56 sm:h-80 sm:w-80"
+        className="absolute h-48 w-48 sm:h-64 sm:w-64"
         animate={{ rotate: 360 }}
-        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
         style={{ willChange: "transform" }}
       >
         <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
           <circle
             cx="100" cy="100" r="97"
-            stroke="rgba(184,255,23,0.18)" strokeWidth="1"
-            strokeDasharray="2 14" strokeLinecap="round"
+            stroke="rgba(184,255,23,0.30)" strokeWidth="1.2"
+            strokeDasharray="3 12" strokeLinecap="round"
           />
         </svg>
-        {/* Punto neon girando */}
         <div
-          className="absolute top-0.5 left-1/2 -translate-x-1/2 h-2.5 w-2.5 rounded-full bg-lime-300"
-          style={{ boxShadow: "0 0 10px 4px rgba(184,255,23,0.8), 0 0 20px 8px rgba(184,255,23,0.3)" }}
+          className="absolute top-0 left-1/2 -translate-x-1/2 h-3 w-3 rounded-full bg-lime-300"
+          style={{ boxShadow: "0 0 12px 5px rgba(184,255,23,0.9), 0 0 24px 10px rgba(184,255,23,0.35)" }}
         />
       </motion.div>
 
-      {/* ── Anillo medio — sentido antihorario ────────────────────────── */}
+      {/* ── Anillo medio — cyan, antihorario ──────────────────────────── */}
       <motion.div
-        className="absolute h-40 w-40 sm:h-56 sm:w-56"
+        className="absolute h-64 w-64 sm:h-80 sm:w-80"
         animate={{ rotate: -360 }}
-        transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
         style={{ willChange: "transform" }}
       >
         <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-          <circle cx="100" cy="100" r="97" stroke="rgba(51,247,255,0.12)" strokeWidth="0.8" />
+          <circle cx="100" cy="100" r="97" stroke="rgba(51,247,255,0.18)" strokeWidth="0.8" strokeDasharray="8 20" />
         </svg>
         <div
-          className="absolute top-0.5 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-cyan-300"
-          style={{ boxShadow: "0 0 8px 3px rgba(51,247,255,0.8), 0 0 16px 6px rgba(51,247,255,0.25)" }}
+          className="absolute top-0 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-cyan-300"
+          style={{ boxShadow: "0 0 10px 4px rgba(51,247,255,0.9), 0 0 20px 8px rgba(51,247,255,0.3)" }}
         />
       </motion.div>
 
-      {/* ── Anillo interior — violeta, inclinado ──────────────────────── */}
+      {/* ── Anillo orbital violeta — más grande, muy lento ────────────── */}
       <motion.div
-        className="absolute h-28 w-28 sm:h-40 sm:w-40"
+        className="absolute h-80 w-80 sm:h-96 sm:w-96"
         animate={{ rotate: 360 }}
-        transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
-        style={{ willChange: "transform", transform: "rotateX(60deg)" }}
+        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+        style={{ willChange: "transform" }}
       >
         <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-          <ellipse cx="100" cy="100" rx="97" ry="50" stroke="rgba(155,77,255,0.15)" strokeWidth="1" strokeDasharray="6 10" />
+          <circle cx="100" cy="100" r="97" stroke="rgba(155,77,255,0.12)" strokeWidth="0.6" strokeDasharray="2 18" />
         </svg>
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-violet-400"
+          style={{ boxShadow: "0 0 8px 3px rgba(155,77,255,0.8)" }}
+        />
       </motion.div>
 
-      {/* ── Logo ZODI — aparece una vez, se mantiene ─────────────────── */}
+      {/* ── Logo ZODI circular — aparece gradualmente ───────────────── */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.6 }}
-        animate={{ opacity: 0.22, scale: 1 }}
+        initial={{ opacity: 0, scale: 0.55 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
         className="absolute"
       >
-        <Image
-          src="/zodi-art/brand/isotipo.png"
-          alt=""
-          width={110}
-          height={110}
-          className="mix-blend-screen"
-          priority
-          draggable={false}
-        />
+        {/* Círculo contenedor con borde neon sutil */}
+        <div
+          className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-full overflow-hidden"
+          style={{
+            border: "1px solid rgba(184,255,23,0.25)",
+            boxShadow: "0 0 20px rgba(184,255,23,0.15), inset 0 0 20px rgba(155,77,255,0.1)",
+            background: "radial-gradient(circle, rgba(10,10,20,0.7) 0%, rgba(4,4,10,0.85) 100%)",
+          }}
+        >
+          <Image
+            src="/zodi-art/brand/isotipo.png"
+            alt="ZODI"
+            fill
+            className="object-contain p-2 mix-blend-screen"
+            priority
+            draggable={false}
+          />
+        </div>
       </motion.div>
 
       {/* ── Pulso interior — halo que respira ────────────────────────── */}
