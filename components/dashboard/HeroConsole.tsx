@@ -118,6 +118,108 @@ function energyColor(score: number): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CRYSTAL BALL BG — reemplaza el video; solo transform:rotate (sin repaints)
+// ─────────────────────────────────────────────────────────────────────────────
+function CrystalBallBg() {
+  return (
+    <div
+      className="absolute inset-0 -z-10 overflow-hidden rounded-2xl flex items-center justify-center pointer-events-none select-none"
+      aria-hidden
+    >
+      {/* Gradiente base oscuro-violeta */}
+      <div className="absolute inset-0 bg-gradient-to-br from-violet-950/40 via-black/60 to-lime-950/20" />
+
+      {/* Halo central — glow radial estático */}
+      <div
+        className="absolute h-56 w-56 sm:h-80 sm:w-80 rounded-full"
+        style={{
+          background: "radial-gradient(circle, rgba(155,77,255,0.12) 0%, rgba(184,255,23,0.06) 45%, transparent 70%)",
+          filter: "blur(4px)",
+        }}
+      />
+
+      {/* ── Anillo exterior — sentido horario ─────────────────────────── */}
+      <motion.div
+        className="absolute h-56 w-56 sm:h-80 sm:w-80"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+        style={{ willChange: "transform" }}
+      >
+        <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
+          <circle
+            cx="100" cy="100" r="97"
+            stroke="rgba(184,255,23,0.18)" strokeWidth="1"
+            strokeDasharray="2 14" strokeLinecap="round"
+          />
+        </svg>
+        {/* Punto neon girando */}
+        <div
+          className="absolute top-0.5 left-1/2 -translate-x-1/2 h-2.5 w-2.5 rounded-full bg-lime-300"
+          style={{ boxShadow: "0 0 10px 4px rgba(184,255,23,0.8), 0 0 20px 8px rgba(184,255,23,0.3)" }}
+        />
+      </motion.div>
+
+      {/* ── Anillo medio — sentido antihorario ────────────────────────── */}
+      <motion.div
+        className="absolute h-40 w-40 sm:h-56 sm:w-56"
+        animate={{ rotate: -360 }}
+        transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
+        style={{ willChange: "transform" }}
+      >
+        <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
+          <circle cx="100" cy="100" r="97" stroke="rgba(51,247,255,0.12)" strokeWidth="0.8" />
+        </svg>
+        <div
+          className="absolute top-0.5 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-cyan-300"
+          style={{ boxShadow: "0 0 8px 3px rgba(51,247,255,0.8), 0 0 16px 6px rgba(51,247,255,0.25)" }}
+        />
+      </motion.div>
+
+      {/* ── Anillo interior — violeta, inclinado ──────────────────────── */}
+      <motion.div
+        className="absolute h-28 w-28 sm:h-40 sm:w-40"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
+        style={{ willChange: "transform", transform: "rotateX(60deg)" }}
+      >
+        <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
+          <ellipse cx="100" cy="100" rx="97" ry="50" stroke="rgba(155,77,255,0.15)" strokeWidth="1" strokeDasharray="6 10" />
+        </svg>
+      </motion.div>
+
+      {/* ── Logo ZODI — aparece una vez, se mantiene ─────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={{ opacity: 0.22, scale: 1 }}
+        transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+        className="absolute"
+      >
+        <Image
+          src="/zodi-art/brand/isotipo.png"
+          alt=""
+          width={110}
+          height={110}
+          className="mix-blend-screen"
+          priority
+          draggable={false}
+        />
+      </motion.div>
+
+      {/* ── Pulso interior — halo que respira ────────────────────────── */}
+      <motion.div
+        className="absolute h-20 w-20 sm:h-28 sm:w-28 rounded-full"
+        animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          background: "radial-gradient(circle, rgba(155,77,255,0.2) 0%, transparent 70%)",
+          willChange: "transform, opacity",
+        }}
+      />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function HeroConsole() {
   const ctx = getTodaysAstralContext();
@@ -197,14 +299,8 @@ export function HeroConsole() {
       <section className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
       {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
       <div className="glass-panel neon-border overflow-hidden rounded-2xl relative">
-        {/* Atmospheric video background */}
-        <video
-          className="absolute inset-0 h-full w-full object-cover opacity-[0.18] -z-10 rounded-2xl"
-          autoPlay muted loop playsInline
-        >
-          <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-transparent -z-10 rounded-2xl" />
+        <CrystalBallBg />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-transparent -z-10 rounded-2xl" />
 
         <div className="p-5 sm:p-7">
           {/* Kicker */}
