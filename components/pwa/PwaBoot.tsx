@@ -48,17 +48,43 @@ export function usePwa() {
 }
 
 export function PwaBoot() {
-  const [offline, setOffline] = useState(false);
+  const [offline, setOffline]         = useState(false);
+  const [updateReady, setUpdateReady] = useState(false);
+
+  function forceUpdate() {
+    if ("caches" in window) {
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+        .finally(() => (window as Window).location.reload());
+    } else {
+      (window as Window).location.reload();
+    }
+  }
 
   useEffect(() => {
-    if (window.matchMedia("(display-mode: standalone)").matches) return;
-    if ((navigator as { standalone?: boolean }).standalone === true) return;
-
     const isProduction = process.env.NODE_ENV === "production";
 
     if ("serviceWorker" in navigator) {
       if (isProduction) {
-        navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+        navigator.serviceWorker.register("/sw.js").then(reg => {
+          // Detectar cuando hay una nueva versión esperando
+          reg.addEventListener("updatefound", () => {
+            const newWorker = reg.installing;
+            if (!newWorker) return;
+            newWorker.addEventListener("statechange", () => {
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                setUpdateReady(true);
+              }
+            });
+          });
+          // Comprobar actualización inmediatamente
+          reg.update().catch(() => undefined);
+        }).catch(() => undefined);
+
+        // Si el SW toma el control, recargar para usar los nuevos assets
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (!refreshing) { refreshing = true; (window as Window).location.reload(); }
+        });
       } else {
         navigator.serviceWorker
           .getRegistrations()
@@ -105,6 +131,28 @@ export function PwaBoot() {
 
   return (
     <AnimatePresence>
+      {/* Banner de nueva versión disponible */}
+      {updateReady && (
+        <motion.div
+          key="update"
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 60 }}
+          className="fixed bottom-24 left-3 right-3 z-[60] flex items-center justify-between gap-3 rounded-2xl border border-lime-300/40 bg-[rgba(4,4,10,0.97)] px-4 py-3 shadow-[0_0_30px_rgba(0,0,0,0.8)]"
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-black text-lime-300 leading-tight">✦ Nueva versión disponible</p>
+            <p className="text-[11px] text-white/50 mt-0.5">Actualiza para ver los últimos cambios.</p>
+          </div>
+          <button
+            onClick={forceUpdate}
+            className="shrink-0 rounded-xl bg-lime-300 px-4 py-2 text-xs font-black text-black hover:bg-lime-200 active:scale-95 transition"
+          >
+            Actualizar
+          </button>
+        </motion.div>
+      )}
+
       {offline && (
         <motion.div
           key="offline"

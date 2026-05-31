@@ -2564,6 +2564,21 @@ function PerfilUI() {
             <LogOut className="h-4 w-4 shrink-0" /> Cerrar sesión
           </button>
           <button
+            onClick={() => {
+              if (typeof window === "undefined") return;
+              if ("caches" in window) {
+                caches.keys()
+                  .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+                  .finally(() => (window as Window).location.reload());
+              } else {
+                (window as Window).location.reload();
+              }
+            }}
+            className="flex items-center gap-2.5 rounded-lg border border-cyan-500/15 px-4 py-3 text-sm font-bold text-cyan-400/60 hover:border-cyan-500/40 hover:text-cyan-400 transition"
+          >
+            <RefreshCw className="h-4 w-4 shrink-0" /> Actualizar app
+          </button>
+          <button
             onClick={() => setShowDelete(!showDelete)}
             className="flex items-center gap-2.5 rounded-lg border border-red-500/15 px-4 py-3 text-sm font-bold text-red-400/60 hover:border-red-500/40 hover:text-red-400 transition"
           >
