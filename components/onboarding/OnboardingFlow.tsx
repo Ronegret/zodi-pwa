@@ -372,11 +372,9 @@ export function OnboardingFlow() {
                 <div className="mt-5 grid gap-3">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Input label="Fecha de nacimiento *" value={data.birthDate} onChange={v => update("birthDate",v)} type="date" />
-                    <div>
-                      <Input label="Hora (mejora el ascendente)" value={data.birthTime} onChange={v => update("birthTime",v)} type="time" />
-                      <p className="mt-1 text-[11px] text-white/35">Sin hora, calculo igual pero el ascendente será aproximado.</p>
-                    </div>
+                    <Input label="Hora de nacimiento (opcional)" value={data.birthTime} onChange={v => update("birthTime",v)} type="time" />
                   </div>
+                  <p className="-mt-1 text-[11px] text-white/35">Sin hora, calculo igual pero el ascendente será aproximado.</p>
                   <PlacePicker
                     countryLabel="País de nacimiento *" countryValue={data.birthCountry}
                     onCountryChange={v => { update("birthCountry",v); update("birthCity",""); }}
@@ -518,8 +516,11 @@ function Input({ label, value, onChange, type = "text", placeholder }: {
   return (
     <label className="block cursor-text rounded-xl border border-white/08 bg-black/35 p-3.5 transition focus-within:border-lime-300/40">
       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/40">{label}</span>
-      <input className="w-full bg-transparent text-white outline-none placeholder:text-white/25"
-        type={type} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />
+      <input
+        className="h-6 w-full bg-transparent text-sm text-white outline-none placeholder:text-white/25 [color-scheme:dark]"
+        type={type} value={value} placeholder={placeholder}
+        onChange={e => onChange(e.target.value)}
+      />
     </label>
   );
 }
@@ -528,35 +529,66 @@ function SearchSelect({ label, value, onChange, options, placeholder, icon: Icon
   label: string; value: string; onChange: (v: string) => void;
   options: string[]; placeholder?: string; icon?: React.ElementType;
 }) {
-  const [query, setQuery] = useState(value);
-  const [open, setOpen]   = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [query, setQuery]               = useState(value);
+  const [open, setOpen]                 = useState(false);
+  const [dropPos, setDropPos]           = useState<React.CSSProperties>({});
+  const wrapRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setQuery(value); }, [value]);
+
+  // Cerrar al click fuera
   useEffect(() => {
     function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const filtered = query.length === 0 ? options : options.filter(o => o.toLowerCase().includes(query.toLowerCase()));
+  // Calcular posición fixed para escapar cualquier overflow-hidden
+  function openDropdown() {
+    if (!wrapRef.current) return;
+    const rect = wrapRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const maxH = 192;
+    const style: React.CSSProperties = {
+      position: "fixed",
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    };
+    if (spaceBelow >= maxH || spaceBelow >= rect.top) {
+      style.top = rect.bottom + 6;
+    } else {
+      style.bottom = window.innerHeight - rect.top + 6;
+    }
+    setDropPos(style);
+    setOpen(true);
+  }
+
+  const filtered = query.length === 0
+    ? options
+    : options.filter(o => o.toLowerCase().includes(query.toLowerCase()));
 
   function select(opt: string) { onChange(opt); setQuery(opt); setOpen(false); }
 
   return (
-    <div ref={ref} className="relative">
-      <div className={`flex cursor-text flex-col rounded-xl border bg-black/35 p-3.5 transition ${open ? "border-lime-300/50" : "border-white/08 hover:border-white/20"}`}
-        onClick={() => setOpen(true)}>
+    <div ref={wrapRef} className="relative">
+      <div
+        className={`flex cursor-text flex-col rounded-xl border bg-black/35 p-3.5 transition ${open ? "border-lime-300/50" : "border-white/08 hover:border-white/20"}`}
+        onClick={openDropdown}
+      >
         <span className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/40">
           {Icon && <Icon className="h-3 w-3" />} {label}
         </span>
         <div className="flex items-center gap-2">
-          <input className="flex-1 bg-transparent text-white outline-none placeholder:text-white/25"
-            value={query} placeholder={placeholder ?? "Buscar..."} autoComplete="off"
-            onChange={e => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
-            onFocus={() => setOpen(true)}
+          <input
+            className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/25"
+            value={query}
+            placeholder={placeholder ?? "Buscar..."}
+            autoComplete="off"
+            onChange={e => { setQuery(e.target.value); onChange(e.target.value); if (!open) openDropdown(); }}
+            onFocus={openDropdown}
             onKeyDown={e => {
               if (e.key === "Escape") setOpen(false);
               if (e.key === "Enter" && filtered.length === 1) { select(filtered[0]); e.preventDefault(); }
@@ -565,11 +597,15 @@ function SearchSelect({ label, value, onChange, options, placeholder, icon: Icon
           <ChevronDown className={`h-4 w-4 shrink-0 text-white/30 transition-transform ${open ? "rotate-180" : ""}`} />
         </div>
       </div>
+
       <AnimatePresence>
         {open && (
-          <motion.ul initial={{ opacity:0, y:-4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-4 }}
-            transition={{ duration:0.15 }}
-            className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-[#0e0e14] shadow-2xl no-scrollbar">
+          <motion.ul
+            initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            style={dropPos}
+            className="max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-[#0d0d13] shadow-2xl no-scrollbar"
+          >
             {filtered.length === 0 ? (
               <li className="px-4 py-3 text-sm text-white/40">No encontrado — escríbelo libremente</li>
             ) : filtered.map(opt => (
