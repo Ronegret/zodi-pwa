@@ -195,11 +195,8 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   if (!ready) {
-    return (
-      <div className="grid min-h-[100dvh] place-items-center px-6 text-center text-sm font-bold text-white/55">
-        Cargando dashboard...
-      </div>
-    );
+    // Pantalla invisible — evita el flash de "Cargando dashboard..." antes de renderizar
+    return <div className="min-h-[100dvh]" aria-hidden="true" />;
   }
 
   return <>{children}</>;
