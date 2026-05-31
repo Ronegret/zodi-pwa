@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, RefreshCw, Star, Zap, Heart, Brain,
   LogOut, Trash2, Save, Camera, Check, X, Shuffle,
@@ -1796,31 +1797,39 @@ const AVATAR_PRESETS = [
 
 function PerfilUI() {
   const router = useRouter();
-  const session = getLocalSession();
-  const od = session.onboardingData;
+
+  // ── LAZY INITIALIZERS ─────────────────────────────────────────────────────
+  // Usamos funciones para que los estados se lean desde localStorage en cliente.
+  // Sin esto, en SSR/hidratación de Next.js los valores quedarían vacíos.
+  const getOd = () => (typeof window !== "undefined" ? getLocalSession().onboardingData : undefined);
+  const getSes = () => (typeof window !== "undefined" ? getLocalSession() : { isAuthenticated: false, onboardingCompleted: false, displayName: "" } as ReturnType<typeof getLocalSession>);
 
   // Editable: identidad
-  const [displayName, setDisplayName] = useState(od?.displayName ?? session.displayName ?? "");
-  const [lastName, setLastName] = useState(od?.lastName ?? "");
-  const [avatar, setAvatar] = useState(od?.avatar ?? "/zodi-art/perfil/perfil-1.png");
+  const [displayName, setDisplayName] = useState(() => { const s = getSes(); return s.onboardingData?.displayName ?? s.displayName ?? ""; });
+  const [lastName, setLastName]   = useState(() => getOd()?.lastName ?? "");
+  const [avatar, setAvatar]       = useState(() => getOd()?.avatar ?? "/zodi-art/perfil/perfil-1.png");
   // Editable: nacimiento
-  const [birthDate, setBirthDate] = useState(od?.birthDate ?? "");
-  const [birthTime, setBirthTime] = useState(od?.birthTime ?? "");
-  const [birthCountry, setBirthCountry] = useState(od?.birthCountry ?? "");
-  const [birthCity, setBirthCity] = useState(od?.birthCity ?? "");
+  const [birthDate, setBirthDate]     = useState(() => getOd()?.birthDate ?? "");
+  const [birthTime, setBirthTime]     = useState(() => getOd()?.birthTime ?? "");
+  const [birthCountry, setBirthCountry] = useState(() => getOd()?.birthCountry ?? "");
+  const [birthCity, setBirthCity]     = useState(() => getOd()?.birthCity ?? "");
   // Editable: ubicación actual
-  const [currentCountry, setCurrentCountry] = useState(od?.currentCountry ?? "");
-  const [currentCity, setCurrentCity] = useState(od?.currentCity ?? "");
+  const [currentCountry, setCurrentCountry] = useState(() => getOd()?.currentCountry ?? "");
+  const [currentCity, setCurrentCity]       = useState(() => getOd()?.currentCity ?? "");
   // Editable: contexto vital
   type RelStatus = "single" | "relationship" | "married" | "complicated" | "divorced" | "";
-  const [relationshipStatus, setRelationshipStatus] = useState<RelStatus>(od?.relationshipStatus ?? "");
-  const [partnerName, setPartnerName] = useState(od?.partnerName ?? "");
-  const [partnerBirthDate, setPartnerBirthDate] = useState(od?.partnerBirthDate ?? "");
-  const [hasKids, setHasKids] = useState(od?.hasKids ?? false);
-  const [kidsCount, setKidsCount] = useState(od?.kidsCount ?? 1);
-  const [personalBio, setPersonalBio] = useState(od?.personalBio ?? "");
+  const [relationshipStatus, setRelationshipStatus] = useState<RelStatus>(() => getOd()?.relationshipStatus ?? "");
+  const [partnerName, setPartnerName]           = useState(() => getOd()?.partnerName ?? "");
+  const [partnerBirthDate, setPartnerBirthDate] = useState(() => getOd()?.partnerBirthDate ?? "");
+  const [hasKids, setHasKids]     = useState(() => getOd()?.hasKids ?? false);
+  const [kidsCount, setKidsCount] = useState(() => getOd()?.kidsCount ?? 1);
+  const [personalBio, setPersonalBio] = useState(() => getOd()?.personalBio ?? "");
   // Editable: tono
-  const [readingTone, setReadingTone] = useState<"suave" | "directo" | "brutal" | "sarcastico">(od?.readingTone ?? "directo");
+  const [readingTone, setReadingTone] = useState<"suave" | "directo" | "brutal" | "sarcastico">(() => getOd()?.readingTone ?? "directo");
+
+  // Para acceder a datos no editables (email, astralProfile)
+  const session = getSes();
+  const od = getOd();
 
   // Solo lectura
   const email = session.email ?? "";
@@ -1984,9 +1993,14 @@ function PerfilUI() {
   const sunSign = birthDate ? calculateSunSign(birthDate) : ap?.sunSign;
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 w-full max-w-full">
       {/* ── Información personal ── */}
-      <div className="glass-panel rounded-xl p-4 sm:p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="glass-panel rounded-xl p-4 sm:p-5"
+      >
         {/* Header: título + gemas */}
         <div className="flex items-center justify-between gap-2 mb-4">
           <div>
@@ -2071,10 +2085,15 @@ function PerfilUI() {
         </div>
 
         <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} />
-      </div>
+      </motion.div>
 
       {/* ── Datos de nacimiento ── */}
-      <div className="glass-panel rounded-xl p-4 sm:p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.05 }}
+        className="glass-panel rounded-xl p-4 sm:p-5"
+      >
         <h2 className="text-lg font-black mb-0.5">Datos de nacimiento</h2>
         <p className="text-[11px] text-white/40 mb-4">ZODI usa estos datos para tus lecturas astrológicas personalizadas.</p>
 
@@ -2128,10 +2147,15 @@ function PerfilUI() {
             <RefreshCw className="h-3.5 w-3.5" /> Recalcular
           </a>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Dónde estás ahora (dialecto de ZODI) ── */}
-      <div className="glass-panel rounded-xl p-4 sm:p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.1 }}
+        className="glass-panel rounded-xl p-4 sm:p-5"
+      >
         <h2 className="text-lg font-black mb-0.5">¿Dónde estás ahora?</h2>
         <p className="text-[11px] text-white/40 mb-4">ZODI ajusta su lenguaje al lugar donde vives. Chileno, mexicano, rioplatense… como uno de allí.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2152,97 +2176,152 @@ function PerfilUI() {
           />
         </div>
         <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar ubicación" />
-      </div>
+      </motion.div>
 
       {/* ── Contexto vital — para lecturas más personalizadas ── */}
-      <div className="glass-panel rounded-xl p-4 sm:p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.15 }}
+        className="glass-panel rounded-xl p-4 sm:p-5"
+      >
         <h2 className="text-lg font-black mb-0.5">Tu contexto vital</h2>
         <p className="text-[11px] text-white/40 mb-4">Cuanto más sepa ZODI de ti, más exacta (y ácida) será la lectura. Todo opcional, todo privado.</p>
 
-        {/* Estado sentimental */}
-        <div className="mb-4">
+        {/* Estado sentimental — grid 2-col en mobile, wrap en desktop */}
+        <div className="mb-5">
           <span className="text-[10px] uppercase tracking-widest text-white/40 block mb-2">Estado sentimental</span>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {(["single", "relationship", "married", "complicated", "divorced"] as const).map(key => {
-              const labels: Record<string, string> = { single: "Soltero/a 🤷", relationship: "En pareja 💕", married: "Casado/a 💍", complicated: "Complicado 🙃", divorced: "Separado/a 💔" };
+              const labels: Record<string, string> = {
+                single: "🤷 Soltero/a",
+                relationship: "💕 En pareja",
+                married: "💍 Casado/a",
+                complicated: "🙃 Complicado",
+                divorced: "💔 Separado/a"
+              };
               return (
-              <button key={key} onClick={() => setRelationshipStatus(prev => (prev === key ? "" : key) as RelStatus)}
-                className={`rounded-lg px-3 py-2 text-xs font-bold transition ${
-                  relationshipStatus === key ? "bg-lime-300 text-black" : "border border-white/10 text-white/60 hover:border-lime-300/30"
-                }`}>
-                {labels[key]}
-              </button>
-            );})}
+                <button
+                  key={key}
+                  onClick={() => setRelationshipStatus(prev => (prev === key ? "" : key) as RelStatus)}
+                  className={`rounded-xl py-2.5 px-2 text-xs font-bold transition active:scale-95 ${
+                    relationshipStatus === key
+                      ? "bg-lime-300 text-black shadow-[0_0_12px_rgba(184,255,23,0.3)]"
+                      : "border border-white/10 text-white/60 hover:border-lime-300/30 hover:text-white"
+                  }`}
+                >
+                  {labels[key]}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Pareja — solo si está en pareja/casado */}
-        {(relationshipStatus === "relationship" || relationshipStatus === "married") && (
-          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-xl border border-lime-300/10 bg-lime-300/5 p-3">
-            <label className="block">
-              <span className="text-[10px] uppercase tracking-widest text-white/40">Nombre de tu pareja</span>
-              <input value={partnerName} onChange={e => setPartnerName(e.target.value)}
-                placeholder="Su nombre..."
-                className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55" />
-            </label>
-            <label className="block">
-              <span className="text-[10px] uppercase tracking-widest text-white/40">Fecha de nacimiento de tu pareja</span>
-              <input type="date" value={partnerBirthDate} onChange={e => setPartnerBirthDate(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55 [color-scheme:dark]" />
-              {partnerBirthDate && (
-                <p className="mt-1 text-[10px] text-lime-300/70">
-                  Signo: {calculateSunSign(partnerBirthDate)}
-                </p>
-              )}
-            </label>
-          </div>
-        )}
-
-        {/* Hijos */}
-        <div className="mb-4 flex items-center gap-4">
-          <button onClick={() => setHasKids(!hasKids)}
-            className={`rounded-lg px-4 py-2.5 text-xs font-bold transition ${
-              hasKids ? "bg-violet-500 text-white" : "border border-white/10 text-white/60 hover:border-violet-400/30"
-            }`}>
-            {hasKids ? "✓ Tengo hijos" : "¿Tienes hijos?"}
-          </button>
-          {hasKids && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-white/40">Cuántos:</span>
-              {[1, 2, 3, 4, 5].map(n => (
-                <button key={n} onClick={() => setKidsCount(n)}
-                  className={`h-8 w-8 rounded-lg text-xs font-black transition ${
-                    kidsCount === n ? "bg-violet-500 text-white" : "border border-white/15 text-white/50 hover:text-white"
-                  }`}>{n}</button>
-              ))}
-              {kidsCount >= 5 && <span className="text-xs text-white/30">+</span>}
-            </div>
+        {/* Pareja — solo si está en pareja/casado, con animación */}
+        <AnimatePresence>
+          {(relationshipStatus === "relationship" || relationshipStatus === "married") && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-5 overflow-hidden"
+            >
+              <div className="grid grid-cols-1 gap-3 rounded-xl border border-lime-300/15 bg-lime-300/5 p-3 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-widest text-white/40">Nombre de tu pareja</span>
+                  <input
+                    value={partnerName}
+                    onChange={e => setPartnerName(e.target.value)}
+                    placeholder="Su nombre..."
+                    className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-widest text-white/40">Fecha de nacimiento</span>
+                  <input
+                    type="date"
+                    value={partnerBirthDate}
+                    onChange={e => setPartnerBirthDate(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55 [color-scheme:dark]"
+                  />
+                  {partnerBirthDate && (
+                    <p className="mt-1 text-[10px] font-bold text-lime-300">
+                      Signo: {calculateSunSign(partnerBirthDate)}
+                    </p>
+                  )}
+                </label>
+              </div>
+            </motion.div>
           )}
+        </AnimatePresence>
+
+        {/* Hijos — toggle compacto */}
+        <div className="mb-5">
+          <span className="text-[10px] uppercase tracking-widest text-white/40 block mb-2">¿Tienes hijos?</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setHasKids(!hasKids)}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition active:scale-95 ${
+                hasKids ? "bg-violet-500 text-white shadow-[0_0_10px_rgba(155,77,255,0.3)]" : "border border-white/10 text-white/60 hover:border-violet-400/30"
+              }`}
+            >
+              {hasKids ? "✓ Sí, tengo" : "No tengo"}
+            </button>
+            <AnimatePresence>
+              {hasKids && (
+                <motion.div
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-1.5"
+                >
+                  <span className="text-[10px] text-white/40">Cuántos:</span>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button
+                      key={n}
+                      onClick={() => setKidsCount(n)}
+                      className={`h-7 w-7 rounded-lg text-xs font-black transition active:scale-95 ${
+                        kidsCount === n ? "bg-violet-500 text-white" : "border border-white/15 text-white/50 hover:text-white"
+                      }`}
+                    >{n}</button>
+                  ))}
+                  {kidsCount >= 5 && <span className="text-[10px] text-white/30">+</span>}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Historia personal */}
         <div className="mb-4">
           <span className="text-[10px] uppercase tracking-widest text-white/40 block mb-1">Tu historia en dos líneas</span>
-          <p className="text-[10px] text-white/30 mb-2">ZODI usará esto para alinear las constelaciones con tu vida real.</p>
+          <p className="text-[10px] text-white/30 mb-2">ZODI alinea las constelaciones con tu vida real. Qué más.</p>
           <textarea
             value={personalBio}
             onChange={e => setPersonalBio(e.target.value)}
             rows={3}
             maxLength={400}
-            placeholder="Ej: Trabajo en diseño, llevo 3 años en una relación, acabo de cambiar de ciudad... lo que creas relevante."
-            className="w-full resize-none rounded-lg border border-white/10 bg-black/45 p-3 text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-300/55"
+            placeholder="Trabajo en..., llevo X años en..., acabo de..., lo que sea relevante."
+            className="w-full resize-none rounded-xl border border-white/10 bg-black/45 p-3 text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-300/55 transition"
           />
           <p className="mt-0.5 text-right text-[10px] text-white/25">{personalBio.length}/400</p>
         </div>
 
         <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar contexto" />
-      </div>
+      </motion.div>
 
       {/* ── Tono de lecturas ── */}
-      <div className="glass-panel rounded-xl p-4 sm:p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.2 }}
+        className="glass-panel rounded-xl p-4 sm:p-5"
+      >
         <h2 className="text-lg font-black mb-0.5">Tono de lecturas</h2>
         <p className="text-[11px] text-white/40 mb-3">Cómo quieres que ZODI te hable.</p>
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-4">
+        <div className="grid grid-cols-2 gap-2 mb-4">
           {(["suave", "directo", "brutal", "sarcastico"] as const).map(t => {
             const labels: Record<string, string> = {
               suave: "🌙 Suave", directo: "⚡ Directo", brutal: "🔥 Brutal", sarcastico: "💀 Sarcástico"
@@ -2259,7 +2338,7 @@ function PerfilUI() {
           })}
         </div>
         <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar preferencias" />
-      </div>
+      </motion.div>
 
       <InstallPwaCard />
 

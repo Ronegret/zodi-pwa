@@ -43,12 +43,43 @@ export function getLocalSession(): LocalZodiSession {
     }
   }
 
-  // Auto-corregir sunSign si birthDate está disponible y no coincide
-  // Esto soluciona signos guardados con datos incorrectos o desactualizados
-  if (parsed.onboardingData?.birthDate && parsed.astralProfile) {
-    const correct = calculateSunSign(parsed.onboardingData.birthDate);
-    if (correct && parsed.astralProfile.sunSign !== correct) {
-      parsed = { ...parsed, astralProfile: { ...parsed.astralProfile, sunSign: correct } };
+  // Auto-corregir/completar astralProfile desde onboardingData
+  if (parsed.onboardingData?.birthDate) {
+    const od = parsed.onboardingData;
+    const ap = parsed.astralProfile;
+    const correctSun = calculateSunSign(od.birthDate);
+    const needsRegen = !ap ||
+      (ap.sunSign !== correctSun) ||
+      !ap.moonSign ||
+      !ap.ascendant;
+
+    if (needsRegen) {
+      // Importación dinámica circular: calculamos directamente aquí
+      const signs = ["Aries","Tauro","Géminis","Cáncer","Leo","Virgo","Libra","Escorpio","Sagitario","Capricornio","Acuario","Piscis"];
+      const chineseAnimals = ["Rata","Buey","Tigre","Conejo","Dragón","Serpiente","Caballo","Cabra","Mono","Gallo","Perro","Cerdo"];
+      const date = new Date(`${od.birthDate}T${od.birthTime || "12:00"}`);
+      const seed = date.getFullYear() + date.getMonth() + date.getDate() + Number(od.birthTime?.slice(0, 2) || 0);
+      const moonSign  = signs[(seed + (od.birthCity?.length || 5)) % signs.length];
+      const ascendant = signs[(seed + (od.birthCountry?.length || 5) + 4) % signs.length];
+      const chinese   = chineseAnimals[(date.getFullYear() - 4) % 12];
+
+      // Calcular lifePathNumber
+      let lp = od.birthDate.replace(/\D/g,"").split("").map(Number).reduce((a,b)=>a+b,0);
+      while (lp > 9 && ![11,22,33].includes(lp)) lp = String(lp).split("").map(Number).reduce((a,b)=>a+b,0);
+
+      const corrected = {
+        ...(ap ?? {}),
+        sunSign:        correctSun,
+        moonSign:       ap?.moonSign || moonSign,
+        ascendant:      ap?.ascendant || ascendant,
+        chineseZodiac:  ap?.chineseZodiac || chinese,
+        lifePathNumber: ap?.lifePathNumber || lp,
+        natalChartBase: ap?.natalChartBase || `Sol en ${correctSun}, Luna en ${moonSign}, Ascendente ${ascendant}`,
+        summary:        ap?.summary || `${correctSun} con Luna en ${moonSign}: energía intensa y sin filtros.`,
+        mayanSign:      ap?.mayanSign || "",
+        biorhythmBaseline: ap?.biorhythmBaseline || "",
+      };
+      parsed = { ...parsed, astralProfile: corrected };
       window.localStorage.setItem(SESSION_KEY, JSON.stringify(parsed));
     }
   }
