@@ -27,57 +27,80 @@ export function MusicPlayer() {
 
   if (dismissed) return null;
 
-  // En el dashboard mostramos un banner expandible más visible
+  // En el dashboard — mini player compacto en la derecha, siempre con play visible
   if (isDash) {
     return (
       <AnimatePresence>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-[88px] left-4 z-40 lg:bottom-6 lg:left-auto lg:right-6"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.8, duration: 0.4 }}
+          className="fixed bottom-[88px] right-4 z-40 lg:bottom-6 lg:right-6"
         >
           {expanded ? (
+            /* Panel expandido */
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-3 rounded-2xl border border-lime-300/30 bg-black/90 px-4 py-3 shadow-[0_0_20px_rgba(184,255,23,0.2)] backdrop-blur-md"
+              initial={{ opacity: 0, scale: 0.9, x: 10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 10 }}
+              className="flex items-center gap-2.5 rounded-2xl border border-lime-300/30 bg-[rgba(4,4,10,0.95)] px-3 py-2.5 shadow-[0_4px_24px_rgba(0,0,0,0.7),0_0_16px_rgba(184,255,23,0.12)]"
             >
               {/* Vinilo girando */}
               <motion.div
                 animate={{ rotate: isPlaying ? 360 : 0 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                className="relative h-10 w-10 shrink-0 rounded-full border border-lime-300/40 bg-black shadow-[0_0_10px_rgba(184,255,23,0.3)]"
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                className="relative h-9 w-9 shrink-0 rounded-full border border-lime-300/30 bg-black"
               >
-                <div className="absolute inset-1 rounded-full border border-white/10" />
-                <div className="absolute inset-2 rounded-full border border-white/10" />
+                <div className="absolute inset-1 rounded-full border border-white/08" />
+                <div className="absolute inset-2 rounded-full border border-white/08" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-2.5 w-2.5 rounded-full bg-lime-300" />
+                  <div className="h-2 w-2 rounded-full bg-lime-300" />
                 </div>
               </motion.div>
+
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-lime-300/70">Música ZODI</p>
-                <p className="text-sm font-black text-white truncate max-w-[140px]">ZODI te lo dijo 🎵</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-lime-300/60">Música ZODI</p>
+                <p className="text-xs font-black text-white truncate max-w-[110px]">ZODI te lo dijo</p>
               </div>
-              <button onClick={toggle} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-lime-300 text-black transition hover:bg-lime-200">
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+
+              {/* Play / Pause */}
+              <button
+                onClick={toggle}
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-lime-300 text-black transition hover:bg-lime-200 active:scale-95"
+              >
+                {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
               </button>
-              <button onClick={() => setExpanded(false)} className="text-white/40 hover:text-white/70 transition">
-                <X className="h-4 w-4" />
+
+              <button onClick={() => setExpanded(false)} className="text-white/30 hover:text-white/60 transition shrink-0">
+                <X className="h-3.5 w-3.5" />
               </button>
             </motion.div>
           ) : (
+            /* Botón colapsado — siempre muestra play/pause claramente */
             <motion.button
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setExpanded(true)}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-lime-300/40 bg-black/80 shadow-[0_0_15px_rgba(184,255,23,0.2)] backdrop-blur-md transition hover:border-lime-300/70"
+              aria-label={isPlaying ? "Pausar música" : "Reproducir música ZODI"}
+              className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-lime-300/35 bg-[rgba(4,4,10,0.92)] shadow-[0_4px_20px_rgba(0,0,0,0.6)] transition hover:border-lime-300/65"
             >
-              <Music2 className={`h-5 w-5 ${isPlaying ? "text-lime-300" : "text-white/60"}`} />
+              {/* Vinilo de fondo */}
+              <motion.div
+                animate={{ rotate: isPlaying ? 360 : 0 }}
+                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-1.5 rounded-full border border-white/08"
+              />
+              {/* Icono principal — play o nota musical */}
+              {isPlaying
+                ? <Pause className="relative z-10 h-4 w-4 text-lime-300" />
+                : <Play className="relative z-10 h-4 w-4 text-lime-300 ml-0.5" />
+              }
+              {/* Pulso si está reproduciendo */}
               {isPlaying && (
                 <motion.span
-                  animate={{ scale: [1, 1.6, 1], opacity: [0.4, 0, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inset-0 rounded-full border border-lime-300/40"
+                  animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                  transition={{ duration: 1.8, repeat: Infinity }}
+                  className="absolute inset-0 rounded-2xl border border-lime-300/30"
                 />
               )}
             </motion.button>

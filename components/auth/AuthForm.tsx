@@ -110,20 +110,29 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               biorhythmBaseline: ad.biorhythmBaseline ?? new Date().toISOString(),
             } as any,
             onboardingData: {
-              displayName: ud.displayName ?? "",
-              username: ud.username ?? "",
-              avatar: ud.avatar ?? "/zodi-art/perfil/perfil-1.png",
+              displayName:  ud.displayName ?? "",
+              lastName:     ud.lastName ?? "",
+              username:     ud.username ?? "",
+              avatar:       ud.avatar ?? "/zodi-art/perfil/perfil-1.png",
               genderIdentity: ud.genderIdentity ?? "",
-              // birthDate en users (respaldo) O en astralProfiles
-              birthDate: ad.birthDate ?? ud.birthDate ?? preserved.onboardingData?.birthDate ?? "",
-              birthTime: ad.birthTime ?? ud.birthTime ?? preserved.onboardingData?.birthTime ?? "",
-              birthCity: ad.birthCity ?? ud.birthCity ?? preserved.onboardingData?.birthCity ?? "",
+              // Datos de nacimiento: astralProfiles como fuente primaria, users como respaldo
+              birthDate:    ad.birthDate    ?? ud.birthDate    ?? preserved.onboardingData?.birthDate    ?? "",
+              birthTime:    ad.birthTime    ?? ud.birthTime    ?? preserved.onboardingData?.birthTime    ?? "",
+              birthCity:    ad.birthCity    ?? ud.birthCity    ?? preserved.onboardingData?.birthCity    ?? "",
               birthCountry: ad.birthCountry ?? ud.birthCountry ?? preserved.onboardingData?.birthCountry ?? "",
-              currentCity: ad.currentCity ?? ud.currentCity ?? "",
-              currentCountry: ad.currentCountry ?? ud.currentCountry ?? "",
-              readingTone: ud.readingTone ?? "directo",
-              favoriteTopics: ud.favoriteTopics ?? [],
-              notificationPreferences: ud.notificationPreferences ?? [],
+              // Ubicación actual
+              currentCity:    ud.currentCity    ?? preserved.onboardingData?.currentCity    ?? "",
+              currentCountry: ud.currentCountry ?? preserved.onboardingData?.currentCountry ?? "",
+              // Contexto vital
+              readingTone:        ud.readingTone        ?? preserved.onboardingData?.readingTone   ?? "directo",
+              favoriteTopics:     ud.favoriteTopics     ?? preserved.onboardingData?.favoriteTopics ?? [],
+              notificationPreferences: ud.notificationPreferences ?? preserved.onboardingData?.notificationPreferences ?? [],
+              relationshipStatus: ud.relationshipStatus ?? preserved.onboardingData?.relationshipStatus,
+              partnerName:        ud.partnerName        ?? preserved.onboardingData?.partnerName,
+              partnerBirthDate:   ud.partnerBirthDate   ?? preserved.onboardingData?.partnerBirthDate,
+              hasKids:            ud.hasKids            ?? preserved.onboardingData?.hasKids,
+              kidsCount:          ud.kidsCount          ?? preserved.onboardingData?.kidsCount,
+              personalBio:        ud.personalBio        ?? preserved.onboardingData?.personalBio,
             } as any,
           });
           firestoreDone = true;

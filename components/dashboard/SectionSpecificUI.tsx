@@ -2009,24 +2009,46 @@ function PerfilUI() {
       const auth = getFirebaseAuth();
       const db = getFirebaseDb();
       const uid = auth?.currentUser?.uid ?? session.uid;
-      if (db && uid) {
+      if (db && uid && !uid.startsWith("local_")) {
         await Promise.all([
           setDoc(doc(db, "users", uid), {
             displayName: name,
-            lastName: lastName.trim(),
+            lastName: lastName.trim() || null,
             avatar,
-            birthDate,
-            birthTime,
-            birthCity,
-            birthCountry,
+            birthDate:    birthDate    || null,
+            birthTime:    birthTime    || null,
+            birthCity:    birthCity    || null,
+            birthCountry: birthCountry || null,
+            // Ubicación actual — dialecto ZODI
+            currentCity:    currentCity    || null,
+            currentCountry: currentCountry || null,
+            // Contexto vital — para lecturas personalizadas
             readingTone,
+            relationshipStatus: newOd.relationshipStatus ?? null,
+            partnerName:        newOd.partnerName        ?? null,
+            partnerBirthDate:   newOd.partnerBirthDate   ?? null,
+            hasKids:            newOd.hasKids            ?? null,
+            kidsCount:          newOd.kidsCount          ?? null,
+            personalBio:        newOd.personalBio        ?? null,
+            favoriteTopics:     newOd.favoriteTopics     ?? [],
+            onboardingCompleted: true,
             updatedAt: serverTimestamp(),
           }, { merge: true }),
           setDoc(doc(db, "astralProfiles", uid), {
-            birthDate,
-            birthTime,
-            birthCity,
-            birthCountry,
+            birthDate:    birthDate    || null,
+            birthTime:    birthTime    || null,
+            birthCity:    birthCity    || null,
+            birthCountry: birthCountry || null,
+            // Incluir datos del astralProfile calculado
+            ...(newAp ? {
+              sunSign:       newAp.sunSign,
+              moonSign:      newAp.moonSign,
+              ascendant:     newAp.ascendant,
+              lifePathNumber: newAp.lifePathNumber,
+              chineseZodiac: newAp.chineseZodiac,
+              mayanSign:     newAp.mayanSign,
+              natalChartBase: newAp.natalChartBase,
+            } : {}),
             updatedAt: serverTimestamp(),
           }, { merge: true }),
         ]);

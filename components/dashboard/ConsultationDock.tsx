@@ -383,7 +383,7 @@ export function ConsultationDock() {
           {/* Panel de configuración */}
           <div className="flex flex-col overflow-y-auto p-5 no-scrollbar">
             <p className="zodi-kicker">{active.label}</p>
-            <h3 className="mt-1.5 text-3xl font-black" style={{ fontFamily: "var(--font-display)" }}>
+            <h3 className="mt-1.5 text-xl sm:text-2xl lg:text-3xl font-black" style={{ fontFamily: "var(--font-display)" }}>
               {active.title}
             </h3>
             <p className="mt-3 text-sm leading-6 text-white/60">{active.body}</p>

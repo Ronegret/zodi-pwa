@@ -46,7 +46,7 @@ export function DashboardLaunchpad() {
             >
               <Link
                 href={`/dashboard/${slug}`}
-                className={`group relative flex min-h-52 flex-col overflow-hidden rounded-2xl border border-white/08 bg-gradient-to-br ${color} shadow-lg transition-all duration-300 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]`}
+                className={`group relative flex min-h-36 sm:min-h-44 lg:min-h-52 flex-col overflow-hidden rounded-2xl border border-white/08 bg-gradient-to-br ${color} shadow-lg transition-all duration-300 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]`}
               >
                 {/* Background section image */}
                 <div className="absolute inset-0 opacity-35 transition-opacity duration-500 group-hover:opacity-55">
@@ -77,7 +77,7 @@ export function DashboardLaunchpad() {
                   {/* Text — pushed to bottom */}
                   <div className="mt-auto">
                     <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50">{section.kicker}</p>
-                    <h3 className="mt-1 text-xl font-black leading-tight text-white">{section.title}</h3>
+                    <h3 className="mt-1 text-base sm:text-lg lg:text-xl font-black leading-tight text-white">{section.title}</h3>
                     <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-white/60">{section.description}</p>
 
                     {/* CTA row */}

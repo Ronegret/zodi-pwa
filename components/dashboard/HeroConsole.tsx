@@ -354,7 +354,7 @@ export function HeroConsole() {
                 >
                   {firstName && (
                     <h1
-                      className="text-4xl sm:text-5xl font-black leading-[1.05] tracking-tight"
+                      className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight truncate"
                       style={{ fontFamily: "var(--font-display)" }}
                     >
                       {firstName},
@@ -365,12 +365,12 @@ export function HeroConsole() {
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15, duration: 0.5 }}
-                      className="mt-2 text-lg sm:text-xl font-bold leading-snug text-white/90 max-w-xl"
+                      className="mt-2 text-sm sm:text-base lg:text-xl font-bold leading-snug text-white/90 max-w-xl"
                     >
                       {phrase}
                     </motion.p>
                   ) : (
-                    <p className="mt-2 text-lg sm:text-xl font-bold leading-snug text-white/90 max-w-xl">
+                    <p className="mt-2 text-sm sm:text-base lg:text-xl font-bold leading-snug text-white/90 max-w-xl">
                       Tu mapa astral, tus lecturas y tu energía en un solo lugar.
                     </p>
                   )}
