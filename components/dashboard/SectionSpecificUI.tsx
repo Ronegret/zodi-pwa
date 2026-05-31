@@ -4,9 +4,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
-  Send, Upload, RefreshCw, Star, Flame, Zap, Heart, Brain,
-  LogOut, Trash2, Save, Camera, Check, X, Shuffle, Moon,
-  Sun, CloudLightning, Droplets, Wind, Eye, EyeOff, Plus, Minus,
+  Send, RefreshCw, Star, Zap, Heart, Brain,
+  LogOut, Trash2, Save, Camera, Check, X, Shuffle,
   Copy, Share2, BookOpen, AlertTriangle, Sparkles, ChartNoAxesCombined,
   Waves, NotebookPen, Gem
 } from "lucide-react";
@@ -14,7 +13,6 @@ import { getLocalSession, setLocalSession, signOutZodi } from "@/lib/session";
 import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
-import { PremiumUI } from "@/components/dashboard/PremiumUI";
 import { addXp, updateStreak, XP_PER_ACTION } from "@/lib/gamification";
 import { InstallPwaCard } from "@/components/pwa/PwaBoot";
 
@@ -56,24 +54,36 @@ const INTENTS = ["Amor", "Protección", "Claridad", "Abundancia", "Sanación", "
 // SHARED CONSULT HOOK
 // ─────────────────────────────────────────────────────────────────────────────
 function useConsult(section: DashboardSection) {
-  const [reply, setReply] = useState("");
+  const [reply, setReply]   = useState("");
   const [loading, setLoading] = useState(false);
   const [length, setLength] = useState<"breve" | "normal" | "extensa">("normal");
-  // Lazy init: reads localStorage exactly ONCE per mount, not on every re-render.
-  // Prevents unnecessary reads and avoids potential re-render cascades.
   const [session] = useState(getLocalSession);
   const [profile] = useState(() => buildProfile(getLocalSession()));
 
-  const lengthHints: Record<string, string> = {
-    breve:   "\n[LONGITUD: Respuesta BREVE. Máximo 4 frases directas, sin introducciones ni conclusiones largas.]",
-    extensa: "\n[LONGITUD: Respuesta EXTENSA. Lectura amplia y detallada, desarrolla cada aspecto con matices concretos.]",
-  };
+  // Refs para que `consult` tenga referencia estable y no cause re-renders
+  // en los useEffect que lo usan como dependencia
+  const lengthRef  = useRef(length);
+  const sectionRef = useRef(section);
+  const profileRef = useRef(profile);
+  lengthRef.current  = length;   // actualizar sin useEffect (synchronous)
+  sectionRef.current = section;
+  // profileRef.current nunca cambia (inicializado una sola vez)
 
-  async function consult(input: string) {
-    if (!input.trim() && !section.prompt) return;
+  const consult = useCallback(async (input: string) => {
+    const sec  = sectionRef.current;
+    const len  = lengthRef.current;
+    const prof = profileRef.current;
+
+    if (!input.trim() && !sec.prompt) return;
     setLoading(true);
     setReply("");
-    const fullInput = input + (lengthHints[length] ?? "");
+
+    const lengthHints: Record<string, string> = {
+      breve:   "\n[LONGITUD: Respuesta BREVE. Máximo 4 frases directas, sin introducciones ni conclusiones largas.]",
+      extensa: "\n[LONGITUD: Respuesta EXTENSA. Lectura amplia y detallada, desarrolla cada aspecto con matices concretos.]",
+    };
+    const fullInput = input + (lengthHints[len] ?? "");
+
     try {
       const { getFirebaseToken } = await import("@/lib/firebase/client");
       const token = await getFirebaseToken();
@@ -86,7 +96,7 @@ function useConsult(section: DashboardSection) {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
-          body: JSON.stringify({ provider: "auto", kind: section.kind, input: fullInput, profile }),
+          body: JSON.stringify({ provider: "auto", kind: sec.kind, input: fullInput, profile: prof }),
           signal: AbortSignal.timeout(25000),
         });
       } catch (fetchErr: any) {
@@ -115,7 +125,7 @@ function useConsult(section: DashboardSection) {
     } finally {
       setLoading(false);
     }
-  }
+  }, []); // referencia estable — usa refs internamente
 
   return { reply, loading, consult, session, profile, length, setLength };
 }
@@ -265,7 +275,7 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
   if (loading) return (
     <div className="mt-6 flex items-center gap-3 rounded-md border border-lime-300/20 bg-black/40 p-5">
       <div className="h-5 w-5 animate-spin rounded-full border-2 border-lime-300 border-t-transparent" />
-      <span className="animate-pulse text-sm text-lime-300/70">El cosmos esta procesando tu senal...</span>
+      <span className="animate-pulse text-sm text-lime-300/70">El cosmos está procesando tu señal...</span>
     </div>
   );
   if (!reply) return null;
@@ -445,7 +455,7 @@ function TarotUI({ section }: { section: DashboardSection }) {
             </button>
           </div>
         ) : (
-          <div className={`grid gap-4 ${cardCount === 1 ? "max-w-xs mx-auto" : cardCount === 3 ? "grid-cols-3" : "grid-cols-3"}`}>
+          <div className={`grid gap-3 ${cardCount === 1 ? "max-w-xs mx-auto" : cardCount === 3 ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3"}`}>
             {Array.from({ length: cardCount }).map((_, i) => (
               <div key={i} className="text-center">
                 <p className="text-xs text-lime-200/50 uppercase tracking-widest mb-2">
@@ -1011,12 +1021,13 @@ function RoastUI({ section }: { section: DashboardSection }) {
         </div>
 
         <p className="text-xs uppercase tracking-widest text-white/40 mb-3">Signo solar del objetivo</p>
-        <div className="grid grid-cols-6 gap-2 mb-5">
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-5">
           {ZODIAC.map(z => (
             <button
               key={z.name}
               onClick={() => setTargetSign(z.name)}
               title={z.name}
+              aria-label={z.name}
               className={`rounded-md border p-2 text-center transition ${
                 targetSign === z.name
                   ? "border-orange-400 bg-orange-400/15"
@@ -1024,7 +1035,7 @@ function RoastUI({ section }: { section: DashboardSection }) {
               }`}
             >
               <div className="text-xl">{z.emoji}</div>
-              <div className="text-[9px] text-white/40 mt-0.5">{z.name.slice(0,3)}</div>
+              <div className="text-[9px] text-white/40 mt-0.5 truncate">{z.name.slice(0,3)}</div>
             </button>
           ))}
         </div>
@@ -1395,12 +1406,14 @@ function ChinoUI({ section }: { section: DashboardSection }) {
   return (
     <div className="grid gap-5">
       <div className="glass-panel rounded-md overflow-hidden">
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[500px] bg-black">
+        <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[500px]"
+          style={{ background: "linear-gradient(135deg, rgba(220,38,38,0.15), rgba(10,10,20,0.95))" }}>
           <Image
             src={`/zodi-art/chino/${currentImg}`}
             alt={targetSign}
             fill
-            className="object-contain"
+            sizes="(max-width: 640px) 100vw, 800px"
+            className="object-contain object-center"
             priority
           />
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 text-center">
@@ -1499,12 +1512,14 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
     <div className="grid gap-5">
       {/* Sign Image */}
       <div className="glass-panel rounded-md overflow-hidden">
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[500px] bg-black">
+        <div className="relative w-full aspect-[3/4] sm:aspect-[16/9] max-h-[520px]"
+          style={{ background: "linear-gradient(to bottom, rgba(10,10,20,0.8), rgba(5,5,10,0.95))" }}>
           <Image
             src={`/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${currentImg}`}
             alt={targetSign}
             fill
-            className="object-contain"
+            sizes="(max-width: 640px) 100vw, 800px"
+            className="object-contain object-center"
             priority
           />
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 text-center">
@@ -2343,7 +2358,7 @@ function HistorialUI() {
 
             {expanded === r.id && (
               <div className="border-t border-white/10 px-4 pb-4 pt-3">
-                <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-white/80">{r.text}</pre>
+                <div className="whitespace-pre-wrap break-words font-sans text-sm leading-7 text-white/80 overflow-x-auto">{r.text}</div>
                 <div className="mt-3 flex gap-2">
                   <button
                     onClick={() => shareReading(r)}
@@ -2358,7 +2373,7 @@ function HistorialUI() {
                     <Copy className="h-3 w-3" /> Copiar
                   </button>
                   <button
-                    onClick={() => deleteReading(r.id)}
+                    onClick={() => { if (confirm("¿Borrar esta lectura?")) deleteReading(r.id); }}
                     className="flex items-center gap-1.5 rounded-md border border-red-500/20 px-3 py-2 text-xs font-bold text-red-400/60 hover:text-red-400 transition ml-auto"
                   >
                     <X className="h-3 w-3" /> Borrar
