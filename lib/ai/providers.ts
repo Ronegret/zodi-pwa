@@ -35,25 +35,42 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
   const promptBundle = params.prompt
     ? { system: params.system ?? zodiSystemPrompt, user: params.prompt }
     : buildReadingPrompt(params.kind, params.profile, params.input);
-  const provider = resolveProvider(params.provider);
 
-  if (provider === "mock") {
-    return localFallback(params.kind, params.profile, promptBundle, provider);
+  if (!resolveProvider(params.provider) || resolveProvider(params.provider) === "mock") {
+    return localFallback(params.kind, params.profile, promptBundle, "mock");
   }
 
-  try {
-    const text =
-      provider === "claude"
-        ? await callClaude(promptBundle.system, promptBundle.user)
-        : provider === "gemini"
-        ? await callGemini(promptBundle.system, promptBundle.user)
-        : await callOpenAI(promptBundle.system, promptBundle.user);
+  // Intentar proveedores en orden de preferencia con fallback automático
+  const errors: string[] = [];
 
-    return normalizeReading(text, params.kind, promptBundle, provider);
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : "No se pudo completar la lectura.";
-    return localFallback(params.kind, params.profile, promptBundle, provider, reason);
+  async function tryProvider(p: AIProvider): Promise<string | null> {
+    try {
+      if (p === "claude")  return await callClaude(promptBundle.system, promptBundle.user);
+      if (p === "openai")  return await callOpenAI(promptBundle.system, promptBundle.user);
+      if (p === "gemini")  return await callGemini(promptBundle.system, promptBundle.user);
+    } catch (e) {
+      errors.push(`${p}: ${e instanceof Error ? e.message : "error"}`);
+    }
+    return null;
   }
+
+  const ordered: AIProvider[] = params.provider && params.provider !== "auto"
+    ? [params.provider]
+    : ["claude", "openai", "gemini"];
+
+  for (const p of ordered) {
+    // Skip if provider not configured
+    if (p === "claude"  && !process.env.ANTHROPIC_API_KEY && !process.env.CLAUDE_API_KEY) continue;
+    if (p === "openai"  && !process.env.OPENAI_API_KEY)  continue;
+    if (p === "gemini"  && !process.env.GEMINI_API_KEY)  continue;
+
+    const text = await tryProvider(p);
+    if (text) return normalizeReading(text, params.kind, promptBundle, p);
+  }
+
+  const reason = errors.length > 0 ? errors.join(" | ") : "Sin proveedores configurados.";
+  console.error("generateReading: all providers failed:", errors);
+  return localFallback(params.kind, params.profile, promptBundle, "mock", reason);
 }
 
 function resolveProvider(provider: AIProvider = "auto"): AIProvider {
