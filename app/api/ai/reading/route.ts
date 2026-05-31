@@ -4,6 +4,9 @@ import type { ReadingKind } from "@/types/zodi";
 import { getFirebaseAuth } from "@/lib/firebase/admin";
 import { z } from "zod";
 
+// Ampliar el timeout de Vercel (30s en Pro, ignorado en Hobby pero no causa error)
+export const maxDuration = 30;
+
 const requests = new Map<string, { count: number; resetAt: number }>();
 
 const ReadingSchema = z.object({

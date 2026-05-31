@@ -36,41 +36,46 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
     ? { system: params.system ?? zodiSystemPrompt, user: params.prompt }
     : buildReadingPrompt(params.kind, params.profile, params.input);
 
-  if (!resolveProvider(params.provider) || resolveProvider(params.provider) === "mock") {
+  // Sin keys configuradas → fallback local inmediato
+  const resolvedProvider = resolveProvider(params.provider);
+  if (resolvedProvider === "mock") {
     return localFallback(params.kind, params.profile, promptBundle, "mock");
   }
 
-  // Intentar proveedores en orden de preferencia con fallback automático
-  const errors: string[] = [];
-
-  async function tryProvider(p: AIProvider): Promise<string | null> {
-    try {
-      if (p === "claude")  return await callClaude(promptBundle.system, promptBundle.user);
-      if (p === "openai")  return await callOpenAI(promptBundle.system, promptBundle.user);
-      if (p === "gemini")  return await callGemini(promptBundle.system, promptBundle.user);
-    } catch (e) {
-      errors.push(`${p}: ${e instanceof Error ? e.message : "error"}`);
-    }
-    return null;
-  }
-
-  const ordered: AIProvider[] = params.provider && params.provider !== "auto"
+  // Determinar qué providers tienen keys disponibles
+  const available: AIProvider[] = params.provider && params.provider !== "auto"
     ? [params.provider]
-    : ["claude", "openai", "gemini"];
+    : (["claude", "openai", "gemini"] as AIProvider[]).filter(p => {
+        if (p === "claude") return !!(process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY);
+        if (p === "openai") return !!process.env.OPENAI_API_KEY;
+        if (p === "gemini") return !!process.env.GEMINI_API_KEY;
+        return false;
+      });
 
-  for (const p of ordered) {
-    // Skip if provider not configured
-    if (p === "claude"  && !process.env.ANTHROPIC_API_KEY && !process.env.CLAUDE_API_KEY) continue;
-    if (p === "openai"  && !process.env.OPENAI_API_KEY)  continue;
-    if (p === "gemini"  && !process.env.GEMINI_API_KEY)  continue;
-
-    const text = await tryProvider(p);
-    if (text) return normalizeReading(text, params.kind, promptBundle, p);
+  if (available.length === 0) {
+    return localFallback(params.kind, params.profile, promptBundle, "mock", "Sin proveedores configurados.");
   }
 
-  const reason = errors.length > 0 ? errors.join(" | ") : "Sin proveedores configurados.";
-  console.error("generateReading: all providers failed:", errors);
-  return localFallback(params.kind, params.profile, promptBundle, "mock", reason);
+  // ── Llamar todos los providers en PARALELO — el primero que responda gana ──
+  // Esto evita el timeout de Vercel (10s Hobby) que ocurre con llamadas secuenciales.
+  // Promise.any() resuelve con el primer resultado exitoso; si todos fallan, rechaza.
+  const attempts = available.map((p): Promise<string> => {
+    if (p === "claude") return callClaude(promptBundle.system, promptBundle.user);
+    if (p === "openai") return callOpenAI(promptBundle.system, promptBundle.user);
+    if (p === "gemini") return callGemini(promptBundle.system, promptBundle.user);
+    return Promise.reject(new Error(`Provider ${p} no implementado`));
+  });
+
+  try {
+    const text = await Promise.any(attempts);
+    return normalizeReading(text, params.kind, promptBundle, resolvedProvider);
+  } catch (aggErr: any) {
+    const reason = aggErr?.errors
+      ? (aggErr.errors as Error[]).map(e => e.message).join(" | ")
+      : "Todos los providers fallaron";
+    console.error("[ZODI] generateReading: all providers failed:", reason);
+    return localFallback(params.kind, params.profile, promptBundle, "mock", reason);
+  }
 }
 
 function resolveProvider(provider: AIProvider = "auto"): AIProvider {
@@ -100,7 +105,7 @@ async function callClaude(system: string, user: string) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 7000);
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -145,7 +150,12 @@ async function callGemini(system: string, user: string) {
   const { GoogleGenAI } = await import("@google/genai");
   const ai = new GoogleGenAI({ apiKey });
 
-  const response = await ai.models.generateContent({
+  // Timeout wrapper — Gemini SDK no tiene AbortSignal nativo
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Gemini timeout")), 7000)
+  );
+
+  const geminiPromise = ai.models.generateContent({
     model: "gemini-1.5-flash",
     contents: [{ role: "user", parts: [{ text: user }] }],
     config: {
@@ -155,6 +165,7 @@ async function callGemini(system: string, user: string) {
     }
   });
 
+  const response = await Promise.race([geminiPromise, timeoutPromise]);
   const text = response.text?.trim();
   if (!text) throw new Error("La lectura llegó en silencio.");
   return text;
@@ -167,7 +178,7 @@ async function callOpenAI(system: string, user: string) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 7000);
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {

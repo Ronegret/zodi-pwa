@@ -4,6 +4,8 @@ import { zodiChatPrompt } from "@/lib/ai/prompts";
 import { buildPersonalizationBlock } from "@/lib/ai/personalization";
 import { z } from "zod";
 
+export const maxDuration = 30;
+
 const ChatSchema = z.object({
   messages: z.array(z.object({
     role: z.enum(["user", "model", "zodi"]),
@@ -69,7 +71,7 @@ async function callClaude(system: string, messages: { role: string; text: string
       system,
       messages: claudeMessages
     }),
-    signal: AbortSignal.timeout(8000)
+    signal: AbortSignal.timeout(7000)
   });
 
   if (!res.ok) throw new Error(`Claude ${res.status}`);
@@ -102,7 +104,7 @@ async function callOpenAI(system: string, messages: { role: string; text: string
       max_tokens: 400,
       messages: openaiMessages
     }),
-    signal: AbortSignal.timeout(8000)
+    signal: AbortSignal.timeout(7000)
   });
 
   if (!res.ok) throw new Error(`OpenAI ${res.status}`);
@@ -136,27 +138,33 @@ async function callGemini(system: string, messages: { role: string; text: string
   return text;
 }
 
-// ── Probar proveedores en orden: Claude → OpenAI → Gemini ────────────────────
+// ── Llamar todos los providers en PARALELO — el primero que responda gana ──
 async function generateZodiReply(system: string, messages: { role: string; text: string }[]): Promise<string> {
-  const errors: string[] = [];
+  const attempts: Promise<string>[] = [];
 
   if (process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY) {
-    try { return await callClaude(system, messages); }
-    catch (e) { errors.push(`Claude: ${e instanceof Error ? e.message : "error"}`); }
+    attempts.push(callClaude(system, messages));
   }
-
   if (process.env.OPENAI_API_KEY) {
-    try { return await callOpenAI(system, messages); }
-    catch (e) { errors.push(`OpenAI: ${e instanceof Error ? e.message : "error"}`); }
+    attempts.push(callOpenAI(system, messages));
   }
-
   if (process.env.GEMINI_API_KEY) {
-    try { return await callGemini(system, messages); }
-    catch (e) { errors.push(`Gemini: ${e instanceof Error ? e.message : "error"}`); }
+    attempts.push(callGemini(system, messages));
   }
 
-  console.error("All providers failed:", errors);
-  throw new Error("All AI providers failed");
+  if (attempts.length === 0) {
+    throw new Error("Sin providers configurados");
+  }
+
+  try {
+    return await Promise.any(attempts);
+  } catch (aggErr: any) {
+    const reason = aggErr?.errors
+      ? (aggErr.errors as Error[]).map((e: Error) => e.message).join(" | ")
+      : "Todos los providers fallaron";
+    console.error("[ZODI chat] All providers failed:", reason);
+    throw new Error(reason);
+  }
 }
 
 // ── Handler principal ────────────────────────────────────────────────────────
