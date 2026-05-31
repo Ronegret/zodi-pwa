@@ -1,13 +1,8 @@
 import { AnimatedShell } from "@/components/AnimatedShell";
-import { AIAssistant } from "@/components/dashboard/AIAssistant";
 import { BottomNav, Sidebar } from "@/components/dashboard/Navigation";
-import { ConsultationDock } from "@/components/dashboard/ConsultationDock";
 import { DashboardGate } from "@/components/dashboard/DashboardGate";
 import { DashboardLaunchpad } from "@/components/dashboard/DashboardLaunchpad";
-import { DashboardPanels } from "@/components/dashboard/DashboardPanels";
 import { HeroConsole } from "@/components/dashboard/HeroConsole";
-import { PremiumPlans } from "@/components/dashboard/PremiumPlans";
-import { FeatureGrid } from "@/components/modules/FeatureGrid";
 import { PaymentHandler } from "@/components/dashboard/PaymentHandler";
 import { Suspense } from "react";
 
@@ -18,13 +13,11 @@ export default function DashboardPage() {
         <div className="mx-auto flex w-full max-w-[1500px] gap-3 sm:gap-5 px-3 py-4 pb-nav sm:px-5">
           <Sidebar />
           <div className="min-w-0 flex-1">
+            {/* Hero personalizado — saludo + cristal + CTAs */}
             <HeroConsole />
+            {/* Grid de herramientas — la navegación principal */}
             <DashboardLaunchpad />
-            <ConsultationDock />
-            <DashboardPanels />
-            <AIAssistant />
-            <FeatureGrid />
-            <PremiumPlans />
+            {/* El resto de secciones están en /dashboard/[section] via el sidebar */}
           </div>
         </div>
         <BottomNav />

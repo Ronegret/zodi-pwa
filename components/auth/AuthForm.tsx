@@ -64,18 +64,114 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     }
   }, []);
 
-  // ── applyFirebaseUser — única función que decide a dónde ir ───────────────
+  // ── applyFirebaseUser — decide a dónde ir, RÁPIDO ────────────────────────
+  //
+  // Principio: para usuarios que regresan, navegar INMEDIATAMENTE desde datos
+  // locales y sincronizar Firestore en background. Solo bloquear si es usuario
+  // genuinamente nuevo (sin datos en ningún lado).
+  //
   const applyFirebaseUser = useCallback(async (user: User, forceNewUser = false) => {
     const preserved = getLocalSession();
     const sameUid   = preserved.uid === user.uid;
     const sameEmail = !!(user.email && preserved.email && user.email === preserved.email);
     const sameUser  = sameUid || sameEmail;
-    let localDone   = sameUser ? preserved.onboardingCompleted : false;
-    if (forceNewUser) localDone = false;
 
-    let firestoreDone = false;
+    // Mínimas gemas de bienvenida (sin bloquear)
+    import("@/lib/gamification").then(g => { if (g.getGems().total === 0) g.addGems(15); }).catch(() => {});
 
-    // Paso 1: Firestore
+    // ── VÍA RÁPIDA 1: usuario conocido en localStorage ───────────────────
+    if (!forceNewUser && sameUser && preserved.onboardingCompleted) {
+      setLocalSession({
+        isAuthenticated: true, onboardingCompleted: true,
+        uid: user.uid, email: user.email || preserved.email || "",
+        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
+        loginAt: Date.now(),
+        astralProfile: preserved.astralProfile,
+        onboardingData: preserved.onboardingData,
+      });
+      router.push("/dashboard");
+
+      // Sincronizar Firestore en background — no bloquea la navegación
+      Promise.all([
+        import("firebase/firestore"),
+        import("@/lib/firebase/client"),
+      ]).then(async ([{ getDoc, doc, setDoc, serverTimestamp }, { getFirebaseDb }]) => {
+        const db = getFirebaseDb();
+        if (!db) return;
+        const [uSnap, aSnap] = await Promise.all([
+          getDoc(doc(db, "users", user.uid)),
+          getDoc(doc(db, "astralProfiles", user.uid)),
+        ]);
+        if (uSnap.exists()) {
+          const ud = uSnap.data();
+          const ad = aSnap.exists() ? aSnap.data() : ud;
+          // Fusionar datos de Firestore con lo que ya tenemos localmente
+          setLocalSession({
+            onboardingData: {
+              ...preserved.onboardingData,
+              displayName: ud.displayName || preserved.onboardingData?.displayName || "",
+              birthDate: ad.birthDate ?? ud.birthDate ?? preserved.onboardingData?.birthDate ?? "",
+              birthTime: ad.birthTime ?? ud.birthTime ?? preserved.onboardingData?.birthTime ?? "",
+              birthCity: ad.birthCity ?? ud.birthCity ?? preserved.onboardingData?.birthCity ?? "",
+              birthCountry: ad.birthCountry ?? ud.birthCountry ?? preserved.onboardingData?.birthCountry ?? "",
+              currentCity: ud.currentCity ?? preserved.onboardingData?.currentCity ?? "",
+              currentCountry: ud.currentCountry ?? preserved.onboardingData?.currentCountry ?? "",
+              readingTone: ud.readingTone ?? preserved.onboardingData?.readingTone ?? "directo",
+              favoriteTopics: ud.favoriteTopics ?? preserved.onboardingData?.favoriteTopics ?? [],
+              notificationPreferences: ud.notificationPreferences ?? preserved.onboardingData?.notificationPreferences ?? [],
+              lastName: ud.lastName ?? preserved.onboardingData?.lastName ?? "",
+              avatar: ud.avatar ?? preserved.onboardingData?.avatar ?? "/zodi-art/perfil/perfil-1.png",
+              username: ud.username ?? preserved.onboardingData?.username ?? "",
+              genderIdentity: ud.genderIdentity ?? preserved.onboardingData?.genderIdentity ?? "",
+              relationshipStatus: ud.relationshipStatus ?? preserved.onboardingData?.relationshipStatus,
+              partnerName: ud.partnerName ?? preserved.onboardingData?.partnerName,
+              partnerBirthDate: ud.partnerBirthDate ?? preserved.onboardingData?.partnerBirthDate,
+              hasKids: ud.hasKids ?? preserved.onboardingData?.hasKids,
+              kidsCount: ud.kidsCount ?? preserved.onboardingData?.kidsCount,
+              personalBio: ud.personalBio ?? preserved.onboardingData?.personalBio,
+            } as any,
+            astralProfile: {
+              ...preserved.astralProfile,
+              sunSign: ad.sunSign ?? preserved.astralProfile?.sunSign ?? "",
+              moonSign: ad.moonSign ?? preserved.astralProfile?.moonSign ?? "",
+              ascendant: ad.ascendant ?? preserved.astralProfile?.ascendant ?? "",
+              lifePathNumber: ad.lifePathNumber ?? preserved.astralProfile?.lifePathNumber ?? 1,
+              chineseZodiac: ad.chineseZodiac ?? preserved.astralProfile?.chineseZodiac ?? "",
+              mayanSign: ad.mayanSign ?? preserved.astralProfile?.mayanSign ?? "",
+              biorhythmBaseline: ad.biorhythmBaseline ?? preserved.astralProfile?.biorhythmBaseline ?? new Date().toISOString(),
+              natalChartBase: ad.natalChartBase ?? preserved.astralProfile?.natalChartBase ?? "",
+              summary: ad.summary ?? preserved.astralProfile?.summary ?? "",
+            } as any,
+          });
+        }
+      }).catch(() => { /* silencioso — datos locales ya disponibles */ });
+      return;
+    }
+
+    // ── VÍA RÁPIDA 2: identidad duradera local ────────────────────────────
+    if (!forceNewUser) {
+      const identity = getSavedIdentity();
+      if (identity && (identity.uid === user.uid || identity.email === user.email) && identity.onboardingCompleted) {
+        setLocalSession({
+          isAuthenticated: true, onboardingCompleted: true,
+          uid: user.uid, email: user.email || identity.email,
+          displayName: user.displayName || identity.onboardingData?.displayName || "Viajero ZODI",
+          loginAt: Date.now(),
+          onboardingData: identity.onboardingData,
+          astralProfile: identity.astralProfile,
+        });
+        router.push("/dashboard");
+        // Sync Firestore en background
+        import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
+          saveOnboardingProfile(user.uid, identity.onboardingData, identity.astralProfile)
+        ).catch(() => {});
+        return;
+      }
+    }
+
+    // ── VÍA LENTA: usuario nuevo o sin datos locales → esperar Firestore ──
+    // (solo llega aquí forceNewUser=true o usuario completamente desconocido)
+    let firestoreHasData = false;
     try {
       const [{ getDoc, doc }, { getFirebaseDb }] = await Promise.all([
         import("firebase/firestore"),
@@ -87,123 +183,56 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
-
-        // Recuperar si users existe con onboardingCompleted — astralProfiles es opcional
-        // (puede faltar si el guardado en Firestore falló parcialmente)
         if (uSnap.exists() && uSnap.data().onboardingCompleted) {
           const ud = uSnap.data();
-          // Fusionar: datos del astralProfiles doc si existe, si no, los del users doc como fallback
           const ad = aSnap.exists() ? aSnap.data() : ud;
-
           setLocalSession({
             isAuthenticated: true, onboardingCompleted: true,
-            displayName: ud.displayName || user.displayName || preserved.displayName || "Viajero ZODI",
-            email: user.email || preserved.email || "",
+            displayName: ud.displayName || user.displayName || "Viajero ZODI",
+            email: user.email || "",
             uid: user.uid, loginAt: Date.now(),
             astralProfile: {
-              sunSign: ad.sunSign ?? preserved.astralProfile?.sunSign ?? "",
-              moonSign: ad.moonSign ?? preserved.astralProfile?.moonSign ?? "",
-              ascendant: ad.ascendant ?? preserved.astralProfile?.ascendant ?? "",
-              lifePathNumber: ad.lifePathNumber ?? preserved.astralProfile?.lifePathNumber ?? 1,
-              chineseZodiac: ad.chineseZodiac ?? preserved.astralProfile?.chineseZodiac ?? "",
-              mayanSign: ad.mayanSign ?? preserved.astralProfile?.mayanSign ?? "",
+              sunSign: ad.sunSign ?? "", moonSign: ad.moonSign ?? "",
+              ascendant: ad.ascendant ?? "", lifePathNumber: ad.lifePathNumber ?? 1,
+              chineseZodiac: ad.chineseZodiac ?? "", mayanSign: ad.mayanSign ?? "",
               biorhythmBaseline: ad.biorhythmBaseline ?? new Date().toISOString(),
+              natalChartBase: ad.natalChartBase ?? "", summary: ad.summary ?? "",
             } as any,
             onboardingData: {
-              displayName:  ud.displayName ?? "",
-              lastName:     ud.lastName ?? "",
-              username:     ud.username ?? "",
-              avatar:       ud.avatar ?? "/zodi-art/perfil/perfil-1.png",
+              displayName: ud.displayName ?? "", lastName: ud.lastName ?? "",
+              username: ud.username ?? "", avatar: ud.avatar ?? "/zodi-art/perfil/perfil-1.png",
               genderIdentity: ud.genderIdentity ?? "",
-              // Datos de nacimiento: astralProfiles como fuente primaria, users como respaldo
-              birthDate:    ad.birthDate    ?? ud.birthDate    ?? preserved.onboardingData?.birthDate    ?? "",
-              birthTime:    ad.birthTime    ?? ud.birthTime    ?? preserved.onboardingData?.birthTime    ?? "",
-              birthCity:    ad.birthCity    ?? ud.birthCity    ?? preserved.onboardingData?.birthCity    ?? "",
-              birthCountry: ad.birthCountry ?? ud.birthCountry ?? preserved.onboardingData?.birthCountry ?? "",
-              // Ubicación actual
-              currentCity:    ud.currentCity    ?? preserved.onboardingData?.currentCity    ?? "",
-              currentCountry: ud.currentCountry ?? preserved.onboardingData?.currentCountry ?? "",
-              // Contexto vital
-              readingTone:        ud.readingTone        ?? preserved.onboardingData?.readingTone   ?? "directo",
-              favoriteTopics:     ud.favoriteTopics     ?? preserved.onboardingData?.favoriteTopics ?? [],
-              notificationPreferences: ud.notificationPreferences ?? preserved.onboardingData?.notificationPreferences ?? [],
-              relationshipStatus: ud.relationshipStatus ?? preserved.onboardingData?.relationshipStatus,
-              partnerName:        ud.partnerName        ?? preserved.onboardingData?.partnerName,
-              partnerBirthDate:   ud.partnerBirthDate   ?? preserved.onboardingData?.partnerBirthDate,
-              hasKids:            ud.hasKids            ?? preserved.onboardingData?.hasKids,
-              kidsCount:          ud.kidsCount          ?? preserved.onboardingData?.kidsCount,
-              personalBio:        ud.personalBio        ?? preserved.onboardingData?.personalBio,
+              birthDate: ad.birthDate ?? ud.birthDate ?? "",
+              birthTime: ad.birthTime ?? ud.birthTime ?? "",
+              birthCity: ad.birthCity ?? ud.birthCity ?? "",
+              birthCountry: ad.birthCountry ?? ud.birthCountry ?? "",
+              currentCity: ud.currentCity ?? "", currentCountry: ud.currentCountry ?? "",
+              readingTone: ud.readingTone ?? "directo",
+              favoriteTopics: ud.favoriteTopics ?? [],
+              notificationPreferences: ud.notificationPreferences ?? [],
+              relationshipStatus: ud.relationshipStatus, partnerName: ud.partnerName,
+              partnerBirthDate: ud.partnerBirthDate, hasKids: ud.hasKids,
+              kidsCount: ud.kidsCount, personalBio: ud.personalBio,
             } as any,
           });
-          firestoreDone = true;
+          firestoreHasData = true;
         }
       }
     } catch { /* Firestore no disponible */ }
 
-    // Paso 2: Identidad duradera local
-    // Solo para usuarios que regresan (forceNewUser=false) — nunca para registros nuevos
-    if (!firestoreDone && !forceNewUser) {
-      const identity = getSavedIdentity();
-      const idMatch = identity && (identity.uid === user.uid || identity.email === user.email) && identity.onboardingCompleted;
-      if (idMatch && identity) {
-        setLocalSession({
-          isAuthenticated: true, onboardingCompleted: true,
-          uid: user.uid, email: user.email || identity.email,
-          displayName: user.displayName || preserved.displayName || "Viajero ZODI",
-          loginAt: Date.now(),
-          onboardingData: identity.onboardingData,
-          astralProfile: identity.astralProfile,
-        });
-        import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
-          saveOnboardingProfile(user.uid, identity.onboardingData, identity.astralProfile)
-        ).catch(() => {});
-        firestoreDone = true;
-      }
-    }
-
-    // Paso 3: Sesión local del mismo usuario
-    // Solo para usuarios que regresan (forceNewUser=false)
-    if (!firestoreDone && !forceNewUser && sameUser && preserved.onboardingCompleted) {
-      setLocalSession({
-        isAuthenticated: true, onboardingCompleted: true,
-        uid: user.uid, email: user.email || preserved.email || "",
-        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
-        loginAt: Date.now(), astralProfile: preserved.astralProfile,
-        onboardingData: preserved.onboardingData,
-      });
-      if (preserved.onboardingData && preserved.astralProfile) {
-        import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>
-          saveOnboardingProfile(user.uid, preserved.onboardingData as any, preserved.astralProfile as any)
-        ).catch(() => {});
-      }
-      firestoreDone = true;
-    }
-
-    // Paso 4: No encontramos datos en ningún lado
-    // - forceNewUser = true  → usuario genuinamente nuevo → onboarding
-    // - forceNewUser = false → usuario existente que ya completó → dashboard
-    //   (prefiero que llegue al dashboard sin datos a que quede en loop de onboarding)
-    const existingUserFallback = !forceNewUser;
-    if (!firestoreDone) {
+    if (!firestoreHasData) {
       setLocalSession({
         isAuthenticated: true,
-        onboardingCompleted: existingUserFallback,
+        onboardingCompleted: !forceNewUser,
         displayName: user.displayName || preserved.displayName || "Viajero ZODI",
         email: user.email || preserved.email || "",
-        uid: user.uid,
-        loginAt: Date.now(),
+        uid: user.uid, loginAt: Date.now(),
         astralProfile: preserved.astralProfile,
         onboardingData: preserved.onboardingData,
       });
     }
 
-    try {
-      const g = await import("@/lib/gamification");
-      if (g.getGems().total === 0) g.addGems(15);
-    } catch { /* ignorar */ }
-
-    const done = firestoreDone || localDone || existingUserFallback;
-    router.push(done ? "/dashboard" : "/onboarding");
+    router.push(firestoreHasData || !forceNewUser ? "/dashboard" : "/onboarding");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
@@ -271,6 +300,27 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setMessage("Firebase no configurado. Revisa las variables NEXT_PUBLIC_FIREBASE_*.");
       setGoogleLoading(false);
       return;
+    }
+
+    // En mobile/PWA usar redirect directamente — popup es bloqueado en iOS Safari
+    const isStandalone = typeof window !== "undefined" && (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as { standalone?: boolean }).standalone === true
+    );
+    const isMobile = typeof navigator !== "undefined" &&
+      /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isStandalone || isMobile) {
+      try {
+        sessionStorage.setItem("zodi.google_redirect_pending", "1");
+        await signInWithRedirect(auth, googleProvider);
+        return; // página navega
+      } catch {
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        setMessage("Error al iniciar Google. Intenta con email y contraseña.");
+        setGoogleLoading(false);
+        return;
+      }
     }
 
     try {
