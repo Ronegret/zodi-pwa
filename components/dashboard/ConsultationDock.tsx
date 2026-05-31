@@ -6,12 +6,15 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CalendarDays, Check, Copy, Gem, HeartHandshake,
-  MoonStar, Share2, Sparkles, Star, Users, Waves, WandSparkles
+  MoonStar, Share2, Sparkles, Star, Users, Waves, WandSparkles,
+  UserPlus, X, Trash2
 } from "lucide-react";
 import { demoProfile } from "@/lib/data";
 import { getSessionProfile } from "@/lib/session";
 import { addGems, addXp, GEMS_PER_EVENT } from "@/lib/gamification";
 import { ZodiLoader } from "@/components/modules/ZodiLoader";
+import { getCircle, addToCircle, removeFromCircle, type CirclePerson, type CircleRelation } from "@/lib/circle";
+import { calculateSunSign, calculateLifePathNumber } from "@/lib/astral";
 import type { LucideIcon } from "lucide-react";
 import type { ReadingKind } from "@/types/zodi";
 
@@ -192,6 +195,34 @@ export function ConsultationDock() {
   const [result, setResult]       = useState<string | null>(null);
   const [showGems, setShowGems]   = useState(false);
   const [cotilleoSign, setCotilleoSign] = useState("");
+  // Mi Círculo
+  const [circle, setCircle]       = useState<CirclePerson[]>([]);
+  const [selectedPerson, setSelectedPerson] = useState<CirclePerson | null>(null);
+  const [addingPerson, setAddingPerson]     = useState(false);
+  const [newName, setNewName]               = useState("");
+  const [newRelation, setNewRelation]       = useState<CircleRelation>("amigo/a");
+  const [newBirthDate, setNewBirthDate]     = useState("");
+
+  // Cargar círculo al montar
+  useEffect(() => {
+    if (typeof window !== "undefined") setCircle(getCircle());
+  }, []);
+
+  function refreshCircle() { setCircle(getCircle()); }
+
+  function handleAddPerson() {
+    if (!newName.trim()) return;
+    addToCircle({ name: newName.trim(), relation: newRelation, birthDate: newBirthDate || undefined });
+    setNewName(""); setNewBirthDate(""); setNewRelation("amigo/a");
+    setAddingPerson(false);
+    refreshCircle();
+  }
+
+  function handleRemovePerson(id: string) {
+    removeFromCircle(id);
+    if (selectedPerson?.id === id) setSelectedPerson(null);
+    refreshCircle();
+  }
 
   // Ocultar toast de gemas tras 2s
   useEffect(() => {
@@ -209,11 +240,29 @@ export function ConsultationDock() {
     const baseProfile = sessionProfile ?? demoProfile;
 
     const domainFocus = focus ?? active.focusDomain ?? undefined;
+
+    // Contexto de la persona del cotilleo
+    let cotilleoCtx = "";
+    if (active.title === "Cotilleo") {
+      if (selectedPerson) {
+        const sign = selectedPerson.zodiacSign ?? (selectedPerson.birthDate ? calculateSunSign(selectedPerson.birthDate) : "");
+        const lp = selectedPerson.lifePathNumber ?? (selectedPerson.birthDate ? calculateLifePathNumber(selectedPerson.birthDate) : null);
+        cotilleoCtx = `Persona a leer: ${selectedPerson.name} (${selectedPerson.relation}). ` +
+          `${selectedPerson.birthDate ? `Nacido/a el ${selectedPerson.birthDate}. ` : ""}` +
+          `${sign ? `Signo: ${sign}. ` : ""}` +
+          `${lp ? `Camino de vida: ${lp}. ` : ""}` +
+          `${selectedPerson.birthCity ? `Origen: ${selectedPerson.birthCity}, ${selectedPerson.birthCountry ?? ""}. ` : ""}` +
+          `${selectedPerson.notes ? `Notas: ${selectedPerson.notes}. ` : ""}`;
+      } else if (cotilleoSign) {
+        cotilleoCtx = `Signo a leer: ${cotilleoSign}.`;
+      }
+    }
+
     const userInput = [
       active.input,
-      active.title === "Cotilleo" && cotilleoSign ? `Signo a leer: ${cotilleoSign}.` : "",
+      cotilleoCtx,
       focus ? `El usuario quiere enfocarse SOLO en: ${focus}.` : "",
-      detail ? `Detalle adicional del usuario: ${detail}` : ""
+      detail ? `Detalle adicional: ${detail}` : ""
     ].filter(Boolean).join("\n");
 
     try {
@@ -291,7 +340,7 @@ export function ConsultationDock() {
               return (
                   <button
                   key={consulta.title}
-                  onClick={() => { setActive(consulta); setResult(null); setFocus(null); setCotilleoSign(""); }}
+                  onClick={() => { setActive(consulta); setResult(null); setFocus(null); setCotilleoSign(""); setSelectedPerson(null); setAddingPerson(false); }}
                   className={`hover-bubble flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${
                     isActive
                       ? "border-lime-300/50 bg-lime-300/10 text-lime-100 shadow-[0_0_16px_rgba(184,255,23,0.08)]"
@@ -339,28 +388,106 @@ export function ConsultationDock() {
             </h3>
             <p className="mt-3 text-sm leading-6 text-white/60">{active.body}</p>
 
-            {/* Selector de signo — solo para Cotilleo */}
+            {/* Mi Círculo — solo para Cotilleo */}
             {active.title === "Cotilleo" && (
-              <div className="mt-4">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">¿De qué signo es?</p>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {ZODIAC_MINI.map(z => (
-                    <button
-                      key={z.name}
-                      onClick={() => setCotilleoSign(z.name)}
-                      className={`rounded-lg border p-1.5 text-center text-xs font-bold transition ${
-                        cotilleoSign === z.name
-                          ? "border-lime-300 bg-lime-300/10 text-lime-200"
-                          : "border-white/10 text-white/50 hover:border-lime-300/25 hover:text-white/80"
-                      }`}
-                    >
-                      <div className="text-base">{z.emoji}</div>
-                      <div className="truncate text-[9px] mt-0.5">{z.name.slice(0, 5)}</div>
+              <div className="mt-4 space-y-3">
+                {/* Lista del círculo */}
+                {circle.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">Tu círculo</p>
+                    <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto no-scrollbar">
+                      {circle.map(p => {
+                        const isSelected = selectedPerson?.id === p.id;
+                        return (
+                          <div key={p.id} className={`group relative flex items-center gap-2 rounded-lg border p-2 cursor-pointer transition ${
+                            isSelected ? "border-lime-300 bg-lime-300/10" : "border-white/10 hover:border-lime-300/25"
+                          }`} onClick={() => { setSelectedPerson(isSelected ? null : p); setCotilleoSign(""); }}>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold truncate">{p.name}</p>
+                              <p className="text-[10px] text-white/40 truncate">
+                                {p.relation}{p.zodiacSign ? ` · ${p.zodiacSign}` : ""}
+                              </p>
+                            </div>
+                            <button onClick={e => { e.stopPropagation(); handleRemovePerson(p.id); }}
+                              className="shrink-0 opacity-0 group-hover:opacity-100 transition rounded p-0.5 hover:text-red-400">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Añadir nueva persona */}
+                {!addingPerson ? (
+                  <button onClick={() => setAddingPerson(true)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-lime-200/60 hover:text-lime-200 transition">
+                    <UserPlus className="h-3.5 w-3.5" /> Añadir persona al círculo
+                  </button>
+                ) : (
+                  <div className="rounded-xl border border-lime-300/20 bg-lime-300/5 p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-lime-200">Nueva persona</p>
+                      <button onClick={() => setAddingPerson(false)}><X className="h-3.5 w-3.5 text-white/30" /></button>
+                    </div>
+                    <input value={newName} onChange={e => setNewName(e.target.value)}
+                      placeholder="Nombre..."
+                      className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-lime-300/40" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <select value={newRelation} onChange={e => setNewRelation(e.target.value as CircleRelation)}
+                        className="rounded-lg border border-white/10 bg-black/40 px-2 py-2 text-xs text-white outline-none [color-scheme:dark]">
+                        {(["pareja","ex","amigo/a","papá","mamá","hijo/a","hermano/a","familiar","compañero/a","crush","otro"] as CircleRelation[]).map(r => (
+                          <option key={r} value={r}>{r}</option>
+                        ))}
+                      </select>
+                      <input type="date" value={newBirthDate} onChange={e => setNewBirthDate(e.target.value)}
+                        placeholder="Fecha nacimiento"
+                        className="rounded-lg border border-white/10 bg-black/40 px-2 py-2 text-xs text-white outline-none [color-scheme:dark]" />
+                    </div>
+                    {newBirthDate && (
+                      <p className="text-[10px] text-lime-300/70">
+                        Signo: {calculateSunSign(newBirthDate)} · Vida: {calculateLifePathNumber(newBirthDate)}
+                      </p>
+                    )}
+                    <button onClick={handleAddPerson} disabled={!newName.trim()}
+                      className="w-full rounded-lg bg-lime-300 py-2 text-xs font-black text-black disabled:opacity-40">
+                      Añadir al círculo
                     </button>
-                  ))}
-                </div>
-                {cotilleoSign && (
-                  <p className="mt-2 text-xs font-bold text-lime-300">✦ {cotilleoSign} — ya lo tengo en el radar</p>
+                  </div>
+                )}
+
+                {/* O por signo directo */}
+                {!selectedPerson && (
+                  <div>
+                    <p className="mt-1 mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">O elige solo el signo</p>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {ZODIAC_MINI.map(z => (
+                        <button key={z.name} onClick={() => setCotilleoSign(cotilleoSign === z.name ? "" : z.name)}
+                          className={`rounded-lg border p-1.5 text-center text-xs font-bold transition ${
+                            cotilleoSign === z.name ? "border-lime-300 bg-lime-300/10" : "border-white/10 text-white/50 hover:border-lime-300/25"
+                          }`}>
+                          <div className="text-base">{z.emoji}</div>
+                          <div className="truncate text-[9px] mt-0.5">{z.name.slice(0, 5)}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Resumen selección */}
+                {(selectedPerson || cotilleoSign) && (
+                  <div className="rounded-lg border border-lime-300/20 bg-lime-300/5 px-3 py-2 text-xs">
+                    {selectedPerson ? (
+                      <span className="font-bold text-lime-200">
+                        ✦ {selectedPerson.name} ({selectedPerson.relation})
+                        {selectedPerson.zodiacSign ? ` · ${selectedPerson.zodiacSign}` : ""}
+                        {selectedPerson.lifePathNumber ? ` · Vida ${selectedPerson.lifePathNumber}` : ""}
+                      </span>
+                    ) : (
+                      <span className="font-bold text-lime-200">✦ Solo signo: {cotilleoSign}</span>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -424,7 +551,7 @@ export function ConsultationDock() {
             {/* Botón de consulta */}
             <button
               onClick={startReading}
-              disabled={loading || (active.title === "Cotilleo" && !cotilleoSign)}
+              disabled={loading || (active.title === "Cotilleo" && !cotilleoSign && !selectedPerson)}
               className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-lime-300 px-5 py-3.5 font-black text-black transition hover:bg-lime-200 active:scale-95 disabled:opacity-50"
             >
               {loading ? (

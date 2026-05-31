@@ -59,14 +59,20 @@ export function buildReadingPrompt(
 ) {
   const ctx = getTodaysAstralContext();
 
-  // ── Bloque de personalización cultural del usuario
+  // ── Bloque de personalización cultural del usuario (incluye contexto vital)
   const personalization = buildPersonalizationBlock({
-    displayName:    profile.displayName,
-    birthDate:      profile.birthDate,
-    birthCity:      profile.birthCity,
-    birthCountry:   profile.birthCountry,
-    currentCity:    profile.currentCity,
-    currentCountry: profile.currentCountry,
+    displayName:        profile.displayName,
+    birthDate:          profile.birthDate,
+    birthCity:          profile.birthCity,
+    birthCountry:       profile.birthCountry,
+    currentCity:        profile.currentCity,
+    currentCountry:     profile.currentCountry,
+    relationshipStatus: profile.relationshipStatus,
+    partnerName:        profile.partnerName,
+    partnerBirthDate:   profile.partnerBirthDate,
+    hasKids:            profile.hasKids,
+    kidsCount:          profile.kidsCount,
+    personalBio:        profile.personalBio,
   });
 
   // ── Sistema enriquecido con personalización
@@ -124,10 +130,15 @@ export function buildReadingPrompt(
   if (kind === "name-reading") {
     baseLines.push(
       "",
-      "Instrucción especial: si el usuario proporcionó nombre y apellidos, analiza cada uno por separado. " +
-      "Nombre: energía pública, identidad de primer contacto y vibración numerológica. " +
-      "Primer apellido: herencia paterna, raíces familiares y lo que se carga inconscientemente. " +
-      "Segundo apellido (si existe): rama materna, legado emocional. Da la vibración global del nombre completo al final."
+      "INSTRUCCIÓN ESPECIAL — ANÁLISIS NOMBRE COMPLETO CON ACENTO ZODI:\n" +
+      "1. NOMBRE: vibración numerológica + significado ancestral + cómo lo perciben los demás. " +
+      "Incluye su conexión con las constelaciones del día de nacimiento.\n" +
+      "2. PRIMER APELLIDO: herencia paterna, karma familiar, raíces. ¿Qué carga sin saberlo?\n" +
+      "3. SEGUNDO APELLIDO (si existe): rama materna, legado emocional, lo que heredó del lado que menos lo sabe.\n" +
+      "4. VIBRACIÓN TOTAL del nombre completo: número + misión de vida combinada.\n" +
+      "5. ALINEACIÓN con las constelaciones de su fecha de nacimiento: qué dijeron los astros el día que llegó con ese nombre.\n" +
+      "6. Una HISTORIA MÍSTICA en estilo ZODI: cyberpunk + oscuro + divertido. Un párrafo que el usuario quiera compartir.\n" +
+      "Usa humor ácido pero que haga sentir especial. Este análisis debe parecer que lo hiciste SOLO para esta persona."
     );
   }
 

@@ -398,6 +398,13 @@ export interface PersonalizationData {
   birthCountry?: string;
   currentCity?: string;
   currentCountry?: string;
+  // Contexto vital
+  relationshipStatus?: string;
+  partnerName?: string;
+  partnerBirthDate?: string;
+  hasKids?: boolean;
+  kidsCount?: number;
+  personalBio?: string;
 }
 
 export function buildPersonalizationBlock(data: PersonalizationData): string {
@@ -416,10 +423,11 @@ export function buildPersonalizationBlock(data: PersonalizationData): string {
     parts.push(`GENERACIÓN: ${gen.label} — ${gen.context}`);
   }
 
-  // Pop culture de su época y país
+  // Pop culture de su época y país — OBLIGATORIO usarla, no ignorarla
   const popCtx = getPopCultureContext(data.birthDate, data.birthCountry);
   if (popCtx) {
     parts.push(popCtx);
+    parts.push(`⚠️ INSTRUCCIÓN HUMOR: ZODI DEBE mencionar al menos UNA referencia de esta lista en la lectura. No de forma forzada — como si tú también lo vivieras. "Eso lo escuchabas mientras ponías el cassette de..." o "Esto te lo digo igual que el profe de Física o Química te lo decía..." etc. Esto es OBLIGATORIO para el humor personalizado.`);
   }
 
   // Origen
@@ -432,16 +440,45 @@ export function buildPersonalizationBlock(data: PersonalizationData): string {
   if (data.currentCountry && data.currentCountry !== data.birthCountry) {
     const currentCtx = getCulturalContext(data.currentCountry, data.currentCity);
     if (currentCtx) {
-      parts.push(`VIVE AHORA EN: ${data.currentCountry}${data.currentCity ? `, ${data.currentCity}` : ""} — mezcla cultural de origen + destino.`);
+      parts.push(`VIVE AHORA EN: ${data.currentCountry}${data.currentCity ? `, ${data.currentCity}` : ""}. Mezcla cultural: adapta el lenguaje al destino actual, pero guiña al origen.`);
     }
+  } else if (data.currentCountry) {
+    parts.push(`HABLA COMO SI FUERAS DE ${data.currentCountry}${data.currentCity ? `, ${data.currentCity}` : ""} — usa las expresiones locales, no el español genérico.`);
+  }
+
+  // Contexto vital — para lecturas mucho más personalizadas
+  const lifeLines: string[] = [];
+  if (data.relationshipStatus) {
+    const statusLabels: Record<string, string> = {
+      single: "soltero/a", relationship: "en pareja", married: "casado/a",
+      complicated: "situación complicada ('estamos pero no estamos')", divorced: "separado/a"
+    };
+    lifeLines.push(`Estado sentimental: ${statusLabels[data.relationshipStatus] || data.relationshipStatus}`);
+    if ((data.relationshipStatus === "relationship" || data.relationshipStatus === "married") && data.partnerName) {
+      lifeLines.push(
+        `Pareja: ${data.partnerName}` +
+        (data.partnerBirthDate
+          ? ` (nacido/a el ${data.partnerBirthDate})`
+          : "")
+      );
+    }
+  }
+  if (data.hasKids) {
+    lifeLines.push(`Tiene ${data.kidsCount && data.kidsCount > 1 ? `${data.kidsCount} hijos` : "un hijo/a"} — factor que influye en decisiones y energía`);
+  }
+  if (data.personalBio?.trim()) {
+    lifeLines.push(`Historia personal: "${data.personalBio.trim().slice(0, 400)}"`);
+  }
+  if (lifeLines.length > 0) {
+    parts.push(`CONTEXTO VITAL:\n${lifeLines.map(l => `• ${l}`).join("\n")}\n→ Úsalo para hacer las lecturas concretas, no genéricas. Una persona con pareja no necesita el mismo consejo de amor que una soltera.`);
   }
 
   if (parts.length === 0) return "";
 
   return `
-══ CONTEXTO CULTURAL DEL USUARIO ══
-${parts.join("\n")}
+══ PERFIL COMPLETO DEL USUARIO ══
+${parts.join("\n\n")}
 
-INSTRUCCIÓN: Usa este contexto para personalizar las respuestas. Incluye referencias culturales de su origen cuando sea natural. Usa alguna expresión regional si encaja bien. Menciona el significado del nombre cuando sea relevante para la lectura. La generación da contexto sobre su etapa vital y referencias culturales compartidas.
+INSTRUCCIÓN GENERAL: Usa TODO este contexto. Jerga regional en cada respuesta. Referencia pop cultural al menos una vez. El estado vital cambia el enfoque. Este usuario no es un número de signo — es una persona con historia. Trátale como tal.
 ══════════════════════════════════`;
 }

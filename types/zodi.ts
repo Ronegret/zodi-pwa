@@ -69,6 +69,13 @@ export type UserProfile = {
   rank: string;
   plan: "free" | "premium" | "vip";
   language?: "es" | "en" | "ca";
+  // Contexto vital
+  relationshipStatus?: string;
+  partnerName?: string;
+  partnerBirthDate?: string;
+  hasKids?: boolean;
+  kidsCount?: number;
+  personalBio?: string;
 };
 
 export type OnboardingData = {
@@ -87,6 +94,13 @@ export type OnboardingData = {
   favoriteTopics: string[];
   notificationPreferences: string[];
   language?: "es" | "en" | "ca";
+  // Contexto vital para lecturas más personalizadas
+  relationshipStatus?: "single" | "relationship" | "married" | "complicated" | "divorced";
+  partnerName?: string;
+  partnerBirthDate?: string;
+  hasKids?: boolean;
+  kidsCount?: number;
+  personalBio?: string;
 };
 
 export type AstralProfile = {

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { getLocalSession, setLocalSession, signOutZodi } from "@/lib/session";
 import { COUNTRY_LIST, getCitiesForCountry } from "@/lib/places";
-import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
+import { getTodaysAstralContext, calculateSunSign, generateAstralProfile } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
 import { addXp, updateStreak, XP_PER_ACTION, getGems } from "@/lib/gamification";
@@ -133,30 +133,37 @@ function useConsult(section: DashboardSection) {
 }
 
 function buildProfile(session: ReturnType<typeof getLocalSession>) {
-  // No requerir astralProfile — birthDate es suficiente para lecturas personalizadas
   const od = session.onboardingData;
-  const ap = session.astralProfile;
+  const ap = session.astralProfile ?? (od?.birthDate ? generateAstralProfile(od) : null);
   if (!od && !ap) return null;
 
-  // Signo calculado desde birthDate (fuente de verdad)
   const zodiac = od?.birthDate ? calculateSunSign(od.birthDate) : (ap?.sunSign ?? "");
 
   return {
-    uid: session.uid,
-    displayName: session.displayName ?? od?.displayName,
+    uid:                session.uid,
+    displayName:        session.displayName ?? od?.displayName,
     zodiac,
-    moonSign:       ap?.moonSign ?? "",
-    ascendant:      ap?.ascendant ?? "",
-    birthDate:      od?.birthDate ?? "",
-    birthTime:      od?.birthTime ?? "",
-    birthCity:      od?.birthCity ?? "",
-    birthCountry:   od?.birthCountry ?? "",
-    lifePathNumber: ap?.lifePathNumber ?? 0,
-    chineseZodiac:  ap?.chineseZodiac ?? "",
-    mayanSign:      ap?.mayanSign ?? "",
-    readingTone:    od?.readingTone ?? "directo",
-    favoriteTopics: od?.favoriteTopics ?? [],
-    level: 1,
+    moonSign:           ap?.moonSign ?? "",
+    ascendant:          ap?.ascendant ?? "",
+    birthDate:          od?.birthDate ?? "",
+    birthTime:          od?.birthTime ?? "",
+    birthCity:          od?.birthCity ?? "",
+    birthCountry:       od?.birthCountry ?? "",
+    currentCity:        od?.currentCity ?? "",
+    currentCountry:     od?.currentCountry ?? "",
+    lifePathNumber:     ap?.lifePathNumber ?? 0,
+    chineseZodiac:      ap?.chineseZodiac ?? "",
+    mayanSign:          ap?.mayanSign ?? "",
+    readingTone:        od?.readingTone ?? "directo",
+    favoriteTopics:     od?.favoriteTopics ?? [],
+    level:              1,
+    // Contexto vital
+    relationshipStatus: od?.relationshipStatus,
+    partnerName:        od?.partnerName,
+    partnerBirthDate:   od?.partnerBirthDate,
+    hasKids:            od?.hasKids,
+    kidsCount:          od?.kidsCount,
+    personalBio:        od?.personalBio,
   };
 }
 
@@ -539,15 +546,19 @@ function TarotUI({ section }: { section: DashboardSection }) {
 // 2. NOMBRE UI
 // ─────────────────────────────────────────────────────────────────────────────
 function NombreUI({ section }: { section: DashboardSection }) {
-  const { reply, loading, consult, length, setLength } = useConsult(section);
-  const [nombre, setNombre] = useState("");
-  const [ap1, setAp1] = useState("");
-  const [ap2, setAp2] = useState("");
-  const [mode, setMode] = useState<"vibracion" | "historia" | "genealogia">("historia");
+  const { reply, loading, consult, length, setLength, session } = useConsult(section);
+  const od = session.onboardingData;
+  const ap = session.astralProfile ?? (od?.birthDate ? generateAstralProfile(od) : null);
+  // Pre-llenar desde sesión
+  const [nombre, setNombre] = useState(od?.displayName?.split(" ")[0] ?? "");
+  const [ap1, setAp1] = useState(od?.lastName?.split(" ")[0] ?? "");
+  const [ap2, setAp2] = useState(od?.lastName?.split(" ").slice(1).join(" ") ?? "");
+  const [mode, setMode] = useState<"vibracion" | "historia" | "genealogia" | "completo">("historia");
 
   const modes = [
-    { key: "historia",   label: "Historia ZODI",    emoji: "📖", desc: "Tu nombre convertido en mito" },
-    { key: "vibracion",  label: "Vibración",         emoji: "🔢", desc: "Energía numerológica de tu nombre" },
+    { key: "completo",   label: "Todo junto",        emoji: "✨", desc: "Nombre + constelaciones + historia completa" },
+    { key: "historia",   label: "Historia ZODI",     emoji: "📖", desc: "Tu nombre convertido en mito" },
+    { key: "vibracion",  label: "Vibración",         emoji: "🔢", desc: "Energía numerológica completa" },
     { key: "genealogia", label: "Genealogía",        emoji: "🌳", desc: "Qué cargan tus apellidos" },
   ] as const;
 
@@ -574,10 +585,23 @@ function NombreUI({ section }: { section: DashboardSection }) {
 
   async function analyze() {
     if (!nombre.trim()) return;
-    const modeLabel = mode === "historia" ? "Inventa una historia mística en estilo ZODI (cyberpunk, oscuro, divertido) sobre el origen y energía del nombre completo. Que sea memorable y única."
-      : mode === "vibracion" ? "Analiza la vibración numerológica de cada parte del nombre (nombre, primer apellido, segundo apellido) y su significado. Sé directo y concreto."
-      : "Analiza el significado genealógico y energético de los apellidos. Qué herencia emocional, karma familiar y vibración pública cargan.";
-    const extra = `Nombre: ${nombre}. Primer apellido: ${ap1 || "no indicado"}. Segundo apellido: ${ap2 || "no indicado"}. Nombre completo: ${nombreCompleto}. Vibración total: ${vibrTotal}.\n${modeLabel}`;
+    // Contexto astral del usuario para el análisis completo
+    const ctx = getTodaysAstralContext();
+    const astralCtx = ap
+      ? `Datos astrales del portador: nacido/a el ${od?.birthDate ?? "?"} en ${od?.birthCity ?? "?"}, ${od?.birthCountry ?? "?"}. ` +
+        `Signo solar: ${ap.sunSign}. Luna en ${ap.moonSign}. Ascendente ${ap.ascendant}. ` +
+        `Camino de vida: ${ap.lifePathNumber}. Chino: ${ap.chineseZodiac}. Maya: ${ap.mayanSign}. ` +
+        `Hoy (${ctx.dateReadable}): Sol en ${ctx.sunTransit}, Luna ${ctx.moonPhase}, Vibración ${ctx.dayVibration}.`
+      : "";
+    const modeLabel = mode === "completo"
+      ? `ANÁLISIS COMPLETO. Une todo: vibración numerológica del nombre completo, origen ancestral, herencia de los apellidos, conexión con las constelaciones de la fecha de nacimiento, y cómo todo eso se activa HOY (${ctx.dateReadable}). Escribe una historia mítica ZODI sobre esta persona que parezca hecha a medida. Humor ácido pero que haga sentir especial. Incluye al menos una referencia pop o cultural que encaje con su generación.`
+      : mode === "historia"
+      ? "Historia mística estilo ZODI (cyberpunk, oscuro, divertido) sobre el origen y energía del nombre completo. Que la persona quiera compartirla."
+      : mode === "vibracion"
+      ? "Vibración numerológica detallada: calcula cada parte del nombre por separado y el total. Explica qué significa para su vida."
+      : "Genealogía energética de los apellidos: herencia emocional, karma familiar y raíces que carga sin saberlo.";
+
+    const extra = `Nombre: ${nombre}. Primer apellido: ${ap1 || "no indicado"}. Segundo apellido: ${ap2 || "no indicado"}. Nombre completo: ${nombreCompleto}. Vibración total: ${vibrTotal}.\n${astralCtx}\n${modeLabel}`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
@@ -641,7 +665,7 @@ function NombreUI({ section }: { section: DashboardSection }) {
           disabled={loading || !nombre.trim()}
           className="mt-3 w-full rounded-md bg-lime-300 py-3 font-black text-black disabled:opacity-50 hover:bg-lime-200 transition"
         >
-          {loading ? "ZODI descifra tu nombre..." : `Analizar ${mode === "historia" ? "mi historia" : mode === "vibracion" ? "mi vibración" : "mi genealogía"}`}
+          {loading ? "ZODI descifra tu esencia..." : mode === "completo" ? "✨ Análisis completo — todo junto" : mode === "historia" ? "📖 Crear mi historia" : mode === "vibracion" ? "🔢 Analizar vibración" : "🌳 Analizar genealogía"}
         </button>
       </div>
       <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
@@ -1784,6 +1808,17 @@ function PerfilUI() {
   const [birthTime, setBirthTime] = useState(od?.birthTime ?? "");
   const [birthCountry, setBirthCountry] = useState(od?.birthCountry ?? "");
   const [birthCity, setBirthCity] = useState(od?.birthCity ?? "");
+  // Editable: ubicación actual
+  const [currentCountry, setCurrentCountry] = useState(od?.currentCountry ?? "");
+  const [currentCity, setCurrentCity] = useState(od?.currentCity ?? "");
+  // Editable: contexto vital
+  type RelStatus = "single" | "relationship" | "married" | "complicated" | "divorced" | "";
+  const [relationshipStatus, setRelationshipStatus] = useState<RelStatus>(od?.relationshipStatus ?? "");
+  const [partnerName, setPartnerName] = useState(od?.partnerName ?? "");
+  const [partnerBirthDate, setPartnerBirthDate] = useState(od?.partnerBirthDate ?? "");
+  const [hasKids, setHasKids] = useState(od?.hasKids ?? false);
+  const [kidsCount, setKidsCount] = useState(od?.kidsCount ?? 1);
+  const [personalBio, setPersonalBio] = useState(od?.personalBio ?? "");
   // Editable: tono
   const [readingTone, setReadingTone] = useState<"suave" | "directo" | "brutal" | "sarcastico">(od?.readingTone ?? "directo");
 
@@ -1829,13 +1864,22 @@ function PerfilUI() {
       birthTime,
       birthCity,
       birthCountry,
-      currentCity: od?.currentCity ?? "",
-      currentCountry: od?.currentCountry ?? "",
+      currentCity,
+      currentCountry,
       readingTone,
       favoriteTopics: od?.favoriteTopics ?? [],
       notificationPreferences: od?.notificationPreferences ?? [],
+      // Contexto vital
+      relationshipStatus: (relationshipStatus || undefined) as "single" | "relationship" | "married" | "complicated" | "divorced" | undefined,
+      partnerName: partnerName.trim() || undefined,
+      partnerBirthDate: partnerBirthDate || undefined,
+      hasKids,
+      kidsCount: hasKids ? kidsCount : undefined,
+      personalBio: personalBio.trim() || undefined,
     };
-    setLocalSession({ displayName: name, onboardingData: newOd });
+    // Regenerar astralProfile si hay fecha de nacimiento
+    const newAp = newOd.birthDate ? generateAstralProfile(newOd) : (session.astralProfile ?? undefined);
+    setLocalSession({ displayName: name, onboardingData: newOd, astralProfile: newAp });
 
     try {
       const [
@@ -2086,6 +2130,114 @@ function PerfilUI() {
         </div>
       </div>
 
+      {/* ── Dónde estás ahora (dialecto de ZODI) ── */}
+      <div className="glass-panel rounded-xl p-4 sm:p-5">
+        <h2 className="text-lg font-black mb-0.5">¿Dónde estás ahora?</h2>
+        <p className="text-[11px] text-white/40 mb-4">ZODI ajusta su lenguaje al lugar donde vives. Chileno, mexicano, rioplatense… como uno de allí.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <ProfilePlaceInput
+            label="País actual"
+            value={currentCountry}
+            onChange={v => { setCurrentCountry(v); setCurrentCity(""); }}
+            options={COUNTRY_LIST}
+            placeholder="Buscar país..."
+          />
+          <ProfilePlaceInput
+            label="Ciudad actual (opcional)"
+            value={currentCity}
+            onChange={setCurrentCity}
+            options={getCitiesForCountry(currentCountry)}
+            placeholder={currentCountry ? "Buscar ciudad..." : "Selecciona el país primero"}
+            disabled={!currentCountry}
+          />
+        </div>
+        <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar ubicación" />
+      </div>
+
+      {/* ── Contexto vital — para lecturas más personalizadas ── */}
+      <div className="glass-panel rounded-xl p-4 sm:p-5">
+        <h2 className="text-lg font-black mb-0.5">Tu contexto vital</h2>
+        <p className="text-[11px] text-white/40 mb-4">Cuanto más sepa ZODI de ti, más exacta (y ácida) será la lectura. Todo opcional, todo privado.</p>
+
+        {/* Estado sentimental */}
+        <div className="mb-4">
+          <span className="text-[10px] uppercase tracking-widest text-white/40 block mb-2">Estado sentimental</span>
+          <div className="flex flex-wrap gap-2">
+            {(["single", "relationship", "married", "complicated", "divorced"] as const).map(key => {
+              const labels: Record<string, string> = { single: "Soltero/a 🤷", relationship: "En pareja 💕", married: "Casado/a 💍", complicated: "Complicado 🙃", divorced: "Separado/a 💔" };
+              return (
+              <button key={key} onClick={() => setRelationshipStatus(prev => (prev === key ? "" : key) as RelStatus)}
+                className={`rounded-lg px-3 py-2 text-xs font-bold transition ${
+                  relationshipStatus === key ? "bg-lime-300 text-black" : "border border-white/10 text-white/60 hover:border-lime-300/30"
+                }`}>
+                {labels[key]}
+              </button>
+            );})}
+          </div>
+        </div>
+
+        {/* Pareja — solo si está en pareja/casado */}
+        {(relationshipStatus === "relationship" || relationshipStatus === "married") && (
+          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-xl border border-lime-300/10 bg-lime-300/5 p-3">
+            <label className="block">
+              <span className="text-[10px] uppercase tracking-widest text-white/40">Nombre de tu pareja</span>
+              <input value={partnerName} onChange={e => setPartnerName(e.target.value)}
+                placeholder="Su nombre..."
+                className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55" />
+            </label>
+            <label className="block">
+              <span className="text-[10px] uppercase tracking-widest text-white/40">Fecha de nacimiento de tu pareja</span>
+              <input type="date" value={partnerBirthDate} onChange={e => setPartnerBirthDate(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55 [color-scheme:dark]" />
+              {partnerBirthDate && (
+                <p className="mt-1 text-[10px] text-lime-300/70">
+                  Signo: {calculateSunSign(partnerBirthDate)}
+                </p>
+              )}
+            </label>
+          </div>
+        )}
+
+        {/* Hijos */}
+        <div className="mb-4 flex items-center gap-4">
+          <button onClick={() => setHasKids(!hasKids)}
+            className={`rounded-lg px-4 py-2.5 text-xs font-bold transition ${
+              hasKids ? "bg-violet-500 text-white" : "border border-white/10 text-white/60 hover:border-violet-400/30"
+            }`}>
+            {hasKids ? "✓ Tengo hijos" : "¿Tienes hijos?"}
+          </button>
+          {hasKids && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-white/40">Cuántos:</span>
+              {[1, 2, 3, 4, 5].map(n => (
+                <button key={n} onClick={() => setKidsCount(n)}
+                  className={`h-8 w-8 rounded-lg text-xs font-black transition ${
+                    kidsCount === n ? "bg-violet-500 text-white" : "border border-white/15 text-white/50 hover:text-white"
+                  }`}>{n}</button>
+              ))}
+              {kidsCount >= 5 && <span className="text-xs text-white/30">+</span>}
+            </div>
+          )}
+        </div>
+
+        {/* Historia personal */}
+        <div className="mb-4">
+          <span className="text-[10px] uppercase tracking-widest text-white/40 block mb-1">Tu historia en dos líneas</span>
+          <p className="text-[10px] text-white/30 mb-2">ZODI usará esto para alinear las constelaciones con tu vida real.</p>
+          <textarea
+            value={personalBio}
+            onChange={e => setPersonalBio(e.target.value)}
+            rows={3}
+            maxLength={400}
+            placeholder="Ej: Trabajo en diseño, llevo 3 años en una relación, acabo de cambiar de ciudad... lo que creas relevante."
+            className="w-full resize-none rounded-lg border border-white/10 bg-black/45 p-3 text-sm text-white outline-none placeholder:text-white/20 focus:border-lime-300/55"
+          />
+          <p className="mt-0.5 text-right text-[10px] text-white/25">{personalBio.length}/400</p>
+        </div>
+
+        <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar contexto" />
+      </div>
+
       {/* ── Tono de lecturas ── */}
       <div className="glass-panel rounded-xl p-4 sm:p-5">
         <h2 className="text-lg font-black mb-0.5">Tono de lecturas</h2>
@@ -2244,7 +2396,9 @@ function PerfilUI() {
 // ─────────────────────────────────────────────────────────────────────────────
 function CartaNatalUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
-  const ap = session.astralProfile;
+  const od = session.onboardingData;
+  // Si no hay astralProfile guardado pero tenemos birthDate, calculamos al vuelo
+  const ap = session.astralProfile ?? (od?.birthDate ? generateAstralProfile(od) : null);
 
   const planets = ap
     ? [
