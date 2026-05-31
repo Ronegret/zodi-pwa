@@ -792,95 +792,203 @@ function ManoUI({ section }: { section: DashboardSection }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. COMPATIBILIDAD UI
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Mapa explícito signo → nombre de archivo (sin acentos, capitalizado)
+const SIGN_TO_FILE: Record<string, string> = {
+  "Aries": "Aries", "Tauro": "Tauro", "Géminis": "Geminis",
+  "Cáncer": "Cancer", "Leo": "Leo", "Virgo": "Virgo",
+  "Libra": "Libra", "Escorpio": "Escorpio", "Sagitario": "Sagitario",
+  "Capricornio": "Capricornio", "Acuario": "Acuario", "Piscis": "Piscis",
+};
+function signImgPath(sign: string): string {
+  const file = SIGN_TO_FILE[sign]
+    ?? sign.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return `/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${file}.png`;
+}
+
+// Tarjeta grande de signo con imagen artwork + radio + sombra neon
+function SignCard({ sign, label, sublabel }: { sign: string; label?: string; sublabel?: string }) {
+  const neonColors: Record<string, string> = {
+    Aries: "rgba(239,68,68,0.45)", Tauro: "rgba(34,197,94,0.45)",
+    "Géminis": "rgba(234,179,8,0.45)", "Cáncer": "rgba(148,163,184,0.45)",
+    Leo: "rgba(251,191,36,0.45)", Virgo: "rgba(132,204,22,0.45)",
+    Libra: "rgba(244,114,182,0.45)", Escorpio: "rgba(168,85,247,0.45)",
+    Sagitario: "rgba(139,92,246,0.45)", Capricornio: "rgba(120,113,108,0.45)",
+    Acuario: "rgba(6,182,212,0.45)", Piscis: "rgba(20,184,166,0.45)",
+  };
+  const glow = neonColors[sign] ?? "rgba(184,255,23,0.35)";
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <p className="text-[10px] uppercase tracking-widest text-white/40">{label ?? "Signo solar"}</p>
+      <div
+        className="relative w-full aspect-square max-w-[180px] rounded-2xl overflow-hidden border border-white/10"
+        style={{ boxShadow: `0 0 28px ${glow}, 0 4px 20px rgba(0,0,0,0.6)` }}
+      >
+        <Image
+          src={signImgPath(sign)}
+          alt={sign}
+          fill
+          sizes="180px"
+          className="object-cover transition-transform duration-500 hover:scale-105"
+          priority
+        />
+        {/* Gradiente inferior para el texto */}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pt-10 pb-3 px-3 text-center">
+          <p className="text-lg font-black text-white drop-shadow-lg">{sign}</p>
+          {sublabel && <p className="text-[10px] text-white/55 mt-0.5">{sublabel}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CompatibilidadUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
   const [theirSign, setTheirSign] = useState("");
   const [theirName, setTheirName] = useState("");
   const [relation, setRelation] = useState<"pareja" | "amistad" | "trabajo">("pareja");
-  const mySign = session.astralProfile?.sunSign ?? "";
+
+  // Signo calculado siempre desde birthDate
+  const od = session.onboardingData;
+  const mySign = (od?.birthDate ? calculateSunSign(od.birthDate) : null)
+    || session.astralProfile?.sunSign
+    || "";
 
   const relations = [
-    { key: "pareja",   label: "Pareja",   emoji: "💕" },
-    { key: "amistad",  label: "Amistad",  emoji: "🤝" },
-    { key: "trabajo",  label: "Trabajo",  emoji: "💼" },
+    { key: "pareja",  label: "Pareja",  emoji: "💕" },
+    { key: "amistad", label: "Amistad", emoji: "🤝" },
+    { key: "trabajo", label: "Trabajo", emoji: "💼" },
   ] as const;
 
   async function analyze() {
     if (!theirSign) return;
-    const extra = `Mi signo: ${mySign}. Signo de ${theirName || "la otra persona"}: ${theirSign}. Tipo de relación: ${relation}. Analiza química, comunicación, conflictos posibles, timing y consejo. Sé directo y útil.`;
+    const extra = `Mi signo: ${mySign}. Signo de ${theirName || "la otra persona"}: ${theirSign}. Tipo de relación: ${relation}. Analiza química, comunicación, conflictos posibles, timing y consejo. Sé directo, ácido y útil.`;
     await consult(`${section.prompt}\n${extra}`);
   }
 
   return (
     <div className="grid gap-5">
-      <div className="glass-panel rounded-md p-5">
+      {/* Tipo de relación */}
+      <div className="glass-panel rounded-2xl p-5">
         <h2 className="text-xl font-black mb-4">Tipo de relación</h2>
-        <div className="flex gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {relations.map(r => (
             <button
               key={r.key}
               onClick={() => setRelation(r.key)}
-              className={`flex-1 rounded-md border py-3 text-center font-black text-sm transition ${
-                relation === r.key ? "border-lime-300 bg-lime-300/10 text-lime-200" : "border-white/10 text-white/60 hover:border-lime-300/25"
+              className={`rounded-xl border py-3 text-center font-black text-sm transition active:scale-95 ${
+                relation === r.key
+                  ? "border-lime-300 bg-lime-300/10 text-lime-200 shadow-[0_0_12px_rgba(184,255,23,0.15)]"
+                  : "border-white/10 text-white/60 hover:border-lime-300/25"
               }`}
             >
-              {r.emoji} {r.label}
+              <span className="block text-xl mb-0.5">{r.emoji}</span>
+              {r.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-4">Los dos perfiles</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {/* My sign */}
-          <div className="rounded-md border border-lime-300/20 bg-lime-300/5 p-4 flex flex-col items-center">
-            <p className="text-xs uppercase tracking-widest text-lime-200/60 mb-2 w-full text-left">Tú</p>
+      {/* Los dos perfiles */}
+      <div className="glass-panel rounded-2xl p-5">
+        <h2 className="text-xl font-black mb-5">Los dos perfiles</h2>
+        <div className="grid gap-5 sm:grid-cols-2">
+
+          {/* ── MI SIGNO ── */}
+          <div className="rounded-2xl border border-lime-300/20 bg-lime-300/5 p-4">
             {mySign ? (
-              <div className="relative w-32 h-32 mb-2">
-                <Image src={`/zodi-art/nuevas/2-Compatibilidad/${mySign}.png`} alt={mySign} fill className="object-contain" />
-              </div>
+              <SignCard sign={mySign} label="Tú" sublabel={ZODIAC.find(z => z.name === mySign)?.dates} />
             ) : (
-              <div className="text-4xl mb-2">⭐</div>
+              <div className="flex flex-col items-center gap-3 py-6 text-center">
+                <div className="text-5xl">⭐</div>
+                <p className="text-sm font-bold text-white/50">Añade tu fecha de nacimiento en el perfil</p>
+                <a href="/dashboard/perfil" className="text-xs font-black text-lime-300 underline underline-offset-4">Ir al perfil →</a>
+              </div>
             )}
-            <p className="font-black text-lime-200 text-lg">{mySign || "Desconocido"}</p>
-            <p className="text-xs text-white/40">Signo solar</p>
           </div>
-          {/* Their sign */}
-          <div className="rounded-md border border-white/10 p-4">
-            <p className="text-xs uppercase tracking-widest text-white/40 mb-2">La otra persona</p>
+
+          {/* ── SU SIGNO ── */}
+          <div className="rounded-2xl border border-white/10 p-4 flex flex-col gap-3">
             <input
               value={theirName}
               onChange={e => setTheirName(e.target.value)}
-              placeholder="Nombre (opcional)"
-              className="w-full rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-lime-300/40 mb-3"
+              placeholder="Nombre de la otra persona (opcional)"
+              className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/25 focus:border-lime-300/40 transition"
             />
-            <p className="text-xs text-white/40 mb-2">Su signo solar</p>
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {ZODIAC.map(z => (
+
+            {/* Si ya eligió signo, muestra card grande + botón cambiar */}
+            {theirSign ? (
+              <div className="relative">
+                <SignCard sign={theirSign} label={theirName || "La otra persona"} sublabel={ZODIAC.find(z => z.name === theirSign)?.dates} />
                 <button
-                  key={z.name}
-                  onClick={() => setTheirSign(z.name)}
-                  title={z.name}
-                  className={`relative aspect-square w-full rounded-md transition overflow-hidden ${
-                    theirSign === z.name ? "ring-2 ring-lime-300 shadow-[0_0_15px_rgba(184,255,23,0.3)] scale-105" : "hover:bg-white/10 opacity-70 hover:opacity-100"
-                  }`}
+                  onClick={() => setTheirSign("")}
+                  className="mt-2 w-full rounded-xl border border-white/10 py-1.5 text-xs font-bold text-white/40 hover:text-white/70 transition"
                 >
-                  <Image src={`/zodi-art/nuevas/2-Compatibilidad/${z.name}.png`} alt={z.name} fill className="object-contain p-1" />
+                  Cambiar signo
                 </button>
-              ))}
-            </div>
-            {theirSign && <p className="mt-2 text-xs font-black text-lime-300">{theirSign} seleccionado</p>}
+              </div>
+            ) : (
+              /* Grid selector de signos */
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 mb-3">Elige su signo solar</p>
+                <div className="grid grid-cols-4 gap-2">
+                  {ZODIAC.map(z => (
+                    <motion.button
+                      key={z.name}
+                      onClick={() => setTheirSign(z.name)}
+                      title={z.name}
+                      whileHover={{ scale: 1.06 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="group relative aspect-square w-full rounded-2xl overflow-hidden border border-white/10 transition-all"
+                      style={theirSign === z.name
+                        ? { boxShadow: "0 0 18px rgba(184,255,23,0.5)", border: "1px solid rgba(184,255,23,0.7)" }
+                        : undefined
+                      }
+                    >
+                      <Image
+                        src={signImgPath(z.name)}
+                        alt={z.name}
+                        fill
+                        sizes="80px"
+                        className="object-cover transition-all duration-300 group-hover:scale-110"
+                      />
+                      {/* Overlay con nombre */}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent pt-4 pb-1 text-center">
+                        <p className="text-[9px] font-black text-white/90 leading-tight">{z.name.slice(0, 5)}</p>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* VS badge central — solo cuando ambos signos están elegidos */}
+        {mySign && theirSign && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="my-4 flex items-center justify-center gap-4"
+          >
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-lime-300/30" />
+            <span className="rounded-full border border-lime-300/30 bg-lime-300/10 px-4 py-1 text-xs font-black text-lime-300">
+              {mySign} VS {theirSign}
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-lime-300/30" />
+          </motion.div>
+        )}
 
         <LengthSelector value={length} onChange={setLength} />
         <button
           onClick={analyze}
           disabled={loading || !theirSign}
-          className="mt-3 w-full rounded-md bg-lime-300 py-3 font-black text-black disabled:opacity-50 hover:bg-lime-200 transition"
+          className="mt-3 w-full rounded-2xl bg-lime-300 py-3.5 font-black text-black disabled:opacity-50 hover:bg-lime-200 transition active:scale-[0.99] text-sm sm:text-base"
         >
-          {loading ? "Analizando la química..." : `Analizar compatibilidad ${relation === "pareja" ? "💕" : relation === "amistad" ? "🤝" : "💼"}`}
+          {loading
+            ? "Analizando la química..."
+            : `Analizar compatibilidad ${relation === "pareja" ? "💕" : relation === "amistad" ? "🤝" : "💼"}`}
         </button>
       </div>
       <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
