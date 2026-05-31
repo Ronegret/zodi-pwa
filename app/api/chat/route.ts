@@ -65,12 +65,12 @@ Datos del usuario: Signo solar ${userProfile?.sunSign || 'Desconocido'}, Luna ${
     }));
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       contents: geminiContents,
       config: {
         systemInstruction: systemInstruction,
-        temperature: 0.7,
-        maxOutputTokens: 150, // Keep it very cheap
+        temperature: 0.85,
+        maxOutputTokens: 200,
       }
     });
 

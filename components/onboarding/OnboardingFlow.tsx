@@ -393,7 +393,7 @@ export function OnboardingFlow() {
 
             {/* ─── PASO 2: Reveal astral ──────────────────────────────────────── */}
             {step === 2 && (
-              <div className="relative flex h-full min-h-[520px] flex-col overflow-hidden rounded-2xl">
+              <div className="relative flex min-h-[60dvh] flex-col overflow-hidden rounded-2xl">
                 {/* Imagen de fondo del signo */}
                 <div className="absolute inset-0">
                   <Image src={signMeta.img} alt={profile.sunSign} fill

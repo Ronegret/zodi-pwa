@@ -101,7 +101,7 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
 
       {/* Plans grid — only for premium section */}
       {section.slug === "premium" && (
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 grid-cols-1 sm:grid-cols-2">
           {plans.map((plan) => (
             <article
               key={plan.name}
