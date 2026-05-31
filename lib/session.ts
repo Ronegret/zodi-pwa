@@ -49,7 +49,11 @@ export function getLocalSession(): LocalZodiSession {
 export function setLocalSession(session: Partial<LocalZodiSession>) {
   if (typeof window === "undefined") return;
   const current = getLocalSession();
-  const nextSession = { ...current, ...session };
+  // Mergear onboardingData en profundidad para no perder campos al actualizar parcialmente
+  const mergedOnboarding = session.onboardingData
+    ? { ...current.onboardingData, ...session.onboardingData }
+    : current.onboardingData;
+  const nextSession = { ...current, ...session, onboardingData: mergedOnboarding };
   window.localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
 
   // Guardar identidad duradera cuando el onboarding está completo

@@ -165,9 +165,36 @@ export function HeroConsole() {
 
   const timeGreeting = getTimeGreeting();
 
-  return (
-    <section className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
+  // Detectar si falta la fecha de nacimiento (dato clave para lecturas)
+  const missingBirthDate = mounted && !profile?.birthDate && !getLocalSession().onboardingData?.birthDate;
 
+  return (
+    <section className="grid gap-4">
+      {/* ── Banner: falta fecha de nacimiento ─────────────────────────────── */}
+      {missingBirthDate && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="flex items-center justify-between gap-3 rounded-xl border border-orange-400/30 bg-orange-400/10 px-4 py-3"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-lg shrink-0">⚠️</span>
+            <div className="min-w-0">
+              <p className="text-sm font-black text-orange-200 leading-tight">Falta tu fecha de nacimiento</p>
+              <p className="text-[11px] text-orange-200/65 mt-0.5 truncate">Sin ella, tus lecturas son genéricas. Añádela para personalizar todo.</p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/perfil"
+            className="shrink-0 rounded-lg bg-orange-400 px-3 py-2 text-xs font-black text-black hover:bg-orange-300 transition whitespace-nowrap"
+          >
+            Completar →
+          </Link>
+        </motion.div>
+      )}
+
+      <section className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
       {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
       <div className="glass-panel neon-border overflow-hidden rounded-2xl relative">
         {/* Atmospheric video background */}
@@ -423,6 +450,7 @@ export function HeroConsole() {
           Editar perfil
         </Link>
       </div>
+      </section>
     </section>
   );
 }

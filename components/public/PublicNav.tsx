@@ -124,31 +124,30 @@ export function PublicNav() {
             <PwaInstallButton compact />
           </nav>
 
-          {/* Right CTA buttons */}
+          {/* Right CTAs */}
           <div className="flex items-center gap-2">
+            {/* Entrar — siempre visible */}
             <Link
               href="/auth/login"
-              className="rounded-lg border border-white/15 px-3 py-2.5 text-xs sm:text-sm font-bold text-white/75 transition hover:border-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-lime-300"
+              className="rounded-lg border border-white/15 px-3 py-2 text-xs sm:text-sm font-bold text-white/75 transition hover:border-white/30"
             >
               Entrar
             </Link>
+            {/* Crear cuenta — solo en desktop */}
             <Link
               href="/auth/register"
-              className="rounded-lg bg-lime-300 px-3 py-2.5 text-xs sm:text-sm font-black text-black transition hover:bg-lime-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-lime-300"
+              className="hidden md:inline-flex rounded-lg bg-lime-300 px-3 py-2 text-sm font-black text-black transition hover:bg-lime-200"
             >
               Crear cuenta
             </Link>
             {/* Hamburger — mobile only */}
             <button
-              className="ml-1 grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/15 text-white/70 transition hover:border-white/30 md:hidden z-50 relative"
-              onClick={(e) => {
-                e.preventDefault();
-                setOpen(!open);
-              }}
+              className="ml-1 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-white/15 text-white/70 transition hover:border-white/30 md:hidden z-50 relative"
+              onClick={(e) => { e.preventDefault(); setOpen(!open); }}
               aria-label={open ? "Cerrar menú" : "Abrir menú"}
               aria-expanded={open}
             >
-              {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -168,40 +167,43 @@ export function PublicNav() {
         }}
         className="fixed inset-x-0 z-[49] bg-black border-b border-lime-300/15 shadow-2xl md:hidden"
       >
-        <div className="px-6 pt-8 pb-10">
-          {/* Nav links */}
-          <nav className="flex flex-col divide-y divide-white/07">
+        <div className="px-5 pt-6 pb-8">
+          {/* Marketing hook */}
+          <p className="text-xs uppercase tracking-[0.28em] text-lime-200/60 mb-1">Tu oráculo personal</p>
+          <p className="text-sm text-white/55 mb-6">Horóscopo, tarot y lecturas personalizadas con IA.</p>
+
+          {/* CTAs principales — app-like */}
+          <div className="flex flex-col gap-3 mb-6">
+            <PwaInstallButton />
+            <Link
+              href="/auth/register"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center rounded-2xl bg-lime-300 py-4 text-base font-black text-black transition hover:bg-lime-200 shadow-[0_0_24px_rgba(184,255,23,0.2)] active:scale-98"
+            >
+              Crear cuenta gratis ✦
+            </Link>
+            <Link
+              href="/auth/login"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center rounded-2xl border border-white/15 py-3.5 text-base font-bold text-white/75 transition hover:border-white/30 hover:text-white"
+            >
+              Ya tengo cuenta — Entrar
+            </Link>
+          </div>
+
+          {/* Nav links — secundarios */}
+          <nav className="flex flex-col border-t border-white/08 pt-4">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="py-4 text-2xl font-black tracking-tight text-white transition-colors hover:text-lime-300"
-                style={{ fontFamily: "var(--font-display)" }}
+                className="flex items-center py-3 text-sm font-semibold text-white/50 transition hover:text-white/80"
               >
                 {link.label}
               </a>
             ))}
           </nav>
-
-          {/* CTAs */}
-          <div className="mt-8 flex flex-col gap-3">
-            <PwaInstallButton />
-            <Link
-              href="/auth/login"
-              onClick={() => setOpen(false)}
-              className="block rounded-xl border border-white/20 py-4 text-center text-lg font-bold text-white/80 transition hover:border-white/40"
-            >
-              Entrar
-            </Link>
-            <Link
-              href="/auth/register"
-              onClick={() => setOpen(false)}
-              className="block rounded-xl bg-lime-300 py-4 text-center text-lg font-black text-black transition hover:bg-lime-200 shadow-[0_0_20px_rgba(184,255,23,0.25)]"
-            >
-              Crear cuenta gratis ✦
-            </Link>
-          </div>
         </div>
       </div>
     </>

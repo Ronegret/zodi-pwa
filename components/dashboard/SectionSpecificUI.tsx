@@ -1843,165 +1843,167 @@ function PerfilUI() {
   const sunSign = birthDate ? calculateSunSign(birthDate) : ap?.sunSign;
 
   return (
-    <div className="grid gap-5">
+    <div className="grid gap-4">
       {/* ── Información personal ── */}
-      <div className="glass-panel rounded-md p-5">
-        {/* Header row: título + badge de gemas */}
-        <div className="flex items-start justify-between gap-3 mb-1 min-w-0">
-          <h2 className="text-xl font-black leading-tight min-w-0 truncate">Información personal</h2>
-          <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1">
-            <Gem className="h-3.5 w-3.5 text-lime-300" />
-            <span className="text-sm font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>{gems}</span>
+      <div className="glass-panel rounded-xl p-4 sm:p-5">
+        {/* Header: título + gemas */}
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 className="text-lg font-black leading-tight">Información personal</h2>
+            <p className="text-[11px] text-white/40 mt-0.5">El correo no se puede cambiar. Todo lo demás, sí.</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1 rounded-full border border-lime-300/30 bg-lime-300/10 px-2.5 py-1">
+            <Gem className="h-3 w-3 text-lime-300" />
+            <span className="text-xs font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>{gems}</span>
           </div>
         </div>
-        <p className="text-xs text-white/40 mb-5">El correo no puede modificarse por seguridad. Todo lo demás, sí.</p>
-        <div className="grid gap-4">
-          {/* Avatar */}
-          <div>
-            <span className="text-xs uppercase tracking-widest text-white/40">Imagen de perfil</span>
-            <div className="mt-2 flex items-center gap-4">
-              <div className="relative h-16 w-16 shrink-0 rounded-xl overflow-hidden border-2 border-lime-300/40">
-                <Image
-                  src={avatar.startsWith("data:") ? avatar : avatar}
-                  alt="Avatar"
-                  fill
-                  className="object-cover"
-                  unoptimized={avatar.startsWith("data:")}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <button
-                  type="button"
-                  onClick={() => avatarInputRef.current?.click()}
-                  className="text-xs font-bold text-lime-200/80 hover:text-lime-200 transition underline"
-                >
-                  Subir foto propia
-                </button>
-                <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
-              </div>
-            </div>
-            <div className="mt-3 grid grid-cols-[repeat(7,minmax(0,1fr))] sm:grid-cols-[repeat(13,minmax(0,1fr))] gap-1.5">
-              {AVATAR_PRESETS.map((src, i) => (
-                <button
-                  key={src}
-                  type="button"
-                  onClick={() => setAvatar(src)}
-                  title={`Avatar ${i + 1}`}
-                  className={`relative aspect-square w-full rounded-lg overflow-hidden transition-all duration-200 ${
-                    avatar === src
-                      ? "ring-2 ring-lime-300 scale-105 shadow-[0_0_10px_rgba(184,255,23,0.4)]"
-                      : "opacity-60 hover:opacity-100 hover:scale-105"
-                  }`}
-                >
-                  <Image src={src} alt={`Avatar ${i + 1}`} fill className="object-cover" />
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Email — solo lectura */}
-          <div>
-            <span className="text-xs uppercase tracking-widest text-white/40">Correo electrónico</span>
-            <div className="mt-1 flex items-center gap-2 rounded-md border border-white/10 bg-black/25 px-4 py-3 overflow-hidden">
-              <span className="flex-1 text-sm text-white/50 truncate min-w-0">{email || "Sin correo registrado"}</span>
-              <Lock className="h-3.5 w-3.5 text-white/25 shrink-0" />
+        {/* Avatar */}
+        <div className="mb-4">
+          <span className="text-[10px] uppercase tracking-widest text-white/40">Imagen de perfil</span>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border-2 border-lime-300/40">
+              <Image src={avatar} alt="Avatar" fill className="object-cover" unoptimized={avatar.startsWith("data:")} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-white/60 leading-snug mb-1">Elige un avatar o sube tu foto</p>
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                className="text-xs font-bold text-lime-200/80 hover:text-lime-200 transition underline"
+              >
+                Subir foto propia
+              </button>
+              <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
             </div>
           </div>
-          {/* Nombre + Apellido */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-xs uppercase tracking-widest text-white/40">Nombre</span>
-              <input
-                value={displayName}
-                onChange={e => setDisplayName(e.target.value)}
-                placeholder="Tu nombre o apodo"
-                className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55"
-              />
-            </label>
-            <label className="block">
-              <span className="text-xs uppercase tracking-widest text-white/40">Apellido(s)</span>
-              <input
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-                placeholder="Tu apellido (linaje, origen)"
-                className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55"
-              />
-              <p className="mt-1 text-[10px] text-white/30">Para análisis de nombre y genealogía astral</p>
-            </label>
+          {/* Avatar grid — 5 cols móvil, 7 tablet, 13 desktop */}
+          <div className="mt-3 grid grid-cols-5 sm:grid-cols-7 md:grid-cols-[repeat(13,minmax(0,1fr))] gap-2">
+            {AVATAR_PRESETS.map((src, i) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => setAvatar(src)}
+                title={`Avatar ${i + 1}`}
+                className={`relative aspect-square w-full rounded-lg overflow-hidden transition-all duration-200 ${
+                  avatar === src
+                    ? "ring-2 ring-lime-300 scale-105 shadow-[0_0_8px_rgba(184,255,23,0.5)]"
+                    : "opacity-55 hover:opacity-100 hover:scale-105"
+                }`}
+              >
+                <Image src={src} alt={`Avatar ${i + 1}`} fill className="object-cover" />
+              </button>
+            ))}
           </div>
         </div>
-        <div className="mt-5"><ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} /></div>
+
+        {/* Email — solo lectura */}
+        <div className="mb-4">
+          <span className="text-[10px] uppercase tracking-widest text-white/40">Correo</span>
+          <div className="mt-1 flex items-center gap-2 rounded-lg border border-white/10 bg-black/25 px-3 py-2.5 overflow-hidden">
+            <span className="flex-1 text-sm text-white/45 truncate min-w-0">{email || "Sin correo"}</span>
+            <Lock className="h-3 w-3 text-white/20 shrink-0" />
+          </div>
+        </div>
+
+        {/* Nombre + Apellido — siempre columna única en móvil */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <label className="block">
+            <span className="text-[10px] uppercase tracking-widest text-white/40">Nombre</span>
+            <input
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              placeholder="Tu nombre o apodo"
+              className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55"
+            />
+          </label>
+          <label className="block">
+            <span className="text-[10px] uppercase tracking-widest text-white/40">Apellido(s)</span>
+            <input
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              placeholder="Tu apellido"
+              className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55"
+            />
+            <p className="mt-1 text-[10px] text-white/30">Para análisis de nombre y genealogía astral</p>
+          </label>
+        </div>
+
+        <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} />
       </div>
 
       {/* ── Datos de nacimiento ── */}
-      <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-1">Datos de nacimiento</h2>
-        <p className="text-xs text-white/40 mb-5">ZODI usa estos datos para calcular tus lecturas astrológicas personalizadas.</p>
-        <div className="grid gap-3 sm:grid-cols-2">
+      <div className="glass-panel rounded-xl p-4 sm:p-5">
+        <h2 className="text-lg font-black mb-0.5">Datos de nacimiento</h2>
+        <p className="text-[11px] text-white/40 mb-4">ZODI usa estos datos para tus lecturas astrológicas personalizadas.</p>
+
+        {/* Siempre columna única en móvil */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="block">
-            <span className="text-xs uppercase tracking-widest text-white/40">Fecha de nacimiento</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/40">Fecha de nacimiento</span>
             <input
               type="date"
               value={birthDate}
               onChange={e => setBirthDate(e.target.value)}
-              className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55 [color-scheme:dark]"
+              className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55 [color-scheme:dark]"
             />
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-widest text-white/40">Hora de nacimiento</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/40">Hora de nacimiento <span className="normal-case text-white/25">(opcional)</span></span>
             <input
               type="time"
               value={birthTime}
               onChange={e => setBirthTime(e.target.value)}
-              className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55 [color-scheme:dark]"
+              className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55 [color-scheme:dark]"
             />
-            <p className="mt-1 text-[10px] text-white/30">Opcional, mejora el cálculo del ascendente</p>
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-widest text-white/40">Ciudad de nacimiento</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/40">Ciudad de nacimiento</span>
             <input
               value={birthCity}
               onChange={e => setBirthCity(e.target.value)}
               placeholder="Ej: Ciudad de México"
-              className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55"
+              className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55"
             />
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-widest text-white/40">País de nacimiento</span>
+            <span className="text-[10px] uppercase tracking-widest text-white/40">País de nacimiento</span>
             <input
               value={birthCountry}
               onChange={e => setBirthCountry(e.target.value)}
               placeholder="Ej: México"
-              className="mt-1 w-full rounded-md border border-white/10 bg-black/45 px-4 py-3 text-white outline-none focus:border-lime-300/55"
+              className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55"
             />
           </label>
         </div>
+
         {sunSign && (
-          <div className="mt-4 flex items-center gap-2 rounded-md border border-lime-300/20 bg-lime-300/5 px-3 py-2 text-sm">
-            <span className="text-white/60">Signo solar calculado:</span>
+          <div className="mt-3 flex items-center gap-2 rounded-lg border border-lime-300/20 bg-lime-300/5 px-3 py-2 text-sm">
+            <span className="text-white/55 text-xs">Signo solar calculado:</span>
             <span className="font-black text-lime-300">{sunSign}</span>
           </div>
         )}
-        <div className="mt-5 flex flex-wrap gap-3">
+
+        <div className="mt-4 flex flex-wrap gap-2.5">
           <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar datos" />
-          <a href="/onboarding" className="flex items-center gap-2 rounded-md border border-white/15 px-5 py-3 text-sm font-bold text-white/60 hover:text-white/90 transition">
-            <RefreshCw className="h-4 w-4" /> Recalcular mi destino
+          <a href="/onboarding" className="flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2.5 text-sm font-bold text-white/55 hover:text-white/80 transition">
+            <RefreshCw className="h-3.5 w-3.5" /> Recalcular
           </a>
         </div>
       </div>
 
       {/* ── Tono de lecturas ── */}
-      <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-1">Tono de lecturas</h2>
-        <p className="text-xs text-white/40 mb-4">Cómo quieres que ZODI te hable.</p>
-        <div className="flex flex-wrap gap-2 mb-4">
+      <div className="glass-panel rounded-xl p-4 sm:p-5">
+        <h2 className="text-lg font-black mb-0.5">Tono de lecturas</h2>
+        <p className="text-[11px] text-white/40 mb-3">Cómo quieres que ZODI te hable.</p>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-4">
           {(["suave", "directo", "brutal", "sarcastico"] as const).map(t => {
             const labels: Record<string, string> = {
               suave: "🌙 Suave", directo: "⚡ Directo", brutal: "🔥 Brutal", sarcastico: "💀 Sarcástico"
             };
             return (
               <button key={t} onClick={() => setReadingTone(t)}
-                className={`rounded-md px-4 py-2 text-sm font-bold transition ${
+                className={`rounded-lg px-3 py-2 text-sm font-bold transition ${
                   readingTone === t ? "bg-lime-300 text-black" : "border border-white/10 text-white/60 hover:border-lime-300/40"
                 }`}
               >
@@ -2013,146 +2015,125 @@ function PerfilUI() {
         <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} label="Guardar preferencias" />
       </div>
 
-      {/* PWA Install Card (will return null if not installable or dismissed) */}
       <InstallPwaCard />
 
-      {/* Rewards & Referrals */}
-      <div className="glass-panel rounded-md p-5 border border-yellow-400/20 bg-yellow-400/5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow-400/20">
-            <Gem className="h-5 w-5 text-yellow-400" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-yellow-100">Programa Embajadores ZODI</h2>
-            <p className="text-xs text-yellow-200/60">Invita amigos y gana recompensas</p>
+      {/* Embajadores */}
+      <div className="glass-panel rounded-xl p-4 border border-yellow-400/15 bg-yellow-400/5">
+        <div className="flex items-center gap-2.5 mb-3 min-w-0">
+          <Gem className="h-4 w-4 shrink-0 text-yellow-400" />
+          <div className="min-w-0">
+            <h2 className="text-sm font-black text-yellow-100">Embajadores ZODI</h2>
+            <p className="text-[10px] text-yellow-200/55">Invita amigos · Gana 500 gemas por registro</p>
           </div>
         </div>
-        <p className="text-sm text-white/70 mb-4">
-          Gana <strong className="text-yellow-400">500 gemas</strong> por cada amigo que se registre con tu enlace. Ellos recibirán <strong className="text-yellow-400">200 gemas extra</strong> para empezar.
-        </p>
-        <div className="flex items-center gap-2 rounded-md border border-white/10 bg-black/40 p-2">
-          <input 
-            readOnly 
+        <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 p-2 overflow-hidden">
+          <input
+            readOnly
             value={typeof window !== 'undefined' ? `${window.location.origin}/auth/register?ref=${session.uid}` : ''}
-            className="w-full bg-transparent text-sm text-white/50 outline-none px-2"
+            className="min-w-0 flex-1 bg-transparent text-xs text-white/40 outline-none truncate"
           />
           <button
             onClick={() => {
               if (typeof window !== 'undefined') {
                 navigator.clipboard.writeText(`${window.location.origin}/auth/register?ref=${session.uid}`);
                 const btn = document.getElementById("copy-btn");
-                if (btn) { btn.innerText = "¡Copiado!"; setTimeout(() => btn.innerText = "Copiar", 2000); }
+                if (btn) { btn.innerText = "✓"; setTimeout(() => btn.innerText = "Copiar", 2000); }
               }
             }}
             id="copy-btn"
-            className="shrink-0 rounded bg-yellow-400 px-4 py-2 text-xs font-black text-black hover:bg-yellow-300 transition"
+            className="shrink-0 rounded-md bg-yellow-400 px-3 py-1.5 text-xs font-black text-black hover:bg-yellow-300 transition"
           >
             Copiar
           </button>
         </div>
       </div>
 
-      {/* Push Notifications UI */}
-      <div className="glass-panel rounded-md p-5 border border-purple-500/20 bg-purple-500/5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/20">
-              <span className="text-xl">🔔</span>
-            </div>
-            <div>
-              <h2 className="text-xl font-black text-purple-100">Notificaciones del Cosmos</h2>
-              <p className="text-xs text-purple-200/60">Avisos de gemas y eventos astrales</p>
+      {/* Notificaciones */}
+      <div className="glass-panel rounded-xl p-4 border border-purple-500/15 bg-purple-500/5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="shrink-0">🔔</span>
+            <div className="min-w-0">
+              <h2 className="text-sm font-black text-purple-100 truncate">Notificaciones</h2>
+              <p className="text-[10px] text-purple-200/50">Gemas y eventos astrales</p>
             </div>
           </div>
           <button
             onClick={async () => {
               if (typeof window !== 'undefined' && 'Notification' in window) {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                  alert("¡El cosmos te avisará! (Pronto configuraremos Firebase Messaging completo)");
-                } else {
-                  alert("Permiso denegado. No podremos avisarte de premios.");
-                }
+                const p = await Notification.requestPermission();
+                alert(p === 'granted' ? "¡Activadas!" : "Permiso denegado.");
               }
             }}
-            className="shrink-0 rounded bg-purple-500 px-4 py-2 text-xs font-black text-white hover:bg-purple-400 transition"
+            className="shrink-0 rounded-lg bg-purple-500 px-3 py-1.5 text-xs font-black text-white hover:bg-purple-400 transition"
           >
             Activar
           </button>
         </div>
       </div>
 
-      {/* Astral data */}
+      {/* Perfil astral */}
       {ap && (
-        <div className="glass-panel rounded-md p-5">
-          <h2 className="text-xl font-black mb-4">Tu perfil astral</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="glass-panel rounded-xl p-4 sm:p-5">
+          <h2 className="text-sm font-black mb-3">Tu perfil astral</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
-              { label: "Signo solar", value: ap.sunSign ?? "–", type: "zodiac", img: `/zodiac/${ap.sunSign?.toLowerCase() === 'piscis' ? 'picis' : ap.sunSign?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()}.png` },
-              { label: "Luna",        value: ap.moonSign ?? "–",   emoji: "🌙" },
-              { label: "Ascendente",  value: ap.ascendant ?? "–",  emoji: "⬆️" },
-              { label: "Camino vida", value: String(ap.lifePathNumber ?? "–"), type: "numerology", img: `/zodi-art/nuevas/7-Numerologia/${ap.lifePathNumber}.png` },
-              { label: "Chino",       value: ap.chineseZodiac ?? "–", type: "chinese", img: `/zodi-art/chino/C_${ap.chineseZodiac ? ap.chineseZodiac.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""}.png` },
-              { label: "Maya",        value: ap.mayanSign ?? "–",  emoji: "🌿" },
+              { label: "Signo",      value: ap.sunSign ?? "–",             emoji: "☀️" },
+              { label: "Luna",       value: ap.moonSign ?? "–",            emoji: "🌙" },
+              { label: "Ascendente", value: ap.ascendant ?? "–",           emoji: "⬆️" },
+              { label: "Vida",       value: String(ap.lifePathNumber ?? "–"), emoji: "🔢" },
+              { label: "Chino",      value: ap.chineseZodiac ?? "–",       emoji: "🐉" },
+              { label: "Maya",       value: ap.mayanSign ?? "–",           emoji: "🌿" },
             ].map(item => (
-              <div key={item.label} className="rounded-md border border-white/10 bg-black/30 p-3 flex flex-col items-center text-center">
-                <p className="text-xs text-white/40 mb-2 w-full text-left">{item.label}</p>
-                {item.img && item.value !== "–" ? (
-                  <div className="relative w-16 h-16 mb-2">
-                    <Image src={item.img} alt={item.value} fill className="object-contain" />
-                  </div>
-                ) : (
-                  <p className="text-3xl mb-2">{item.emoji}</p>
-                )}
-                <p className="font-black text-sm">{item.value}</p>
+              <div key={item.label} className="rounded-lg border border-white/08 bg-black/30 p-3 text-center">
+                <p className="text-[10px] text-white/40 mb-1">{item.label}</p>
+                <p className="text-xl mb-0.5">{item.emoji}</p>
+                <p className="font-black text-sm leading-tight break-words">{item.value}</p>
               </div>
             ))}
           </div>
-          <a
-            href="/onboarding"
-            className="mt-4 inline-flex items-center gap-2 rounded-md border border-white/15 px-5 py-2.5 text-sm font-bold text-white/60 hover:text-white/90 transition"
-          >
-            <RefreshCw className="h-4 w-4" /> Recalcular mi destino
+          <a href="/onboarding" className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-white/35 hover:text-lime-200/70 transition">
+            <RefreshCw className="h-3 w-3" /> Recalcular
           </a>
         </div>
       )}
 
-      {/* Account actions */}
-      <div className="glass-panel rounded-md p-5">
-        <h2 className="text-xl font-black mb-4">Cuenta</h2>
-        <div className="grid gap-3">
+      {/* Cuenta */}
+      <div className="glass-panel rounded-xl p-4 sm:p-5">
+        <h2 className="text-sm font-black mb-3 text-white/70">Cuenta</h2>
+        <div className="grid gap-2.5">
           <button
             onClick={signOut}
-            className="flex items-center gap-3 rounded-md border border-white/15 px-5 py-3 font-bold text-white/70 hover:border-red-400/40 hover:text-red-400 transition"
+            className="flex items-center gap-2.5 rounded-lg border border-white/12 px-4 py-3 text-sm font-bold text-white/65 hover:border-red-400/35 hover:text-red-400 transition"
           >
-            <LogOut className="h-4 w-4" /> Cerrar sesión
+            <LogOut className="h-4 w-4 shrink-0" /> Cerrar sesión
           </button>
           <button
             onClick={() => setShowDelete(!showDelete)}
-            className="flex items-center gap-3 rounded-md border border-red-500/20 px-5 py-3 font-bold text-red-400/70 hover:border-red-500/50 hover:text-red-400 transition"
+            className="flex items-center gap-2.5 rounded-lg border border-red-500/15 px-4 py-3 text-sm font-bold text-red-400/60 hover:border-red-500/40 hover:text-red-400 transition"
           >
-            <Trash2 className="h-4 w-4" /> Eliminar cuenta
+            <Trash2 className="h-4 w-4 shrink-0" /> Eliminar cuenta
           </button>
         </div>
 
         {showDelete && (
-          <div className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="h-4 w-4 text-red-400" />
-              <p className="font-black text-red-400 text-sm">Esta acción es irreversible</p>
+          <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3.5">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="h-3.5 w-3.5 text-red-400 shrink-0" />
+              <p className="font-black text-red-400 text-xs">Esta acción es irreversible</p>
             </div>
-            <p className="text-sm text-white/60 mb-3">Escribe <strong className="text-red-400">ELIMINAR</strong> para confirmar</p>
-            <div className="flex gap-3">
+            <p className="text-xs text-white/55 mb-2.5">Escribe <strong className="text-red-400">ELIMINAR</strong> para confirmar</p>
+            <div className="flex gap-2">
               <input
                 value={deleteConfirm}
                 onChange={e => setDeleteConfirm(e.target.value)}
                 placeholder="ELIMINAR"
-                className="flex-1 rounded-md border border-red-500/30 bg-black/45 px-4 py-2 text-sm text-white outline-none"
+                className="flex-1 min-w-0 rounded-lg border border-red-500/30 bg-black/45 px-3 py-2 text-sm text-white outline-none"
               />
               <button
                 onClick={deleteAccount}
                 disabled={deleteConfirm !== "ELIMINAR"}
-                className="rounded-md bg-red-500 px-5 py-2 font-black text-sm text-white disabled:opacity-40"
+                className="shrink-0 rounded-lg bg-red-500 px-4 py-2 font-black text-sm text-white disabled:opacity-40"
               >
                 Eliminar
               </button>
