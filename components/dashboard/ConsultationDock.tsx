@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CalendarDays, Check, Copy, Gem, HeartHandshake,
-  MoonStar, Share2, Sparkles, Star, Waves, WandSparkles
+  MoonStar, Share2, Sparkles, Star, Users, Waves, WandSparkles
 } from "lucide-react";
 import { demoProfile } from "@/lib/data";
 import { getSessionProfile } from "@/lib/session";
@@ -25,6 +25,15 @@ type Consulta = {
   input: string;
   focusDomain?: string;
 };
+
+const ZODIAC_MINI = [
+  { name: "Aries", emoji: "♈" }, { name: "Tauro", emoji: "♉" },
+  { name: "Géminis", emoji: "♊" }, { name: "Cáncer", emoji: "♋" },
+  { name: "Leo", emoji: "♌" }, { name: "Virgo", emoji: "♍" },
+  { name: "Libra", emoji: "♎" }, { name: "Escorpio", emoji: "♏" },
+  { name: "Sagitario", emoji: "♐" }, { name: "Capricornio", emoji: "♑" },
+  { name: "Acuario", emoji: "♒" }, { name: "Piscis", emoji: "♓" },
+];
 
 const consultas: Consulta[] = [
   {
@@ -82,7 +91,16 @@ const consultas: Consulta[] = [
     kind: "numerology",
     input: "Analiza mi numerología, camino de vida, vibración actual y recomendación.",
     focusDomain: "numerología y patrones numéricos",
-  }
+  },
+  {
+    title: "Cotilleo",
+    label: "Otro signo",
+    body: "Espía los astros de alguien más. Amor, trabajo, dinero y una advertencia. Sin que se entere.",
+    image: "/zodi-art/nuevas/2-Portada--Home/ZODI-riendose-con-sarcasmo2.png",
+    icon: Users,
+    kind: "daily-horoscope",
+    input: "Haz un horóscopo del día para este signo solar, con amor, trabajo, dinero, energía y señal de alerta. Es modo cotilleo: lo estoy leyendo para otra persona sin su permiso cósmico.",
+  },
 ];
 
 const tonos = ["suave", "directo", "brutal", "sarcástico"] as const;
@@ -166,13 +184,14 @@ function ResultBox({ result, sectionTitle }: { result: string; sectionTitle: str
 
 // ── ConsultationDock ──────────────────────────────────────────────────────────
 export function ConsultationDock() {
-  const [active, setActive]   = useState(consultas[0]);
-  const [tone, setTone]       = useState<(typeof tonos)[number]>("directo");
-  const [focus, setFocus]     = useState<string | null>(null);
-  const [detail, setDetail]   = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult]   = useState<string | null>(null);
-  const [showGems, setShowGems] = useState(false);
+  const [active, setActive]       = useState(consultas[0]);
+  const [tone, setTone]           = useState<(typeof tonos)[number]>("directo");
+  const [focus, setFocus]         = useState<string | null>(null);
+  const [detail, setDetail]       = useState("");
+  const [loading, setLoading]     = useState(false);
+  const [result, setResult]       = useState<string | null>(null);
+  const [showGems, setShowGems]   = useState(false);
+  const [cotilleoSign, setCotilleoSign] = useState("");
 
   // Ocultar toast de gemas tras 2s
   useEffect(() => {
@@ -192,6 +211,7 @@ export function ConsultationDock() {
     const domainFocus = focus ?? active.focusDomain ?? undefined;
     const userInput = [
       active.input,
+      active.title === "Cotilleo" && cotilleoSign ? `Signo a leer: ${cotilleoSign}.` : "",
       focus ? `El usuario quiere enfocarse SOLO en: ${focus}.` : "",
       detail ? `Detalle adicional del usuario: ${detail}` : ""
     ].filter(Boolean).join("\n");
@@ -271,7 +291,7 @@ export function ConsultationDock() {
               return (
                   <button
                   key={consulta.title}
-                  onClick={() => { setActive(consulta); setResult(null); setFocus(null); }}
+                  onClick={() => { setActive(consulta); setResult(null); setFocus(null); setCotilleoSign(""); }}
                   className={`hover-bubble flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${
                     isActive
                       ? "border-lime-300/50 bg-lime-300/10 text-lime-100 shadow-[0_0_16px_rgba(184,255,23,0.08)]"
@@ -318,6 +338,32 @@ export function ConsultationDock() {
               {active.title}
             </h3>
             <p className="mt-3 text-sm leading-6 text-white/60">{active.body}</p>
+
+            {/* Selector de signo — solo para Cotilleo */}
+            {active.title === "Cotilleo" && (
+              <div className="mt-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/40">¿De qué signo es?</p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {ZODIAC_MINI.map(z => (
+                    <button
+                      key={z.name}
+                      onClick={() => setCotilleoSign(z.name)}
+                      className={`rounded-lg border p-1.5 text-center text-xs font-bold transition ${
+                        cotilleoSign === z.name
+                          ? "border-lime-300 bg-lime-300/10 text-lime-200"
+                          : "border-white/10 text-white/50 hover:border-lime-300/25 hover:text-white/80"
+                      }`}
+                    >
+                      <div className="text-base">{z.emoji}</div>
+                      <div className="truncate text-[9px] mt-0.5">{z.name.slice(0, 5)}</div>
+                    </button>
+                  ))}
+                </div>
+                {cotilleoSign && (
+                  <p className="mt-2 text-xs font-bold text-lime-300">✦ {cotilleoSign} — ya lo tengo en el radar</p>
+                )}
+              </div>
+            )}
 
             {/* Selector de área de enfoque — siempre visible, Todos por defecto */}
             <div className="mt-4">
@@ -378,7 +424,7 @@ export function ConsultationDock() {
             {/* Botón de consulta */}
             <button
               onClick={startReading}
-              disabled={loading}
+              disabled={loading || (active.title === "Cotilleo" && !cotilleoSign)}
               className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-lime-300 px-5 py-3.5 font-black text-black transition hover:bg-lime-200 active:scale-95 disabled:opacity-50"
             >
               {loading ? (

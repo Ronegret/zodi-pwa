@@ -7,9 +7,10 @@ import {
   Send, RefreshCw, Star, Zap, Heart, Brain,
   LogOut, Trash2, Save, Camera, Check, X, Shuffle,
   Copy, Share2, BookOpen, AlertTriangle, Sparkles, ChartNoAxesCombined,
-  Waves, NotebookPen, Gem, Lock
+  Waves, NotebookPen, Gem, Lock, ChevronDown
 } from "lucide-react";
 import { getLocalSession, setLocalSession, signOutZodi } from "@/lib/session";
+import { COUNTRY_LIST, getCitiesForCountry } from "@/lib/places";
 import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
@@ -132,25 +133,28 @@ function useConsult(section: DashboardSection) {
 }
 
 function buildProfile(session: ReturnType<typeof getLocalSession>) {
-  if (!session.astralProfile) return null;
+  // No requerir astralProfile — birthDate es suficiente para lecturas personalizadas
   const od = session.onboardingData;
   const ap = session.astralProfile;
-  // Always recalculate sunSign from birthDate to fix any stored stale values
-  const zodiac = od?.birthDate ? calculateSunSign(od.birthDate) : ap.sunSign;
+  if (!od && !ap) return null;
+
+  // Signo calculado desde birthDate (fuente de verdad)
+  const zodiac = od?.birthDate ? calculateSunSign(od.birthDate) : (ap?.sunSign ?? "");
+
   return {
     uid: session.uid,
-    displayName: session.displayName,
+    displayName: session.displayName ?? od?.displayName,
     zodiac,
-    moonSign: ap.moonSign,
-    ascendant: ap.ascendant,
-    birthDate: od?.birthDate,
-    birthTime: od?.birthTime,
-    birthCity: od?.birthCity,
-    birthCountry: od?.birthCountry,
-    lifePathNumber: ap.lifePathNumber,
-    chineseZodiac: ap.chineseZodiac,
-    mayanSign: ap.mayanSign,
-    readingTone: od?.readingTone ?? "directo",
+    moonSign:       ap?.moonSign ?? "",
+    ascendant:      ap?.ascendant ?? "",
+    birthDate:      od?.birthDate ?? "",
+    birthTime:      od?.birthTime ?? "",
+    birthCity:      od?.birthCity ?? "",
+    birthCountry:   od?.birthCountry ?? "",
+    lifePathNumber: ap?.lifePathNumber ?? 0,
+    chineseZodiac:  ap?.chineseZodiac ?? "",
+    mayanSign:      ap?.mayanSign ?? "",
+    readingTone:    od?.readingTone ?? "directo",
     favoriteTopics: od?.favoriteTopics ?? [],
     level: 1,
   };
@@ -1477,7 +1481,11 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const ctx = getTodaysAstralContext();
 
-  const mySign = session.astralProfile?.sunSign ?? "Aries";
+  // Calcular signo desde birthDate (fuente de verdad) antes que del astralProfile guardado
+  const od = session.onboardingData;
+  const mySign = (od?.birthDate ? calculateSunSign(od.birthDate) : null)
+    || session.astralProfile?.sunSign
+    || "";
   const [targetSign, setTargetSign] = useState<string>(mySign);
   const [cotilleoMode, setCotilleoMode] = useState(false);
   const [hasAutoConsulted, setHasAutoConsulted] = useState(false);
@@ -1629,6 +1637,95 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AUTOCOMPLETE DE LUGAR — reutilizable en PerfilUI para ciudad y país
+// ─────────────────────────────────────────────────────────────────────────────
+function ProfilePlaceInput({
+  label, value, onChange, options, placeholder, disabled,
+}: {
+  label: string; value: string; onChange: (v: string) => void;
+  options: string[]; placeholder?: string; disabled?: boolean;
+}) {
+  const [query, setQuery] = useState(value);
+  const [open, setOpen] = useState(false);
+  const [dropPos, setDropPos] = useState<React.CSSProperties>({});
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setQuery(value); }, [value]);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  function openDrop() {
+    if (!wrapRef.current || disabled) return;
+    const rect = wrapRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const style: React.CSSProperties = { position: "fixed", left: rect.left, width: rect.width, zIndex: 9999 };
+    if (spaceBelow >= 192 || spaceBelow >= rect.top) style.top = rect.bottom + 4;
+    else style.bottom = window.innerHeight - rect.top + 4;
+    setDropPos(style);
+    setOpen(true);
+  }
+
+  const filtered = query.length === 0
+    ? options.slice(0, 60)
+    : options.filter(o => o.toLowerCase().includes(query.toLowerCase())).slice(0, 60);
+
+  function select(opt: string) { onChange(opt); setQuery(opt); setOpen(false); }
+
+  return (
+    <div ref={wrapRef} className="block">
+      <span className="text-[10px] uppercase tracking-widest text-white/40">{label}</span>
+      <div
+        onClick={openDrop}
+        className={`mt-1 flex items-center gap-2 rounded-lg border bg-black/45 px-3 py-2.5 transition cursor-text ${
+          open ? "border-lime-300/55" : "border-white/10 hover:border-white/20"
+        } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+      >
+        <input
+          className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/25"
+          value={query}
+          placeholder={placeholder ?? "Buscar..."}
+          autoComplete="off"
+          disabled={disabled}
+          onChange={e => { setQuery(e.target.value); onChange(e.target.value); if (!open) openDrop(); }}
+          onFocus={openDrop}
+          onKeyDown={e => {
+            if (e.key === "Escape") setOpen(false);
+            if (e.key === "Enter" && filtered.length === 1) { select(filtered[0]); e.preventDefault(); }
+          }}
+        />
+        <ChevronDown className={`h-4 w-4 shrink-0 text-white/30 transition-transform ${open ? "rotate-180" : ""}`} />
+      </div>
+      {open && options.length > 0 && (
+        <ul
+          style={dropPos}
+          className="max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-[#0d0d13] shadow-2xl no-scrollbar"
+        >
+          {filtered.length === 0 ? (
+            <li className="px-4 py-3 text-sm text-white/40">No encontrado — escríbelo igual</li>
+          ) : filtered.map(opt => (
+            <li key={opt}>
+              <button type="button" onClick={() => select(opt)}
+                className={`w-full px-4 py-2.5 text-left text-sm transition hover:bg-lime-300/10 hover:text-lime-200 ${
+                  opt === value ? "bg-lime-300/08 text-lime-300 font-bold" : "text-white/80"
+                }`}
+              >
+                {opt === value && <Check className="mr-2 inline h-3 w-3 text-lime-300" />}{opt}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 11. PERFIL UI (full editor + sign out)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1685,8 +1782,8 @@ function PerfilUI() {
   // Editable: nacimiento
   const [birthDate, setBirthDate] = useState(od?.birthDate ?? "");
   const [birthTime, setBirthTime] = useState(od?.birthTime ?? "");
-  const [birthCity, setBirthCity] = useState(od?.birthCity ?? "");
   const [birthCountry, setBirthCountry] = useState(od?.birthCountry ?? "");
+  const [birthCity, setBirthCity] = useState(od?.birthCity ?? "");
   // Editable: tono
   const [readingTone, setReadingTone] = useState<"suave" | "directo" | "brutal" | "sarcastico">(od?.readingTone ?? "directo");
 
@@ -1957,24 +2054,21 @@ function PerfilUI() {
               className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55 [color-scheme:dark]"
             />
           </label>
-          <label className="block">
-            <span className="text-[10px] uppercase tracking-widest text-white/40">Ciudad de nacimiento</span>
-            <input
-              value={birthCity}
-              onChange={e => setBirthCity(e.target.value)}
-              placeholder="Ej: Ciudad de México"
-              className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55"
-            />
-          </label>
-          <label className="block">
-            <span className="text-[10px] uppercase tracking-widest text-white/40">País de nacimiento</span>
-            <input
-              value={birthCountry}
-              onChange={e => setBirthCountry(e.target.value)}
-              placeholder="Ej: México"
-              className="mt-1 w-full rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55"
-            />
-          </label>
+          <ProfilePlaceInput
+            label="Ciudad de nacimiento"
+            value={birthCity}
+            onChange={setBirthCity}
+            options={getCitiesForCountry(birthCountry)}
+            placeholder={birthCountry ? "Buscar ciudad..." : "Selecciona el país primero"}
+            disabled={!birthCountry}
+          />
+          <ProfilePlaceInput
+            label="País de nacimiento"
+            value={birthCountry}
+            onChange={v => { setBirthCountry(v); setBirthCity(""); }}
+            options={COUNTRY_LIST}
+            placeholder="Buscar país..."
+          />
         </div>
 
         {sunSign && (

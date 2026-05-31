@@ -43,6 +43,16 @@ export function getLocalSession(): LocalZodiSession {
     }
   }
 
+  // Auto-corregir sunSign si birthDate está disponible y no coincide
+  // Esto soluciona signos guardados con datos incorrectos o desactualizados
+  if (parsed.onboardingData?.birthDate && parsed.astralProfile) {
+    const correct = calculateSunSign(parsed.onboardingData.birthDate);
+    if (correct && parsed.astralProfile.sunSign !== correct) {
+      parsed = { ...parsed, astralProfile: { ...parsed.astralProfile, sunSign: correct } };
+      window.localStorage.setItem(SESSION_KEY, JSON.stringify(parsed));
+    }
+  }
+
   return parsed;
 }
 
@@ -163,15 +173,21 @@ export function completeLocalOnboarding(data: OnboardingData, astralProfile: Ast
 
 export function getSessionProfile(): Partial<UserProfile> | null {
   const session = getLocalSession();
-  if (!session.isAuthenticated || !session.onboardingData || !session.astralProfile) return null;
+  // Solo requerimos onboardingData — la autenticación de ruta la maneja el middleware
+  if (!session.onboardingData) return null;
 
   const od = session.onboardingData;
   const ap = session.astralProfile;
 
-  const correctedSunSign = od?.birthDate ? calculateSunSign(od.birthDate) : ap.sunSign;
-  if (correctedSunSign !== ap.sunSign) {
-    setLocalSession({ astralProfile: { ...ap, sunSign: correctedSunSign } });
-    ap.sunSign = correctedSunSign;
+  // Siempre calcular el signo solar desde birthDate — es la fuente de verdad
+  const zodiac = od?.birthDate
+    ? calculateSunSign(od.birthDate)
+    : (ap?.sunSign ?? "");
+
+  // Sincronizar astralProfile si el signo guardado es incorrecto o está vacío
+  if (zodiac && ap && zodiac !== ap.sunSign) {
+    setLocalSession({ astralProfile: { ...ap, sunSign: zodiac } });
+    ap.sunSign = zodiac;
   }
 
   return {
@@ -179,23 +195,21 @@ export function getSessionProfile(): Partial<UserProfile> | null {
     displayName: session.displayName ?? od.displayName,
     username: od.username,
     avatar: od.avatar,
-    zodiac: ap.sunSign,
-    moonSign: ap.moonSign,
-    ascendant: ap.ascendant,
-    lifePathNumber: ap.lifePathNumber,
-    chineseZodiac: ap.chineseZodiac,
-    mayanSign: ap.mayanSign,
-    biorhythmBaseline: ap.biorhythmBaseline,
-    birthDate: od.birthDate,
-    birthTime: od.birthTime,
-    birthCity: od.birthCity,
+    zodiac,                                         // calculado desde birthDate
+    moonSign:          ap?.moonSign ?? "",
+    ascendant:         ap?.ascendant ?? "",
+    lifePathNumber:    ap?.lifePathNumber ?? 0,
+    chineseZodiac:     ap?.chineseZodiac ?? "",
+    mayanSign:         ap?.mayanSign ?? "",
+    biorhythmBaseline: ap?.biorhythmBaseline ?? "",
+    birthDate:    od.birthDate,
+    birthTime:    od.birthTime,
+    birthCity:    od.birthCity,
     birthCountry: od.birthCountry,
-    readingTone: od.readingTone,
-    favoriteTopics: od.favoriteTopics,
+    readingTone:     od.readingTone,
+    favoriteTopics:  od.favoriteTopics,
     onboardingCompleted: true,
-    xp: 0,
-    level: 1,
-    streak: 0,
+    xp: 0, level: 1, streak: 0,
     rank: "Aprendiz Místico",
     plan: "free"
   };
