@@ -266,7 +266,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       }, 14000);
     }
 
-    // getRedirectResult: siempre llamar aunque no haya pending (cubre PWA)
+    // getRedirectResult: procesa el resultado de un redirect previo de Google
     getRedirectResult(auth)
       .then(async (result) => {
         if (googleTimeout) clearTimeout(googleTimeout);
@@ -278,7 +278,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             const { getAdditionalUserInfo } = await import("firebase/auth");
             const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
             await applyFirebaseUser(result.user, isNew);
-          } catch (e) {
+          } catch {
             authHandledRef.current = false;
             setGoogleLoading(false);
             setMessage("Error al cargar tu perfil. Recarga e inténtalo de nuevo.");
@@ -291,19 +291,25 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       .catch((err: any) => {
         if (googleTimeout) clearTimeout(googleTimeout);
         sessionStorage.removeItem("zodi.google_redirect_pending");
-        // Solo mostrar error si auth no fue manejado ya por onAuthStateChanged
-        if (!authHandledRef.current) {
-          setGoogleLoading(false);
-          const code = err?.code ?? "";
-          if (code === "auth/unauthorized-domain") {
-            setMessage("⚠️ Este dominio no está autorizado en Firebase. Añádelo en Firebase Console → Authentication → Authorized Domains.");
-            setMsgType("error");
-          } else if (code && code !== "auth/popup-closed-by-user") {
-            setMessage(`Error Google (${code}). Intenta con email y contraseña.`);
-            setMsgType("error");
-          }
-        } else {
-          setGoogleLoading(false);
+        setGoogleLoading(false);
+        if (authHandledRef.current) return; // ya fue manejado por onAuthStateChanged
+
+        // Solo mostrar error si el usuario HABÍA iniciado un intento de Google
+        // (redirectPending estaba en sessionStorage). Sin esto, cualquier error
+        // de getRedirectResult al cargar la página se muestra aunque nadie haya
+        // pulsado "Continuar con Google" — eso es el bug que veían todos.
+        if (!redirectPending) return;
+
+        const code = err?.code ?? "";
+        if (code === "auth/unauthorized-domain") {
+          setMessage("⚠️ Este dominio no está autorizado en Firebase Console → Authentication → Authorized Domains.");
+          setMsgType("error");
+        } else if (code === "auth/operation-not-allowed") {
+          setMessage("⚠️ Google Sign-In no está activado en Firebase Console → Authentication → Sign-in method.");
+          setMsgType("error");
+        } else if (code && code !== "auth/popup-closed-by-user") {
+          setMessage(`Google no pudo completar el inicio de sesión (${code}). Intenta de nuevo o usa email.`);
+          setMsgType("error");
         }
       });
 
