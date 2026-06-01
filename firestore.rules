@@ -1,107 +1,148 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Función auxiliar: verifica si el usuario está autenticado
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
     function isAuth() {
       return request.auth != null;
     }
-    
-    // Función auxiliar: verifica si el usuario es dueño del documento
     function isOwner(uid) {
       return isAuth() && request.auth.uid == uid;
     }
 
-    // Reglas para perfiles de usuario
-    // Nadie puede leer/escribir perfiles salvo el propio usuario
+    // ── Usuarios ─────────────────────────────────────────────────────────────
+    // Perfil base: datos públicos del usuario + preferencias
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.keys().hasOnly([
-        'email',
-        'emailSubscribed',
-        'displayName',
-        'username',
-        'avatar',
-        'genderIdentity',
-        'onboardingCompleted',
-        'readingTone',
-        'favoriteTopics',
-        'notificationPreferences',
-        'referralCode',
-        'fcmTokens',
-        'notificationsEnabled',
-        'updatedAt'
-      ]);
-      allow update: if isOwner(userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-        'email',
-        'emailSubscribed',
-        'displayName',
-        'username',
-        'avatar',
-        'genderIdentity',
-        'onboardingCompleted',
-        'readingTone',
-        'favoriteTopics',
-        'notificationPreferences',
-        'referralCode',
-        'fcmTokens',
-        'notificationsEnabled',
-        'updatedAt'
-      ]);
+      allow read:   if isAuth(); // cualquier usuario logueado puede leer perfiles (para buscar amigos)
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
       allow delete: if isOwner(userId);
     }
 
-    // Reglas para perfiles de onboarding (OnboardingProfile)
-    match /onboardingProfiles/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId);
-    }
-
-    // Reglas para perfiles astrales
+    // ── Perfiles astrales ─────────────────────────────────────────────────────
+    // Datos de onboarding + astrología generados en el onboarding
     match /astralProfiles/{userId} {
-      allow read: if isOwner(userId);
+      allow read:  if isAuth();
       allow write: if isOwner(userId);
     }
 
-    // Reglas para el sistema de Gamificación (gemas, rachas)
-    // El usuario solo puede leer sus propios datos.
-    // Para escribir, evitamos que sumen 10000 gemas manualmente; solo el Admin SDK o incrementos permitidos.
+    // ── Perfiles de onboarding (legacy) ───────────────────────────────────────
+    match /onboardingProfiles/{userId} {
+      allow read:  if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+
+    // ── Lecturas / Readings ───────────────────────────────────────────────────
+    match /readings/{readingId} {
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── Favoritos ─────────────────────────────────────────────────────────────
+    match /favorites/{favId} {
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── Historial ─────────────────────────────────────────────────────────────
+    match /history/{histId} {
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+    }
+
+    // ── Logros / Achievements ─────────────────────────────────────────────────
+    match /achievements/{achId} {
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+    }
+
+    // ── Notificaciones ────────────────────────────────────────────────────────
+    match /notifications/{notifId} {
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow update: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── Gamificación (gemas, rachas) ──────────────────────────────────────────
+    // Solo lectura desde cliente; escritura solo desde Admin SDK
     match /gamification/{userId} {
       allow read: if isOwner(userId);
-      // Las escrituras de gemas, compras y referidos pasan solo por backend/Admin SDK.
-      allow create, update, delete: if false;
+      allow write: if false; // solo Admin SDK
     }
 
-    // Reglas de Comunidad y Chats
+    // ── Subscripciones / Stripe ───────────────────────────────────────────────
+    match /subscriptions/{subId} {
+      allow read: if isAuth() && resource.data.uid == request.auth.uid;
+      allow write: if false; // solo backend/Stripe webhook
+    }
+
+    // ── Publicaciones de comunidad ────────────────────────────────────────────
     match /communityPosts/{postId} {
-      allow read: if isAuth();
-      allow create: if isAuth() && request.resource.data.authorId == request.auth.uid;
+      allow read:           if isAuth();
+      allow create:         if isAuth() && request.resource.data.authorId == request.auth.uid;
       allow update, delete: if isAuth() && resource.data.authorId == request.auth.uid;
     }
 
+    // ── Comentarios ──────────────────────────────────────────────────────────
     match /comments/{commentId} {
-      allow read: if isAuth();
-      allow create: if isAuth() && request.resource.data.authorId == request.auth.uid;
+      allow read:           if isAuth();
+      allow create:         if isAuth() && request.resource.data.authorId == request.auth.uid;
       allow update, delete: if isAuth() && resource.data.authorId == request.auth.uid;
     }
 
     match /dailyTopicComments/{commentId} {
-      allow read: if isAuth();
-      allow create: if isAuth() && request.resource.data.authorId == request.auth.uid;
+      allow read:           if isAuth();
+      allow create:         if isAuth() && request.resource.data.authorId == request.auth.uid;
       allow update, delete: if isAuth() && resource.data.authorId == request.auth.uid;
     }
 
+    // ── Reacciones ────────────────────────────────────────────────────────────
+    match /reactions/{reactionId} {
+      allow read:           if isAuth();
+      allow create:         if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow delete:         if isAuth() && resource.data.uid == request.auth.uid;
+    }
+
+    // ── Amistades ─────────────────────────────────────────────────────────────
+    match /friendships/{docId} {
+      allow read:  if isAuth() && (
+        resource.data.from == request.auth.uid ||
+        resource.data.to == request.auth.uid
+      );
+      allow create: if isAuth() && request.resource.data.from == request.auth.uid;
+      allow update: if isAuth() && (
+        resource.data.from == request.auth.uid ||
+        resource.data.to == request.auth.uid
+      );
+      allow delete: if isAuth() && (
+        resource.data.from == request.auth.uid ||
+        resource.data.to == request.auth.uid
+      );
+    }
+
+    // ── Mensajes de chat ──────────────────────────────────────────────────────
+    match /messages/{chatId}/msgs/{msgId} {
+      allow read, write: if isAuth() && chatId.matches('.*' + request.auth.uid + '.*');
+    }
+
     match /chatMessages/{messageId} {
-      allow read: if isAuth() && resource.data.userId == request.auth.uid;
+      allow read:   if isAuth() && resource.data.userId == request.auth.uid;
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
     }
 
     match /deletedChats/{chatId} {
-      allow read: if isAuth() && resource.data.userId == request.auth.uid;
+      allow read:           if isAuth() && resource.data.userId == request.auth.uid;
       allow create, update: if isAuth() && request.resource.data.userId == request.auth.uid;
     }
-    
-    // Regateo seguro genérico por defecto
+
+    // ── Referidos ─────────────────────────────────────────────────────────────
+    match /referrals/{refId} {
+      allow read:   if isAuth() && resource.data.uid == request.auth.uid;
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+    }
+
+    // ── Bloqueo total para todo lo demás ─────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }

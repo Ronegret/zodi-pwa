@@ -174,52 +174,60 @@ export function MarketingHome() {
       {lightbox && <Lightbox src={lightbox} onClose={() => setLightbox(null)} />}
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden px-4 py-10 sm:py-16">
+      <section className="relative min-h-[calc(100vh-64px)] overflow-hidden px-4 py-8 sm:py-16">
 
-        {/* ── ANIMATED BACKGROUND (Video hidden on mobile to prevent stuttering) ── */}
-        <div className="absolute inset-0 h-full w-full bg-[url('/zodi-art/poster-chaos.png')] bg-cover bg-center opacity-40 md:hidden" />
-        <video autoPlay muted loop playsInline poster="/zodi-art/poster-chaos.png"
-          className="hidden md:block absolute inset-0 h-full w-full object-cover opacity-40 mix-blend-screen"
-          aria-hidden="true">
-          <source src="/zodi-art/hero-bg.mp4" type="video/mp4" />
-        </video>
+        {/* Fondo estático imagen — sin video */}
+        <div className="absolute inset-0 h-full w-full bg-[url('/zodi-art/poster-chaos.png')] bg-cover bg-center opacity-35" />
 
-        {/* Gradient overlay to keep text readable */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgba(5,5,7,0.5)] to-[rgba(5,5,7,0.98)] sm:bg-[linear-gradient(110deg,rgba(5,5,7,.85)_45%,rgba(5,5,7,0.2)_100%)]" />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(5,5,7,0.55)] via-[rgba(5,5,7,0.45)] to-[rgba(5,5,7,0.98)] lg:bg-[linear-gradient(110deg,rgba(5,5,7,.88)_45%,rgba(5,5,7,0.15)_100%)]" />
 
-        <div className="relative mx-auto grid min-h-[80vh] max-w-7xl items-center gap-8 lg:grid-cols-[1fr_0.85fr]">
-          <div>
-            <p className="stagger-1 mb-4 inline-block rounded-full border border-lime-300/30 bg-lime-300/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-lime-300">
+        <div className="relative mx-auto flex max-w-7xl flex-col justify-center gap-6 lg:grid lg:min-h-[80vh] lg:grid-cols-[1fr_0.85fr] lg:items-center lg:gap-10">
+          <div className="flex flex-col">
+            <p className="stagger-1 mb-4 inline-block self-start rounded-full border border-lime-300/30 bg-lime-300/10 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-lime-300 sm:text-xs">
               ✦ Oráculo Astral ZODI ✦
             </p>
-            <h1 className="glitch-text stagger-2 max-w-4xl text-5xl font-black leading-[1.04] sm:text-6xl lg:text-7xl"
-              style={{ fontFamily:"var(--font-display)" }}>
+            <h1
+              className="glitch-text stagger-2 max-w-4xl text-[2.4rem] font-black leading-[1.06] sm:text-5xl lg:text-7xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
               Zodi te lee el futuro y te juzga el presente.
             </h1>
-            <p className="stagger-2 mt-6 max-w-2xl text-lg leading-8 text-white/70">
-              Horóscopo, tarot, numerología, carta natal y comunidad en un solo lugar oscuro y brillante. Crea tu perfil astral gratis, elige qué quieres consultar y recibe lecturas con personalidad: directas, místicas y con el humor exacto para no convertirte en víctima del universo.
+            <p className="stagger-2 mt-4 max-w-2xl text-base leading-7 text-white/70 sm:mt-6 sm:text-lg sm:leading-8">
+              Horóscopo, tarot, numerología, carta natal y comunidad en un solo lugar oscuro y brillante. Crea tu perfil astral gratis y recibe lecturas con personalidad.
             </p>
-            <div className="stagger-3 mt-8 flex flex-wrap gap-3">
-              <Link href="/auth/register"
-                className="hero-cta-pulse flex items-center gap-2 rounded-xl bg-lime-300 px-6 py-4 font-black text-black">
-                Empezar gratis <ArrowRight className="h-5 w-5" />
+            <div className="stagger-3 mt-6 flex flex-wrap gap-3 sm:mt-8">
+              <Link
+                href="/auth/register"
+                className="hero-cta-pulse flex items-center gap-2 rounded-xl bg-lime-300 px-5 py-3.5 text-sm font-black text-black sm:px-6 sm:py-4 sm:text-base"
+              >
+                Empezar gratis <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
-              <a href="#consultas"
-                className="rounded-xl border border-purple-300/40 bg-purple-500/10 px-6 py-4 font-bold text-purple-100 transition hover:bg-purple-500/20">
+              <a
+                href="#consultas"
+                className="rounded-xl border border-purple-300/40 bg-purple-500/10 px-5 py-3.5 text-sm font-bold text-purple-100 transition hover:bg-purple-500/20 sm:px-6 sm:py-4 sm:text-base"
+              >
                 Explorar lecturas
               </a>
             </div>
+
+            {/* Feature pills — solo mobile */}
+            <div className="mt-6 flex flex-wrap gap-2 lg:hidden">
+              <span className="rounded-full border border-lime-300/20 bg-lime-300/05 px-3 py-1 text-[11px] font-medium text-lime-200/70">✦ Tarot vivo</span>
+              <span className="rounded-full border border-fuchsia-300/20 bg-fuchsia-500/05 px-3 py-1 text-[11px] font-medium text-fuchsia-200/70">✦ Rachas</span>
+              <span className="rounded-full border border-cyan-300/20 bg-cyan-500/05 px-3 py-1 text-[11px] font-medium text-cyan-200/70">✦ Modo móvil</span>
+            </div>
           </div>
 
-          {/* Imagen oráculo — en móvil se muestra compacta, en desktop la versión grande */}
+          {/* Imagen oráculo — solo desktop lg+ */}
           <motion.div
             initial={{ opacity: 0, rotate: -3, y: 24 }}
             animate={{ opacity: 1, rotate: 0, y: 0 }}
-            className="glass-panel neon-border rounded-md p-3 sm:p-5 lg:block"
+            className="hidden lg:block glass-panel neon-border rounded-xl p-4"
           >
             <button
-              onClick={() => setLightbox("/zodi-art/home/hero-main.png")}
-              className="group relative block w-full overflow-hidden rounded-md"
+              onClick={() => setLightbox("/zodi-art/nuevas/2-Portada--Home/Hero-principal-portada.png")}
+              className="group relative block w-full overflow-hidden rounded-lg"
               aria-label="Ver imagen completa"
             >
               <Image
@@ -227,10 +235,10 @@ export function MarketingHome() {
                 alt="Oráculo cyberpunk de ZODI"
                 width={520}
                 height={520}
-                className="h-auto w-full rounded-md opacity-95 transition duration-300 group-hover:scale-105"
+                className="h-auto w-full rounded-lg opacity-95 transition duration-300 group-hover:scale-105"
                 priority
               />
-              <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/0 transition group-hover:bg-black/30">
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 transition group-hover:bg-black/30">
                 <ZoomIn className="h-10 w-10 text-white opacity-0 drop-shadow-lg transition group-hover:opacity-100" />
               </div>
             </button>
@@ -258,10 +266,10 @@ export function MarketingHome() {
                 alt="Personaje ZODI completo"
                 width={700}
                 height={1200}
-                className="h-[480px] w-full object-contain transition duration-500 group-hover:scale-105 sm:h-[620px]"
+                className="h-64 w-full object-contain transition duration-500 group-hover:scale-105 sm:h-[480px] lg:h-[620px]"
                 style={{ background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.3))" }}
               />
-              <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent p-4">
+              <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent p-3">
                 <div className="sm:hidden flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white/70 backdrop-blur-sm">
                   <ZoomIn className="h-3 w-3" /> Ampliar
                 </div>
@@ -278,7 +286,7 @@ export function MarketingHome() {
                 alt="ZODI - Horóscopos. Humor Ácido. Destino con Sarcasmo."
                 width={700}
                 height={700}
-                className="h-[480px] w-full object-contain transition duration-500 group-hover:scale-105 sm:h-[620px]"
+                className="h-64 w-full object-contain transition duration-500 group-hover:scale-105 sm:h-[480px] lg:h-[620px]"
                 style={{ background: "radial-gradient(ellipse at center, rgba(184,255,23,0.06) 0%, transparent 70%)" }}
               />
             </button>

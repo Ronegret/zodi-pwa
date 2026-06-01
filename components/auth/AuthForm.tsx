@@ -84,7 +84,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setLocalSession({
         isAuthenticated: true, onboardingCompleted: true,
         uid: user.uid, email: user.email || preserved.email || "",
-        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
+        // Preferir displayName del onboardingData sobre el placeholder "Viajero ZODI"
+        displayName: user.displayName || preserved.onboardingData?.displayName || preserved.displayName || "Viajero ZODI",
         loginAt: Date.now(),
         astralProfile: preserved.astralProfile,
         onboardingData: preserved.onboardingData,
@@ -110,12 +111,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             onboardingData: {
               ...preserved.onboardingData,
               displayName: ud.displayName || preserved.onboardingData?.displayName || "",
-              birthDate: ad.birthDate ?? ud.birthDate ?? preserved.onboardingData?.birthDate ?? "",
-              birthTime: ad.birthTime ?? ud.birthTime ?? preserved.onboardingData?.birthTime ?? "",
-              birthCity: ad.birthCity ?? ud.birthCity ?? preserved.onboardingData?.birthCity ?? "",
-              birthCountry: ad.birthCountry ?? ud.birthCountry ?? preserved.onboardingData?.birthCountry ?? "",
-              currentCity: ud.currentCity ?? preserved.onboardingData?.currentCity ?? "",
-              currentCountry: ud.currentCountry ?? preserved.onboardingData?.currentCountry ?? "",
+              birthDate: ad.birthDate || ud.birthDate || preserved.onboardingData?.birthDate || "",
+              birthTime: ad.birthTime || ud.birthTime || preserved.onboardingData?.birthTime || "",
+              birthCity: ad.birthCity || ud.birthCity || preserved.onboardingData?.birthCity || "",
+              birthCountry: ad.birthCountry || ud.birthCountry || preserved.onboardingData?.birthCountry || "",
+              currentCity: ud.currentCity || preserved.onboardingData?.currentCity || "",
+              currentCountry: ud.currentCountry || preserved.onboardingData?.currentCountry || "",
               readingTone: ud.readingTone ?? preserved.onboardingData?.readingTone ?? "directo",
               favoriteTopics: ud.favoriteTopics ?? preserved.onboardingData?.favoriteTopics ?? [],
               notificationPreferences: ud.notificationPreferences ?? preserved.onboardingData?.notificationPreferences ?? [],
@@ -183,9 +184,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
-        if (uSnap.exists() && uSnap.data().onboardingCompleted) {
+        if (uSnap.exists() && uSnap.data()?.onboardingCompleted) {
           const ud = uSnap.data();
-          const ad = aSnap.exists() ? aSnap.data() : ud;
+          if (!ud) return; // guard: existe pero data() devolvió null (edge case)
+          const ad = (aSnap.exists() && aSnap.data()) ? aSnap.data()! : ud;
           setLocalSession({
             isAuthenticated: true, onboardingCompleted: true,
             displayName: ud.displayName || user.displayName || "Viajero ZODI",
@@ -199,14 +201,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               natalChartBase: ad.natalChartBase ?? "", summary: ad.summary ?? "",
             } as any,
             onboardingData: {
-              displayName: ud.displayName ?? "", lastName: ud.lastName ?? "",
-              username: ud.username ?? "", avatar: ud.avatar ?? "/zodi-art/perfil/perfil-1.png",
-              genderIdentity: ud.genderIdentity ?? "",
-              birthDate: ad.birthDate ?? ud.birthDate ?? "",
-              birthTime: ad.birthTime ?? ud.birthTime ?? "",
-              birthCity: ad.birthCity ?? ud.birthCity ?? "",
-              birthCountry: ad.birthCountry ?? ud.birthCountry ?? "",
-              currentCity: ud.currentCity ?? "", currentCountry: ud.currentCountry ?? "",
+              displayName: ud.displayName || "", lastName: ud.lastName || "",
+              username: ud.username || "", avatar: ud.avatar || "/zodi-art/perfil/perfil-1.png",
+              genderIdentity: ud.genderIdentity || "",
+              birthDate: ad.birthDate || ud.birthDate || "",
+              birthTime: ad.birthTime || ud.birthTime || "",
+              birthCity: ad.birthCity || ud.birthCity || "",
+              birthCountry: ad.birthCountry || ud.birthCountry || "",
+              currentCity: ud.currentCity || "", currentCountry: ud.currentCountry || "",
               readingTone: ud.readingTone ?? "directo",
               favoriteTopics: ud.favoriteTopics ?? [],
               notificationPreferences: ud.notificationPreferences ?? [],
@@ -221,10 +223,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     } catch { /* Firestore no disponible */ }
 
     if (!firestoreHasData) {
+      // Si el usuario tenía sesión local previa (onboarding ya hecho), lo tratamos como
+      // usuario conocido aunque Firestore no responda. Si no, lo mandamos a onboarding.
+      const hadPriorSession = preserved.onboardingCompleted === true;
       setLocalSession({
         isAuthenticated: true,
-        onboardingCompleted: !forceNewUser,
-        displayName: user.displayName || preserved.displayName || "Viajero ZODI",
+        onboardingCompleted: !forceNewUser && hadPriorSession,
+        displayName: user.displayName || preserved.displayName || preserved.onboardingData?.displayName || "Viajero ZODI",
         email: user.email || preserved.email || "",
         uid: user.uid, loginAt: Date.now(),
         astralProfile: preserved.astralProfile,
@@ -232,7 +237,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       });
     }
 
-    router.push(firestoreHasData || !forceNewUser ? "/dashboard" : "/onboarding");
+    // Decisión de navegación:
+    // - Firestore tiene datos → dashboard
+    // - No forzado nuevo Y tenía sesión local previa → dashboard
+    // - Cualquier otro caso → onboarding
+    const goToDashboard = firestoreHasData || (!forceNewUser && preserved.onboardingCompleted === true);
+    router.push(goToDashboard ? "/dashboard" : "/onboarding");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
@@ -244,9 +254,22 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const redirectPending = sessionStorage.getItem("zodi.google_redirect_pending");
     if (redirectPending) setGoogleLoading(true);
 
+    // Timeout de seguridad: si google sigue cargando tras 14s, mostrar error
+    let googleTimeout: ReturnType<typeof setTimeout> | null = null;
+    if (redirectPending) {
+      googleTimeout = setTimeout(() => {
+        if (authHandledRef.current) return; // ya fue procesado
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        setGoogleLoading(false);
+        setMessage("Google tardó demasiado. Vuelve a intentarlo o usa email.");
+        setMsgType("error");
+      }, 14000);
+    }
+
     // getRedirectResult: siempre llamar aunque no haya pending (cubre PWA)
     getRedirectResult(auth)
       .then(async (result) => {
+        if (googleTimeout) clearTimeout(googleTimeout);
         sessionStorage.removeItem("zodi.google_redirect_pending");
         if (result?.user && !authHandledRef.current) {
           authHandledRef.current = true;
@@ -255,20 +278,32 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             const { getAdditionalUserInfo } = await import("firebase/auth");
             const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
             await applyFirebaseUser(result.user, isNew);
-          } catch {
+          } catch (e) {
             authHandledRef.current = false;
             setGoogleLoading(false);
+            setMessage("Error al cargar tu perfil. Recarga e inténtalo de nuevo.");
+            setMsgType("error");
           }
         } else {
           setGoogleLoading(false);
         }
       })
       .catch((err: any) => {
+        if (googleTimeout) clearTimeout(googleTimeout);
         sessionStorage.removeItem("zodi.google_redirect_pending");
-        setGoogleLoading(false);
-        const code = err?.code ?? "";
-        if (code && code !== "auth/popup-closed-by-user" && code !== "auth/internal-error") {
-          setMessage(`Error Google: ${err.message || code}`);
+        // Solo mostrar error si auth no fue manejado ya por onAuthStateChanged
+        if (!authHandledRef.current) {
+          setGoogleLoading(false);
+          const code = err?.code ?? "";
+          if (code === "auth/unauthorized-domain") {
+            setMessage("⚠️ Este dominio no está autorizado en Firebase. Añádelo en Firebase Console → Authentication → Authorized Domains.");
+            setMsgType("error");
+          } else if (code && code !== "auth/popup-closed-by-user") {
+            setMessage(`Error Google (${code}). Intenta con email y contraseña.`);
+            setMsgType("error");
+          }
+        } else {
+          setGoogleLoading(false);
         }
       });
 
@@ -276,62 +311,82 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user && !authHandledRef.current) {
         authHandledRef.current = true;
+        if (googleTimeout) clearTimeout(googleTimeout);
         try {
           await applyFirebaseUser(user);
         } catch (e) {
-          // Si falla, resetear para que el usuario pueda intentar manualmente
           authHandledRef.current = false;
-          console.error("[ZODI] onAuthStateChanged applyFirebaseUser error:", e);
+          setGoogleLoading(false);
+          // Solo mostrar error si venía de un intento de Google
+          const pending = sessionStorage.getItem("zodi.google_redirect_pending");
+          if (pending) {
+            sessionStorage.removeItem("zodi.google_redirect_pending");
+            setMessage("No se pudo cargar tu perfil. Recarga la página e inténtalo de nuevo.");
+            setMsgType("error");
+          }
         }
       }
     });
 
-    return () => unsub();
+    return () => {
+      if (googleTimeout) clearTimeout(googleTimeout);
+      unsub();
+    };
   }, [applyFirebaseUser]);
 
   // ── Google OAuth ──────────────────────────────────────────────────────────
   async function loginWithGoogle() {
     if (authHandledRef.current || googleLoading) return;
     setMessage("");
+    setMsgType("info");
     setGoogleLoading(true);
 
     const auth = getFirebaseAuth();
     if (!auth) {
-      setMessage("Firebase no configurado. Revisa las variables NEXT_PUBLIC_FIREBASE_*.");
+      setMessage("Firebase no configurado. Revisa las variables de entorno.");
+      setMsgType("error");
       setGoogleLoading(false);
       return;
     }
 
-    // En mobile/PWA usar redirect directamente — popup es bloqueado en iOS Safari
+    // iOS Safari y PWA instalada → redirect (popup bloqueado en esos contextos)
+    // Android Chrome, Firefox, Desktop → popup (más fiable que redirect en producción)
+    const isIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/i.test(navigator.userAgent);
     const isStandalone = typeof window !== "undefined" && (
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as { standalone?: boolean }).standalone === true
     );
-    const isMobile = typeof navigator !== "undefined" &&
-      /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const useRedirect = isIOS || isStandalone;
 
-    if (isStandalone || isMobile) {
+    if (useRedirect) {
       try {
         sessionStorage.setItem("zodi.google_redirect_pending", "1");
         await signInWithRedirect(auth, googleProvider);
         return; // página navega
-      } catch {
+      } catch (e: any) {
         sessionStorage.removeItem("zodi.google_redirect_pending");
-        setMessage("Error al iniciar Google. Intenta con email y contraseña.");
+        const code = (e as { code?: string }).code ?? "";
+        setMessage(code === "auth/unauthorized-domain"
+          ? "⚠️ Dominio no autorizado. Añade zodi.aibueno.es en Firebase Console → Authentication → Authorized Domains."
+          : `Error al iniciar Google (${code || "desconocido"}). Intenta con email y contraseña.`
+        );
+        setMsgType("error");
         setGoogleLoading(false);
         return;
       }
     }
 
+    // ── Popup (Android Chrome, Firefox, Desktop) ───────────────────────────
     try {
       authHandledRef.current = true;
       const result = await signInWithPopup(auth, googleProvider);
+
       try {
         const { getAdditionalUserInfo } = await import("firebase/auth");
         const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
         await applyFirebaseUser(result.user, isNew);
-      } catch (profileErr) {
-        console.error("[ZODI] Profile load failed post-Google:", profileErr);
+      } catch {
+        // Perfil falló → recuperar enviando a onboarding
         setLocalSession({
           isAuthenticated: true, onboardingCompleted: false,
           uid: result.user.uid, email: result.user.email || "",
@@ -339,36 +394,63 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         });
         router.push("/onboarding");
       }
-    } catch (popupErr: any) {
-      authHandledRef.current = false; // Permitir reintento
-      const code = popupErr?.code ?? "";
+      return;
 
+    } catch (popupErr: any) {
+      authHandledRef.current = false;
+      const code: string = popupErr?.code ?? "";
+
+      // Usuario cerró el popup — no es un error real
       if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-        setMessage("Cancelaste Google. Sin drama cósmico, puedes volver a intentarlo.");
-      } else if (code === "auth/account-exists-with-different-credential") {
-        setMessage("Ese correo ya existe con otro método. Entra con email y contraseña.");
-      } else if (code === "auth/unauthorized-domain") {
-        setMessage("⚠️ Este dominio no está autorizado en Firebase. Ve a Firebase Console → Authentication → Authorized Domains y añade este dominio.");
-      } else if (code === "auth/popup-blocked") {
-        // Popup bloqueado → intentar redirect
-        try {
-          sessionStorage.setItem("zodi.google_redirect_pending", "1");
-          await signInWithRedirect(auth, googleProvider);
-          return; // La página va a navegar, no continuar
-        } catch {
-          sessionStorage.removeItem("zodi.google_redirect_pending");
-          setMessage("Tu browser bloqueó la ventana de Google. Permite popups e inténtalo de nuevo.");
-        }
-      } else {
-        // Cualquier otro error → intentar redirect como fallback
+        setGoogleLoading(false);
+        return;
+      }
+
+      // Credencial ya usada con otro método
+      if (code === "auth/account-exists-with-different-credential") {
+        setMessage("Ese correo ya tiene cuenta con otro método. Entra con email y contraseña.");
+        setMsgType("error");
+        setGoogleLoading(false);
+        return;
+      }
+
+      // Dominio no autorizado
+      if (code === "auth/unauthorized-domain") {
+        setMessage("⚠️ Dominio no autorizado en Firebase. Añade zodi.aibueno.es en Firebase Console → Authentication → Authorized Domains.");
+        setMsgType("error");
+        setGoogleLoading(false);
+        return;
+      }
+
+      // Popup bloqueado por el browser → fallback a redirect
+      if (code === "auth/popup-blocked") {
         try {
           sessionStorage.setItem("zodi.google_redirect_pending", "1");
           await signInWithRedirect(auth, googleProvider);
           return;
-        } catch {
+        } catch (e: any) {
           sessionStorage.removeItem("zodi.google_redirect_pending");
-          setMessage(`Error Google (${code || "desconocido"}). Intenta con email y contraseña.`);
+          setMessage("Tu navegador bloqueó Google. Permite ventanas emergentes e inténtalo de nuevo.");
+          setMsgType("error");
+          setGoogleLoading(false);
+          return;
         }
+      }
+
+      // Cualquier otro error — también intentar redirect como último recurso
+      try {
+        sessionStorage.setItem("zodi.google_redirect_pending", "1");
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      } catch (e: any) {
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        const rCode: string = (e as { code?: string }).code ?? "";
+        setMessage(
+          rCode === "auth/unauthorized-domain"
+            ? "⚠️ Dominio no autorizado. Añade zodi.aibueno.es en Firebase Console → Authentication → Authorized Domains."
+            : `Error Google (${code || rCode || "desconocido"}). Intenta con email y contraseña.`
+        );
+        setMsgType("error");
       }
     } finally {
       setGoogleLoading(false);

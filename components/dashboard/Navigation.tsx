@@ -18,6 +18,7 @@ import {
   HeartHandshake,
   History,
   Home,
+  LayoutGrid,
   MessageCircle,
   MoonStar,
   Orbit,
@@ -37,17 +38,17 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { getXpData, getLevel, getLevelTitle, getStreak, getGems } from "@/lib/gamification";
+import { MobileFullMenu } from "@/components/dashboard/MobileFullMenu";
 
 type NavItem = { label: string; icon: LucideIcon; href: string; badge?: string };
 
-// ── Bottom nav: 5 tabs thumb-friendly ─────────────────────────────────────────
-// ORÁCULO en el centro como en Co-Star ("Ask the Void")
+// ── Bottom nav: 5 tabs — "Menú" muestra todas las secciones ───────────────────
 const bottomNav: NavItem[] = [
-  { label: "Inicio",    icon: Home,        href: "/dashboard" },
-  { label: "Hoy",       icon: MoonStar,    href: "/dashboard/horoscopo" },
-  { label: "Oráculo",   icon: WandSparkles, href: "/dashboard/oraculo" },
-  { label: "Social",    icon: Users,       href: "/dashboard/comunidad" },
-  { label: "Perfil",    icon: UserRound,   href: "/dashboard/perfil" }
+  { label: "Inicio",   icon: Home,        href: "/dashboard" },
+  { label: "Hoy",      icon: MoonStar,    href: "/dashboard/horoscopo" },
+  { label: "Oráculo",  icon: WandSparkles, href: "/dashboard/oraculo" },
+  { label: "Menú",     icon: LayoutGrid,  href: "#menu" },
+  { label: "Perfil",   icon: UserRound,   href: "/dashboard/perfil" },
 ];
 
 // ── Sidebar completo (desktop) ─────────────────────────────────────────────────
@@ -235,8 +236,9 @@ export function Sidebar() {
 // ── Bottom Nav (móvil) ─────────────────────────────────────────────────────────
 export function BottomNav() {
   const pathname = usePathname();
-  const [streak, setStreak] = useState(0);
-  const [gems, setGems] = useState(0);
+  const [streak, setStreak]     = useState(0);
+  const [gems, setGems]         = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -246,80 +248,106 @@ export function BottomNav() {
   }, []);
 
   return (
-    <nav
-      className="fixed bottom-2 left-2 right-2 z-40 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] lg:hidden sm:bottom-4 sm:left-4 sm:right-4"
-      style={{
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        background: "rgb(8, 8, 14)",
-        transform: "translateZ(0)",
-        willChange: "auto",
-      }}
-    >
-      <div className="grid grid-cols-5 items-center justify-between px-1 sm:px-2" style={{ height: "64px" }}>
-        {bottomNav.map((item, i) => {
-          const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-          const isOracle = item.href === "/dashboard/oraculo";
+    <>
+      {/* Menú completo de secciones */}
+      <MobileFullMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
 
-          if (isOracle) {
+      <nav
+        className="fixed bottom-2 left-2 right-2 z-40 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] lg:hidden sm:bottom-4 sm:left-4 sm:right-4"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          background: "rgb(8, 8, 14)",
+          transform: "translateZ(0)",
+          willChange: "auto",
+        }}
+      >
+        <div className="grid grid-cols-5 items-center justify-between px-1 sm:px-2" style={{ height: "64px" }}>
+          {bottomNav.map((item) => {
+            const isOracle = item.href === "/dashboard/oraculo";
+            const isMenu   = item.href === "#menu";
+            const active   = !isMenu && !isOracle &&
+              (pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href)));
+
+            // ── Oráculo — botón especial con glow ─────────────────────────
+            if (isOracle) {
+              return (
+                <button
+                  key="oracle"
+                  aria-label="Oráculo"
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-oracle"))}
+                  className="relative flex flex-col items-center justify-center gap-0.5 text-white/50"
+                >
+                  <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-white/08 border border-white/12">
+                    <item.icon className="h-5 w-5" />
+                    <span className="oracle-pulse-ring absolute inset-0 rounded-xl border border-lime-300/30 pointer-events-none" />
+                  </div>
+                  <span className="text-[10px] font-semibold leading-tight mt-0.5">{item.label}</span>
+                </button>
+              );
+            }
+
+            // ── Menú — abre el bottom sheet completo ──────────────────────
+            if (isMenu) {
+              return (
+                <button
+                  key="menu"
+                  aria-label="Menú completo"
+                  onClick={() => setMenuOpen(true)}
+                  className={`relative flex flex-col items-center justify-center gap-0.5 transition-all ${
+                    menuOpen ? "text-lime-300" : "text-white/45"
+                  }`}
+                >
+                  {menuOpen && (
+                    <motion.span
+                      layoutId="tab-indicator"
+                      className="absolute top-0 h-0.5 w-8 rounded-full bg-lime-300"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <div className={`flex h-6 w-6 items-center justify-center transition-all ${menuOpen ? "scale-110" : ""}`}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
+                </button>
+              );
+            }
+
+            // ── Tab normal ─────────────────────────────────────────────────
             return (
-              <button
+              <Link
                 key={item.href}
+                href={item.href}
                 aria-label={item.label}
-                onClick={() => window.dispatchEvent(new CustomEvent('open-oracle'))}
-                className="relative flex flex-col items-center justify-center gap-0.5 transition-all text-white/45 scale-100"
+                className={`relative flex flex-col items-center justify-center gap-0.5 transition-all ${
+                  active ? "text-lime-300" : "text-white/45"
+                }`}
               >
-                <div className="relative flex h-12 w-12 items-center justify-center rounded-xl transition-all bg-white/08 border border-white/12">
+                {active && (
+                  <motion.span
+                    layoutId="tab-indicator"
+                    className="absolute top-0 h-0.5 w-8 rounded-full bg-lime-300"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <div className={`flex h-6 w-6 items-center justify-center transition-all ${active ? "scale-110" : ""}`}>
                   <item.icon className="h-5 w-5" />
-                  {/* CSS animation — menos costosa que Framer Motion infinite, desactivada en móvil via media query */}
-                  <span className="oracle-pulse-ring absolute inset-0 rounded-xl border border-lime-300/30 pointer-events-none" />
                 </div>
-                <span className="text-[10px] font-semibold leading-tight mt-0.5">
-                  {item.label}
-                </span>
-              </button>
+                {/* Badges */}
+                {item.href === "/dashboard/horoscopo" && (
+                  <span className="absolute right-2 top-1 h-1.5 w-1.5 rounded-full bg-lime-300 shadow-[0_0_4px_rgba(184,255,23,0.8)]" />
+                )}
+                {item.href === "/dashboard/perfil" && streak >= 3 && (
+                  <span className="absolute right-1 top-1 flex items-center gap-0.5 rounded-full bg-orange-500/80 px-1.5 py-0.5">
+                    <Flame className="h-2 w-2 text-white" />
+                    <span className="text-[8px] font-black text-white">{streak}</span>
+                  </span>
+                )}
+                <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
+              </Link>
             );
-          }
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-label={item.label}
-              className={`relative flex flex-col items-center justify-center gap-0.5 transition-all ${
-                active ? "text-lime-300" : "text-white/45"
-              }`}
-            >
-              {/* Active indicator — pill arriba del icono */}
-              {active && (
-                <motion.span
-                  layoutId="tab-indicator"
-                  className="absolute top-0 h-0.5 w-8 rounded-full bg-lime-300"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
-              )}
-
-              <div className={`flex h-6 w-6 items-center justify-center transition-all ${active ? "scale-110" : ""}`}>
-                <item.icon className="h-5 w-5" />
-              </div>
-
-              {/* Badges */}
-              {item.href === "/dashboard/horoscopo" && (
-                <span className="absolute right-2.5 top-1.5 h-1.5 w-1.5 rounded-full bg-lime-300 shadow-[0_0_4px_rgba(184,255,23,0.80)]" />
-              )}
-              {item.href === "/dashboard/perfil" && streak >= 3 && (
-                <span className="absolute right-2 top-1.5 flex items-center gap-0.5 rounded-full bg-orange-500/80 px-1.5 py-0.5">
-                  <Flame className="h-2 w-2 text-white" />
-                  <span className="text-[8px] font-black text-white">{streak}</span>
-                </span>
-              )}
-
-              <span className="text-[10px] font-semibold leading-tight">
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+          })}
+        </div>
+      </nav>
+    </>
   );
 }

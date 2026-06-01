@@ -284,7 +284,7 @@ export function HeroConsole() {
   const missingBirthDate = mounted && !profile?.birthDate && !getLocalSession().onboardingData?.birthDate;
 
   return (
-    <section className="grid gap-4">
+    <section className="grid gap-3">
       {/* ── Banner: falta fecha de nacimiento ─────────────────────────────── */}
       {missingBirthDate && (
         <motion.div
@@ -297,7 +297,7 @@ export function HeroConsole() {
             <span className="text-lg shrink-0">⚠️</span>
             <div className="min-w-0">
               <p className="text-sm font-black text-orange-200 leading-tight">Falta tu fecha de nacimiento</p>
-              <p className="text-[11px] text-orange-200/65 mt-0.5 truncate">Sin ella, tus lecturas son genéricas. Añádela para personalizar todo.</p>
+              <p className="text-[11px] text-orange-200/65 mt-0.5 truncate">Sin ella, tus lecturas son genéricas.</p>
             </div>
           </div>
           <Link
@@ -309,36 +309,35 @@ export function HeroConsole() {
         </motion.div>
       )}
 
-      <section className="grid gap-4 lg:grid-cols-[1.4fr_0.6fr]">
+      <section className="grid gap-3 lg:grid-cols-[1.4fr_0.6fr]">
       {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
-      {/* Fondo semi-transparente propio para que la bola de cristal sea visible */}
       <div
         className="neon-border overflow-hidden rounded-2xl relative"
-        style={{ background: "linear-gradient(145deg, rgba(8,8,16,0.88), rgba(5,5,12,0.85))", border: "1px solid rgba(255,255,255,0.07)" }}
+        style={{ background: "linear-gradient(145deg, rgba(8,8,16,0.92), rgba(5,5,12,0.88))", border: "1px solid rgba(255,255,255,0.07)" }}
       >
         <CrystalBallBg />
 
-        <div className="p-5 sm:p-7 relative z-[1]">
-          {/* Kicker */}
-          <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="p-4 sm:p-6 relative z-[1]">
+          {/* Kicker + energy badge: columna en mobile, fila en sm+ */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="zodi-kicker">{timeGreeting} · ZODI panel astral</p>
-            {mounted && sign && (
+            {mounted && sign && sign.trim() && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3, duration: 0.4 }}
-                className="flex items-center gap-2 rounded-full border border-white/15 bg-black/50 px-3 py-1.5"
+                className="flex w-fit items-center gap-1.5 rounded-full border border-white/15 bg-black/50 px-2.5 py-1"
               >
-                <Zap className="h-3.5 w-3.5 text-lime-300 shrink-0" />
-                <span className="text-[11px] font-black uppercase tracking-wider text-lime-200">
-                  {sign} · {energyScore}% energía hoy
+                <Zap className="h-3 w-3 text-lime-300 shrink-0" />
+                <span className="text-[10px] font-black uppercase tracking-wide text-lime-200">
+                  {sign} · {energyScore}% hoy
                 </span>
               </motion.div>
             )}
           </div>
 
           {/* Main greeting */}
-          <div className="mt-4 flex items-start justify-between gap-4">
+          <div className="mt-3 flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               {!mounted ? (
                 <div className="space-y-3 mt-2">
@@ -354,7 +353,7 @@ export function HeroConsole() {
                 >
                   {firstName && (
                     <h1
-                      className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight truncate"
+                      className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black leading-[1.05] tracking-tight"
                       style={{ fontFamily: "var(--font-display)" }}
                     >
                       {firstName},
@@ -365,12 +364,12 @@ export function HeroConsole() {
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15, duration: 0.5 }}
-                      className="mt-2 text-sm sm:text-base lg:text-xl font-bold leading-snug text-white/90 max-w-xl"
+                      className="mt-2 text-sm sm:text-base lg:text-lg font-semibold leading-snug text-white/85 max-w-xl"
                     >
                       {phrase}
                     </motion.p>
                   ) : (
-                    <p className="mt-2 text-sm sm:text-base lg:text-xl font-bold leading-snug text-white/90 max-w-xl">
+                    <p className="mt-2 text-sm sm:text-base font-semibold leading-snug text-white/85 max-w-xl">
                       Tu mapa astral, tus lecturas y tu energía en un solo lugar.
                     </p>
                   )}
@@ -379,7 +378,7 @@ export function HeroConsole() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3, duration: 0.4 }}
-                      className="mt-2 text-sm text-lime-200/70 font-medium"
+                      className="mt-1.5 text-xs sm:text-sm text-lime-200/65 font-medium"
                     >
                       {ctx.moonPhase} · {moonLine}
                     </motion.p>
@@ -389,12 +388,12 @@ export function HeroConsole() {
             </div>
 
             {/* ZODI character */}
-            <div className="hidden md:block shrink-0 -mt-2 -mr-2 sm:-mr-4">
+            <div className="hidden md:block shrink-0 -mt-2 -mr-2">
               <Image
                 src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.png"
                 alt="ZODI"
-                width={160}
-                height={200}
+                width={140}
+                height={175}
                 className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.3)]"
               />
             </div>
@@ -406,13 +405,13 @@ export function HeroConsole() {
               initial={{ opacity: 0, scaleX: 0 }}
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
-              className="mt-5 origin-left"
+              className="mt-4 origin-left"
             >
-              <div className="flex items-center justify-between mb-1.5 text-xs text-white/50">
-                <span className="font-bold uppercase tracking-widest">Energía {sign} hoy</span>
-                <span className="font-black text-white/80">{energyScore}%</span>
+              <div className="flex items-center justify-between mb-1 text-[10px] text-white/45">
+                <span className="font-bold uppercase tracking-widest">Energía {sign}</span>
+                <span className="font-black text-white/75">{energyScore}%</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+              <div className="h-1 w-full rounded-full bg-white/10 overflow-hidden">
                 <motion.div
                   className={`h-full rounded-full bg-gradient-to-r ${energyColor(energyScore)}`}
                   initial={{ width: 0 }}
@@ -424,22 +423,22 @@ export function HeroConsole() {
           )}
 
           {/* Daily context pills */}
-          <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/50">
-            <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 font-medium">
-              ☀️ Sol en {ctx.sunTransit}
+          <div className="mt-3 flex flex-wrap gap-1.5 text-[10px] text-white/45">
+            <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 font-medium">
+              ☀️ {ctx.sunTransit}
             </span>
-            <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 font-medium">
+            <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 font-medium">
               {ctx.moonPhase}
             </span>
-            <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 font-medium">
-              🔢 Vibración {ctx.dayVibration}
+            <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 font-medium">
+              🔢 {ctx.dayVibration}
             </span>
           </div>
 
           {/* ── Mobile profile strip — solo en mobile (oculto en lg+) ── */}
           {mounted && (
-            <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 lg:hidden">
-              <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-lime-300/25">
+            <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-white/08 bg-black/35 px-3 py-2.5 lg:hidden">
+              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-lime-300/20">
                 {avatar.startsWith("data:") ? (
                   <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
                 ) : (
@@ -447,43 +446,45 @@ export function HeroConsole() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-black truncate leading-tight">{profile?.displayName ?? "—"}</p>
-                <p className="text-[10px] text-white/50 mt-0.5">
-                  {sign ? `${sign} · Nivel ${level}` : levelTitle}
+                <p className="text-xs font-black truncate leading-tight">{profile?.displayName ?? "—"}</p>
+                <p className="text-[10px] text-white/45 mt-0.5">
+                  {sign ? `${sign} · Nv ${level}` : levelTitle}
                 </p>
               </div>
-              {streak > 0 && (
-                <div className="flex items-center gap-1 shrink-0">
-                  <Flame className="h-3 w-3 text-orange-400" />
-                  <span className="text-xs font-black text-orange-300">{streak}d</span>
+              <div className="flex items-center gap-2.5 shrink-0">
+                {streak > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Flame className="h-3 w-3 text-orange-400" />
+                    <span className="text-[11px] font-black text-orange-300">{streak}d</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1">
+                  <Gem className="h-3 w-3 text-lime-300" />
+                  <span className="text-[11px] font-black text-lime-200">{gems}</span>
                 </div>
-              )}
-              <div className="flex items-center gap-1 shrink-0">
-                <Gem className="h-3 w-3 text-lime-300" />
-                <span className="text-xs font-black text-lime-200">{gems}</span>
               </div>
             </div>
           )}
 
-          {/* CTAs */}
-          <div className="mt-4 flex flex-wrap gap-2.5">
+          {/* CTAs — grid 2 cols en mobile */}
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2.5">
             <Link
               href="/dashboard/horoscopo"
-              className="group flex items-center gap-2 rounded-xl bg-lime-300 px-4 py-2.5 text-sm font-black text-black transition hover:bg-lime-200 active:scale-95"
+              className="group col-span-2 sm:col-span-1 flex items-center justify-center gap-2 rounded-xl bg-lime-300 px-4 py-3 text-sm font-black text-black transition hover:bg-lime-200 active:scale-95"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4 shrink-0" />
               Tu lectura del día
-              <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+              <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5 shrink-0" />
             </Link>
             <Link
               href="/dashboard/oraculo"
-              className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/40 px-4 py-2.5 text-sm font-bold text-white/80 transition hover:border-white/30 hover:text-white active:scale-95"
+              className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-black/40 px-4 py-3 text-sm font-bold text-white/80 transition hover:border-white/30 hover:text-white active:scale-95"
             >
               Consulta libre
             </Link>
             <Link
               href="/dashboard/tarot"
-              className="flex items-center gap-2 rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-2.5 text-sm font-bold text-violet-200/80 transition hover:border-violet-400/50 hover:text-violet-100 active:scale-95"
+              className="flex items-center justify-center gap-2 rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-sm font-bold text-violet-200/80 transition hover:border-violet-400/50 hover:text-violet-100 active:scale-95"
             >
               Tirada rápida
             </Link>

@@ -18,18 +18,18 @@ const featured = [
 
 export function DashboardLaunchpad() {
   return (
-    <section className="mt-6 sm:mt-8">
-      <div className="mb-4 flex items-end justify-between gap-3">
+    <section className="mt-4 sm:mt-6">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.32em] text-lime-200/70">Tus herramientas del caos</p>
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-black leading-tight">¿Qué destino<br className="sm:hidden" /> quieres tentar hoy?</h2>
+          <p className="text-[10px] uppercase tracking-[0.32em] text-lime-200/65">Herramientas</p>
+          <h2 className="text-base sm:text-xl lg:text-2xl font-black leading-tight">¿Qué quieres consultar hoy?</h2>
         </div>
         <Link href="/dashboard/premium" className="hidden rounded-xl border border-lime-300/25 px-3 py-2 text-xs font-black text-lime-200 transition hover:bg-lime-300/10 sm:inline">
           Ver planes ✦
         </Link>
       </div>
 
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-2.5 grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
         {featured.map(({ slug, badge, color }, index) => {
           const section = dashboardSections.find(s => s.slug === slug);
           if (!section) return null;
@@ -38,51 +38,51 @@ export function DashboardLaunchpad() {
           return (
             <motion.div
               key={slug}
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              initial={{ opacity: 0, y: 16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: index * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -6, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              transition={{ delay: index * 0.04, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -4, scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
             >
               <Link
                 href={`/dashboard/${slug}`}
-                className={`group relative flex min-h-36 sm:min-h-44 lg:min-h-52 flex-col overflow-hidden rounded-2xl border border-white/08 bg-gradient-to-br ${color} shadow-lg transition-all duration-300 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]`}
+                className={`group relative flex min-h-[140px] sm:min-h-44 lg:min-h-52 flex-col overflow-hidden rounded-2xl border border-white/08 bg-gradient-to-br ${color} shadow-lg transition-all duration-300 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]`}
               >
                 {/* Background section image */}
-                <div className="absolute inset-0 opacity-35 transition-opacity duration-500 group-hover:opacity-55">
+                <div className="absolute inset-0 opacity-30 transition-opacity duration-500 group-hover:opacity-50">
                   <Image
                     src={section.image}
                     alt={section.title}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
                     className="object-cover object-center"
                   />
                 </div>
 
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
                 {/* Content */}
-                <div className="relative flex flex-1 flex-col p-4">
+                <div className="relative flex flex-1 flex-col p-3 sm:p-4">
                   {/* Top row */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-black/50 border border-white/15 backdrop-blur-sm shadow-lg">
-                      <Icon className="h-5 w-5 text-white" />
+                  <div className="flex items-start justify-between gap-1">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-black/55 border border-white/12 shadow-lg">
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </div>
-                    <span className="rounded-full border border-white/20 bg-black/50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white/90 backdrop-blur-sm">
+                    <span className="rounded-full border border-white/20 bg-black/55 px-2 py-0.5 text-[9px] sm:px-2.5 sm:py-1 sm:text-[10px] font-black uppercase tracking-wider text-white/90">
                       {badge}
                     </span>
                   </div>
 
                   {/* Text — pushed to bottom */}
                   <div className="mt-auto">
-                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/50">{section.kicker}</p>
-                    <h3 className="mt-1 text-sm sm:text-base lg:text-lg font-black leading-tight text-white line-clamp-2">{section.title}</h3>
-                    <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-white/60">{section.description}</p>
+                    <p className="hidden sm:block text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{section.kicker}</p>
+                    <h3 className="text-xs sm:text-sm lg:text-base font-black leading-tight text-white line-clamp-2">{section.title}</h3>
+                    <p className="mt-1 hidden sm:block text-[11px] leading-4 text-white/50 line-clamp-2">{section.description}</p>
 
                     {/* CTA row */}
-                    <div className="mt-3 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-lime-300/80 transition group-hover:text-lime-300">
-                      <span>Consultar</span>
+                    <div className="mt-2 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-lime-300/75 transition group-hover:text-lime-300">
+                      <span>Abrir</span>
                       <span className="transition-transform group-hover:translate-x-1">→</span>
                     </div>
                   </div>

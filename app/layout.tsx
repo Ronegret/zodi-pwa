@@ -55,7 +55,6 @@ export const viewport: Viewport = {
 };
 
 import { CookieBanner } from "@/components/public/CookieBanner";
-import { SplashScreen } from "@/components/SplashScreen";
 import { PwaBoot } from "@/components/pwa/PwaBoot";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -80,21 +79,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                if (sessionStorage.getItem('zodi.splash_seen')) {
-                  document.documentElement.classList.add('splash-seen');
-                }
-              } catch (e) {}
-            `
-          }}
-        />
       </head>
       <body suppressHydrationWarning>
         <PwaBoot />
-        <SplashScreen />
         {children}
         <ZodiOracle />
         <MusicPlayer />
