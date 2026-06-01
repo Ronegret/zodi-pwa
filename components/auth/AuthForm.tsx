@@ -10,7 +10,7 @@ import {
   onAuthStateChanged, type User
 } from "firebase/auth";
 import { ArrowLeft, AtSign, CheckCircle2, Eye, EyeOff, Loader2, Lock, UserRound, XCircle, AlertTriangle } from "lucide-react";
-import { getFirebaseAuth, googleProvider } from "@/lib/firebase/client";
+import { getFirebaseAuth, googleProvider, isFirebaseConfigured } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession, getSavedIdentity } from "@/lib/session";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
@@ -223,12 +223,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     } catch { /* Firestore no disponible */ }
 
     if (!firestoreHasData) {
-      // Si el usuario tenía sesión local previa (onboarding ya hecho), lo tratamos como
-      // usuario conocido aunque Firestore no responda. Si no, lo mandamos a onboarding.
+      // Si es un login de una cuenta Firebase existente, dejamos entrar aunque Firestore
+      // no responda o falte el perfil. El dashboard pedira completar datos si hace falta.
       const hadPriorSession = preserved.onboardingCompleted === true;
+      const allowExistingFirebaseUser = !forceNewUser;
       setLocalSession({
         isAuthenticated: true,
-        onboardingCompleted: !forceNewUser && hadPriorSession,
+        onboardingCompleted: allowExistingFirebaseUser || hadPriorSession,
         displayName: user.displayName || preserved.displayName || preserved.onboardingData?.displayName || "Viajero ZODI",
         email: user.email || preserved.email || "",
         uid: user.uid, loginAt: Date.now(),
@@ -239,9 +240,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     // Decisión de navegación:
     // - Firestore tiene datos → dashboard
-    // - No forzado nuevo Y tenía sesión local previa → dashboard
-    // - Cualquier otro caso → onboarding
-    const goToDashboard = firestoreHasData || (!forceNewUser && preserved.onboardingCompleted === true);
+    // - Login de cuenta existente → dashboard
+    // - Registro/Google nuevo sin datos → onboarding
+    const goToDashboard = firestoreHasData || !forceNewUser || preserved.onboardingCompleted === true;
     router.push(goToDashboard ? "/dashboard" : "/onboarding");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
@@ -266,9 +267,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       }, 14000);
     }
 
+    let redirectChecked = false;
+
     // getRedirectResult: procesa el resultado de un redirect previo de Google
     getRedirectResult(auth)
       .then(async (result) => {
+        redirectChecked = true;
         if (googleTimeout) clearTimeout(googleTimeout);
         sessionStorage.removeItem("zodi.google_redirect_pending");
         if (result?.user && !authHandledRef.current) {
@@ -284,11 +288,23 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             setMessage("Error al cargar tu perfil. Recarga e inténtalo de nuevo.");
             setMsgType("error");
           }
+        } else if (auth.currentUser && !authHandledRef.current) {
+          authHandledRef.current = true;
+          setGoogleLoading(false);
+          try {
+            await applyFirebaseUser(auth.currentUser, false);
+          } catch {
+            authHandledRef.current = false;
+            setGoogleLoading(false);
+            setMessage("Error al cargar tu perfil. Recarga e intentalo de nuevo.");
+            setMsgType("error");
+          }
         } else {
           setGoogleLoading(false);
         }
       })
       .catch((err: any) => {
+        redirectChecked = true;
         if (googleTimeout) clearTimeout(googleTimeout);
         sessionStorage.removeItem("zodi.google_redirect_pending");
         setGoogleLoading(false);
@@ -315,6 +331,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     // Auto-redirect si ya hay sesión activa (Firebase persiste entre visitas)
     const unsub = onAuthStateChanged(auth, async (user) => {
+      if (redirectPending && !redirectChecked) return;
       if (user && !authHandledRef.current) {
         authHandledRef.current = true;
         if (googleTimeout) clearTimeout(googleTimeout);
@@ -383,7 +400,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setMessage("Ese correo tiene más errores que un horóscopo genérico."); return; }
     if (!password) { setMessage("Contraseña vacía. El universo también necesita seguridad."); return; }
     if (mode === "register") {
-      if (emailStatus === "taken") { setMessage("Ese correo ya tiene cuenta. Usa la opción de arriba para entrar."); return; }
       if (emailStatus === "checking") { setMessage("Verificando tu correo... espera un segundo."); return; }
       if (password.length < 6) { setMessage("6 caracteres mínimo."); return; }
       if (password !== confirm) { setMessage("Las contraseñas no coinciden."); return; }
@@ -410,8 +426,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             return;
           }
         } catch (firebaseErr: any) {
-          if (mode === "register" && firebaseErr.code === "auth/email-already-in-use") throw firebaseErr;
-          console.warn("[ZODI] Firebase falló, probando fallback local:", firebaseErr.code);
+          const code = (firebaseErr as { code?: string }).code ?? "";
+          authHandledRef.current = false;
+
+          if (isFirebaseConfigured) {
+            throw firebaseErr;
+          }
+
+          console.warn("[ZODI] Firebase no disponible, probando fallback local:", code);
         }
       }
 
@@ -460,10 +482,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       if (code === "auth/email-already-in-use") {
         setMessage("Ese correo ya tiene portal. Te llevamos al login..."); setMsgType("info");
         setTimeout(() => router.push("/auth/login"), 2000);
+      } else if (code === "auth/account-exists-with-different-credential" || code === "auth/credential-already-in-use") {
+        setMessage("Ese correo ya existe con otro metodo. Si es Gmail, entra con el boton de Google.");
+        setMsgType("error");
       } else if (code === "auth/too-many-requests") {
         setMessage("Demasiados intentos. Vuelve en unos minutos. ☕"); setMsgType("error");
       } else if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
-        setMessage("Contraseña incorrecta. Prueba recuperarla abajo."); setMsgType("error");
+        setMessage("Correo o contraseña incorrectos. Si creaste la cuenta con Gmail, usa el botón de Google."); setMsgType("error");
       } else if (code === "auth/user-not-found") {
         setMessage("Ese correo no existe en ZODI. ¿Registrarte quizás?"); setMsgType("error");
       } else if (code === "auth/invalid-email") {
