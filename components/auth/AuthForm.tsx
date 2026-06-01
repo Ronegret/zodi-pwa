@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  signInWithPopup, signInWithRedirect, getRedirectResult,
+  signInWithRedirect, getRedirectResult,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, fetchSignInMethodsForEmail,
   onAuthStateChanged, type User
@@ -334,7 +334,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     };
   }, [applyFirebaseUser]);
 
-  // ── Google OAuth ──────────────────────────────────────────────────────────
+  // ── Google OAuth — redirect universal (evita third-party cookie issue de Chrome) ──
   async function loginWithGoogle() {
     if (authHandledRef.current || googleLoading) return;
     setMessage("");
@@ -349,118 +349,23 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    // iOS Safari y PWA instalada → redirect (popup bloqueado en esos contextos)
-    // Android Chrome, Firefox, Desktop → popup (más fiable que redirect en producción)
-    const isIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const isStandalone = typeof window !== "undefined" && (
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (navigator as { standalone?: boolean }).standalone === true
-    );
-    const useRedirect = isIOS || isStandalone;
-
-    if (useRedirect) {
-      try {
-        sessionStorage.setItem("zodi.google_redirect_pending", "1");
-        await signInWithRedirect(auth, googleProvider);
-        return; // página navega
-      } catch (e: any) {
-        sessionStorage.removeItem("zodi.google_redirect_pending");
-        const code = (e as { code?: string }).code ?? "";
-        setMessage(code === "auth/unauthorized-domain"
-          ? "⚠️ Dominio no autorizado. Añade zodi.aibueno.es en Firebase Console → Authentication → Authorized Domains."
-          : `Error al iniciar Google (${code || "desconocido"}). Intenta con email y contraseña.`
-        );
-        setMsgType("error");
-        setGoogleLoading(false);
-        return;
-      }
-    }
-
-    // ── Popup (Android Chrome, Firefox, Desktop) ───────────────────────────
+    // Usamos redirect para TODOS los navegadores.
+    // Chrome 80+ bloquea la comunicación cross-origin del popup (third-party cookies),
+    // causando auth/internal-error aunque los dominios estén autorizados en Firebase.
+    // Con redirect el resultado viaja por URL y no hay intercambio cross-origin de cookies.
     try {
-      authHandledRef.current = true;
-      const result = await signInWithPopup(auth, googleProvider);
-
-      try {
-        const { getAdditionalUserInfo } = await import("firebase/auth");
-        const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
-        await applyFirebaseUser(result.user, isNew);
-      } catch {
-        // Perfil falló → recuperar enviando a onboarding
-        setLocalSession({
-          isAuthenticated: true, onboardingCompleted: false,
-          uid: result.user.uid, email: result.user.email || "",
-          displayName: result.user.displayName || "Viajero ZODI", loginAt: Date.now(),
-        });
-        router.push("/onboarding");
-      }
-      return;
-
-    } catch (popupErr: any) {
-      authHandledRef.current = false;
-      const code: string = popupErr?.code ?? "";
-
-      // Usuario cerró el popup — no es un error real
-      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-        setGoogleLoading(false);
-        return;
-      }
-
-      // Credencial ya usada con otro método
-      if (code === "auth/account-exists-with-different-credential") {
-        setMessage("Ese correo ya tiene cuenta con otro método. Entra con email y contraseña.");
-        setMsgType("error");
-        setGoogleLoading(false);
-        return;
-      }
-
-      // Dominio no autorizado
-      if (code === "auth/unauthorized-domain") {
-        setMessage("⚠️ Dominio no autorizado en Firebase. Añade zodi.aibueno.es en Firebase Console → Authentication → Authorized Domains.");
-        setMsgType("error");
-        setGoogleLoading(false);
-        return;
-      }
-
-      // Popup bloqueado por el browser → fallback a redirect
-      if (code === "auth/popup-blocked") {
-        try {
-          sessionStorage.setItem("zodi.google_redirect_pending", "1");
-          await signInWithRedirect(auth, googleProvider);
-          return;
-        } catch (e: any) {
-          sessionStorage.removeItem("zodi.google_redirect_pending");
-          setMessage("Tu navegador bloqueó Google. Permite ventanas emergentes e inténtalo de nuevo.");
-          setMsgType("error");
-          setGoogleLoading(false);
-          return;
-        }
-      }
-
-      // Error interno de Firebase — casi siempre es dominio no autorizado
-      if (code === "auth/internal-error" || code === "auth/network-request-failed") {
-        setMessage("⚠️ El dominio de producción no está autorizado en Firebase. Ve a Firebase Console → Authentication → Authorized Domains y añade el dominio de la web. Mientras tanto usa email y contraseña.");
-        setMsgType("error");
-        setGoogleLoading(false);
-        return;
-      }
-
-      // Cualquier otro error — también intentar redirect como último recurso
-      try {
-        sessionStorage.setItem("zodi.google_redirect_pending", "1");
-        await signInWithRedirect(auth, googleProvider);
-        return;
-      } catch (e: any) {
-        sessionStorage.removeItem("zodi.google_redirect_pending");
-        const rCode: string = (e as { code?: string }).code ?? "";
-        setMessage(
-          (rCode === "auth/unauthorized-domain" || rCode === "auth/internal-error")
-            ? "⚠️ Dominio no autorizado en Firebase. Añade el dominio en Firebase Console → Authentication → Authorized Domains."
-            : `Error Google (${code || rCode || "desconocido"}). Intenta con email y contraseña.`
-        );
-        setMsgType("error");
-      }
-    } finally {
+      sessionStorage.setItem("zodi.google_redirect_pending", "1");
+      await signInWithRedirect(auth, googleProvider);
+      // La página navega — lo que sigue no se ejecuta
+    } catch (e: any) {
+      sessionStorage.removeItem("zodi.google_redirect_pending");
+      const code = (e as { code?: string }).code ?? "";
+      setMessage(
+        code === "auth/unauthorized-domain"
+          ? "⚠️ Dominio no autorizado en Firebase Console → Authentication → Authorized Domains."
+          : `Error Google (${code || "desconocido"}). Intenta con email y contraseña.`
+      );
+      setMsgType("error");
       setGoogleLoading(false);
     }
   }
