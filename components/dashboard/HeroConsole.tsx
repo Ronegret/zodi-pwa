@@ -593,15 +593,30 @@ export function HeroConsole() {
         </Link>
       </div>
       </section>
+
+      {/* ── Astral stats strip — solo en mobile/tablet (lg tiene el panel derecho) ── */}
+      {mounted && profile && sign && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="grid grid-cols-4 gap-2 lg:hidden"
+        >
+          <Metric label="Signo" value={sign} />
+          <Metric label="Luna" value={profile.moonSign || "—"} />
+          <Metric label="Asc." value={profile.ascendant || "—"} />
+          <Metric label="Camino" value={profile.lifePathNumber ? String(profile.lifePathNumber) : "—"} />
+        </motion.div>
+      )}
     </section>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-white/08 bg-black/40 p-3.5">
-      <p className="zodi-kicker mb-1">{label}</p>
-      <p className="text-lg font-black text-white">{value}</p>
+    <div className="rounded-xl border border-white/08 bg-black/40 p-2.5 sm:p-3.5">
+      <p className="zodi-kicker mb-0.5 sm:mb-1 text-[9px] sm:text-[10px]">{label}</p>
+      <p className="text-sm sm:text-base lg:text-lg font-black text-white truncate">{value}</p>
     </div>
   );
 }
