@@ -159,6 +159,212 @@ export function getCulturalContext(country?: string, city?: string): string | nu
   return `De ${country}${cityNote}. Humor ${ctx.humor}. Expresiones que puede usar: ${ctx.expressions.slice(0, 5).join(", ")}. Referencias culturales que resuenen: ${ctx.references}.`;
 }
 
+// ── Infancia / Edad de oro (5-12 años) ───────────────────────────────────────
+interface ChildhoodEra {
+  cartoons: string;   // Dibujos animados y pelis de su infancia
+  toys: string;       // Juguetes icónicos
+  games: string;      // Juegos de patio/calle
+  snacks: string;     // Golosinas y comidas de infancia
+  schoollife: string; // Vida escolar de esa época
+  fear: string;       // El miedo clásico de esa generación
+}
+
+// Clave = país + década de infancia (año de nacimiento + 7 ≈ centro de la edad de oro)
+// Ejemplo: nacido 1990 → infancia centrada en ~1997 → clave "90s"
+const CHILDHOOD: Record<string, Record<string, ChildhoodEra>> = {
+  "España": {
+    "70s": {
+      cartoons: "Heidi, Marco, Mazinger Z (doblado), El Correcaminos, Scooby-Doo y Los Picapiedra en TVE",
+      toys: "el trompo de madera, el yo-yo, las canicas, los soldaditos de plomo, los coches de Scalextric del vecino rico",
+      games: "la rayuela, el escondite, el pañuelo, el bote, chapas en la calle",
+      snacks: "chupachups a 1 peseta, las pipas de girasol en bolsita, las gaseosas en botella de vidrio, caramelos a granel en la tienda de la esquina",
+      schoollife: "el pupitre de madera con tintero, el cuaderno Rubio, la palmeta del maestro, el bocadillo de chorizo en el recreo",
+      fear: "el coco y el 'hombre del saco' como amenaza real de los padres, el miedo a la oscuridad del pasillo",
+    },
+    "80s": {
+      cartoons: "He-Man, Thundercats, Los Pitufos, Inspector Gadget, ET (en el cine con los padres), Dragon Ball primeras temporadas",
+      toys: "el Scalextric, los Clicks de Famobil, Hot Wheels, Barbie rubia de pelo duro, los Playmobil, Spectrum ZX (el del vecino afortunado)",
+      games: "los recreativos con monedas de 5 duros, la máquina de Pac-Man, el parchís los domingos, chapas en el patio",
+      snacks: "los Bollicao, Donettes, el Cola Cao en el desayuno, patatas fritas Churrería, el Nestlé de bote, los Sugus",
+      schoollife: "el estuche enorme con compás y escuadra, la agenda escolar con pegatinas de fútbol, el bocadillo de jamón york",
+      fear: "el SIDA en las noticias que no entendías, Freddy Krueger visto de refilón en el vídeo del vecino mayor",
+    },
+    "90s": {
+      cartoons: "Dragon Ball Z (sagrado), Los Simpsons (primeras), Doraemon, Los Fruittis, Sailor Moon, Bola de Drac en Cataluña",
+      toys: "Tamagotchi (el que moría si ibas al cole), Super Nintendo/Game Boy, los tazos de las bolsas de patatas, el yo-yo Yomega, Furby",
+      games: "los tazos de DBZ en el recreo, el GoldenEye en casa del colega, las maquinitas Game & Watch, pelé-pelé en el patio",
+      snacks: "los Risketos, las bolsas de Cheetos a 25 pesetas, los Conguitos, el Cheeseburger de McDonalds como premio de cumpleaños",
+      schoollife: "las agendas con candado, los bolígrafos de 8 colores, la carpeta Archivador con fotos de grupos de música, el chivatazo en clase",
+      fear: "el efecto 2000 que iba a acabar con todo, los vídeos de terror que circulaban en VHS pirata",
+    },
+    "00s": {
+      cartoons: "SpongeBob, Avatar La Leyenda de Aang, Naruto (primeros arcos), Ben 10, Lazy Town, las pelis de Pixar",
+      toys: "Game Boy Advance SP, Nintendo DS, Wii en Navidad, los Bakugan, las cartas de Pokémon, el iPod nano de colores",
+      games: "Club Penguin, Habbo Hotel, Friv, el Counter-Strike en el cyber del barrio, los Sims 2",
+      snacks: "los Ruffles con sabores nuevos cada año, los Gummies de HARIBO, el Kinder Sorpresa del domingo, las galletas Príncipe",
+      schoollife: "el messenger en el Messenger de MSN al llegar a casa, el Tuenti recién creado para los mayores, el primer Nokia de los padres que te dejaban usar",
+      fear: "los vídeos de terror de YouTube que te mandaban por MSN, el Slenderman y las creepypastas",
+    },
+  },
+  "México": {
+    "70s": {
+      cartoons: "El Chavo del 8 (primeras temporadas EN VIVO), Chespirito, Los Picapiedra, La Familia Burrón en historieta",
+      toys: "el trompo, la pirinola, el balero, los soldaditos de plástico, las canicas de vidrio en la banqueta",
+      games: "el avioncito en la banqueta, las escondidas en el callejón, el bote pateado, el yoyo",
+      snacks: "las paletas de hielo artesanales del carrito, los cacahuates enchilados, las papas con limón y chile, la nieve raspada",
+      schoollife: "el cuaderno Scribe, el lápiz Mirado, el recreo con los tamales de la señora, las bancas de madera",
+      fear: "el cucuy, el 'coco' que traían los abuelitos, la llorona del río del barrio",
+    },
+    "80s": {
+      cartoons: "He-Man, Dragon Ball primeras, Transformers, Los Súper Campeones (Oliver y Benji), Inspector Gadget, Robotech",
+      toys: "Atari 2600, Hot Wheels, las muñecas Barbie 'piratas' del tianguis, los Transformers 'taiwaneses', el juego de serpientes y escaleras",
+      games: "los recreativos de la feria con fichas, el Nintendo que costaba un mes de sueldo del papá, el trompo en el patio",
+      snacks: "el Gansito Marinela (eterno), los Pingüinos, el Boing de guayaba, los Choco Roles, la paleta payaso",
+      schoollife: "el cuaderno profesional cuadriculado, el dictado a mano, el himno nacional los lunes, el uniforme con escudo cosido",
+      fear: "las historias de brujería de la abuela, el chupacabras cuando salió en las noticias",
+    },
+    "90s": {
+      cartoons: "Dragon Ball Z (religión), Los Simpsons doblado en México, Caballeros del Zodiaco, Sailor Moon, Dexter's Lab, Johnny Bravo",
+      toys: "el Tamagotchi que escondías en clase, la Super Nintendo / Sega Genesis, los tazos de sabritas con DBZ, Game Boy",
+      games: "los tazos en el recreo (el juego de apilar y golpear), Mortal Kombat en el Oxxo/recreativo, las matatenas",
+      snacks: "las sabritas originales con limón, el Choco Krispies de caja, el Yakult, los Pulparindos, el Gatorade que era de ricos",
+      schoollife: "el folder Scribe con plastiflor, el cuaderno con portada de Barbie o DBZ, la cooperativa escolar, el día del niño con pastel",
+      fear: "el chupacabras (completamente real según los primos), las piñas y leyendas del barrio",
+    },
+    "00s": {
+      cartoons: "Naruto (obligatorio), SpongeBob doblado en México, Ben 10, Avatar, El Chavo animado, Caillou",
+      toys: "Nintendo DS, Wii, las cartas Pokémon / Yu-Gi-Oh!, los Bakugan, el Tamagotchi v2",
+      games: "Club Penguin, Habbo Hotel, el Grand Theft Auto en casa del primo mayor, los Sims",
+      snacks: "las Maruchan como almuerzo completo, los Hot Cheetos, los Takis (recién aparecidos), el Gatorade azul neón",
+      schoollife: "el MSN con el nick raro en el Messenger, el Hi5 antes de Facebook, bajar música del LimeWire",
+      fear: "los vídeos de terror de YouTube (Momo, Slenderman), el spam de cadenas de MSN que te mataban si no reenviabas",
+    },
+  },
+  "Argentina": {
+    "70s": {
+      cartoons: "Heidi y Marco en TVE (llegaban tarde), El Zorro, Los Picapiedra, Hijitus (dibujo animado argentino)",
+      toys: "el balero, el trompo, las bolitas de vidrio, los soldaditos de plomo, el elástico en el patio",
+      games: "la mancha, las escondidas, el fútbol en la calle con una pelota de trapo o de goma",
+      snacks: "los alfajores de maicena de la abuela, el submarino (chocolate en la leche caliente), las paletas Stani, la soda en sifón",
+      schoollife: "el delantal blanco obligatorio, la carpeta con tapas duras, el dictado de la señorita, los Cuadernos Rivadavia",
+      fear: "el viejo de la bolsa, el 'te va a llevar el lobizón' de los abuelos del interior",
+    },
+    "80s": {
+      cartoons: "He-Man, Transformers, Dragon Ball primeras, Los Pitufos, La Abeja Maya, Robotech, Candy Candy",
+      toys: "el Atari (el que tenía era dios del barrio), los Clicks de Famobil, el Scalextric, los muñecos He-Man taiwaneses",
+      games: "el recreativo con fichas de 50 centavos, el fútbol en el potrero, la rayuela, las bolitas",
+      snacks: "los Cachafaz, las galletitas Terrabusi, el Facturas de panadería del domingo, los Alfajores Havanna de los ricos",
+      schoollife: "el cuaderno Gloria, el lápiz negro Faber Castell, el guardapolvo blanco, el servicio cívico los lunes",
+      fear: "las noticias de la dictadura que los padres bajaban la voz para hablar (sin entender bien qué pasaba)",
+    },
+    "90s": {
+      cartoons: "Dragon Ball Z (SAGRADO), Los Simpsons rioplatenses, Rugrats, Aaahh! Real Monsters, Beavis y Butt-Head, Pokémon",
+      toys: "Tamagotchi, Super Nintendo, los tazos de las papas fritas, Game Boy, los muñecos de Pokémon",
+      games: "los tazos en el recreo (el deporte nacional), el Mortal Kombat en el cyber, las figuritas del álbum",
+      snacks: "las Papas 3D, el Yogurisimo, el Mogul, el sándwich de miga del kiosco, los alfajores Jorgito",
+      schoollife: "el cuaderno Gloria cuadriculado, el estuche con mil lapiceras de colores, las figuritas del álbum Panini",
+      fear: "el efecto 2000 que iba a fundir los bancos (encima en Argentina tenía todo el sentido)",
+    },
+    "00s": {
+      cartoons: "Naruto, SpongeBob, Avatar, Chiquititas (últimas temporadas), Rebelde Way (los mayores), Pokémon y Digimon",
+      toys: "Game Boy Advance, Nintendo DS, los Bakugan, Yu-Gi-Oh! cartas, el iPod mini",
+      games: "El fotolog con frase de Los Piojos, el MSN con el nick dramático, los Sims, el Counter Strike en el cyber",
+      snacks: "las Palitos de la Selva, Rhodesia, el Tofi, el Flan Milka de la vianda, los Chizitos",
+      schoollife: "el Fotolog con foto de perfil moody, el 'cambio el número' por el primer celular Nokia de tapita",
+      fear: "los vídeos de terror de MSN ('abre este adjunto a las 12 de la noche'), la cadena de los 7 años de mala suerte",
+    },
+  },
+  "Chile": {
+    "80s": {
+      cartoons: "He-Man, Thundercats, Dragon Ball primeras, Los Pitufos, Mazinger Z, Heidi (repeticiones)",
+      toys: "el trompo, el yo-yo, los muñecos He-Man 'chuecos' del Persa, el Scalextric del primo rico",
+      games: "la pinta en el patio, el elástico, las chapas, el fútbol en la villa",
+      snacks: "las Papas Fritas Recart, los Super Ocho, el Tritón de helado, el Watt's de durazno, las galletas Tritón",
+      schoollife: "el delantal azul (niños) o cuadrillé (niñas), el cuaderno cuadriculado, el 'silencio niños' de la tía",
+      fear: "el cuco, el 'hombre de la bolsa', y las historias del viejo pascuero malo que traían los adultos",
+    },
+    "90s": {
+      cartoons: "Dragon Ball Z (misa dominical), Los Simpsons, Doraemon en TVN, Pokémon, Sailor Moon, Digimon",
+      toys: "Tamagotchi (el que moría en la mochila), Super Nintendo, Game Boy, los tazos de las papas Lays con DBZ",
+      games: "tazos en el recreo (deporte olímpico), el recreativo con monedas de 100, el GoldenEye N64",
+      snacks: "los Papas Lays a 100 pesos, los Mc Donald's como premio mensual, el Zuko, el Chocman, las Tritón",
+      schoollife: "el Estuche con 800 cosas inútiles, la Agenda escolar con pegatinas de Pokémon, el kiosco del colegio",
+      fear: "el efecto 2000 que 'iba a apagar todos los computadores', los vídeos de terror en VHS del hermano mayor",
+    },
+    "00s": {
+      cartoons: "Naruto, SpongeBob en Chilevision, Avatar, Ben 10, 31 Minutos (NACIONAL Y SAGRADO), Tulio Triviño",
+      toys: "Game Boy Advance SP, Nintendo DS, los Bakugan, las cartas Pokémon, el iPod nano de colores",
+      games: "Habbo Hotel (el cyber del barrio), Counter-Strike en el cyber, Club Penguin, el Messenger",
+      snacks: "los Doritos nuevos sabores, las papas Lays sabor Limón, los Chips Ahoy, el Zuko de uva",
+      schoollife: "el Hi5 antes del Facebook, el MSN con el nick de Los Bunkers, bajar música del Ares",
+      fear: "los vídeos de terror de MSN, la cadena del 'si no reenvías esto en 10 minutos te va a pasar algo malo'",
+    },
+  },
+  "Colombia": {
+    "80s": {
+      cartoons: "El Chapulín Colorado, He-Man, Los Pitufos, Dragon Ball primeras, Candy Candy, Los Picapiedra",
+      toys: "el trompo, el yo-yo, las canicas, los soldaditos de plástico, las muñecas de trapo de la abuela",
+      games: "el partido de fútbol en el potrero, la lleva, el encostalado en fiestas del barrio",
+      snacks: "los Chitos, las papas de paquete Margarita, el Bon Bon Bum, el Frescolita, las paletas artesanales",
+      schoollife: "el cuaderno de 100 hojas, el lápiz Koh-I-Noor, el recreo con el perro caliente de la señora",
+      fear: "el monstruo del closet, y los apagones frecuentes que hacían todo más aterrador",
+    },
+    "90s": {
+      cartoons: "Dragon Ball Z, Los Simpsons, Pokémon, Digimon, Dexter's Lab, Johnny Bravo, Betty la Fea (los mayores)",
+      toys: "Tamagotchi, Super Nintendo, tazos de las papas Margarita, Game Boy, los muñecos Pokémon",
+      games: "tazos en el recreo, el 'ponchado' en el patio, los recreativos del centro comercial",
+      snacks: "el Chocoramo (religioso), las Papas Margarita, el Colombina, el Bon Bon Bum de fresa, el Milo de tarro",
+      schoollife: "el cuaderno cuadriculado, los colores Faber Castell, el recreo con el caldo de pollo en termo",
+      fear: "los vídeos de terror en VHS del primo mayor, el Y2K, el 'no hagas eso que te va a llevar el diablo'",
+    },
+    "00s": {
+      cartoons: "Naruto, SpongeBob, Avatar, Ben 10, Drake & Josh doblado, Pokémon Advanced",
+      toys: "Nintendo DS, los Bakugan, Yu-Gi-Oh! cartas, la Bratz vs Barbie, el iPod shuffle",
+      games: "el Messenger con el nick de Shakira, Hi5, Club Penguin, el Counter-Strike en el café internet",
+      snacks: "los Doritos, los Cheetos Poffs, el Colombina, las galletas Festival de limón, el Milo en el recreo",
+      schoollife: "el primer Nokia de papá prestado, el MSN en el cyber, bajar canciones del LimeWire",
+      fear: "los videos de terror de MSN, la cadena de la niña del vestido blanco",
+    },
+  },
+};
+
+function getChildhoodDecade(birthDate?: string): string {
+  if (!birthDate) return "90s";
+  const year = parseInt(birthDate.split("-")[0]);
+  // Centro de infancia = año nacimiento + 7
+  const midChildhood = year + 7;
+  if (midChildhood < 1980) return "70s";
+  if (midChildhood < 1990) return "80s";
+  if (midChildhood < 2000) return "90s";
+  return "00s";
+}
+
+export function getChildhoodContext(birthDate?: string, country?: string): string | null {
+  if (!birthDate || !country) return null;
+
+  const decade = getChildhoodDecade(birthDate);
+  const countryData = CHILDHOOD[country];
+  if (!countryData) return null;
+
+  // Buscar la era exacta o la más cercana disponible
+  const era = countryData[decade] ??
+    countryData["90s"] ??
+    countryData["80s"] ??
+    Object.values(countryData)[0];
+
+  if (!era) return null;
+
+  return `INFANCIA / EDAD DE ORO (sus 5-12 años, cuando todo era posible):
+📺 Dibujos que veía: ${era.cartoons}
+🧸 Juguetes de su infancia: ${era.toys}
+🏃 Juegos en la calle/patio: ${era.games}
+🍬 Golosinas y sabores de infancia: ${era.snacks}
+🏫 Vida escolar de esa época: ${era.schoollife}
+😱 El miedo clásico de su generación: ${era.fear}
+
+Úsalo con emoción y nostalgia — "de niño/a seguro que...", "¿a que todavía recuerdas el olor de...?", "eso lo aprendiste antes que el alfabeto". Que sienta que ZODI también vivió esa infancia con él/ella.`;
+}
+
 // ── Significado del nombre ────────────────────────────────────────────────────
 const NAME_MEANINGS: Record<string, string> = {
   // Masculinos
@@ -423,6 +629,13 @@ export function buildPersonalizationBlock(data: PersonalizationData): string {
     parts.push(`GENERACIÓN: ${gen.label} — ${gen.context}`);
   }
 
+  // Infancia / edad de oro — referencias de sus 5-12 años
+  const childhoodCtx = getChildhoodContext(data.birthDate, data.birthCountry);
+  if (childhoodCtx) {
+    parts.push(childhoodCtx);
+    parts.push(`⚠️ INSTRUCCIÓN INFANCIA: ZODI puede usar UNA referencia de infancia cuando la lectura lo pida emocionalmente — momentos de vulnerabilidad, nostalgia, miedos, o cuando el consejo conecta con un patrón que viene de lejos. No en cada respuesta — solo cuando golpee con verdad. "Esto lo traes desde niño/a, cuando...", "ese miedo que tienes hoy lo aprendiste antes de los 12..."`);
+  }
+
   // Pop culture de su época y país — OBLIGATORIO usarla, no ignorarla
   const popCtx = getPopCultureContext(data.birthDate, data.birthCountry);
   if (popCtx) {
@@ -479,6 +692,6 @@ export function buildPersonalizationBlock(data: PersonalizationData): string {
 ══ PERFIL COMPLETO DEL USUARIO ══
 ${parts.join("\n\n")}
 
-INSTRUCCIÓN GENERAL: Usa TODO este contexto. Jerga regional en cada respuesta. Referencia pop cultural al menos una vez. El estado vital cambia el enfoque. Este usuario no es un número de signo — es una persona con historia. Trátale como tal.
+INSTRUCCIÓN GENERAL: Usa TODO este contexto. Jerga regional en cada respuesta. Referencia pop cultural al menos una vez. Usa infancia solo cuando conecte de verdad emocionalmente. El estado vital cambia el enfoque. Este usuario no es un número de signo — es una persona con historia, una infancia, una generación y un país. Trátale como tal.
 ══════════════════════════════════`;
 }
