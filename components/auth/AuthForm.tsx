@@ -437,6 +437,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         }
       }
 
+      // Error interno de Firebase — casi siempre es dominio no autorizado
+      if (code === "auth/internal-error" || code === "auth/network-request-failed") {
+        setMessage("⚠️ El dominio de producción no está autorizado en Firebase. Ve a Firebase Console → Authentication → Authorized Domains y añade el dominio de la web. Mientras tanto usa email y contraseña.");
+        setMsgType("error");
+        setGoogleLoading(false);
+        return;
+      }
+
       // Cualquier otro error — también intentar redirect como último recurso
       try {
         sessionStorage.setItem("zodi.google_redirect_pending", "1");
@@ -446,8 +454,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         sessionStorage.removeItem("zodi.google_redirect_pending");
         const rCode: string = (e as { code?: string }).code ?? "";
         setMessage(
-          rCode === "auth/unauthorized-domain"
-            ? "⚠️ Dominio no autorizado. Añade zodi.aibueno.es en Firebase Console → Authentication → Authorized Domains."
+          (rCode === "auth/unauthorized-domain" || rCode === "auth/internal-error")
+            ? "⚠️ Dominio no autorizado en Firebase. Añade el dominio en Firebase Console → Authentication → Authorized Domains."
             : `Error Google (${code || rCode || "desconocido"}). Intenta con email y contraseña.`
         );
         setMsgType("error");
