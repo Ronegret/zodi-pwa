@@ -1,11 +1,4 @@
-/**
- * Módulo de personalización cultural ZODI
- * Enriquece el contexto del usuario más allá del signo zodiacal:
- * - Generación según año de nacimiento
- * - Contexto cultural y jerga según país/ciudad de origen
- * - Significado del nombre
- * - Palabras y referencias regionales
- */
+import { calculateSunSign } from "@/lib/astral";
 
 // ── Generación por año de nacimiento ─────────────────────────────────────────
 export function getGeneration(birthDate?: string): { label: string; context: string } | null {
@@ -596,6 +589,92 @@ export function getPopCultureContext(birthDate?: string, country?: string): stri
 Úsalas como un amigo que vivió lo mismo — "¿te acuerdas cuando...?", "esto es como cuando...", "eso lo hacías mientras escuchabas a...". Que se sienta nostalgia real, no Wikipedia.`;
 }
 
+// ── Etapa de vida ─────────────────────────────────────────────────────────────
+export function getLifeStage(birthDate?: string, hasKids?: boolean): { label: string; context: string } | null {
+  if (!birthDate) return null;
+  const age = new Date().getFullYear() - parseInt(birthDate.split("-")[0]);
+  if (isNaN(age)) return null;
+
+  if (age < 20) return {
+    label: "Joven en formación",
+    context: "Identidad construyéndose en tiempo real. Todo se siente urgente o eterno. El consejo que más necesita: perspectiva, no apuro."
+  };
+  if (age < 27) return {
+    label: "Los veinte complicados",
+    context: "El primer choque serio entre las expectativas y la realidad adulta. Mucho que aprender, poco que soltar todavía. Energía alta, criterio aún afinándose."
+  };
+  if (age <= 30) return {
+    label: "Primer retorno de Saturno (27-30)",
+    context: "El cosmos manda la primera revisión seria de vida. Todo lo que no se resolvió en los veinte vuelve con intereses. Crisis de identidad real — es el proceso, no el fracaso."
+  };
+  if (age < 36) return {
+    label: "Los treinta que nadie describió bien",
+    context: "Más criterio pero más presión social de plazos. La comparación con los demás está en su punto álgido. Ya saben lo que quieren, el problema es conseguirlo sin perder la cabeza."
+  };
+  if (age < 43) return {
+    label: "La madurez incómoda (36-42)",
+    context: "Ya tiene claro lo que quiere. El problema es que el mundo no siempre coopera. Energía de consolidación: salud, dinero, relaciones — todo llama a revisión al mismo tiempo."
+  };
+  if (age <= 50) return {
+    label: "Segundo retorno de Saturno (43-50)",
+    context: "Segunda revisión profunda de identidad. Todo lo que se postergó vuelve. La pregunta real es: ¿quién soy cuando dejo de ser lo que los demás esperan? No es crisis — es claridad forzada."
+  };
+  if (age < 60) return {
+    label: "La segunda vuelta (50-59)",
+    context: "Experiencia acumulada, menos paciencia para lo que no vale. Prioridades más claras que nunca. El ego ya no necesita tantas pruebas externas. La salud y el propósito ganan protagonismo."
+  };
+  return {
+    label: "La sabiduría sin pedir permiso (60+)",
+    context: `Perspectiva que solo se gana viviendo. Ya vio suficiente para saber cuándo algo vale y cuándo no.${hasKids ? " Con hijos mayores, la identidad también se reconfigura." : ""} El consejo que da ZODI aquí es directo y sin rodeos — se lo merece.`
+  };
+}
+
+// ── Retorno solar / cumpleaños ─────────────────────────────────────────────────
+export function getBirthdayContext(birthDate?: string): string | null {
+  if (!birthDate) return null;
+  try {
+    const today = new Date();
+    const bday = new Date(birthDate);
+    const thisYear = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
+    const nextYear = new Date(today.getFullYear() + 1, bday.getMonth(), bday.getDate());
+
+    const diffMs = thisYear.getTime() - today.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return `🎂 RETORNO SOLAR HOY — Es su cumpleaños. El Sol está exactamente donde estaba cuando nació. Menciónalo con emoción real: "hoy tu año solar se cierra y uno nuevo comienza — el cosmos te ve". Esta es la lectura más especial del año para esta persona.`;
+    }
+    if (diffDays >= 1 && diffDays <= 7) {
+      return `🎂 CUMPLEAÑOS ESTA SEMANA (en ${diffDays} día${diffDays > 1 ? "s" : ""}) — Su retorno solar está a punto. El año solar que termina pide balance. Menciónalo con naturalidad: "tu año solar cierra esta semana, ¿qué cosechaste?"`;
+    }
+    if (diffDays >= 8 && diffDays <= 30) {
+      return `🌟 CUMPLEAÑOS PRÓXIMO (en ${diffDays} días) — Está en la última fase de su año solar. Es tiempo de cerrar ciclos, no abrir más. Puedes mencionarlo si encaja: "tu año solar está en sus últimos días — ideal para soltar antes de renovarte".`;
+    }
+    // Check if birthday was very recent (this year already passed)
+    const diffSinceBday = Math.round((today.getTime() - thisYear.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffSinceBday >= 0 && diffSinceBday <= 7) {
+      return `🎂 AÑO SOLAR RECIÉN ABIERTO (hace ${diffSinceBday} día${diffSinceBday !== 1 ? "s" : ""}) — Su retorno solar fue hace muy poco. Está en los primeros días de su nuevo año solar — energía de comienzo, intenciones frescas. Menciónalo: "acabas de abrir tu nuevo año solar".`;
+    }
+    // Check next year's birthday if this year already passed
+    const diffToNextMs = nextYear.getTime() - today.getTime();
+    const diffToNextDays = Math.round(diffToNextMs / (1000 * 60 * 60 * 24));
+    if (diffToNextDays <= 7) {
+      return `🎂 CUMPLEAÑOS ESTA SEMANA (en ${diffToNextDays} día${diffToNextDays !== 1 ? "s" : ""}) — Su retorno solar está a punto. Menciónalo.`;
+    }
+    return null;
+  } catch { return null; }
+}
+
+// ── Signo de la pareja calculado ──────────────────────────────────────────────
+export function getPartnerSignContext(partnerName?: string, partnerBirthDate?: string): string | null {
+  if (!partnerName || !partnerBirthDate) return null;
+  try {
+    const sign = calculateSunSign(partnerBirthDate);
+    if (!sign) return null;
+    return `Signo de ${partnerName}: ${sign} — en lecturas de amor, pareja o relaciones, analiza automáticamente la dinámica de esta combinación de signos. ¿Se complementan? ¿Chocan? ¿Qué necesita cada uno del otro?`;
+  } catch { return null; }
+}
+
 // ── Bloque completo de personalización para el prompt ────────────────────────
 export interface PersonalizationData {
   displayName?: string;
@@ -611,6 +690,7 @@ export interface PersonalizationData {
   hasKids?: boolean;
   kidsCount?: number;
   personalBio?: string;
+  recurringTheme?: string; // tema recurrente detectado — la "herida que vuelve"
 }
 
 export function buildPersonalizationBlock(data: PersonalizationData): string {
@@ -659,6 +739,18 @@ export function buildPersonalizationBlock(data: PersonalizationData): string {
     parts.push(`HABLA COMO SI FUERAS DE ${data.currentCountry}${data.currentCity ? `, ${data.currentCity}` : ""} — usa las expresiones locales, no el español genérico.`);
   }
 
+  // Etapa de vida — cambia completamente el enfoque y el tipo de consejo
+  const lifeStage = getLifeStage(data.birthDate, data.hasKids);
+  if (lifeStage) {
+    parts.push(`ETAPA DE VIDA: ${lifeStage.label} — ${lifeStage.context}`);
+  }
+
+  // Cumpleaños / retorno solar — si es relevante, ZODI lo menciona
+  const birthdayCtx = getBirthdayContext(data.birthDate);
+  if (birthdayCtx) {
+    parts.push(birthdayCtx);
+  }
+
   // Contexto vital — para lecturas mucho más personalizadas
   const lifeLines: string[] = [];
   if (data.relationshipStatus) {
@@ -667,14 +759,13 @@ export function buildPersonalizationBlock(data: PersonalizationData): string {
       complicated: "situación complicada ('estamos pero no estamos')", divorced: "separado/a"
     };
     lifeLines.push(`Estado sentimental: ${statusLabels[data.relationshipStatus] || data.relationshipStatus}`);
-    if ((data.relationshipStatus === "relationship" || data.relationshipStatus === "married") && data.partnerName) {
-      lifeLines.push(
-        `Pareja: ${data.partnerName}` +
-        (data.partnerBirthDate
-          ? ` (nacido/a el ${data.partnerBirthDate})`
-          : "")
-      );
-    }
+  }
+  // Pareja con signo calculado
+  const partnerSignCtx = getPartnerSignContext(data.partnerName, data.partnerBirthDate);
+  if (partnerSignCtx) {
+    lifeLines.push(partnerSignCtx);
+  } else if (data.partnerName) {
+    lifeLines.push(`Pareja: ${data.partnerName}`);
   }
   if (data.hasKids) {
     lifeLines.push(`Tiene ${data.kidsCount && data.kidsCount > 1 ? `${data.kidsCount} hijos` : "un hijo/a"} — factor que influye en decisiones y energía`);
@@ -683,7 +774,12 @@ export function buildPersonalizationBlock(data: PersonalizationData): string {
     lifeLines.push(`Historia personal: "${data.personalBio.trim().slice(0, 400)}"`);
   }
   if (lifeLines.length > 0) {
-    parts.push(`CONTEXTO VITAL:\n${lifeLines.map(l => `• ${l}`).join("\n")}\n→ Úsalo para hacer las lecturas concretas, no genéricas. Una persona con pareja no necesita el mismo consejo de amor que una soltera.`);
+    parts.push(`CONTEXTO VITAL:\n${lifeLines.map(l => `• ${l}`).join("\n")}\n→ Úsalo para lecturas concretas. Una persona con pareja no necesita el mismo consejo que una soltera. Un padre o madre de familia tiene otras prioridades que alguien sin hijos.`);
+  }
+
+  // Tema recurrente — "la herida que vuelve"
+  if (data.recurringTheme?.trim()) {
+    parts.push(`⚠️ PATRÓN RECURRENTE: Esta persona ha consultado varias veces sobre "${data.recurringTheme}". ZODI puede notarlo si encaja: "esta es la segunda/tercera vez que tocamos esto — algo aquí quiere ser visto de verdad". No forzarlo, usarlo cuando sea verdad.`);
   }
 
   if (parts.length === 0) return "";

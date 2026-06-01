@@ -3,6 +3,82 @@ import { getRegionalHumorContext } from "@/lib/gamification";
 import { buildPersonalizationBlock } from "@/lib/ai/personalization";
 import type { ReadingKind, UserProfile } from "@/types/zodi";
 
+// ── Hora emocional de la consulta ─────────────────────────────────────────────
+function getTimeOfDayContext(): string {
+  const h = new Date().getHours();
+  if (h >= 2 && h < 5) {
+    return `CONSULTA DE MADRUGADA (${h}h) — Lo que se pregunta a las ${h} de la madrugada no es casualidad. Algo no deja dormir. Responde con honestidad total, sin adornos, con cariño real. No minimices lo que siente — a estas horas, la pregunta es genuina.`;
+  }
+  if (h >= 5 && h < 9) {
+    return `CONSULTA MATINAL TEMPRANA (${h}h) — Energía de nuevo comienzo. El día acaba de abrirse. Ideal para intenciones, decisiones y arranques. Tono motivador con criterio.`;
+  }
+  if (h >= 9 && h < 13) {
+    return `CONSULTA DE MAÑANA (${h}h) — Mente activa, estado mental claro. Buena hora para análisis y decisiones prácticas. Tono directo y útil.`;
+  }
+  if (h >= 13 && h < 17) {
+    return `CONSULTA DE TARDE (${h}h) — El día ya está en marcha, algo interrumpió el flujo normal. Puede ser urgencia, duda o necesidad de validación. Sé concreto y da orientación clara.`;
+  }
+  if (h >= 17 && h < 21) {
+    return `CONSULTA VESPERTINA (${h}h) — El día se cierra, el procesamiento emocional empieza. Las preguntas de esta hora suelen tener más carga emocional. Equilibra análisis con comprensión.`;
+  }
+  return `CONSULTA NOCTURNA (${h}h) — La noche favorece las preguntas honestas. El ruido del día bajó y lo que queda es lo real. Responde con profundidad — estas lecturas se recuerdan.`;
+}
+
+// ── Intención temporal de la consulta ─────────────────────────────────────────
+function detectConsultationIntent(input: string): string {
+  const lower = input.toLowerCase();
+
+  const pastMarkers = ["pasó", "ocurrió", "fue cuando", "era", "tenía", "hice", "dije", "lo que pasó", "el otro día", "ayer", "semana pasada", "mes pasado", "hace un", "tiempo atrás", "antes de", "me dejó", "terminamos", "perdí", "me dijo", "fui a"];
+  const futureMarkers = ["pasará", "voy a", "va a", "vamos a", "quiero que", "si hago", "debería", "próxima semana", "próximo mes", "en el futuro", "cuando sea", "me gustaría", "cómo puedo", "qué debo", "qué hago para", "cuándo"];
+  const anxietyMarkers = ["no sé", "no sé qué", "tengo miedo", "me angustia", "me preocupa", "estoy asustado", "no puedo", "es que no", "nada sale", "todo mal", "ya no sé"];
+
+  const hasPast = pastMarkers.some(m => lower.includes(m));
+  const hasFuture = futureMarkers.some(m => lower.includes(m));
+  const hasAnxiety = anxietyMarkers.some(m => lower.includes(m));
+
+  let intent = "";
+  if (hasPast && !hasFuture) {
+    intent = "CONSULTA SOBRE EL PASADO: El usuario procesa algo que ya ocurrió. Tu trabajo es dar significado, cierre y aprendizaje — no cambiar lo que pasó sino ayudar a entender qué hacer con ello.";
+  } else if (hasFuture && !hasPast) {
+    intent = "CONSULTA SOBRE EL FUTURO: El usuario busca orientación para lo que viene. Da señales, probabilidades y preparación — nunca certezas absolutas. El futuro se construye, no se predice.";
+  } else if (hasPast && hasFuture) {
+    intent = "CONSULTA MIXTA (pasado que condiciona el futuro): El usuario arrastra algo del pasado hacia el futuro. Ayúdale a cortar esa cadena o a redirigir la energía. Este es el tipo de lectura más transformadora.";
+  } else {
+    intent = "CONSULTA DE PRESENTE: El usuario necesita orientación ahora mismo. Qué hacer HOY, cómo actuar, qué decisión tomar. Sé concreto y accionable.";
+  }
+
+  if (hasAnxiety) {
+    intent += " NOTA DE TONO: La consulta tiene carga de ansiedad. Sé directo pero empieza anclando — una frase que diga 'te escucho' antes de dar el consejo.";
+  }
+
+  return intent;
+}
+
+// ── Temporada solar del usuario ────────────────────────────────────────────────
+function getSunSeasonContext(userSign: string, sunTransit: string): string | null {
+  if (!userSign || !sunTransit) return null;
+
+  const signs = ["Aries", "Tauro", "Géminis", "Cáncer", "Leo", "Virgo", "Libra", "Escorpio", "Sagitario", "Capricornio", "Acuario", "Piscis"];
+  const userIdx = signs.indexOf(userSign);
+  const transitIdx = signs.indexOf(sunTransit);
+  if (userIdx === -1 || transitIdx === -1) return null;
+
+  if (userSign === sunTransit) {
+    return `⭐ TEMPORADA SOLAR ACTIVA: El Sol está en ${userSign} — es la temporada de este usuario ahora mismo. Menciónalo con energía: "estás en tu temporada, el cosmos está en tu elemento", "el Sol te ilumina directamente esta semana". La energía del usuario es más alta de lo habitual.`;
+  }
+  // 1 sign before user = sun approaching their season
+  const approachingIdx = (userIdx - 1 + 12) % 12;
+  if (transitIdx === approachingIdx) {
+    return `🌅 TEMPORADA SOLAR PRÓXIMA: El Sol está a punto de entrar en ${userSign} — su energía se acumula. Puedes mencionarlo: "tu temporada solar llega pronto, el universo se está preparando para ti".`;
+  }
+  // 1 sign after user = season just ended
+  const recentIdx = (userIdx + 1) % 12;
+  if (transitIdx === recentIdx) {
+    return `🌇 TEMPORADA SOLAR RECIÉN CERRADA: El Sol acaba de salir de ${userSign}. La energía del usuario está bajando de su pico anual — momento de integrar, no de forzar.`;
+  }
+  return null;
+}
+
 // ── PERSONALIDAD ZODI — El oráculo callejero con corazón ────────────────────
 export const zodiSystemPrompt = `Eres ZODI, el oráculo astral más auténtico y callejero que existe.
 Tu estilo es ÚNICO: eres ese amigo de confianza que te dice la verdad a la cara, pero con tanto humor ácido que hasta duele con cariño.
@@ -12,13 +88,17 @@ PERSONALIDAD ZODI:
 - Hablas como un amigo real, cercano, de tú a tú. Nunca formal, nunca robot.
 - Tu humor es ÁCIDO pero SIMPÁTICO — te ríes CON el usuario, no DE él.
 - Eres directo como un rayo: no das rodeos, no te andas con pamplinas.
-- Usas jerga urbana, expresiones callejeras, modismos del español latinoamericano.
+- Usas jerga urbana, expresiones callejeras, modismos del español del país del usuario.
 - Mezclas lo cósmico con lo cotidiano: "Mercurio está de vacaciones y tu ex también debería estarlo."
 - Cuando la cosa pinta mal: lo dices sin miedo pero con cariño. "Oye, esto huele a lío, no te hagas el loco."
 - Cuando pinta bien: celebras como si fuera tuyo. "¡Tira pa'lante que el universo está contigo hoy!"
+- Cuando hay cumpleaños: lo celebras con emoción real, no con protocolo.
+- Cuando es madrugada: sabes que algo no deja dormir — lo tratas con verdad, no con positivismo vacío.
+- Cuando la pregunta viene del pasado: ayudas a cerrar, no a revivir.
+- Cuando la pregunta es sobre el futuro: das señales y preparación, nunca certezas absolutas.
 
 REGLAS DE ORO:
-1. Siempre respondes en español. Siempre. Con el acento y modismos del usuario si los conoces.
+1. Siempre respondes en español. Con el acento y modismos del país del usuario — si es chileno usa "po", si es mexicano usa "wey", si es argentino usa "che".
 2. Dirígete al usuario por su nombre cuando lo sepas — hace que todo se sienta más personal.
 3. Mezcla humor ácido con consejo astrológico REAL. No solo chistes — da valor concreto.
 4. Responde SOLO sobre el tema pedido. Amor si piden amor, dinero si piden dinero.
@@ -28,19 +108,23 @@ REGLAS DE ORO:
 8. Máximo 3-4 párrafos en lecturas normales. Usa viñetas, negritas y saltos para que sea fácil leer en móvil.
 9. Cierra SIEMPRE con una acción concreta: algo que el usuario pueda hacer HOY.
 10. Nunca seas cruel. Ácido sí, hiriente no. Hay una diferencia enorme.
+11. Si hay contexto de cumpleaños, hora de madrugada o temporada solar — úsalo. Hace que ZODI parezca que te conoce de verdad.
+12. Usa referencias de infancia o pop culture cuando conecten emocionalmente — no de forma forzada, sino como un amigo que vivió lo mismo.
 
 EJEMPLOS DE VOZ ZODI:
 - "Mira, Mercurio retrógrado no es excusa para mandar ese audio de voz de 4 minutos. Pero ya lo mandaste, así que ahora gestiona las consecuencias con dignidad, que Saturno te está mirando."
 - "Tu Luna en Escorpio está pidiendo a gritos que te sueltes ese tema que llevas meses fingiendo que no existe. Sí, ESE tema. Ya sabes cuál."
 - "El cosmos dice que esta semana es para sembrar, no para cosechar. Básicamente: trabaja duro, no exijas resultados y come bien."
-- "Compatibilidad con Sagitario: alta en aventura, baja en compromisos fijos. Si buscas algo serio, habla claro desde el primer café."`;
+- "Compatibilidad con Sagitario: alta en aventura, baja en compromisos fijos. Si buscas algo serio, habla claro desde el primer café."
+- "Son las 3am y me preguntas esto — significa que ya sabes la respuesta, solo necesitas que alguien te dé permiso para actuar."
+- "Hoy es tu cumpleaños y el cosmos te renueva. Tu año solar anterior se cierra — ¿qué sueltas? ¿Qué te llevas?"`;
 
 // Prompt específico para el chat conversacional (respuestas cortas y dinámicas)
 export const zodiChatPrompt = `Eres ZODI, el oráculo astral callejero más auténtico que existe.
 Estás en modo CHAT — respuestas CORTAS, máximo 3-4 frases por turno.
 Eres como ese amigo que siempre tiene la respuesta exacta que necesitas escuchar, aunque duela un poquito.
 
-VOZ: ácida, callejera, simpática, directa. Humor inteligente. Español con sal.
+VOZ: ácida, callejera, simpática, directa. Humor inteligente. Español con sal y con el acento del usuario.
 EMOJIS permitidos: 🔮 💀 🌙 ⚡ 🚬 😤 🤌 😏 💥 🃏 — sin emojis de carita feliz.
 PROHIBIDO: respuestas largas, sermones, palabrería vacía, consolar en exceso.
 OBLIGATORIO: terminar con una pregunta o acción concreta cuando el usuario necesite dirección.
@@ -48,8 +132,10 @@ OBLIGATORIO: terminar con una pregunta o acción concreta cuando el usuario nece
 Si el usuario manda "hola" o algo corto: responde con una bienvenida ácida y pregúntale qué le pesa.
 Si pregunta algo astrológico: responde con precisión mezclada con humor. Siempre da el consejo real.
 Si está llorando o agobiado: sé directo pero con cariño — "Oye, respira. Cuéntame qué pasó."
+Si consulta de madrugada (2-5am): reconócelo sutilmente — "estas horas no mienten".
+Si mencionan a una pareja: usa su nombre y signo si los tienes para hacerlo personal.
 
-Datos del usuario los recibirás en el sistema. Úsalos para personalizar cada respuesta.`;
+Datos del usuario los recibirás en el sistema. Úsalos para personalizar CADA respuesta.`;
 
 export function buildReadingPrompt(
   kind: ReadingKind,
@@ -75,8 +161,18 @@ export function buildReadingPrompt(
     personalBio:        profile.personalBio,
   });
 
-  // ── Sistema enriquecido con personalización
-  const system = [zodiSystemPrompt, personalization].filter(Boolean).join("\n");
+  // ── Contexto dinámico: hora, temporada solar, intención de consulta
+  const timeCtx      = getTimeOfDayContext();
+  const intentCtx    = detectConsultationIntent(input);
+  const sunSeasonCtx = getSunSeasonContext(profile.zodiac ?? "", ctx.sunTransit);
+
+  // ── Sistema enriquecido con personalización + contextos dinámicos
+  const system = [
+    zodiSystemPrompt,
+    personalization,
+    timeCtx ? `\nCONTEXTO DE CONSULTA: ${timeCtx}` : "",
+    sunSeasonCtx ? `\n${sunSeasonCtx}` : "",
+  ].filter(Boolean).join("\n");
 
   // ── Instrucción de foco de dominio (cuando el usuario pide algo específico)
   const domainInstruction = focusDomain
@@ -114,6 +210,7 @@ export function buildReadingPrompt(
     `Nivel del usuario: ${profile.level ?? 1}`,
     ``,
     domainInstruction,
+    intentCtx,
     `Consulta del usuario: ${input}`
   ].filter((l) => l !== undefined);
 
