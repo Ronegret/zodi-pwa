@@ -11,32 +11,50 @@ import { dashboardSections } from "@/lib/dashboard-sections";
 const categories = [
   {
     label: "Horóscopos",
+    cartaLabel: "Entrantes Cósmicos",
+    description: "Lecturas rápidas y guía diaria para digerir tu clima astral del día.",
     emoji: "🌙",
+    cartaEmoji: "🍳",
     slugs: ["horoscopo", "semana", "mes", "transitos", "chino", "maya"],
   },
   {
     label: "Lecturas",
+    cartaLabel: "Postres Adivinatorios",
+    description: "Oráculos, tiradas de cartas y descifrado de símbolos sin anestesia.",
     emoji: "🃏",
+    cartaEmoji: "🧁",
     slugs: ["tarot", "celta", "suenos", "runas", "cristales", "roast"],
   },
   {
     label: "Astrología",
+    cartaLabel: "Platos Fuertes Astrales",
+    description: "Lecturas profundas sobre tu personalidad, destino, vibración y relaciones.",
     emoji: "⭐",
+    cartaEmoji: "🍲",
     slugs: ["carta-natal", "numerologia", "nombre", "mano", "biorritmo", "compatibilidad"],
   },
   {
     label: "Social",
+    cartaLabel: "Acompañamientos",
+    description: "Comparte tu energía con tu círculo o confiésate de manera anónima.",
     emoji: "👥",
+    cartaEmoji: "🍹",
     slugs: ["comunidad", "amigos"],
   },
   {
     label: "Mi espacio",
+    cartaLabel: "Reservas del Alma",
+    description: "Tu bitácora mística de crecimiento, logros y lecturas guardadas.",
     emoji: "🏆",
+    cartaEmoji: "🍷",
     slugs: ["logros", "rachas", "favoritos", "guardados", "historial", "puntos"],
   },
   {
     label: "Cuenta",
+    cartaLabel: "La Cuenta",
+    description: "Tu estatus actual, perfil astral y planes de suscripción.",
     emoji: "👤",
+    cartaEmoji: "💸",
     slugs: ["perfil", "premium"],
   },
 ];
@@ -50,6 +68,7 @@ export function MobileFullMenu({
   onClose: () => void;
 }) {
   const pathname = usePathname();
+  const [viewMode, setViewMode] = useState<"carta" | "grid">("carta");
 
   // Cerrar con tecla Escape
   useEffect(() => {
@@ -91,7 +110,7 @@ export function MobileFullMenu({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 32, stiffness: 340 }}
-            className="fixed bottom-0 left-0 right-0 z-[56] flex max-h-[88dvh] flex-col rounded-t-2xl"
+            className="fixed bottom-0 left-0 right-0 z-[56] flex max-h-[90dvh] flex-col rounded-t-2xl"
             style={{
               background: "linear-gradient(180deg, rgb(14,14,22) 0%, rgb(8,8,16) 100%)",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -104,7 +123,7 @@ export function MobileFullMenu({
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pb-4 pt-1 shrink-0 border-b border-white/07">
+            <div className="flex items-center justify-between px-5 pb-3 pt-1 shrink-0 border-b border-white/07">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-lime-300/70">Navegación</p>
                 <h2 className="text-lg font-black leading-tight">Todo en ZODI</h2>
@@ -118,8 +137,34 @@ export function MobileFullMenu({
               </button>
             </div>
 
+            {/* Selector de Vista (Segment Control) */}
+            <div className="px-5 py-3 shrink-0 flex justify-center border-b border-white/05 bg-black/25">
+              <div className="flex rounded-xl bg-white/03 border border-white/08 p-1 w-full max-w-sm">
+                <button
+                  onClick={() => setViewMode("carta")}
+                  className={`flex-1 rounded-lg py-2 text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                    viewMode === "carta"
+                      ? "bg-lime-300 text-black shadow-[0_0_12px_rgba(184,255,23,0.25)]"
+                      : "text-white/60 hover:text-white"
+                  }`}
+                >
+                  📜 La Carta ZODI
+                </button>
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`flex-1 rounded-lg py-2 text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                    viewMode === "grid"
+                      ? "bg-lime-300 text-black shadow-[0_0_12px_rgba(184,255,23,0.25)]"
+                      : "text-white/60 hover:text-white"
+                  }`}
+                >
+                  🎛️ Vista Rejilla
+                </button>
+              </div>
+            </div>
+
             {/* Oráculo quick-access */}
-            <div className="px-5 pt-4 pb-2 shrink-0">
+            <div className="px-5 pt-3 pb-1 shrink-0">
               <button
                 onClick={() => {
                   onClose();
@@ -150,39 +195,94 @@ export function MobileFullMenu({
                 if (!items.length) return null;
 
                 return (
-                  <div key={cat.label} className="mb-6">
-                    <p className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-white/50">
-                      {cat.emoji} {cat.label}
-                    </p>
-                    <div className="grid grid-cols-3 gap-2.5">
-                      {items.map((section) => {
-                        const active = pathname === `/dashboard/${section.slug}`;
-                        const Icon = section.icon;
-                        return (
-                          <Link
-                            key={section.slug}
-                            href={`/dashboard/${section.slug}`}
-                            onClick={onClose}
-                            className={`group flex flex-col items-center gap-2 rounded-xl border px-2 py-3.5 text-center transition active:scale-95 ${
-                              active
-                                ? "border-lime-300/40 bg-lime-300/10 text-lime-200"
-                                : "border-white/08 bg-white/03 text-white/70 hover:border-white/20 hover:bg-white/08"
-                            }`}
-                          >
-                            <div className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
-                              active
-                                ? "bg-lime-300/20 text-lime-300"
-                                : "bg-black/40 text-white/50 group-hover:text-white/80"
-                            }`}>
-                              <Icon className="h-4 w-4" />
-                            </div>
-                            <span className="text-[11px] font-bold leading-tight line-clamp-2">
-                              {section.title}
-                            </span>
-                          </Link>
-                        );
-                      })}
+                  <div key={cat.label} className="mb-6 mt-4">
+                    <div className="mb-3 px-1">
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-lime-300/80">
+                        {viewMode === "carta" ? `${cat.cartaEmoji} ${cat.cartaLabel}` : `${cat.emoji} ${cat.label}`}
+                      </p>
+                      {viewMode === "carta" && (
+                        <p className="mt-1 text-xs text-white/40 italic font-medium leading-normal">
+                          {cat.description}
+                        </p>
+                      )}
                     </div>
+
+                    {viewMode === "grid" ? (
+                      <div className="grid grid-cols-3 gap-2.5">
+                        {items.map((section) => {
+                          const active = pathname === `/dashboard/${section.slug}`;
+                          const Icon = section.icon;
+                          return (
+                            <Link
+                              key={section.slug}
+                              href={`/dashboard/${section.slug}`}
+                              onClick={onClose}
+                              className={`group flex flex-col items-center gap-2 rounded-xl border px-2 py-3.5 text-center transition active:scale-95 ${
+                                active
+                                  ? "border-lime-300/40 bg-lime-300/10 text-lime-200"
+                                  : "border-white/08 bg-white/03 text-white/70 hover:border-white/20 hover:bg-white/08"
+                              }`}
+                            >
+                              <div className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
+                                active
+                                  ? "bg-lime-300/20 text-lime-300"
+                                  : "bg-black/40 text-white/50 group-hover:text-white/80"
+                              }`}>
+                                <Icon className="h-4 w-4" />
+                              </div>
+                              <span className="text-[11px] font-bold leading-tight line-clamp-2">
+                                {section.title}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3.5 border border-white/05 bg-black/20 p-4 rounded-xl">
+                        {items.map((section) => {
+                          const active = pathname === `/dashboard/${section.slug}`;
+                          const Icon = section.icon;
+                          return (
+                            <Link
+                              key={section.slug}
+                              href={`/dashboard/${section.slug}`}
+                              onClick={onClose}
+                              className="group flex items-start gap-3.5 py-0.5 text-left transition active:opacity-80"
+                            >
+                              {/* Icon box */}
+                              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition ${
+                                active
+                                  ? "border-lime-300/40 bg-lime-300/10 text-lime-300"
+                                  : "border-white/08 bg-black/45 text-white/40 group-hover:border-lime-300/30 group-hover:text-lime-200"
+                              }`}>
+                                <Icon className="h-4 w-4" />
+                              </div>
+                              
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-baseline gap-1">
+                                  <span className={`text-sm font-black transition ${
+                                    active ? "text-lime-300" : "text-white group-hover:text-lime-200"
+                                  }`}>
+                                    {section.title}
+                                  </span>
+                                  {/* Dotted separator */}
+                                  <span className="flex-1 border-b border-dashed border-white/10 mx-2" />
+                                  <span className={`text-[10px] font-black uppercase tracking-wider shrink-0 transition ${
+                                    active ? "text-lime-300" : "text-lime-200/50"
+                                  }`}>
+                                    {section.kicker}
+                                  </span>
+                                </div>
+                                <p className="mt-1 text-xs text-white/45 leading-relaxed font-medium">
+                                  {section.description}
+                                </p>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })}
