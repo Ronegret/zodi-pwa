@@ -1,16 +1,18 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light";
+export type Theme = "dark" | "neon";
 interface ThemeCtx { theme: Theme; toggle: () => void; }
 
 const Ctx = createContext<ThemeCtx>({ theme: "dark", toggle: () => {} });
 
-const THEME_COLOR = { dark: "#060608", light: "#f0ece2" };
+const THEME_COLOR: Record<Theme, string> = {
+  dark: "#060608",
+  neon: "#000000",
+};
 
 function applyTheme(t: Theme) {
   document.documentElement.setAttribute("data-theme", t);
-  // Actualiza el color de la barra del navegador en iOS/Android
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", THEME_COLOR[t]);
 }
@@ -20,14 +22,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("zodi-theme") as Theme | null;
-    const t = saved === "light" ? "light" : "dark";
+    const t = saved === "neon" ? "neon" : "dark";
     setTheme(t);
     applyTheme(t);
   }, []);
 
   const toggle = () => {
     setTheme(prev => {
-      const next = prev === "dark" ? "light" : "dark";
+      const next = prev === "dark" ? "neon" : "dark";
       localStorage.setItem("zodi-theme", next);
       applyTheme(next);
       return next;

@@ -20,7 +20,6 @@ import {
   Home,
   LayoutGrid,
   MessageCircle,
-  Moon,
   MoonStar,
   Orbit,
   Pickaxe,
@@ -30,13 +29,12 @@ import {
   ShieldHalf,
   Sparkles,
   Star,
-  Sun,
   Swords,
   UserRound,
   Users,
   Waves,
   WandSparkles,
-  BookMarked
+  Zap
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { getXpData, getLevel, getLevelTitle, getStreak, getGems } from "@/lib/gamification";
@@ -232,16 +230,16 @@ export function Sidebar() {
         {/* Theme toggle */}
         <button
           onClick={toggle}
-          title={theme === "dark" ? "Modo día" : "Modo noche"}
+          title={theme === "dark" ? "Activar modo NEON" : "Volver al modo oscuro"}
           className="flex items-center gap-2 rounded-lg px-3 py-2 transition hover:bg-white/[0.05] w-full"
         >
           {theme === "dark" ? (
-            <Sun className="h-3.5 w-3.5 text-amber-300/80" />
+            <Zap className="h-3.5 w-3.5 text-yellow-300/80" />
           ) : (
-            <Moon className="h-3.5 w-3.5 text-violet-400/80" />
+            <Sparkles className="h-3.5 w-3.5 text-lime-300/80" />
           )}
           <span className="text-xs font-bold text-white/45">
-            {theme === "dark" ? "Modo día" : "Modo noche"}
+            {theme === "dark" ? "⚡ Modo NEON" : "🌌 Modo Oscuro"}
           </span>
         </button>
 

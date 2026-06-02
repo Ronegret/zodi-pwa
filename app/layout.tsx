@@ -87,7 +87,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* Anti-flash: applies saved theme before React hydrates */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem('zodi-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light')})()`,
+            __html: `(function(){var t=localStorage.getItem('zodi-theme');if(t==='neon')document.documentElement.setAttribute('data-theme','neon')})()`,
           }}
         />
         <ThemeProvider>

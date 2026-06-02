@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Sun, X, WandSparkles } from "lucide-react";
+import { Sparkles, X, WandSparkles, Zap } from "lucide-react";
 import { dashboardSections } from "@/lib/dashboard-sections";
 import { useTheme } from "@/lib/theme";
 
@@ -129,13 +129,14 @@ export function MobileFullMenu({
                 {/* Theme toggle */}
                 <button
                   onClick={toggle}
-                  aria-label={theme === "dark" ? "Activar modo día" : "Activar modo noche"}
+                  aria-label={theme === "dark" ? "Activar modo NEON" : "Volver a modo oscuro"}
                   className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 transition hover:bg-white/10"
+                  title={theme === "dark" ? "⚡ Modo NEON" : "🌌 Modo Oscuro"}
                 >
                   {theme === "dark" ? (
-                    <Sun className="h-4 w-4 text-amber-300/80" />
+                    <Zap className="h-4 w-4 text-yellow-300/80" />
                   ) : (
-                    <Moon className="h-4 w-4 text-violet-400/80" />
+                    <Sparkles className="h-4 w-4 text-lime-300/80" />
                   )}
                 </button>
                 <button
