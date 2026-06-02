@@ -68,27 +68,46 @@ export function ZodiOracle() {
 
     try {
       const token = await getFirebaseToken();
-      // Slice history to the last 4 messages to save tokens
-      const historyToKeep = newMessages.slice(-4);
-      
+      // Keep last 8 messages (4 exchanges) — más contexto de la conversación
+      const historyToKeep = newMessages.slice(-8);
+
+      const od = session.onboardingData;
+      const ap = session.astralProfile;
+
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           messages: historyToKeep,
           userProfile: {
-            sunSign:       session.astralProfile?.sunSign,
-            moonSign:      session.astralProfile?.moonSign,
-            ascendant:     session.astralProfile?.ascendant,
-            displayName:   session.displayName,
-            birthDate:     session.onboardingData?.birthDate,
-            birthCity:     session.onboardingData?.birthCity,
-            birthCountry:  session.onboardingData?.birthCountry,
-            currentCity:   session.onboardingData?.currentCity,
-            currentCountry: session.onboardingData?.currentCountry,
+            // ── Perfil astral
+            sunSign:         ap?.sunSign,
+            moonSign:        ap?.moonSign,
+            ascendant:       ap?.ascendant,
+            chineseZodiac:   ap?.chineseZodiac,
+            mayanSign:       ap?.mayanSign,
+            lifePathNumber:  ap?.lifePathNumber,
+            natalChartBase:  ap?.natalChartBase,
+            // ── Identidad
+            displayName:     session.displayName,
+            birthDate:       od?.birthDate,
+            birthCity:       od?.birthCity,
+            birthCountry:    od?.birthCountry,
+            currentCity:     od?.currentCity,
+            currentCountry:  od?.currentCountry,
+            // ── Preferencias
+            readingTone:     od?.readingTone,
+            favoriteTopics:  od?.favoriteTopics,
+            // ── Contexto vital (clave para personalización real)
+            relationshipStatus: od?.relationshipStatus,
+            partnerName:     od?.partnerName,
+            partnerBirthDate: od?.partnerBirthDate,
+            hasKids:         od?.hasKids,
+            kidsCount:       od?.kidsCount,
+            personalBio:     od?.personalBio,
           }
         })
       });

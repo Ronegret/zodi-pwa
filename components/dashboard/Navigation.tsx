@@ -256,21 +256,16 @@ export function Sidebar() {
 export function BottomNav() {
   const pathname = usePathname();
   const [streak, setStreak]     = useState(0);
-  const [gems, setGems]         = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  // Track which button was just pressed for the ring burst effect
   const [pressed, setPressed]   = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      setStreak(getStreak().count);
-      setGems(getGems().total);
-    } catch { /* ignore */ }
+    try { setStreak(getStreak().count); } catch { /* ignore */ }
   }, []);
 
   function handlePress(key: string) {
     setPressed(key);
-    setTimeout(() => setPressed(null), 500);
+    setTimeout(() => setPressed(null), 450);
   }
 
   return (
@@ -284,165 +279,162 @@ export function BottomNav() {
           background: "var(--nav-bg)",
           borderColor: "var(--border)",
           transform: "translateZ(0)",
-          willChange: "auto",
         }}
       >
-        <div className="grid grid-cols-5 items-center justify-between px-1 sm:px-2" style={{ height: "64px" }}>
+        <div className="grid grid-cols-5" style={{ height: "64px" }}>
           {bottomNav.map((item) => {
             const isOracle = item.href === "/dashboard/oraculo";
             const isMenu   = item.href === "#menu";
             const active   = !isMenu && !isOracle &&
               (pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href)));
             const isPressed = pressed === item.href || (isMenu && pressed === "#menu");
+            const isActive  = active || (isMenu && menuOpen);
 
-            // ── Oráculo — botón especial con glow ─────────────────────────
+            // ── Oráculo — botón especial flotante ─────────────────────────
             if (isOracle) {
               return (
-                <motion.button
+                <button
                   key="oracle"
                   aria-label="Oráculo"
-                  whileTap={{ scale: 0.80 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
                   onClick={() => {
                     handlePress(item.href);
                     window.dispatchEvent(new CustomEvent("open-oracle"));
                   }}
-                  className="relative flex flex-col items-center justify-center gap-0.5 text-white/50"
+                  className="relative flex h-full w-full flex-col items-center justify-center gap-0.5 text-white/50 active:scale-90 transition-transform"
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
-                  <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-white/08 border border-white/12">
-                    <item.icon className="h-5 w-5" />
-                    <span className="oracle-pulse-ring absolute inset-0 rounded-xl border border-lime-300/30 pointer-events-none" />
-                    {/* Neon ring burst on press */}
-                    <AnimatePresence>
-                      {isPressed && (
-                        <motion.span
-                          key="burst"
-                          className="absolute inset-0 rounded-xl border-2 border-lime-300 pointer-events-none"
-                          initial={{ scale: 1, opacity: 0.9 }}
-                          animate={{ scale: 1.9, opacity: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.45, ease: "easeOut" }}
-                        />
-                      )}
-                    </AnimatePresence>
-                  </div>
-                  <span className="text-[10px] font-semibold leading-tight mt-0.5">{item.label}</span>
-                </motion.button>
-              );
-            }
-
-            // ── Menú — abre el bottom sheet completo ──────────────────────
-            if (isMenu) {
-              return (
-                <motion.button
-                  key="menu"
-                  aria-label="Menú completo"
-                  whileTap={{ scale: 0.80 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                  onClick={() => {
-                    handlePress("#menu");
-                    setMenuOpen(true);
-                  }}
-                  className={`relative flex flex-col items-center justify-center gap-0.5 transition-colors ${
-                    menuOpen ? "text-lime-300" : "text-white/45"
-                  }`}
-                >
-                  {/* Active pill background */}
-                  <AnimatePresence>
-                    {menuOpen && (
-                      <motion.span
-                        key="pill"
-                        layoutId="tab-pill"
-                        className="absolute inset-x-1 inset-y-0.5 rounded-2xl"
-                        style={{ background: "rgba(184,255,23,0.12)", border: "1px solid rgba(184,255,23,0.20)" }}
-                        initial={{ opacity: 0, scale: 0.7 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.7 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                  </AnimatePresence>
-                  {/* Neon ring burst on press */}
+                  {/* Anillo neon que escala al pulsar */}
                   <AnimatePresence>
                     {isPressed && (
                       <motion.span
-                        key="burst"
-                        className="absolute h-10 w-10 rounded-full border-2 border-lime-300/70 pointer-events-none"
-                        initial={{ scale: 0.6, opacity: 0.9 }}
-                        animate={{ scale: 2.0, opacity: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        key="ring"
+                        className="pointer-events-none absolute rounded-full border-2 border-lime-300"
+                        style={{ width: 44, height: 44, top: "50%", left: "50%", x: "-50%", y: "-62%" }}
+                        initial={{ scale: 1, opacity: 0.85 }}
+                        animate={{ scale: 2.6, opacity: 0 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
                       />
                     )}
                   </AnimatePresence>
-                  <div className={`relative flex h-6 w-6 items-center justify-center transition-all ${menuOpen ? "scale-110" : ""}`}>
+                  <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/08 border border-white/15">
+                    <item.icon className="h-5 w-5" />
+                    <span className="oracle-pulse-ring absolute inset-0 rounded-full border border-lime-300/30 pointer-events-none" />
+                  </div>
+                  <span className="text-[10px] font-semibold leading-none">{item.label}</span>
+                </button>
+              );
+            }
+
+            // ── Menú ──────────────────────────────────────────────────────
+            if (isMenu) {
+              return (
+                <button
+                  key="menu"
+                  aria-label="Menú completo"
+                  onClick={() => { handlePress("#menu"); setMenuOpen(true); }}
+                  className={`relative flex h-full w-full flex-col items-center justify-center gap-0.5 active:scale-90 transition-transform ${
+                    menuOpen ? "text-lime-300" : "text-white/45"
+                  }`}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                >
+                  {/* Círculo activo */}
+                  <AnimatePresence>
+                    {menuOpen && (
+                      <motion.span
+                        key="dot"
+                        className="pointer-events-none absolute rounded-full"
+                        style={{ width: 40, height: 40, top: "50%", left: "50%", x: "-50%", y: "-60%",
+                          background: "rgba(184,255,23,0.14)",
+                          boxShadow: "0 0 14px rgba(184,255,23,0.18), 0 0 0 1px rgba(184,255,23,0.22)"
+                        }}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  {/* Ring burst al pulsar */}
+                  <AnimatePresence>
+                    {isPressed && (
+                      <motion.span
+                        key="ring"
+                        className="pointer-events-none absolute rounded-full border-2 border-lime-300/70"
+                        style={{ width: 40, height: 40, top: "50%", left: "50%", x: "-50%", y: "-60%" }}
+                        initial={{ scale: 1, opacity: 0.85 }}
+                        animate={{ scale: 2.6, opacity: 0 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  <div className="relative z-10 flex h-6 w-6 items-center justify-center">
                     <item.icon className="h-5 w-5" />
                   </div>
-                  <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
-                </motion.button>
+                  <span className="relative z-10 text-[10px] font-semibold leading-none">{item.label}</span>
+                </button>
               );
             }
 
             // ── Tab normal ─────────────────────────────────────────────────
             return (
-              <motion.div
+              <Link
                 key={item.href}
-                whileTap={{ scale: 0.80 }}
-                transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                className="relative flex flex-col items-center justify-center"
+                href={item.href}
+                aria-label={item.label}
+                onClick={() => handlePress(item.href)}
+                className={`relative flex h-full w-full flex-col items-center justify-center gap-0.5 active:scale-90 transition-transform ${
+                  active ? "text-lime-300" : "text-white/45"
+                }`}
+                style={{ WebkitTapHighlightColor: "transparent" }}
               >
-                <Link
-                  href={item.href}
-                  aria-label={item.label}
-                  onClick={() => handlePress(item.href)}
-                  className={`relative flex flex-col items-center justify-center gap-0.5 w-full transition-colors ${
-                    active ? "text-lime-300" : "text-white/45"
-                  }`}
-                >
-                  {/* Active pill background */}
-                  <AnimatePresence>
-                    {active && (
-                      <motion.span
-                        key="pill"
-                        layoutId="tab-pill"
-                        className="absolute inset-x-1 inset-y-0.5 rounded-2xl"
-                        style={{ background: "rgba(184,255,23,0.12)", border: "1px solid rgba(184,255,23,0.20)" }}
-                        initial={{ opacity: 0, scale: 0.7 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.7 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                  </AnimatePresence>
-                  {/* Neon ring burst on press */}
-                  <AnimatePresence>
-                    {isPressed && (
-                      <motion.span
-                        key="burst"
-                        className="absolute h-10 w-10 rounded-full border-2 border-lime-300/70 pointer-events-none"
-                        initial={{ scale: 0.5, opacity: 0.9 }}
-                        animate={{ scale: 2.2, opacity: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
-                      />
-                    )}
-                  </AnimatePresence>
-                  <div className={`relative flex h-6 w-6 items-center justify-center transition-all ${active ? "scale-110" : ""}`}>
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  {/* Badges */}
-                  {item.href === "/dashboard/horoscopo" && (
-                    <span className="absolute right-2 top-1 h-1.5 w-1.5 rounded-full bg-lime-300 shadow-[0_0_4px_rgba(184,255,23,0.8)]" />
+                {/* Círculo activo — se desliza entre tabs con layoutId */}
+                <AnimatePresence>
+                  {active && (
+                    <motion.span
+                      key="dot"
+                      layoutId="nav-active-dot"
+                      className="pointer-events-none absolute rounded-full"
+                      style={{
+                        width: 40, height: 40,
+                        top: "50%", left: "50%", x: "-50%", y: "-60%",
+                        background: "rgba(184,255,23,0.14)",
+                        boxShadow: "0 0 14px rgba(184,255,23,0.18), 0 0 0 1px rgba(184,255,23,0.22)"
+                      }}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                    />
                   )}
-                  {item.href === "/dashboard/perfil" && streak >= 3 && (
-                    <span className="absolute right-1 top-1 flex items-center gap-0.5 rounded-full bg-orange-500/80 px-1.5 py-0.5">
-                      <Flame className="h-2 w-2 text-white" />
-                      <span className="text-[8px] font-black text-white">{streak}</span>
-                    </span>
+                </AnimatePresence>
+                {/* Ring burst al pulsar */}
+                <AnimatePresence>
+                  {isPressed && (
+                    <motion.span
+                      key="ring"
+                      className="pointer-events-none absolute rounded-full border-2 border-lime-300/70"
+                      style={{ width: 40, height: 40, top: "50%", left: "50%", x: "-50%", y: "-60%" }}
+                      initial={{ scale: 1, opacity: 0.85 }}
+                      animate={{ scale: 2.6, opacity: 0 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    />
                   )}
-                  <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
-                </Link>
-              </motion.div>
+                </AnimatePresence>
+                <div className="relative z-10 flex h-6 w-6 items-center justify-center">
+                  <item.icon className={`h-5 w-5 transition-transform ${active ? "scale-110" : ""}`} />
+                </div>
+                {/* Badges */}
+                {item.href === "/dashboard/horoscopo" && !active && (
+                  <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-lime-300 shadow-[0_0_4px_rgba(184,255,23,0.8)]" />
+                )}
+                {item.href === "/dashboard/perfil" && streak >= 3 && (
+                  <span className="absolute right-1 top-1.5 flex items-center gap-0.5 rounded-full bg-orange-500/80 px-1.5 py-0.5">
+                    <Flame className="h-2 w-2 text-white" />
+                    <span className="text-[8px] font-black text-white">{streak}</span>
+                  </span>
+                )}
+                <span className="relative z-10 text-[10px] font-semibold leading-none">{item.label}</span>
+              </Link>
             );
           })}
         </div>

@@ -12,40 +12,111 @@ const ChatSchema = z.object({
     text: z.string().min(1).max(2000)
   })).min(1).max(50),
   userProfile: z.object({
-    sunSign:       z.string().optional(),
-    moonSign:      z.string().optional(),
-    ascendant:     z.string().optional(),
-    displayName:   z.string().optional(),
-    birthDate:     z.string().optional(),
-    birthCity:     z.string().optional(),
-    birthCountry:  z.string().optional(),
-    currentCity:   z.string().optional(),
-    currentCountry: z.string().optional(),
+    // Perfil astral
+    sunSign:          z.string().optional(),
+    moonSign:         z.string().optional(),
+    ascendant:        z.string().optional(),
+    chineseZodiac:    z.string().optional(),
+    mayanSign:        z.string().optional(),
+    lifePathNumber:   z.number().optional(),
+    natalChartBase:   z.string().optional(),
+    // Identidad
+    displayName:      z.string().optional(),
+    birthDate:        z.string().optional(),
+    birthCity:        z.string().optional(),
+    birthCountry:     z.string().optional(),
+    currentCity:      z.string().optional(),
+    currentCountry:   z.string().optional(),
+    // Preferencias
+    readingTone:      z.string().optional(),
+    favoriteTopics:   z.array(z.string()).optional(),
+    // Contexto vital
+    relationshipStatus: z.string().optional(),
+    partnerName:      z.string().optional(),
+    partnerBirthDate: z.string().optional(),
+    hasKids:          z.boolean().optional(),
+    kidsCount:        z.number().optional(),
+    personalBio:      z.string().optional(),
   }).optional()
 });
 
+// ── Detectar tema recurrente en el historial ─────────────────────────────────
+function detectRecurringTheme(messages: { role: string; text: string }[]): string | null {
+  const userMsgs = messages.filter(m => m.role === "user").map(m => m.text.toLowerCase());
+  if (userMsgs.length < 3) return null;
+
+  const themes = [
+    { key: "amor", words: ["amor", "pareja", "ex", "relación", "quiere", "le gusta", "me dejó", "chico", "chica", "novio", "novia"] },
+    { key: "trabajo", words: ["trabajo", "jefe", "empresa", "dinero", "sueldo", "proyecto", "laboral", "empleo", "carrera"] },
+    { key: "familia", words: ["familia", "mamá", "papá", "madre", "padre", "hermano", "hermana", "hijos", "padres"] },
+    { key: "salud", words: ["salud", "ansiedad", "cansancio", "agotado", "enfermo", "depresión", "estrés"] },
+    { key: "decisión", words: ["decisión", "elegir", "cambio", "moverme", "quedarme", "no sé qué hacer", "debo"] },
+  ];
+
+  for (const theme of themes) {
+    const hits = userMsgs.filter(m => theme.words.some(w => m.includes(w)));
+    if (hits.length >= 2) return theme.key;
+  }
+  return null;
+}
+
 // ── Construir system prompt personalizado ────────────────────────────────────
-function buildSystemPrompt(profile?: z.infer<typeof ChatSchema>["userProfile"]) {
-  const signs = [
-    profile?.sunSign   ? `Signo solar: ${profile.sunSign}`    : null,
-    profile?.moonSign  ? `Luna en: ${profile.moonSign}`       : null,
-    profile?.ascendant ? `Ascendente: ${profile.ascendant}`   : null,
+function buildSystemPrompt(
+  profile?: z.infer<typeof ChatSchema>["userProfile"],
+  messages?: { role: string; text: string }[]
+) {
+  // Perfil astral completo
+  const astralParts = [
+    profile?.sunSign        ? `Signo solar: ${profile.sunSign}`           : null,
+    profile?.moonSign       ? `Luna en: ${profile.moonSign}`              : null,
+    profile?.ascendant      ? `Ascendente: ${profile.ascendant}`          : null,
+    profile?.chineseZodiac  ? `Horóscopo chino: ${profile.chineseZodiac}` : null,
+    profile?.mayanSign      ? `Sello maya: ${profile.mayanSign}`          : null,
+    profile?.lifePathNumber ? `Camino de vida: ${profile.lifePathNumber}` : null,
   ].filter(Boolean).join(" | ");
 
+  // Tema recurrente detectado de la conversación
+  const recurringTheme = messages ? detectRecurringTheme(messages) : null;
+
+  // Tono de lectura
+  const toneInstructions: Record<string, string> = {
+    suave:      "Tono SUAVE — empático, amable, sin golpes bajos. Cuida mucho cómo dice las verdades difíciles.",
+    directo:    "Tono DIRECTO — claro, sin rodeos, pero no cruel. La verdad sin azúcar pero con respeto.",
+    brutal:     "Tono BRUTAL — máxima honestidad. Sin filtros, sin suavizar. El usuario lo pidió así — dale exactamente eso.",
+    sarcastico: "Tono SARCÁSTICO — humor ácido sin freno, ironía afilada. El usuario quiere que ZODI se ría con él de todo.",
+  };
+  const toneNote = profile?.readingTone
+    ? toneInstructions[profile.readingTone] ?? toneInstructions.directo
+    : toneInstructions.directo;
+
+  // Temas favoritos
+  const topicsNote = profile?.favoriteTopics?.length
+    ? `Temas que más consulta: ${profile.favoriteTopics.join(", ")}. Si su pregunta es ambigua, guíate por estos temas.`
+    : null;
+
   const personalization = buildPersonalizationBlock({
-    displayName:    profile?.displayName,
-    birthDate:      profile?.birthDate,
-    birthCity:      profile?.birthCity,
-    birthCountry:   profile?.birthCountry,
-    currentCity:    profile?.currentCity,
-    currentCountry: profile?.currentCountry,
+    displayName:        profile?.displayName,
+    birthDate:          profile?.birthDate,
+    birthCity:          profile?.birthCity,
+    birthCountry:       profile?.birthCountry,
+    currentCity:        profile?.currentCity,
+    currentCountry:     profile?.currentCountry,
+    relationshipStatus: profile?.relationshipStatus,
+    partnerName:        profile?.partnerName,
+    partnerBirthDate:   profile?.partnerBirthDate,
+    hasKids:            profile?.hasKids,
+    kidsCount:          profile?.kidsCount,
+    personalBio:        profile?.personalBio,
+    recurringTheme:     recurringTheme ?? undefined,
   });
 
   return [
     zodiChatPrompt,
-    signs ? `PERFIL ASTRAL: ${signs}` : "Perfil astral desconocido — pídelo si es relevante.",
+    astralParts ? `PERFIL ASTRAL: ${astralParts}` : "Perfil astral sin completar — pide los datos que necesites.",
+    toneNote,
+    topicsNote,
     personalization
-  ].filter(Boolean).join("\n");
+  ].filter(Boolean).join("\n\n");
 }
 
 // ── Llamada a Claude (Anthropic) ─────────────────────────────────────────────
@@ -194,7 +265,7 @@ export async function POST(req: Request) {
     }
 
     const { messages, userProfile } = parsed.data;
-    const system = buildSystemPrompt(userProfile);
+    const system = buildSystemPrompt(userProfile, messages as any);
 
     const replyText = await generateZodiReply(system, messages as any);
     return NextResponse.json({ text: replyText });
