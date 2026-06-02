@@ -371,23 +371,39 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    // Usamos redirect para TODOS los navegadores.
-    // Chrome 80+ bloquea la comunicación cross-origin del popup (third-party cookies),
-    // causando auth/internal-error aunque los dominios estén autorizados en Firebase.
-    // Con redirect el resultado viaja por URL y no hay intercambio cross-origin de cookies.
     try {
-      sessionStorage.setItem("zodi.google_redirect_pending", "1");
-      await signInWithRedirect(auth, googleProvider);
-      // La página navega — lo que sigue no se ejecuta
+      const { signInWithPopup, getAdditionalUserInfo } = await import("firebase/auth");
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user && !authHandledRef.current) {
+        authHandledRef.current = true;
+        setGoogleLoading(false);
+        const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
+        await applyFirebaseUser(result.user, isNew);
+      }
     } catch (e: any) {
-      sessionStorage.removeItem("zodi.google_redirect_pending");
-      const code = (e as { code?: string }).code ?? "";
-      setMessage(
-        code === "auth/unauthorized-domain"
-          ? "⚠️ Dominio no autorizado en Firebase Console → Authentication → Authorized Domains."
-          : `Error Google (${code || "desconocido"}). Intenta con email y contraseña.`
-      );
-      setMsgType("error");
+      const code = e?.code ?? "";
+      console.error("[ZODI] Error Google Sign-In:", e);
+      if (code === "auth/popup-blocked") {
+        // Fallback a redirect si el navegador bloquea popups (muy común en móviles)
+        try {
+          sessionStorage.setItem("zodi.google_redirect_pending", "1");
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectErr: any) {
+          const redirectCode = redirectErr?.code ?? "";
+          setMessage(`Google no pudo completar el redireccionamiento (${redirectCode}).`);
+          setMsgType("error");
+        }
+      } else if (code === "auth/unauthorized-domain") {
+        setMessage("⚠️ Este dominio no está autorizado en Firebase Console → Authentication → Authorized Domains.");
+        setMsgType("error");
+      } else if (code === "auth/operation-not-allowed") {
+        setMessage("⚠️ Google Sign-In no está activado en Firebase Console → Authentication → Sign-in method.");
+        setMsgType("error");
+      } else if (code && code !== "auth/popup-closed-by-user") {
+        setMessage(`Google no pudo completar el inicio de sesión (${code}). Intenta de nuevo o usa email.`);
+        setMsgType("error");
+      }
       setGoogleLoading(false);
     }
   }
