@@ -4,10 +4,13 @@ import type { ReadingKind, UserProfile } from "@/types/zodi";
 // "anthropic" se acepta como alias de "claude" (nombre de la empresa vs nombre del proveedor)
 export type AIProvider = "openai" | "claude" | "anthropic" | "gemini" | "mock" | "auto";
 
-// Lecturas largas que necesitan más tokens — Haiku genera ~200 tok/s, estas caben en 7s
+// Haiku 4.5 genera ~250 tok/s en Vercel → cabe en el límite de 10s del plan Hobby
+// Sonnet 4.6 genera ~80-100 tok/s → siempre supera el límite con prompts grandes
+const FAST_MODEL = "claude-haiku-4-5-20251001";
+
 const EXTENDED_KINDS: ReadingKind[] = ["numerology", "natal-chart", "name-reading", "celtic-tarot"];
-const EXTENDED_MAX_TOKENS = 1500;
-const DEFAULT_MAX_TOKENS  = 800;
+const EXTENDED_MAX_TOKENS = 1100; // Haiku: ~4.5s a 250 tok/s
+const DEFAULT_MAX_TOKENS  = 650;  // Haiku: ~2.6s → seguro con cold start
 
 export type GenerateReadingParams = {
   provider?: AIProvider;
@@ -112,7 +115,7 @@ async function callClaude(system: string, user: string, maxTokens = DEFAULT_MAX_
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: process.env.CLAUDE_MODEL || "claude-haiku-4-5-20251001",
+        model: FAST_MODEL,
         max_tokens: maxTokens,
         system,
         messages: [{ role: "user", content: user }],
@@ -164,7 +167,7 @@ async function callOpenAI(system: string, user: string, maxTokens = DEFAULT_MAX_
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
-  const timeoutMs = maxTokens > 1000 ? 9000 : 7000;
+  const timeoutMs = maxTokens > 1000 ? 8500 : 6500;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -173,7 +176,7 @@ async function callOpenAI(system: string, user: string, maxTokens = DEFAULT_MAX_
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+        model: "gpt-4o-mini",
         temperature: 0.85,
         max_tokens: maxTokens,
         messages: [
