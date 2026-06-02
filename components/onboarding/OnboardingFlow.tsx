@@ -302,7 +302,7 @@ export function OnboardingFlow() {
                     <label className="block cursor-text rounded-xl border border-white/08 bg-black/35 p-3.5 transition focus-within:border-lime-300/40">
                       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/40">Usuario (@)</span>
                       <div className="flex items-center gap-2">
-                        <input className="flex-1 bg-transparent text-white outline-none placeholder:text-white/25"
+                        <input className="flex-1 bg-transparent text-base sm:text-sm text-white outline-none placeholder:text-white/25"
                           value={data.username} placeholder="@zodiserpiente"
                           onChange={e => update("username", e.target.value)} autoComplete="off" />
                         {usernameStatus === "checking"  && <Loader2 className="h-4 w-4 animate-spin text-white/40 shrink-0" />}
@@ -330,11 +330,11 @@ export function OnboardingFlow() {
                         <UserCircle className="h-full w-full p-2 text-white/30" />
                       )}
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-white/70 group-hover:text-lime-200 transition">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-white/70 group-hover:text-lime-200 transition truncate">
                         {data.avatar.startsWith("data:") ? "Cambiar foto" : "Subir foto"} <span className="text-white/35 font-normal text-xs">(opcional)</span>
                       </p>
-                      <p className="text-[11px] text-white/35">Si no subes, usamos un avatar ZODI por defecto</p>
+                      <p className="text-[11px] text-white/35 leading-tight text-white/50">Si no subes, usamos un avatar ZODI por defecto</p>
                     </div>
                     <ImagePlus className="ml-auto h-5 w-5 text-white/30 group-hover:text-lime-300 transition shrink-0" />
                     <input className="hidden" type="file" accept="image/*" onChange={e => uploadAvatar(e.target.files?.[0])} />
@@ -410,7 +410,7 @@ export function OnboardingFlow() {
 
             {/* ─── PASO 2: Reveal astral ──────────────────────────────────────── */}
             {step === 2 && (
-              <div className="relative flex min-h-[60dvh] flex-col overflow-hidden rounded-2xl">
+              <div className="relative flex min-h-[60dvh] flex-col overflow-y-auto no-scrollbar max-h-[80dvh] sm:max-h-[75dvh] rounded-2xl">
                 {/* Imagen de fondo del signo */}
                 <div className="absolute inset-0">
                   <Image src={signMeta.img} alt={profile.sunSign} fill
@@ -427,7 +427,7 @@ export function OnboardingFlow() {
                     <div className="mt-3 flex items-center gap-3">
                       <span className="text-5xl sm:text-6xl">{signMeta.emoji}</span>
                       <div>
-                        <h1 className="text-5xl font-black leading-none sm:text-7xl glitch" style={{ fontFamily:"var(--font-display)" }}>
+                        <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-7xl font-black leading-none glitch" style={{ fontFamily:"var(--font-display)" }}>
                           {profile.sunSign}
                         </h1>
                         <p className="mt-1 text-sm text-white/60">{signMeta.element} · Camino {profile.lifePathNumber}</p>
@@ -443,10 +443,10 @@ export function OnboardingFlow() {
                       ].map(([label, value]) => (
                         <motion.div key={label as string}
                           initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.3, duration:0.4 }}
-                          className="rounded-xl border border-white/10 bg-black/50 p-3 backdrop-blur-sm text-center"
+                          className="rounded-xl border border-white/10 bg-black/50 p-1.5 xs:p-2.5 sm:p-3 backdrop-blur-sm text-center"
                         >
-                          <p className="text-[10px] text-white/45">{label}</p>
-                          <p className="mt-0.5 text-sm font-black text-lime-100">{value}</p>
+                          <p className="text-[9px] xs:text-[10px] sm:text-xs text-white/45 truncate">{label}</p>
+                          <p className="mt-0.5 text-[10px] xs:text-xs sm:text-sm font-black text-lime-100 truncate" title={value}>{value}</p>
                         </motion.div>
                       ))}
                     </div>
@@ -468,11 +468,11 @@ export function OnboardingFlow() {
                           <Image src={data.avatar} alt="Avatar" fill className="object-cover" />
                         )}
                       </div>
-                      <div>
-                        <p className="font-black text-lime-100">{data.displayName}</p>
-                        {data.username && <p className="text-xs text-lime-200/50">@{data.username}</p>}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-black text-lime-100 truncate">{data.displayName}</p>
+                        {data.username && <p className="text-xs text-lime-200/50 truncate">@{data.username}</p>}
                       </div>
-                      <div className="ml-auto flex items-center gap-1.5 rounded-full border border-lime-300/20 bg-lime-300/10 px-2.5 py-1">
+                      <div className="ml-auto flex items-center gap-1.5 rounded-full border border-lime-300/20 bg-lime-300/10 px-2.5 py-1 shrink-0">
                         <Gem className="h-3 w-3 text-lime-300" />
                         <span className="text-xs font-black text-lime-200">+300 gemas</span>
                       </div>
@@ -534,7 +534,7 @@ function Input({ label, value, onChange, type = "text", placeholder }: {
     <label className="block cursor-text rounded-xl border border-white/08 bg-black/35 p-3.5 transition focus-within:border-lime-300/40">
       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/40">{label}</span>
       <input
-        className="h-6 w-full bg-transparent text-sm text-white outline-none placeholder:text-white/25 [color-scheme:dark]"
+        className="h-6 w-full bg-transparent text-base sm:text-sm text-white outline-none placeholder:text-white/25 [color-scheme:dark]"
         type={type} value={value} placeholder={placeholder}
         onChange={e => onChange(e.target.value)}
       />
@@ -600,7 +600,7 @@ function SearchSelect({ label, value, onChange, options, placeholder, icon: Icon
         </span>
         <div className="flex items-center gap-2">
           <input
-            className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/25"
+            className="flex-1 bg-transparent text-base sm:text-sm text-white outline-none placeholder:text-white/25"
             value={query}
             placeholder={placeholder ?? "Buscar..."}
             autoComplete="off"
