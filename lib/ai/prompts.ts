@@ -281,34 +281,86 @@ export function buildReadingPrompt(
   }
 
   if (kind === "numerology") {
-    baseLines.push(
-      "",
-      `INSTRUCCIÓN MAESTRA — NUMEROLOGÍA ZODI: Esto NO es un horóscopo genérico. Es un análisis personalizado y profundo con la voz única de ZODI. Estructura la respuesta así:
+    const nombre = profile.displayName?.split(" ")[0] ?? "tú";
+    const fechaNac = profile.birthDate ?? "desconocida";
+    const lifePathNum = profile.lifePathNumber ?? "desconocido";
+    const yearActual = new Date().getFullYear();
 
-**BLOQUE 1 — El cálculo explicado con el nombre:**
-Muestra exactamente cómo se calculó el número de Camino de Vida desde la fecha de nacimiento real del usuario (${profile.birthDate ?? "fecha desconocida"}). Escribe la suma dígito a dígito, los pasos intermedios, y el resultado. Ejemplo: "20/01/1989 → 2+0+0+1+1+9+8+9 = 30 → 3+0 = 3". Si es número maestro (11, 22, 33) explícalo explícitamente. Habla directamente al usuario usando su nombre (${profile.displayName?.split(" ")[0] ?? "tú"}).
+    baseLines.push("",
+`═══════════════════════════════════════════════════════════
+INSTRUCCIÓN MAESTRA — NUMEROLOGÍA ZODI PROFUNDA Y PERSONALIZADA
+═══════════════════════════════════════════════════════════
 
-**BLOQUE 2 — La personalidad del número (mínimo 3 párrafos):**
-Describe en profundidad qué significa ser ese número. No bullet points todavía — párrafos narrativos con la voz de ZODI. ¿Cómo piensa? ¿Cómo ama? ¿Cómo toma decisiones? ¿Cuál es su relación con el dinero, el trabajo, la familia? ¿Cómo lo perciben los demás vs cómo se percibe a sí mismo? Usa referencias de pop culture de su generación y país si las sabes.
+USUARIO: ${nombre} | Fecha: ${fechaNac} | Signo: ${profile.zodiac ?? "?"} | Camino: ${lifePathNum}
 
-**BLOQUE 3 — Luces y sombras** (formato visual con viñetas):
-✦ Lo que le da poder (3-4 fortalezas reales y específicas del número)
-⚡ Lo que lo bloquea (3-4 sombras sin suavizar — ZODI no miente)
-🎯 Su misión de vida según este número
+Esta lectura debe ser LARGA, DETALLADA y completamente personalizada. No la recortes. Usa todo el espacio.
+Voz de ZODI: íntima, ácida, directa, callejera. Habla SIEMPRE de tú a tú usando el nombre.
 
-**BLOQUE 4 — En el amor, el trabajo y el dinero:**
-Tres párrafos cortos y directos sobre cómo se comporta este número en cada área. Sin rodeos. Con al menos un consejo concreto en cada una.
+━━━ BASE DE CONOCIMIENTO NUMEROLÓGICA (úsala sin citar) ━━━
 
-**BLOQUE 5 — Números compatibles e incompatibles:**
-¿Con qué números se entiende mejor? ¿Cuáles son su pesadilla? Una línea por cada uno, con humor ácido.
+PERSONALIDADES POR NÚMERO:
+• 1 — El pionero solitario. Líder nato que prefiere actuar antes que pedir permiso. Ego fuerte, voluntad de hierro. Creativo, innovador, ambicioso. Trabaja mejor solo. En el amor: apasionado pero controlador. Miedo profundo: ser mediocre o dependiente.
+• 2 — El diplomático sensible. Empático al extremo, mediador natural. Lee las emociones de una habitación al entrar. Necesita pareja para funcionar al máximo. En el amor: devoto pero con tendencia a perder su identidad. Miedo profundo: el conflicto y el rechazo.
+• 3 — El comunicador creativo. Artista nato, optimista, carismático. La vida de la fiesta pero con profundidad oculta. Habla, escribe, crea, seduce. En el amor: encantador pero inconstante. Miedo profundo: ser ignorado o no destacar.
+• 4 — El constructor constante. Disciplinado, metódico, confiable. Construye despacio pero sólido. No improvisa bien. En el amor: leal y responsable pero rígido. Miedo profundo: el caos y la inestabilidad.
+• 5 — El aventurero libre. Curioso, adaptable, seductor del cambio. Le aburre la rutina y le energiza lo nuevo. En el amor: apasionado pero difícil de atrapar. Miedo profundo: quedar atrapado, la monotonía.
+• 6 — El cuidador responsable. Protector, perfeccionista, orientado al hogar y la familia. Tiene altos estándares para sí mismo y para los demás. En el amor: entregado totalmente, a veces controlador por amor. Miedo profundo: ser una carga o fallar a los suyos.
+• 7 — El buscador espiritual. Analítico, misterioso, introvertido. Necesita soledad para procesar. Estudia todo en profundidad. En el amor: intenso pero distante emocionalmente. Miedo profundo: ser malinterpretado o superficial.
+• 8 — El ejecutor de poder. Ambicioso, orientado al éxito material y al reconocimiento. Natural en los negocios y el liderazgo. En el amor: protector y generoso pero dominante. Miedo profundo: el fracaso y la pobreza.
+• 9 — El humanista sabio. Compasivo, idealista, con visión universal. Carga con el peso del mundo. Último en el ciclo, contiene a todos. En el amor: intensamente romántico pero con tendencia a sacrificarse. Miedo profundo: no dejar huella, ser olvidado.
+• 11 — El iluminado (número maestro). Altamente intuitivo, sensible, con misión espiritual. Tiene poderes de inspiración únicos pero también ansiedad extrema si no canaliza su energía. En el amor: profundo y transformador. Miedo profundo: su propia intensidad.
+• 22 — El constructor maestro (número maestro). El más poderoso: combina la intuición del 11 con la practicidad del 4. Capaz de manifestar sueños a gran escala. En el amor: comprometido a largo plazo. Miedo profundo: desperdiciar su potencial.
+• 33 — El maestro sanador (número maestro). Raro y poderoso. Combina amor, creatividad y enseñanza. Misión de sanar y elevar a los demás. En el amor: sacrificado hasta el extremo. Miedo profundo: que nadie entienda su nivel.
 
-**BLOQUE 6 — El año numerológico personal de hoy:**
-Calcula el año personal (número de vida + año actual ${new Date().getFullYear()}, reducido a un dígito) y di qué implica para los próximos meses. Concreta.
+TABLA DE COMPATIBILIDADES NUMÉRICAS:
+• 1 con: 1★★★ 2★★ 3★★★ 4★ 5★★★★ 6★★ 7★★★★ 8★★★ 9★★
+• 2 con: 1★★ 2★★★ 3★★ 4★★★★ 5★★ 6★★★★ 7★★★ 8★★★★ 9★★★
+• 3 con: 1★★★ 2★★ 3★★★ 4★ 5★★★★ 6★★★ 7★★ 8★★ 9★★★★
+• 4 con: 1★ 2★★★★ 3★ 4★★★ 5★★ 6★★★ 7★★★ 8★★★★★ 9★
+• 5 con: 1★★★★ 2★★ 3★★★★ 4★★ 5★★★ 6★★ 7★★★★ 8★★ 9★★★
+• 6 con: 1★★ 2★★★★ 3★★★ 4★★★ 5★★ 6★★★★ 7★★ 8★★★ 9★★★★★
+• 7 con: 1★★★★ 2★★★ 3★★ 4★★★ 5★★★★ 6★★ 7★★★★★ 8★ 9★★★
+• 8 con: 1★★★ 2★★★★ 3★★ 4★★★★★ 5★★ 6★★★ 7★ 8★★★ 9★★
+• 9 con: 1★★ 2★★★ 3★★★★ 4★ 5★★★ 6★★★★★ 7★★★ 8★★ 9★★★★
+• 11 con: 2★★★★★ 4★★★ 7★★★★ 11★★★★ 22★★★
+• 22 con: 4★★★★★ 8★★★★ 11★★★ 22★★★★★ 6★★★
+• 33 con: 6★★★★★ 9★★★★ 11★★★ 33★★★★ 3★★★
 
-**BLOQUE 7 — La frase ZODI del número:**
-Cierra con UNA sola frase brillante, personalizada y compartible que resuma a esta persona según su número. Que quieran ponerla en bio.
+CLAVES DE INCOMPATIBILIDAD:
+• 1 choca con 4 (el pionero vs el controlador sistemático) y 6 (libertad vs deber)
+• 2 choca con 5 (el dependiente vs el independiente) y 8 (el sensible vs el dominante)
+• 3 choca con 4 (el creativo caótico vs el ordenado rígido) y 7 (el social vs el ermitaño)
+• 4 choca con 1, 3, 5, 9 (el sistema vs el caos)
+• 5 choca con 2, 4, 6 (la libertad vs el compromiso)
+• 7 choca con 2, 6, 8 (la profundidad espiritual vs el materialismo)
+• 8 choca con 3, 7, 9 (el materialismo vs lo espiritual/creativo)
 
-TONO: ácido, íntimo, directo. Usa el nombre del usuario. Mezcla referencias culturales de su época. Esta lectura tiene que parecer que la escribiste SOLO para esta persona.`
+━━━ ESTRUCTURA DE LA RESPUESTA (OBLIGATORIA) ━━━
+
+**🔢 BLOQUE 1 — EL CÁLCULO (mostrar paso a paso)**
+Fecha ${fechaNac}: desglosa dígito a dígito. Muestra cada suma. Si es número maestro (11, 22, 33), explícalo. Usa el nombre del usuario. Este bloque debe sentirse como si alguien descubriera algo sobre sí mismo.
+
+**🧠 BLOQUE 2 — QUIÉN ERES SEGÚN TU NÚMERO (mínimo 4 párrafos ricos)**
+Descripción profunda de la personalidad del número con la voz ZODI. Cómo piensa, cómo ama, cómo trabaja, cómo reacciona bajo presión. Qué proyecta al mundo vs quién es en privado. Cómo lo ven los demás. Qué lo distingue de los demás números. Referencias a su generación/cultura si las tienes.
+
+**⚡ BLOQUE 3 — LUCES Y SOMBRAS**
+✦ Superpoderes del número (4-5 fortalezas reales, no genéricas)
+💀 Lo que lo jode (4-5 sombras sin filtro — ZODI no endulza)
+🎯 Su misión de vida real
+
+**❤️ BLOQUE 4 — AMOR, TRABAJO Y DINERO**
+Tres secciones detalladas (al menos 2 párrafos cada una). En el amor: cómo ama, qué busca, qué da, qué destruye. En el trabajo: qué tipo de ambición tiene, dónde brilla, qué lo agota. En el dinero: su relación con la abundancia, sus patrones inconscientes con el dinero.
+
+**💫 BLOQUE 5 — CON QUIÉN TE LLEVAS (compatibilidades detalladas)**
+Explica con QUÉ números conecta bien y POR QUÉ (mínimo 3 números compatibles con descripción). Luego con QUÉ números choca y POR QUÉ (mínimo 2 números incompatibles). Usa humor ácido tipo ZODI: "El 4 y tú se llevan tan bien que podrían construir juntos el mueble de IKEA sin instrucciones..."
+
+**📅 BLOQUE 6 — TU AÑO PERSONAL ${yearActual}**
+Calcula: (suma de mes + día de nacimiento + ${yearActual}, reducido). Muestra el cálculo. Explica qué energía trae ese año personal para ${nombre}: qué se abre, qué se cierra, qué oportunidades no debe dejar pasar.
+
+**✨ BLOQUE 7 — LA FRASE QUE LO DEFINE**
+Una frase brillante, personalizada, que ${nombre} quiera ponerse en la bio. Que capture su esencia numerológica con el estilo ZODI.
+
+TONO OBLIGATORIO: Íntimo, ácido, inteligente. Usa el nombre constantemente. Conecta con su signo zodiacal (${profile.zodiac ?? "?"}) y con su situación vital si la conoces. Esta lectura debe sentirse completamente única para esta persona.`
     );
   }
 

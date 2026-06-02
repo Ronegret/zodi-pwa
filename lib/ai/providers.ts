@@ -4,6 +4,11 @@ import type { ReadingKind, UserProfile } from "@/types/zodi";
 // "anthropic" se acepta como alias de "claude" (nombre de la empresa vs nombre del proveedor)
 export type AIProvider = "openai" | "claude" | "anthropic" | "gemini" | "mock" | "auto";
 
+// Lecturas largas que necesitan más tokens — Haiku genera ~200 tok/s, estas caben en 7s
+const EXTENDED_KINDS: ReadingKind[] = ["numerology", "natal-chart", "name-reading", "celtic-tarot"];
+const EXTENDED_MAX_TOKENS = 1500;
+const DEFAULT_MAX_TOKENS  = 800;
+
 export type GenerateReadingParams = {
   provider?: AIProvider;
   kind: ReadingKind;
@@ -58,10 +63,12 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
     return localFallback(params.kind, params.profile, promptBundle, "mock", "Sin proveedores configurados.");
   }
 
+  const maxTokens = EXTENDED_KINDS.includes(params.kind) ? EXTENDED_MAX_TOKENS : DEFAULT_MAX_TOKENS;
+
   const attempts = available.map((p): Promise<string> => {
-    if (p === "claude" || p === "anthropic") return callClaude(promptBundle.system, promptBundle.user);
-    if (p === "openai") return callOpenAI(promptBundle.system, promptBundle.user);
-    if (p === "gemini") return callGemini(promptBundle.system, promptBundle.user);
+    if (p === "claude" || p === "anthropic") return callClaude(promptBundle.system, promptBundle.user, maxTokens);
+    if (p === "openai") return callOpenAI(promptBundle.system, promptBundle.user, maxTokens);
+    if (p === "gemini") return callGemini(promptBundle.system, promptBundle.user, maxTokens);
     return Promise.reject(new Error(`Provider ${p} no implementado`));
   });
 
@@ -87,12 +94,14 @@ function resolveProvider(provider: AIProvider = "auto"): AIProvider {
   return "mock";
 }
 
-async function callClaude(system: string, user: string): Promise<string> {
+async function callClaude(system: string, user: string, maxTokens = DEFAULT_MAX_TOKENS): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
+  // Más tiempo para lecturas largas
+  const timeoutMs = maxTokens > 1000 ? 9000 : 7000;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 7000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -104,7 +113,7 @@ async function callClaude(system: string, user: string): Promise<string> {
       },
       body: JSON.stringify({
         model: process.env.CLAUDE_MODEL || "claude-haiku-4-5-20251001",
-        max_tokens: 800,
+        max_tokens: maxTokens,
         system,
         messages: [{ role: "user", content: user }],
       }),
@@ -127,21 +136,22 @@ async function callClaude(system: string, user: string): Promise<string> {
   }
 }
 
-async function callGemini(system: string, user: string): Promise<string> {
+async function callGemini(system: string, user: string, maxTokens = DEFAULT_MAX_TOKENS): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
   const { GoogleGenAI } = await import("@google/genai");
   const ai = new GoogleGenAI({ apiKey });
 
+  const timeoutMs = maxTokens > 1000 ? 9000 : 7000;
   const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Gemini timeout")), 7000)
+    setTimeout(() => reject(new Error("Gemini timeout")), timeoutMs)
   );
 
   const geminiPromise = ai.models.generateContent({
     model: "gemini-1.5-flash",
     contents: [{ role: "user", parts: [{ text: user }] }],
-    config: { systemInstruction: system, temperature: 0.85, maxOutputTokens: 800 },
+    config: { systemInstruction: system, temperature: 0.85, maxOutputTokens: maxTokens },
   });
 
   const response = await Promise.race([geminiPromise, timeoutPromise]);
@@ -150,12 +160,13 @@ async function callGemini(system: string, user: string): Promise<string> {
   return text;
 }
 
-async function callOpenAI(system: string, user: string): Promise<string> {
+async function callOpenAI(system: string, user: string, maxTokens = DEFAULT_MAX_TOKENS): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
+  const timeoutMs = maxTokens > 1000 ? 9000 : 7000;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 7000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -164,7 +175,7 @@ async function callOpenAI(system: string, user: string): Promise<string> {
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-4o-mini",
         temperature: 0.85,
-        max_tokens: 800,
+        max_tokens: maxTokens,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
