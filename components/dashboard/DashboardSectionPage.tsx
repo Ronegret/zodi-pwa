@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CommunityHub } from "@/components/dashboard/CommunityHub";
 import { SectionSpecificUI } from "@/components/dashboard/SectionSpecificUI";
+import { AmigosSectionUI } from "@/components/dashboard/AmigosSectionUI";
 import { PremiumUI } from "@/components/dashboard/PremiumUI";
 import { plans } from "@/lib/data";
 import { getDashboardSection, type DashboardSection } from "@/lib/dashboard-sections";
@@ -128,7 +129,7 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
         />
       )}
       {showHero && (
-        <section className="glass-panel neon-border grid overflow-hidden rounded-2xl lg:grid-cols-[0.9fr_1.1fr] shadow-[0_0_40px_rgba(0,0,0,0.6)]">
+        <section className="glass-panel neon-border grid rounded-2xl lg:grid-cols-[0.9fr_1.1fr] shadow-[0_0_40px_rgba(0,0,0,0.6)]" style={{ overflow: "clip" }}>
           <div className="relative min-h-72 sm:min-h-80 lg:min-h-96 bg-black/70">
             <Image
               src={section.image}
@@ -149,7 +150,7 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
               <Icon className="h-6 w-6" />
             </div>
             <p className="mt-6 zodi-kicker">{section.kicker}</p>
-            <h1 className="glitch mt-2 text-3xl font-black leading-tight md:text-5xl lg:text-6xl" style={{ fontFamily: "var(--font-display)" }}>{section.title}</h1>
+            <h1 className="glitch mt-2 text-3xl font-black md:text-5xl lg:text-6xl" style={{ fontFamily: "var(--font-display)", lineHeight: 1.1, paddingBottom: "0.15em" }}>{section.title}</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">{section.description}</p>
             <div className="mt-6 flex flex-wrap gap-2">
               {section.chips.map((chip) => (
@@ -170,6 +171,8 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
       {/* Section-specific interactive UI */}
       {section.slug === "comunidad" ? (
         <CommunityHub />
+      ) : section.slug === "amigos" ? (
+        <AmigosSectionUI />
       ) : (
         <SectionSpecificUI section={section} />
       )}

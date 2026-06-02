@@ -328,13 +328,19 @@ export const dashboardSections: DashboardSection[] = [
   ),
   section(
     "amigos", "Amigos", "Tu círculo astral",
-    "Perfiles, afinidad, compatibilidad y actividad de tu gente. Porque el caos compartido pesa menos y se comenta mejor.",
+    "Descubre la compatibilidad exacta con tus amigos. Entra su signo, compara vuestras cartas astrales e invítalos a ZODI para el análisis completo.",
     "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Compatibilidad.png",
     Users, "compatibility",
     "Crea una lectura de amistad y afinidad entre perfiles.",
-    ["Afinidad", "Perfil", "Compatibilidad", "Invitar", "Círculo"],
-    "Ver mis amigos",
-    "Conecta con otras personas en ZODI: ve sus perfiles astrales, compara compatibilidades y comparte lecturas. Las relaciones también tienen energía astral. Saber que tu mejor amiga es Sagitario con Luna en Capricornio explica muchas cosas sobre por qué a veces te entiende perfectamente y otras veces parece de otro planeta."
+    ["Buscar amigo", "Compatibilidad", "Signo", "Luna", "Invitar"],
+    "Buscar amigos",
+    "Introduce el signo de tu amigo/a y ZODI compara vuestros mapas astrales: elementos, signos solares, lunas y más. Con solo el signo obtienes una lectura real. Si añades luna y ascendente, el análisis va mucho más profundo. Y si invitas a tu amigo/a a ZODI, la comparativa se hace con las cartas natales completas de ambos.",
+    [
+      { term: "Compatibilidad solar", def: "La base: tu signo vs el suyo. Los elementos (Fuego, Tierra, Aire, Agua) determinan si hay química natural o tensión. No es determinista, pero explica patrones." },
+      { term: "Compatibilidad lunar", def: "Las lunas son las emociones. Si las lunas son compatibles, os entendéis emocionalmente sin esfuerzo. Si no, necesitáis más trabajo consciente para no malinterpretaros." },
+      { term: "Sinastría", def: "El análisis completo de dos cartas natales juntas. Qué planetas se complementan, cuáles crean tensión y cómo evoluciona la relación con el tiempo. Requiere ambas fechas de nacimiento." },
+      { term: "Análisis completo", def: "Para obtener la sinastría completa, ambas personas necesitan perfil en ZODI con fecha de nacimiento. Con solo signos, el análisis es orientativo pero ya aporta mucho." },
+    ]
   ),
   section(
     "ranking", "Rituales Energéticos", "Tu energía, tus reglas",
