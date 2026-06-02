@@ -450,13 +450,25 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           }
         } catch (firebaseErr: any) {
           const code = (firebaseErr as { code?: string }).code ?? "";
-          authHandledRef.current = false;
+          
+          const isUserError = [
+            "auth/email-already-in-use",
+            "auth/invalid-email",
+            "auth/weak-password",
+            "auth/wrong-password",
+            "auth/invalid-credential",
+            "auth/user-not-found"
+          ].includes(code);
 
-          if (isFirebaseConfigured) {
+          // Si es un error legítimo del usuario (ej. contraseña incorrecta), lo lanzamos para mostrarlo en la UI.
+          // Si es un error de configuración o de red (unauthorized domain, network error, etc.),
+          // lo ignoramos para permitir el fallback al almacenamiento local sin bloquear el acceso.
+          if (isFirebaseConfigured && isUserError) {
+            authHandledRef.current = false;
             throw firebaseErr;
           }
 
-          console.warn("[ZODI] Firebase no disponible, probando fallback local:", code);
+          console.warn("[ZODI] Firebase error o dominio no autorizado, aplicando fallback local:", code);
         }
       }
 
