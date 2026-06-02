@@ -2,9 +2,42 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Gem, Share2, Download } from "lucide-react";
 import { dashboardSections } from "@/lib/dashboard-sections";
+
+// ── Skeleton cards mientras hidrata ──────────────────────────────────────────
+function FeaturedSkeleton() {
+  return (
+    <div className="grid gap-2.5 grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+      {[...Array(8)].map((_, i) => (
+        <div
+          key={i}
+          className="min-h-[140px] sm:min-h-44 lg:min-h-52 rounded-2xl bg-white/04 animate-pulse"
+          style={{ animationDelay: `${i * 60}ms` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SecondaryGroupSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[...Array(4)].map((_, gi) => (
+        <div key={gi}>
+          <div className="h-3 w-24 rounded bg-white/05 mb-2 animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            {[...Array(gi === 0 ? 4 : gi === 1 ? 6 : gi === 2 ? 4 : 6)].map((_, i) => (
+              <div key={i} className="h-9 rounded-xl bg-white/04 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const featured = [
   { slug: "horoscopo",    badge: "🔥 HOY",    color: "from-violet-500/30 to-fuchsia-500/20" },
@@ -41,6 +74,9 @@ const secondaryGroups = [
 ];
 
 export function DashboardLaunchpad() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   return (
     <section className="mt-4 sm:mt-6 space-y-6 sm:space-y-8">
 
@@ -103,6 +139,7 @@ export function DashboardLaunchpad() {
           </Link>
         </div>
 
+        {!mounted ? <FeaturedSkeleton /> : (
         <div className="grid gap-2.5 grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
           {featured.map(({ slug, badge, color }, index) => {
             const section = dashboardSections.find(s => s.slug === slug);
@@ -156,6 +193,7 @@ export function DashboardLaunchpad() {
             );
           })}
         </div>
+        )}
       </div>
 
       {/* ── Secciones secundarias agrupadas ────────────────────────────────── */}
@@ -167,7 +205,7 @@ export function DashboardLaunchpad() {
           </div>
         </div>
 
-        {secondaryGroups.map((group, gi) => (
+        {!mounted ? <SecondaryGroupSkeleton /> : secondaryGroups.map((group, gi) => (
           <motion.div
             key={group.label}
             initial={{ opacity: 0, y: 10 }}
@@ -201,3 +239,4 @@ export function DashboardLaunchpad() {
     </section>
   );
 }
+

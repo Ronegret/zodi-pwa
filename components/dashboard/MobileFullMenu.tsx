@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, WandSparkles } from "lucide-react";
+import { Moon, Sun, X, WandSparkles } from "lucide-react";
 import { dashboardSections } from "@/lib/dashboard-sections";
+import { useTheme } from "@/lib/theme";
 
 // ── Categorías para organizar todas las secciones ─────────────────────────────
 const categories = [
@@ -69,6 +70,7 @@ export function MobileFullMenu({
 }) {
   const pathname = usePathname();
   const [viewMode, setViewMode] = useState<"carta" | "grid">("carta");
+  const { theme, toggle } = useTheme();
 
   // Cerrar con tecla Escape
   useEffect(() => {
@@ -112,7 +114,7 @@ export function MobileFullMenu({
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className="fixed inset-0 z-[56] flex flex-col"
             style={{
-              background: "linear-gradient(160deg, rgb(10,10,18) 0%, rgb(6,6,14) 60%, rgb(8,4,16) 100%)",
+              background: "linear-gradient(160deg, var(--surface) 0%, var(--surface2) 60%, var(--surface3) 100%)",
             }}
           >
             {/* Header */}
@@ -123,13 +125,27 @@ export function MobileFullMenu({
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-lime-300/70">Navegación</p>
                 <h2 className="text-lg font-black leading-tight">Todo en ZODI</h2>
               </div>
-              <button
-                onClick={onClose}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/60 transition hover:bg-white/10 hover:text-white"
-                aria-label="Cerrar menú"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Theme toggle */}
+                <button
+                  onClick={toggle}
+                  aria-label={theme === "dark" ? "Activar modo día" : "Activar modo noche"}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 transition hover:bg-white/10"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-4 w-4 text-amber-300/80" />
+                  ) : (
+                    <Moon className="h-4 w-4 text-violet-400/80" />
+                  )}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/60 transition hover:bg-white/10 hover:text-white"
+                  aria-label="Cerrar menú"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* Selector de Vista (Segment Control) */}

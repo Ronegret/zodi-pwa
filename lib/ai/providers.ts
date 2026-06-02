@@ -4,13 +4,11 @@ import type { ReadingKind, UserProfile } from "@/types/zodi";
 // "anthropic" se acepta como alias de "claude" (nombre de la empresa vs nombre del proveedor)
 export type AIProvider = "openai" | "claude" | "anthropic" | "gemini" | "mock" | "auto";
 
-// Haiku 4.5 genera ~250 tok/s en Vercel → cabe en el límite de 10s del plan Hobby
-// Sonnet 4.6 genera ~80-100 tok/s → siempre supera el límite con prompts grandes
-const FAST_MODEL = "claude-haiku-4-5-20251001";
-
+// El chat route confirma: claude-sonnet-4-6 con 400 tokens = 3.4s en Vercel ✓
+// Reading usa el mismo modelo del env var pero con tokens controlados por tipo
 const EXTENDED_KINDS: ReadingKind[] = ["numerology", "natal-chart", "name-reading", "celtic-tarot"];
-const EXTENDED_MAX_TOKENS = 1100; // Haiku: ~4.5s a 250 tok/s
-const DEFAULT_MAX_TOKENS  = 650;  // Haiku: ~2.6s → seguro con cold start
+const EXTENDED_MAX_TOKENS = 900;  // ~6s con sonnet — margen antes del límite 10s
+const DEFAULT_MAX_TOKENS  = 550;  // ~3.5s con sonnet — igual que chat
 
 export type GenerateReadingParams = {
   provider?: AIProvider;
@@ -101,42 +99,36 @@ async function callClaude(system: string, user: string, maxTokens = DEFAULT_MAX_
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
-  // Más tiempo para lecturas largas
-  const timeoutMs = maxTokens > 1000 ? 9000 : 7000;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  // AbortSignal.timeout — mismo approach que el chat route (funciona confirmado)
+  const timeoutMs = maxTokens > 800 ? 8500 : 6500;
 
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: FAST_MODEL,
-        max_tokens: maxTokens,
-        system,
-        messages: [{ role: "user", content: user }],
-      }),
-      signal: controller.signal,
-    });
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: process.env.CLAUDE_MODEL || "claude-sonnet-4-6",
+      max_tokens: maxTokens,
+      system,
+      messages: [{ role: "user", content: user }],
+    }),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(readProviderError(data, `Claude ${response.status}`));
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(readProviderError(data, `Claude ${response.status}`));
 
-    const content = Array.isArray(data.content) ? data.content : [];
-    const text = content
-      .map((item: { text?: string }) => item.text)
-      .filter(Boolean)
-      .join("\n\n")
-      .trim();
-    if (!text) throw new Error("La lectura llegó en silencio.");
-    return text;
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  const content = Array.isArray(data.content) ? data.content : [];
+  const text = content
+    .map((item: { text?: string }) => item.text)
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
+  if (!text) throw new Error("La lectura llegó en silencio.");
+  return text;
 }
 
 async function callGemini(system: string, user: string, maxTokens = DEFAULT_MAX_TOKENS): Promise<string> {
@@ -167,7 +159,7 @@ async function callOpenAI(system: string, user: string, maxTokens = DEFAULT_MAX_
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
-  const timeoutMs = maxTokens > 1000 ? 8500 : 6500;
+  const timeoutMs = maxTokens > 800 ? 8500 : 6500;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -176,7 +168,7 @@ async function callOpenAI(system: string, user: string, maxTokens = DEFAULT_MAX_
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
         temperature: 0.85,
         max_tokens: maxTokens,
         messages: [

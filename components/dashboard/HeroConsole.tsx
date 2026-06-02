@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { RadioTower, Sparkles, Gem, Flame, Zap, ArrowRight } from "lucide-react";
 import { getTodaysAstralContext } from "@/lib/astral";
 import { getSessionProfile, getLocalSession } from "@/lib/session";
@@ -94,15 +94,32 @@ function getDailyPhrase(
   return { phrase, moonLine };
 }
 
-// ── Saludo según hora LOCAL del usuario ───────────────────────────────────────
+// ── Saludos por idioma y franja horaria ──────────────────────────────────────
+type GreetingSet = { dawn: string; morning: string; noon: string; afternoon: string; night: string };
+
+const GREETINGS: Record<string, GreetingSet> = {
+  es: { dawn: "Madrugada de señales", morning: "Buenos días",   noon: "¡Buenas!",         afternoon: "Buenas tardes",   night: "Buenas noches"   },
+  en: { dawn: "Signals in the dark",  morning: "Good morning",  noon: "Good afternoon",   afternoon: "Good afternoon",  night: "Good evening"    },
+  pt: { dawn: "Sinais na madrugada",  morning: "Bom dia",       noon: "Boa tarde",        afternoon: "Boa tarde",       night: "Boa noite"       },
+  fr: { dawn: "Signaux dans la nuit", morning: "Bonjour",       noon: "Bon après-midi",   afternoon: "Bon après-midi",  night: "Bonne soirée"    },
+  it: { dawn: "Segnali nell'alba",    morning: "Buongiorno",    noon: "Buon pomeriggio",  afternoon: "Buon pomeriggio", night: "Buona sera"      },
+  de: { dawn: "Signale in der Nacht", morning: "Guten Morgen",  noon: "Guten Nachmittag", afternoon: "Guten Nachmittag",night: "Guten Abend"     },
+  ca: { dawn: "Senyals a la nit",     morning: "Bon dia",       noon: "Bon dia",          afternoon: "Bona tarda",      night: "Bona nit"        },
+  gl: { dawn: "Sinais na noite",      morning: "Bos días",      noon: "Boa tarde",        afternoon: "Boa tarde",       night: "Boa noite"       },
+};
+
+// ── Saludo según hora LOCAL del usuario + idioma del navegador ────────────────
 function getLocalTimeGreeting(): string {
-  const h = new Date().getHours(); // usa siempre la hora del navegador (timezone local)
-  if (h < 6)  return "Madrugada de señales";
-  if (h < 12) return "Buenos días";
-  if (h < 14) return "Buena mañana";
-  if (h < 18) return "Buenas tardes";
-  if (h < 22) return "Buenas noches";
-  return "Ya es tarde";
+  const h = new Date().getHours();
+
+  const lang = (typeof navigator !== "undefined" ? navigator.language : "es").slice(0, 2).toLowerCase();
+  const set = GREETINGS[lang] ?? GREETINGS.es;
+
+  if (h < 6)  return set.dawn;
+  if (h < 12) return set.morning;
+  if (h < 14) return set.noon;
+  if (h < 20) return set.afternoon;   // tardes hasta las 20h (compatible con horario español)
+  return set.night;
 }
 
 // ── Skeleton shimmer ──────────────────────────────────────────────────────────
@@ -323,7 +340,7 @@ export function HeroConsole() {
       <section className="grid gap-3 lg:grid-cols-[1.4fr_0.6fr]">
       {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
       <div
-        className="neon-border overflow-hidden rounded-2xl relative"
+        className="hero-dark-card neon-border overflow-hidden rounded-2xl relative"
         style={{ background: "linear-gradient(145deg, rgba(8,8,16,0.92), rgba(5,5,12,0.88))", border: "1px solid rgba(255,255,255,0.07)" }}
       >
         <NeonAura />
@@ -623,11 +640,61 @@ export function HeroConsole() {
   );
 }
 
+// ── Tooltips explicativos de cada métrica astral ──────────────────────────────
+const METRIC_INFO: Record<string, string> = {
+  "Signo":  "Tu signo solar — el Sol estaba en este signo cuando naciste. Define tu personalidad central, tu ego y cómo brillas. Es el que aparece en todos los horóscopos de revista.",
+  "Luna":   "Tu signo lunar — donde estaba la Luna al nacer. Rige tus emociones, tus reacciones instintivas y lo que necesitas para sentirte seguro/a. La parte de ti que solo ven los más cercanos.",
+  "Asc.":   "Tu Ascendente — el signo que salía por el horizonte cuando naciste. Es tu 'máscara pública': cómo te perciben los demás antes de conocerte. También influye en tu apariencia y primeras impresiones.",
+  "Camino": "Tu Camino de vida — un número calculado con tu fecha de nacimiento (se suman todos los dígitos). Define tu misión vital y los temas que van a repetirse en tu historia.",
+};
+
 function Metric({ label, value }: { label: string; value: string }) {
+  const [open, setOpen] = useState(false);
+  const info = METRIC_INFO[label];
+
   return (
-    <div className="rounded-xl border border-white/08 bg-black/40 p-2.5 sm:p-3.5">
-      <p className="zodi-kicker mb-0.5 sm:mb-1 text-[9px] sm:text-[10px]">{label}</p>
-      <p className="text-sm sm:text-base lg:text-lg font-black text-white truncate">{value}</p>
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full rounded-xl border border-white/08 bg-black/40 p-2.5 sm:p-3.5 text-left transition hover:bg-black/55 active:scale-95"
+        aria-expanded={open}
+        title={info}
+      >
+        <div className="flex items-center justify-between gap-1 mb-0.5 sm:mb-1">
+          <p className="zodi-kicker text-[9px] sm:text-[10px]">{label}</p>
+          {info && (
+            <span className="text-[9px] font-black text-white/25 hover:text-white/50 leading-none">?</span>
+          )}
+        </div>
+        <p className="text-sm sm:text-base lg:text-lg font-black text-white truncate">{value}</p>
+      </button>
+
+      <AnimatePresence>
+        {open && info && (
+          <>
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-30"
+              onClick={() => setOpen(false)}
+            />
+            <motion.div
+              key="tooltip"
+              initial={{ opacity: 0, y: 6, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 4, scale: 0.95 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute bottom-full left-0 z-40 mb-2 w-56 rounded-xl border border-violet-400/25 bg-[#0d0c1a] p-3 shadow-[0_8px_30px_rgba(0,0,0,0.8)]"
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-300/70 mb-1">{label}</p>
+              <p className="text-xs text-white/75 leading-relaxed">{info}</p>
+              <div className="absolute -bottom-1.5 left-4 h-3 w-3 rotate-45 border-r border-b border-violet-400/25 bg-[#0d0c1a]" />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

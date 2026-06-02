@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Award,
   Bot,
@@ -20,6 +20,7 @@ import {
   Home,
   LayoutGrid,
   MessageCircle,
+  Moon,
   MoonStar,
   Orbit,
   Pickaxe,
@@ -29,6 +30,7 @@ import {
   ShieldHalf,
   Sparkles,
   Star,
+  Sun,
   Swords,
   UserRound,
   Users,
@@ -39,6 +41,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { getXpData, getLevel, getLevelTitle, getStreak, getGems } from "@/lib/gamification";
 import { MobileFullMenu } from "@/components/dashboard/MobileFullMenu";
+import { useTheme } from "@/lib/theme";
 
 type NavItem = { label: string; icon: LucideIcon; href: string; badge?: string };
 
@@ -118,6 +121,7 @@ const sidebarGroups: { label: string; items: NavItem[] }[] = [
 // ── Sidebar ────────────────────────────────────────────────────────────────────
 export function Sidebar() {
   const pathname = usePathname();
+  const { theme, toggle } = useTheme();
   const [stats, setStats] = useState({ level: 1, title: "Iniciado del Caos", gems: 0, streak: 0 });
 
   useEffect(() => {
@@ -132,11 +136,14 @@ export function Sidebar() {
   }, []);
 
   return (
-    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-56 shrink-0 flex-col rounded-xl border border-white/07 shadow-[0_0_40px_rgba(184,255,23,0.06)] lg:flex overflow-hidden"
-      style={{ background: "linear-gradient(180deg, rgb(12,12,20) 0%, rgb(8,8,16) 100%)" }}
+    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-56 shrink-0 flex-col rounded-xl border shadow-[0_0_40px_rgba(184,255,23,0.06)] lg:flex overflow-hidden"
+      style={{
+        background: "var(--sidebar-bg)",
+        borderColor: "var(--border)",
+      }}
     >
-      {/* Logo — click lleva al inicio */}
-      <div className="flex items-center justify-center border-b border-white/07 px-3 py-6">
+      {/* Logo */}
+      <div className="flex items-center justify-center px-3 py-6" style={{ borderBottom: "1px solid var(--border)" }}>
         <Link href="/" className="relative block h-28 w-full scale-[1.35]">
           <Image
             src="/zodi-logo.png"
@@ -149,8 +156,8 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Stats mini — nivel, gemas, racha */}
-      <div className="border-b border-white/07 px-3 py-3 space-y-2">
+      {/* Stats mini */}
+      <div className="px-3 py-3 space-y-2" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-black uppercase tracking-wider text-white/35">Nivel {stats.level}</span>
           <span className="text-[10px] font-bold text-lime-300/70" style={{ fontFamily: "var(--font-mono)" }}>
@@ -158,14 +165,12 @@ export function Sidebar() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          {/* Gemas */}
           <Link href="/dashboard/premium" className="flex items-center gap-1 hover:opacity-80 transition" title="Recargar energía">
             <Gem className="h-3 w-3 text-lime-300 drop-shadow-[0_0_8px_rgba(184,255,23,0.8)]" />
             <span className="text-xs font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>
               {stats.gems}
             </span>
           </Link>
-          {/* Racha */}
           {stats.streak > 0 && (
             <div className="flex items-center gap-1">
               <Flame className="h-3 w-3 text-orange-400" />
@@ -187,7 +192,7 @@ export function Sidebar() {
             {group.items.map((item) => {
               const active = pathname === item.href;
               const isOracle = item.href === "#open-oracle";
-              
+
               if (isOracle) {
                 return (
                   <button
@@ -223,7 +228,23 @@ export function Sidebar() {
       </nav>
 
       {/* Footer del sidebar */}
-      <div className="border-t border-white/07 px-3 py-3">
+      <div className="px-3 py-3 flex flex-col gap-2" style={{ borderTop: "1px solid var(--border)" }}>
+        {/* Theme toggle */}
+        <button
+          onClick={toggle}
+          title={theme === "dark" ? "Modo día" : "Modo noche"}
+          className="flex items-center gap-2 rounded-lg px-3 py-2 transition hover:bg-white/[0.05] w-full"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-3.5 w-3.5 text-amber-300/80" />
+          ) : (
+            <Moon className="h-3.5 w-3.5 text-violet-400/80" />
+          )}
+          <span className="text-xs font-bold text-white/45">
+            {theme === "dark" ? "Modo día" : "Modo noche"}
+          </span>
+        </button>
+
         <Link href="/dashboard/premium" className="flex items-center gap-2 rounded-lg border border-yellow-400/20 bg-yellow-400/05 px-3 py-2 transition hover:border-yellow-400/40">
           <Crown className="h-3.5 w-3.5 text-yellow-400" />
           <span className="text-xs font-bold text-yellow-300/80">Ver planes</span>
@@ -239,6 +260,8 @@ export function BottomNav() {
   const [streak, setStreak]     = useState(0);
   const [gems, setGems]         = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Track which button was just pressed for the ring burst effect
+  const [pressed, setPressed]   = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -247,16 +270,21 @@ export function BottomNav() {
     } catch { /* ignore */ }
   }, []);
 
+  function handlePress(key: string) {
+    setPressed(key);
+    setTimeout(() => setPressed(null), 500);
+  }
+
   return (
     <>
-      {/* Menú completo de secciones */}
       <MobileFullMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <nav
-        className="fixed bottom-2 left-2 right-2 z-40 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] lg:hidden sm:bottom-4 sm:left-4 sm:right-4"
+        className="bottom-nav-bar fixed bottom-2 left-2 right-2 z-40 rounded-3xl border shadow-[0_8px_32px_rgba(0,0,0,0.8)] lg:hidden sm:bottom-4 sm:left-4 sm:right-4"
         style={{
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          background: "rgb(8, 8, 14)",
+          background: "var(--nav-bg)",
+          borderColor: "var(--border)",
           transform: "translateZ(0)",
           willChange: "auto",
         }}
@@ -267,83 +295,156 @@ export function BottomNav() {
             const isMenu   = item.href === "#menu";
             const active   = !isMenu && !isOracle &&
               (pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href)));
+            const isPressed = pressed === item.href || (isMenu && pressed === "#menu");
 
             // ── Oráculo — botón especial con glow ─────────────────────────
             if (isOracle) {
               return (
-                <button
+                <motion.button
                   key="oracle"
                   aria-label="Oráculo"
-                  onClick={() => window.dispatchEvent(new CustomEvent("open-oracle"))}
+                  whileTap={{ scale: 0.80 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                  onClick={() => {
+                    handlePress(item.href);
+                    window.dispatchEvent(new CustomEvent("open-oracle"));
+                  }}
                   className="relative flex flex-col items-center justify-center gap-0.5 text-white/50"
                 >
                   <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-white/08 border border-white/12">
                     <item.icon className="h-5 w-5" />
                     <span className="oracle-pulse-ring absolute inset-0 rounded-xl border border-lime-300/30 pointer-events-none" />
+                    {/* Neon ring burst on press */}
+                    <AnimatePresence>
+                      {isPressed && (
+                        <motion.span
+                          key="burst"
+                          className="absolute inset-0 rounded-xl border-2 border-lime-300 pointer-events-none"
+                          initial={{ scale: 1, opacity: 0.9 }}
+                          animate={{ scale: 1.9, opacity: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.45, ease: "easeOut" }}
+                        />
+                      )}
+                    </AnimatePresence>
                   </div>
                   <span className="text-[10px] font-semibold leading-tight mt-0.5">{item.label}</span>
-                </button>
+                </motion.button>
               );
             }
 
             // ── Menú — abre el bottom sheet completo ──────────────────────
             if (isMenu) {
               return (
-                <button
+                <motion.button
                   key="menu"
                   aria-label="Menú completo"
-                  onClick={() => setMenuOpen(true)}
-                  className={`relative flex flex-col items-center justify-center gap-0.5 transition-all ${
+                  whileTap={{ scale: 0.80 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                  onClick={() => {
+                    handlePress("#menu");
+                    setMenuOpen(true);
+                  }}
+                  className={`relative flex flex-col items-center justify-center gap-0.5 transition-colors ${
                     menuOpen ? "text-lime-300" : "text-white/45"
                   }`}
                 >
-                  {menuOpen && (
-                    <motion.span
-                      layoutId="tab-indicator"
-                      className="absolute top-0 h-0.5 w-8 rounded-full bg-lime-300"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  <div className={`flex h-6 w-6 items-center justify-center transition-all ${menuOpen ? "scale-110" : ""}`}>
+                  {/* Active pill background */}
+                  <AnimatePresence>
+                    {menuOpen && (
+                      <motion.span
+                        key="pill"
+                        layoutId="tab-pill"
+                        className="absolute inset-x-1 inset-y-0.5 rounded-2xl"
+                        style={{ background: "rgba(184,255,23,0.12)", border: "1px solid rgba(184,255,23,0.20)" }}
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.7 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  {/* Neon ring burst on press */}
+                  <AnimatePresence>
+                    {isPressed && (
+                      <motion.span
+                        key="burst"
+                        className="absolute h-10 w-10 rounded-full border-2 border-lime-300/70 pointer-events-none"
+                        initial={{ scale: 0.6, opacity: 0.9 }}
+                        animate={{ scale: 2.0, opacity: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  <div className={`relative flex h-6 w-6 items-center justify-center transition-all ${menuOpen ? "scale-110" : ""}`}>
                     <item.icon className="h-5 w-5" />
                   </div>
                   <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
-                </button>
+                </motion.button>
               );
             }
 
             // ── Tab normal ─────────────────────────────────────────────────
             return (
-              <Link
+              <motion.div
                 key={item.href}
-                href={item.href}
-                aria-label={item.label}
-                className={`relative flex flex-col items-center justify-center gap-0.5 transition-all ${
-                  active ? "text-lime-300" : "text-white/45"
-                }`}
+                whileTap={{ scale: 0.80 }}
+                transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                className="relative flex flex-col items-center justify-center"
               >
-                {active && (
-                  <motion.span
-                    layoutId="tab-indicator"
-                    className="absolute top-0 h-0.5 w-8 rounded-full bg-lime-300"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-                <div className={`flex h-6 w-6 items-center justify-center transition-all ${active ? "scale-110" : ""}`}>
-                  <item.icon className="h-5 w-5" />
-                </div>
-                {/* Badges */}
-                {item.href === "/dashboard/horoscopo" && (
-                  <span className="absolute right-2 top-1 h-1.5 w-1.5 rounded-full bg-lime-300 shadow-[0_0_4px_rgba(184,255,23,0.8)]" />
-                )}
-                {item.href === "/dashboard/perfil" && streak >= 3 && (
-                  <span className="absolute right-1 top-1 flex items-center gap-0.5 rounded-full bg-orange-500/80 px-1.5 py-0.5">
-                    <Flame className="h-2 w-2 text-white" />
-                    <span className="text-[8px] font-black text-white">{streak}</span>
-                  </span>
-                )}
-                <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
-              </Link>
+                <Link
+                  href={item.href}
+                  aria-label={item.label}
+                  onClick={() => handlePress(item.href)}
+                  className={`relative flex flex-col items-center justify-center gap-0.5 w-full transition-colors ${
+                    active ? "text-lime-300" : "text-white/45"
+                  }`}
+                >
+                  {/* Active pill background */}
+                  <AnimatePresence>
+                    {active && (
+                      <motion.span
+                        key="pill"
+                        layoutId="tab-pill"
+                        className="absolute inset-x-1 inset-y-0.5 rounded-2xl"
+                        style={{ background: "rgba(184,255,23,0.12)", border: "1px solid rgba(184,255,23,0.20)" }}
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.7 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  {/* Neon ring burst on press */}
+                  <AnimatePresence>
+                    {isPressed && (
+                      <motion.span
+                        key="burst"
+                        className="absolute h-10 w-10 rounded-full border-2 border-lime-300/70 pointer-events-none"
+                        initial={{ scale: 0.5, opacity: 0.9 }}
+                        animate={{ scale: 2.2, opacity: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  <div className={`relative flex h-6 w-6 items-center justify-center transition-all ${active ? "scale-110" : ""}`}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  {/* Badges */}
+                  {item.href === "/dashboard/horoscopo" && (
+                    <span className="absolute right-2 top-1 h-1.5 w-1.5 rounded-full bg-lime-300 shadow-[0_0_4px_rgba(184,255,23,0.8)]" />
+                  )}
+                  {item.href === "/dashboard/perfil" && streak >= 3 && (
+                    <span className="absolute right-1 top-1 flex items-center gap-0.5 rounded-full bg-orange-500/80 px-1.5 py-0.5">
+                      <Flame className="h-2 w-2 text-white" />
+                      <span className="text-[8px] font-black text-white">{streak}</span>
+                    </span>
+                  )}
+                  <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
+                </Link>
+              </motion.div>
             );
           })}
         </div>

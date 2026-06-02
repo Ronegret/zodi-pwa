@@ -29,6 +29,10 @@
   /* Panel */
   --panel: rgba(14, 14, 20, 0.82);
 
+  /* Theme-aware backgrounds (used in JS inline styles) */
+  --nav-bg:     rgb(8, 8, 14);
+  --sidebar-bg: linear-gradient(180deg, rgb(12,12,20) 0%, rgb(8,8,16) 100%);
+
   /* Fonts */
   --font-display: var(--font-syne), "Syne", system-ui, sans-serif;
   --font-body:    var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
@@ -822,4 +826,194 @@ input, textarea, select {
 /* ── Bottom nav GPU layer ────────────────────────────────────────────────── */
 nav[style*="translateZ"] {
   contain: layout style;
+}
+
+/* ── Hero card dark scope ─────────────────────────────────────────────────── */
+/* Forces dark-mode Tailwind color vars within the neon hero card so it always
+   renders as a dark neon console regardless of the global theme.              */
+.hero-dark-card {
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-lime-50:  oklch(98.6% 0.031 120.757);
+  --color-lime-100: oklch(96.7% 0.067 122.328);
+  --color-lime-200: oklch(93.8% 0.127 124.321);
+  --color-lime-300: oklch(89.7% 0.196 126.665);
+  --color-lime-400: oklch(84.1% 0.238 128.85);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MODO DÍA — "Amanecer Cósmico"
+   Las imágenes se mantienen. Solo cambian fondos, superficies y texto.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* ── Brand surfaces */
+  --ink:      #f0ece2;
+  --surface:  #faf7f0;
+  --surface2: #f3efe6;
+  --surface3: #e9e4d8;
+
+  /* ── Text → dark indigo */
+  --text-primary:   #1a1730;
+  --text-secondary: rgba(26, 23, 48, 0.62);
+  --text-muted:     rgba(26, 23, 48, 0.36);
+
+  /* ── Borders */
+  --border:        rgba(26, 23, 48, 0.09);
+  --border-bright: rgba(72, 130, 0, 0.30);
+  --border-violet: rgba(122, 53, 221, 0.25);
+
+  /* ── Panel */
+  --panel: rgba(250, 247, 240, 0.94);
+
+  /* ── Theme-aware nav/sidebar */
+  --nav-bg:     rgb(248, 244, 236);
+  --sidebar-bg: linear-gradient(180deg, rgb(252,248,240) 0%, rgb(245,241,232) 100%);
+
+  /* ── Tailwind white/black flip (affects text-white/*, bg-black/*) */
+  --color-white: #1a1730;
+  --color-black: #faf7f0;
+
+  /* ── Lime text → deep green for readability on cream */
+  --color-lime-50:  oklch(97% 0.06 132);
+  --color-lime-100: oklch(90% 0.12 132);
+  --color-lime-200: oklch(55% 0.17 135);
+  --color-lime-300: oklch(48% 0.17 135);
+  --color-lime-400: oklch(52% 0.19 133);
+}
+
+/* ── Body in light mode */
+[data-theme="light"] body {
+  background-color: var(--ink);
+  color: var(--text-primary);
+}
+
+/* ── Body atmospheric gradients in light mode (warmer, softer) */
+[data-theme="light"] body::after {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 10% -5%, rgba(122, 53, 221, 0.06), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 5%,  rgba(72, 130, 0, 0.08), transparent),
+    radial-gradient(ellipse 50% 60% at 50% 100%, rgba(245, 200, 66, 0.05), transparent);
+}
+
+/* ── Glass panels */
+[data-theme="light"] .glass-panel {
+  border-color: rgba(26, 23, 48, 0.08);
+  background: linear-gradient(145deg, rgba(255, 252, 246, 0.98), rgba(245, 241, 232, 0.97));
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.9) inset;
+}
+
+[data-theme="light"] .glass-card {
+  border-color: rgba(26, 23, 48, 0.08);
+  background: var(--surface2);
+}
+
+/* ── Neon border (softer on light bg) */
+[data-theme="light"] .neon-border::before {
+  background: linear-gradient(135deg, rgba(72,130,0,0.18), rgba(122,53,221,0.15), rgba(180,40,140,0.10));
+  opacity: 0.25;
+}
+
+/* ── Kicker labels → dark acid green */
+[data-theme="light"] .zodi-kicker {
+  color: rgba(60, 110, 0, 0.85);
+}
+
+/* ── Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(26, 23, 48, 0.15);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 23, 48, 0.30);
+}
+
+/* ── Selection */
+[data-theme="light"] ::selection {
+  background: oklch(48% 0.17 135);
+  color: #fff;
+}
+
+/* ── Focus visible */
+[data-theme="light"] :focus-visible {
+  outline-color: oklch(48% 0.17 135);
+}
+
+/* ── CTA buttons: keep lime bg bright, fix text contrast */
+[data-theme="light"] .bg-lime-300 {
+  background-color: #b8ff17 !important;
+}
+[data-theme="light"] .hover\:bg-lime-200:hover {
+  background-color: #caff45 !important;
+}
+
+/* ── Make text-black on bright-bg CTAs stay dark (readable) */
+[data-theme="light"] .bg-lime-300 .text-black,
+[data-theme="light"] .bg-lime-300.text-black,
+[data-theme="light"] [class*="bg-lime-300"][class*="text-black"] {
+  color: #050505 !important;
+}
+
+/* Force text-black to always be near-black (for CTA readability) */
+[data-theme="light"] .text-black {
+  color: #0a0a0a !important;
+}
+
+/* ── XP fill bar */
+[data-theme="light"] .xp-fill {
+  background: linear-gradient(90deg, oklch(48% 0.17 135), #3ab070, #00b5c0);
+}
+
+/* ── Shimmer adapt */
+[data-theme="light"] .shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(26,23,48,0.04) 0%,
+    rgba(26,23,48,0.09) 50%,
+    rgba(26,23,48,0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* ── Dashboard background images: stay, but less visible on light bg */
+[data-theme="light"] .dashboard-bg {
+  opacity: 0.03 !important;
+  filter: saturate(0.6) !important;
+  mix-blend-mode: multiply !important;
+}
+
+/* ── Bottom nav in light mode */
+[data-theme="light"] nav.bottom-nav-bar {
+  border-color: rgba(26,23,48,0.10) !important;
+  box-shadow: 0 -1px 20px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.04) !important;
+}
+
+/* ── Oracle pulse ring adapt */
+[data-theme="light"] .oracle-pulse-ring {
+  border-color: oklch(48% 0.17 135) !important;
+}
+
+/* ── Graffiti gradient (logo text) stays vibrant */
+[data-theme="light"] .graffiti {
+  background: linear-gradient(90deg, oklch(48% 0.17 135) 0%, #1a1730 40%, oklch(55% 0.22 310) 70%, oklch(48% 0.22 285) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  filter: none;
+}
+
+/* ── Badges on light mode */
+[data-theme="light"] .zodi-gems {
+  border-color: rgba(60, 110, 0, 0.25);
+  background: rgba(60, 110, 0, 0.10);
+  color: oklch(40% 0.15 135);
+}
+
+/* ── Toast */
+[data-theme="light"] .zodi-toast {
+  border-color: rgba(60, 110, 0, 0.35);
+  background: rgba(60, 110, 0, 0.12);
+  color: oklch(38% 0.15 135);
 }

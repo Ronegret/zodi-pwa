@@ -3,11 +3,80 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { CommunityHub } from "@/components/dashboard/CommunityHub";
 import { SectionSpecificUI } from "@/components/dashboard/SectionSpecificUI";
 import { PremiumUI } from "@/components/dashboard/PremiumUI";
 import { plans } from "@/lib/data";
-import { getDashboardSection } from "@/lib/dashboard-sections";
+import { getDashboardSection, type DashboardSection } from "@/lib/dashboard-sections";
+
+// ── ZODI Explainer — panel "¿Qué es esto?" para nuevos usuarios ──────────────
+function SectionExplainer({ section }: { section: DashboardSection }) {
+  const [open, setOpen] = useState(false);
+  if (!section.explainer) return null;
+
+  return (
+    <div className="rounded-2xl border border-violet-400/20 bg-violet-500/06 overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-white/03"
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="text-base shrink-0">💬</span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-violet-300/70">
+              ZODI te explica
+            </p>
+            <p className="text-xs font-bold text-white/60 truncate">
+              ¿Para qué sirve {section.title.toLowerCase()}? · Toca para saber
+            </p>
+          </div>
+        </div>
+        <div className="shrink-0 text-white/30">
+          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="explainer-body"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className="px-4 pb-4 pt-1 space-y-3 border-t border-white/06">
+              <p className="text-sm leading-relaxed text-white/75">{section.explainer}</p>
+
+              {section.concepts && section.concepts.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.28em] text-violet-300/60">
+                    Conceptos clave
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {section.concepts.map((c) => (
+                      <div
+                        key={c.term}
+                        className="rounded-xl border border-white/07 bg-black/25 px-3 py-2.5"
+                      >
+                        <p className="text-xs font-black text-lime-200/90 leading-tight">{c.term}</p>
+                        <p className="mt-0.5 text-[11px] text-white/55 leading-relaxed">{c.def}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 // Maps section slugs to atmospheric background images
 const SECTION_BG: Record<string, string> = {
@@ -91,6 +160,11 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
             </div>
           </div>
         </section>
+      )}
+
+      {/* Explainer "¿Qué es esto?" — para nuevos usuarios */}
+      {section.slug !== "comunidad" && section.slug !== "premium" && (
+        <SectionExplainer section={section} />
       )}
 
       {/* Section-specific interactive UI */}

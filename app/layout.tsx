@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Syne, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { MusicPlayer } from "@/components/MusicPlayer";
 import { ZodiOracle } from "@/components/ZodiOracle";
+import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
 
 const syne = Syne({
@@ -81,11 +82,19 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body suppressHydrationWarning>
-        <PwaBoot />
-        {children}
-        <ZodiOracle />
-        <MusicPlayer />
-        <CookieBanner />
+        {/* Anti-flash: applies saved theme before React hydrates */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('zodi-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light')})()`,
+          }}
+        />
+        <ThemeProvider>
+          <PwaBoot />
+          {children}
+          <ZodiOracle />
+          <MusicPlayer />
+          <CookieBanner />
+        </ThemeProvider>
       </body>
     </html>
   );
