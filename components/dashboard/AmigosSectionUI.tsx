@@ -251,7 +251,7 @@ export function AmigosSectionUI() {
         receiverSign: toUser.sign,
         receiverAvatar: toUser.avatar,
         status: "pending",
-        createdAt: (await import("firebase/firestore")).serverTimestamp(),
+        createdAt: serverTimestamp(),
       });
       setPendingUids(prev => new Set([...prev, toUser.uid]));
     } catch (e) {

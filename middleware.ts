@@ -1,30 +1,28 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Middleware mínimo: solo protege rutas privadas.
+// NO redirige usuarios autenticados fuera de /auth/* — eso lo maneja el cliente
+// (onAuthStateChanged en AuthForm) para evitar bucles de redirect.
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isAuthenticated = request.cookies.has('zodi_auth');
-  const onboardingCompleted = request.cookies.has('zodi_onboarding');
+  const isAuthenticated    = request.cookies.has('zodi_auth');
+  const onboardingDone     = request.cookies.has('zodi_onboarding');
 
-  const isPublicAuthRoute = pathname === '/' || pathname.startsWith('/auth/');
-
-  if (isPublicAuthRoute && isAuthenticated) {
-    if (onboardingCompleted) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Dashboard requiere estar autenticado y con onboarding completado
+  if (pathname.startsWith('/dashboard')) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
     }
-
-    return NextResponse.redirect(new URL('/onboarding', request.url));
+    if (!onboardingDone) {
+      return NextResponse.redirect(new URL('/onboarding', request.url));
+    }
   }
 
-  const isProtectedRoute = pathname === '/onboarding';
-
-  if (isProtectedRoute && !isAuthenticated) {
+  // Onboarding requiere estar autenticado
+  if (pathname === '/onboarding' && !isAuthenticated) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
-  }
-
-  if (pathname.startsWith('/dashboard') && isAuthenticated && !onboardingCompleted) {
-    return NextResponse.redirect(new URL('/onboarding', request.url));
   }
 
   return NextResponse.next();

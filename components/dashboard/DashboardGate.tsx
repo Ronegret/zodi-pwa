@@ -25,13 +25,14 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
         const db = getFirebaseDb();
         if (!db) return false;
 
-        const timeout = new Promise<null>(res => setTimeout(() => res(null), 3000));
+        // 5s timeout — móvil lento o primer acceso puede tardar más de 3s
+        const timeout = new Promise<null>(res => setTimeout(() => res(null), 5000));
         const firestoreRead = Promise.all([
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
         const timedResult = await Promise.race([firestoreRead, timeout]);
-        if (!timedResult) return false; // timeout
+        if (!timedResult) return false;
 
         const [userSnap, astralSnap] = timedResult;
 
@@ -40,8 +41,6 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
         }
 
         const userData = userSnap.data();
-        // astralProfiles es opcional: puede faltar si el save fue parcial
-        // En ese caso usamos los campos de respaldo guardados en users
         const astralData = astralSnap.exists() ? astralSnap.data() : userData;
 
         setLocalSession({
@@ -67,7 +66,6 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             username: userData.username || "",
             avatar: userData.avatar || "/zodi-art/perfil/perfil-1.png",
             genderIdentity: userData.genderIdentity || "",
-            // birthDate en astralProfiles O en users (respaldo)
             birthDate: astralData.birthDate || userData.birthDate || "",
             birthTime: astralData.birthTime || userData.birthTime || "",
             birthCity: astralData.birthCity || userData.birthCity || "",
@@ -89,16 +87,23 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
     const checkSession = async () => {
       const session = getLocalSession();
 
+      // ── VÍA RÁPIDA: sesión local completa ────────────────────────────────
       if (session.isAuthenticated && session.onboardingCompleted && session.onboardingData?.birthDate) {
         if (!cancelled) setReady(true);
         return;
       }
 
-      if (session.isAuthenticated && (!session.onboardingCompleted || !session.onboardingData?.birthDate)) {
+      // ── CLARA NEGATIVA: autenticado pero nunca hizo onboarding ───────────
+      // Solo bouncea si onboardingCompleted=false explícito — NO si solo falta birthDate
+      // (eso puede ser localStorage incompleto; Firestore puede tener los datos)
+      if (session.isAuthenticated && session.onboardingCompleted === false) {
         router.replace("/onboarding");
         return;
       }
 
+      // ── VERIFICAR CON FIREBASE ────────────────────────────────────────────
+      // Cubre: sin sesión local, sesión expirada, birthDate faltante en localStorage,
+      // y usuario en dispositivo nuevo.
       try {
         const { onAuthStateChanged } = await import("firebase/auth");
         const { getFirebaseAuth } = await import("@/lib/firebase/client");
@@ -109,30 +114,31 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // Timeout de 4s: si Firebase Auth no responde, redirigir a login
+        // 8s timeout — da margen para conexiones lentas (móvil 3G)
         const authTimeout = setTimeout(() => {
           if (!cancelled) router.replace("/auth/login");
-        }, 4000);
+        }, 8000);
 
         unsubscribe = onAuthStateChanged(auth, async (user) => {
           clearTimeout(authTimeout);
+
           if (!user) {
-            router.replace("/auth/login");
+            if (!cancelled) router.replace("/auth/login");
             return;
           }
 
-          // Renovar loginAt para mantener la sesión activa
           const currentSession = getLocalSession();
           const sameUid   = currentSession.uid === user.uid;
           const sameEmail = !!(user.email && currentSession.email && user.email === currentSession.email);
 
+          // Sesión local válida y completa
           if ((sameUid || sameEmail) && currentSession.onboardingCompleted && currentSession.onboardingData?.birthDate) {
-            // Sesión local válida — renovar timestamp y continuar
             setLocalSession({ uid: user.uid, loginAt: Date.now() });
             if (!cancelled) setReady(true);
             return;
           }
 
+          // Intentar restaurar desde Firestore (dispositivo nuevo, localStorage borrado, etc.)
           const restored = await restoreFromFirestore(user);
           if (cancelled) return;
 
@@ -141,9 +147,12 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             return;
           }
 
-          // Firestore vacío — intentar con identidad duradera
+          // Identidad duradera local (sobrevive a logout y expiración de sesión)
           const identity = getSavedIdentity();
-          const identityMatch = identity && (identity.uid === user.uid || identity.email === user.email) && identity.onboardingCompleted && identity.onboardingData?.birthDate;
+          const identityMatch = identity &&
+            (identity.uid === user.uid || identity.email === user.email) &&
+            identity.onboardingCompleted &&
+            identity.onboardingData?.birthDate;
 
           if (identityMatch && identity) {
             setLocalSession({
@@ -163,7 +172,7 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             return;
           }
 
-          // Sesión local con datos del mismo usuario (match uid/email)
+          // Sesión local del mismo usuario con datos completos
           if ((sameUid || sameEmail) && currentSession.onboardingCompleted && currentSession.onboardingData?.birthDate) {
             setLocalSession({ uid: user.uid, loginAt: Date.now() });
             if (currentSession.onboardingData && currentSession.astralProfile) {
@@ -175,8 +184,7 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             return;
           }
 
-          // Último recurso: Firebase user autenticado pero sin datos en ningún lado.
-          // Redirigimos a onboarding para que complete su perfil, en lugar de entrar en un dashboard vacío.
+          // Firebase confirmó al usuario pero no hay datos en ningún lado → onboarding
           setLocalSession({
             isAuthenticated: true,
             onboardingCompleted: false,
@@ -185,20 +193,21 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
             uid: user.uid,
             loginAt: Date.now(),
           });
-          router.replace("/onboarding");
+          if (!cancelled) router.replace("/onboarding");
         });
       } catch {
-        router.replace("/auth/login");
+        if (!cancelled) router.replace("/auth/login");
       }
     };
 
     void checkSession();
 
+    // Verificación periódica de sesión (cada 60s)
     const interval = setInterval(() => {
       const session = getLocalSession();
       if (!session.isAuthenticated) {
         router.replace("/auth/login");
-      } else if (!session.onboardingCompleted) {
+      } else if (session.onboardingCompleted === false) {
         router.replace("/onboarding");
       }
     }, 60000);
