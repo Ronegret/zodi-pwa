@@ -364,7 +364,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     };
   }, [applyFirebaseUser]);
 
-  // ── Google OAuth — popup con fallback automático a redirect ─────────────────
+  // ── Google OAuth — popup con fallback a redirect si está bloqueado ───────────
   async function loginWithGoogle() {
     if (authHandledRef.current || googleLoading) return;
     setMessage("");
@@ -379,30 +379,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    // Detectar contextos donde el popup siempre falla → ir directo a redirect
-    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-    const isIos       = /iphone|ipad|ipod/i.test(ua);
-    const isSafari    = /safari/i.test(ua) && !/chrome/i.test(ua) && !/android/i.test(ua);
-    const isStandalone = typeof window !== "undefined" &&
-                         (window.matchMedia?.("(display-mode: standalone)").matches ||
-                          (window.navigator as any).standalone === true);
-
-    // iOS Safari o PWA standalone → popup siempre bloqueado, usar redirect directamente
-    if (isIos && (isSafari || isStandalone)) {
-      try {
-        sessionStorage.setItem("zodi.google_redirect_pending", "1");
-        await signInWithRedirect(auth, googleProvider);
-        return;
-      } catch (err: any) {
-        sessionStorage.removeItem("zodi.google_redirect_pending");
-        setMessage(`No se pudo iniciar con Google (${err?.code ?? "error"}). Intenta con email.`);
-        setMsgType("error");
-        setGoogleLoading(false);
-        return;
-      }
-    }
-
-    // Resto de navegadores → intentar popup primero, fallback a redirect
     try {
       const { signInWithPopup, getAdditionalUserInfo } = await import("firebase/auth");
       const result = await signInWithPopup(auth, googleProvider);
@@ -414,39 +390,28 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       }
     } catch (e: any) {
       const code = e?.code ?? "";
-      console.error("[ZODI] Error Google Sign-In:", code, e?.message);
-
-      // Estos códigos = popup no disponible → fallback automático a redirect
-      const redirectCodes = [
-        "auth/popup-blocked",
-        "auth/popup-closed-by-user",
-        "auth/cancelled-popup-request",
-      ];
-
-      if (redirectCodes.includes(code)) {
+      console.error("[ZODI] Error Google Sign-In:", e);
+      if (code === "auth/popup-blocked") {
+        // Fallback a redirect si el navegador bloquea popups (muy común en móviles)
         try {
           sessionStorage.setItem("zodi.google_redirect_pending", "1");
           await signInWithRedirect(auth, googleProvider);
-          return; // la página navega — no hay más código que ejecutar
+          return;
         } catch (redirectErr: any) {
-          sessionStorage.removeItem("zodi.google_redirect_pending");
-          setMessage(`Google no respondió. Intenta de nuevo o usa email. (${redirectErr?.code ?? "redirect-error"})`);
+          const redirectCode = redirectErr?.code ?? "";
+          setMessage(`Google no pudo completar el redireccionamiento (${redirectCode}).`);
           setMsgType("error");
         }
       } else if (code === "auth/unauthorized-domain") {
-        setMessage("⚠️ Dominio no autorizado en Firebase → Authentication → Authorized Domains. Añade tu dominio de producción.");
+        setMessage("⚠️ Este dominio no está autorizado en Firebase Console → Authentication → Authorized Domains.");
         setMsgType("error");
       } else if (code === "auth/operation-not-allowed") {
-        setMessage("⚠️ Google Sign-In desactivado en Firebase → Authentication → Sign-in method.");
+        setMessage("⚠️ Google Sign-In no está activado en Firebase Console → Authentication → Sign-in method.");
         setMsgType("error");
-      } else if (code === "auth/network-request-failed") {
-        setMessage("Sin conexión. Comprueba tu red e intenta de nuevo.");
-        setMsgType("error");
-      } else if (code && code !== "auth/user-cancelled") {
-        setMessage(`Error al iniciar con Google (${code}). Intenta de nuevo.`);
+      } else if (code && code !== "auth/popup-closed-by-user") {
+        setMessage(`Google no pudo completar el inicio de sesión (${code}). Intenta de nuevo o usa email.`);
         setMsgType("error");
       }
-      // Si el usuario simplemente cerró el popup: no mostrar error, solo quitar loading
       setGoogleLoading(false);
     }
   }
