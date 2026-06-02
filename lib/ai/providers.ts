@@ -99,8 +99,8 @@ async function callClaude(system: string, user: string, maxTokens = DEFAULT_MAX_
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
-  // AbortSignal.timeout — mismo approach que el chat route (funciona confirmado)
-  const timeoutMs = maxTokens > 800 ? 8500 : 6500;
+  // Timeouts generosos: prompts largos (horóscopo + personalización completa) necesitan margen
+  const timeoutMs = maxTokens > 800 ? 14000 : 11000;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -138,13 +138,13 @@ async function callGemini(system: string, user: string, maxTokens = DEFAULT_MAX_
   const { GoogleGenAI } = await import("@google/genai");
   const ai = new GoogleGenAI({ apiKey });
 
-  const timeoutMs = maxTokens > 1000 ? 9000 : 7000;
+  const timeoutMs = maxTokens > 1000 ? 13000 : 10000;
   const timeoutPromise = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error("Gemini timeout")), timeoutMs)
   );
 
   const geminiPromise = ai.models.generateContent({
-    model: "gemini-1.5-flash",
+    model: "gemini-2.0-flash",
     contents: [{ role: "user", parts: [{ text: user }] }],
     config: { systemInstruction: system, temperature: 0.85, maxOutputTokens: maxTokens },
   });
@@ -159,7 +159,7 @@ async function callOpenAI(system: string, user: string, maxTokens = DEFAULT_MAX_
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
-  const timeoutMs = maxTokens > 800 ? 8500 : 6500;
+  const timeoutMs = maxTokens > 800 ? 14000 : 11000;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
