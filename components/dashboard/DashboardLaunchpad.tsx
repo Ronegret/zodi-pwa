@@ -14,7 +14,7 @@ function FeaturedSkeleton() {
       {[...Array(8)].map((_, i) => (
         <div
           key={i}
-          className="min-h-[140px] sm:min-h-44 lg:min-h-52 rounded-2xl bg-white/04 animate-pulse"
+          className="min-h-[140px] sm:min-h-44 lg:min-h-52 xl:min-h-64 rounded-2xl bg-white/04 animate-pulse"
           style={{ animationDelay: `${i * 60}ms` }}
         />
       ))}
@@ -140,7 +140,7 @@ export function DashboardLaunchpad() {
         </div>
 
         {!mounted ? <FeaturedSkeleton /> : (
-        <div className="grid gap-2.5 grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-2.5 grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:gap-4">
           {featured.map(({ slug, badge, color }, index) => {
             const section = dashboardSections.find(s => s.slug === slug);
             if (!section) return null;
@@ -157,7 +157,7 @@ export function DashboardLaunchpad() {
               >
                 <Link
                   href={`/dashboard/${slug}`}
-                  className={`group relative flex min-h-[140px] sm:min-h-44 lg:min-h-52 flex-col overflow-hidden rounded-2xl border border-white/08 bg-gradient-to-br ${color} shadow-lg transition-all duration-300 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]`}
+                  className={`group relative flex min-h-[140px] sm:min-h-44 lg:min-h-52 xl:min-h-64 flex-col overflow-hidden rounded-2xl border border-white/08 bg-gradient-to-br ${color} shadow-lg transition-all duration-300 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]`}
                 >
                   <div className="absolute inset-0 opacity-30 transition-opacity duration-500 group-hover:opacity-50">
                     <Image

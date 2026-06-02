@@ -129,20 +129,20 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
         />
       )}
       {showHero && (
-        <section className="glass-panel neon-border grid rounded-2xl lg:grid-cols-[0.9fr_1.1fr] shadow-[0_0_40px_rgba(0,0,0,0.6)]" style={{ overflow: "clip" }}>
-          <div className="relative min-h-72 sm:min-h-80 lg:min-h-96 bg-black/70">
+        <section className="glass-panel neon-border grid rounded-2xl lg:grid-cols-[1fr_1fr] xl:grid-cols-[0.95fr_1.05fr] shadow-[0_0_40px_rgba(0,0,0,0.6)]" style={{ overflow: "clip" }}>
+          <div className="relative min-h-72 sm:min-h-80 lg:min-h-[420px] xl:min-h-[480px] bg-black/70">
             <Image
               src={section.image}
               alt={section.title}
               fill
-              sizes="(max-width: 1024px) 100vw, 42vw"
-              className="object-contain"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover object-center"
               priority
             />
             {/* Gradiente suave — no ocupa toda la imagen */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent lg:bg-gradient-to-r lg:from-black/60 lg:via-black/10 lg:to-transparent" />
           </div>
-          <div className="relative p-6 sm:p-8 flex flex-col justify-center bg-black/20">
+          <div className="relative p-6 sm:p-8 xl:p-10 flex flex-col justify-center bg-black/20">
             <Link href="/dashboard" className="mb-6 inline-flex w-fit items-center text-sm font-bold text-lime-200/70 transition hover:text-lime-200 hover:-translate-x-1">
               ← Volver al dashboard
             </Link>

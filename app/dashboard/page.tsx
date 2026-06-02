@@ -10,7 +10,7 @@ export default function DashboardPage() {
   return (
     <AnimatedShell>
       <DashboardGate>
-        <div className="mx-auto flex w-full max-w-[1500px] gap-3 sm:gap-5 px-3 py-4 pb-nav sm:px-5">
+        <div className="mx-auto flex w-full max-w-[1500px] xl:max-w-[1700px] 2xl:max-w-[1920px] gap-3 sm:gap-5 px-3 py-4 pb-nav sm:px-5 xl:px-8">
           <Sidebar />
           <div className="min-w-0 flex-1">
             {/* Hero personalizado — saludo + cristal + CTAs */}

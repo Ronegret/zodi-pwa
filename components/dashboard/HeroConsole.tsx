@@ -337,7 +337,7 @@ export function HeroConsole() {
         </motion.div>
       )}
 
-      <section className="grid gap-3 lg:grid-cols-[1.4fr_0.6fr]">
+      <section className="grid gap-3 lg:grid-cols-[1.4fr_0.6fr] xl:grid-cols-[1.55fr_0.45fr]">
       {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
       <div
         className="hero-dark-card neon-border overflow-hidden rounded-2xl relative"
@@ -345,7 +345,7 @@ export function HeroConsole() {
       >
         <NeonAura />
 
-        <div className="p-4 sm:p-6 relative z-[1]">
+        <div className="p-4 sm:p-6 xl:p-7 relative z-[1]">
           {/* Kicker + energy badge: columna en mobile, fila en sm+ */}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="zodi-kicker">{timeGreeting} · ZODI panel astral</p>
@@ -415,14 +415,14 @@ export function HeroConsole() {
               )}
             </div>
 
-            {/* ZODI character */}
-            <div className="hidden md:block shrink-0 -mt-2 -mr-2">
+            {/* ZODI character — se escala con el ancho del hero */}
+            <div className="hidden md:flex shrink-0 items-end self-stretch -mb-1 -mr-1 lg:-mb-2 lg:-mr-2">
               <Image
                 src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.png"
                 alt="ZODI"
-                width={140}
-                height={175}
-                className="object-contain drop-shadow-[0_0_24px_rgba(184,255,23,0.3)]"
+                width={200}
+                height={250}
+                className="object-contain object-bottom drop-shadow-[0_0_30px_rgba(184,255,23,0.35)] lg:w-[240px] lg:h-[300px] xl:w-[280px] xl:h-[350px]"
               />
             </div>
           </div>
@@ -521,7 +521,7 @@ export function HeroConsole() {
       </div>
 
       {/* ── RIGHT: Profile card — solo en desktop (lg+) ─────────────────── */}
-      <div className="hidden lg:flex glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 flex-col gap-4">
+      <div className="hidden lg:flex glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 xl:p-6 flex-col gap-4 xl:gap-5">
         {/* Decorative sigil */}
         <Image
           src="/zodi-art/brand/isotipo.png"
@@ -534,7 +534,7 @@ export function HeroConsole() {
 
         {/* Avatar + name */}
         <div className="relative flex items-center gap-3">
-          <div className="relative h-14 w-14 overflow-hidden rounded-2xl border-2 border-lime-300/35 shrink-0">
+          <div className="relative h-14 w-14 xl:h-16 xl:w-16 overflow-hidden rounded-2xl border-2 border-lime-300/35 shrink-0">
             {!mounted ? (
               <div className="h-full w-full animate-pulse bg-white/10" />
             ) : avatar.startsWith("data:") ? (

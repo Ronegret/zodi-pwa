@@ -12,7 +12,7 @@ export default async function SectionPage({ params }: { params: Promise<{ sectio
   return (
     <AnimatedShell>
       <DashboardGate>
-        <div className="mx-auto flex w-full max-w-[1500px] gap-3 sm:gap-5 px-3 py-4 sm:px-5">
+        <div className="mx-auto flex w-full max-w-[1500px] xl:max-w-[1700px] 2xl:max-w-[1920px] gap-3 sm:gap-5 xl:gap-6 px-3 py-4 sm:px-5 xl:px-8">
           <Sidebar />
           <div className="min-w-0 flex-1 pb-nav lg:pb-6">
             <DashboardSectionPage sectionSlug={section} />

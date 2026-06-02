@@ -134,7 +134,7 @@ export function Sidebar() {
   }, []);
 
   return (
-    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-56 shrink-0 flex-col rounded-xl border shadow-[0_0_40px_rgba(184,255,23,0.06)] lg:flex overflow-hidden"
+    <aside className="sticky top-5 hidden h-[calc(100vh-40px)] w-56 xl:w-64 shrink-0 flex-col rounded-xl border shadow-[0_0_40px_rgba(184,255,23,0.06)] lg:flex overflow-hidden"
       style={{
         background: "var(--sidebar-bg)",
         borderColor: "var(--border)",
