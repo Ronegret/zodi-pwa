@@ -105,19 +105,19 @@ service cloud.firestore {
     }
 
     // ── Amistades ─────────────────────────────────────────────────────────────
-    match /friendships/{docId} {
-      allow read:  if isAuth() && (
-        resource.data.from == request.auth.uid ||
-        resource.data.to == request.auth.uid
+    match /friends/{docId} {
+      allow read:   if isAuth() && (
+        resource.data.requesterUid == request.auth.uid ||
+        resource.data.receiverUid  == request.auth.uid
       );
-      allow create: if isAuth() && request.resource.data.from == request.auth.uid;
+      allow create: if isAuth() && request.resource.data.requesterUid == request.auth.uid;
       allow update: if isAuth() && (
-        resource.data.from == request.auth.uid ||
-        resource.data.to == request.auth.uid
+        resource.data.requesterUid == request.auth.uid ||
+        resource.data.receiverUid  == request.auth.uid
       );
       allow delete: if isAuth() && (
-        resource.data.from == request.auth.uid ||
-        resource.data.to == request.auth.uid
+        resource.data.requesterUid == request.auth.uid ||
+        resource.data.receiverUid  == request.auth.uid
       );
     }
 

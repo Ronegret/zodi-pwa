@@ -58,6 +58,8 @@ export async function saveOnboardingProfile(uid: string, data: OnboardingData, a
       birthCountry: data.birthCountry ?? null,
       currentCity: data.currentCity ?? null,
       currentCountry: data.currentCountry ?? null,
+      // sunSign en users permite búsquedas de compatibilidad sin leer astralProfiles
+      sunSign: astralProfile.sunSign ?? null,
       referralCode,
       updatedAt: serverTimestamp()
     }, { merge: true }),
