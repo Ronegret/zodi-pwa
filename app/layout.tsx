@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MusicPlayer } from "@/components/MusicPlayer";
 import { ZodiOracle } from "@/components/ZodiOracle";
 import { ThemeProvider } from "@/lib/theme";
@@ -94,6 +96,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <ZodiOracle />
           <MusicPlayer />
           <CookieBanner />
+          <Analytics />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>

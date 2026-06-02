@@ -19,6 +19,8 @@
     "@react-oauth/google": "^0.13.5",
     "@serwist/next": "^9.5.11",
     "@stripe/stripe-js": "^9.7.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.10.0",
     "framer-motion": "^12.23.24",
