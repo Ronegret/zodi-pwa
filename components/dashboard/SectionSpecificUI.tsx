@@ -59,23 +59,27 @@ function useConsult(section: DashboardSection) {
   const [reply, setReply]   = useState("");
   const [loading, setLoading] = useState(false);
   const [length, setLength] = useState<"breve" | "normal" | "extensa">("normal");
+  // Tono inicializado desde la preferencia del usuario — no hardcodeado a "directo"
+  const [tone, setTone] = useState<string>(() => getLocalSession().onboardingData?.readingTone ?? "directo");
   const [session] = useState(getLocalSession);
   const [profile] = useState(() => buildProfile(getLocalSession()));
 
-  // Refs para que `consult` tenga referencia estable y no cause re-renders
-  // en los useEffect que lo usan como dependencia
   const lengthRef  = useRef(length);
   const sectionRef = useRef(section);
   const profileRef = useRef(profile);
+  const toneRef    = useRef(tone);
   lengthRef.current  = length;
   sectionRef.current = section;
-  // Reconstruir perfil en cada render para reflejar cambios del usuario (fecha, tono, etc.)
+  toneRef.current    = tone;
   profileRef.current = buildProfile(getLocalSession());
 
   const consult = useCallback(async (input: string) => {
     const sec  = sectionRef.current;
     const len  = lengthRef.current;
-    const prof = profileRef.current;
+    const base = profileRef.current;
+    // Siempre inyectar el tono seleccionado en el perfil para que buildReadingPrompt
+    // lo use correctamente — no solo como texto en el input
+    const prof = base ? { ...base, readingTone: toneRef.current } : null;
 
     if (!input.trim() && !sec.prompt) return;
     setLoading(true);
@@ -130,7 +134,7 @@ function useConsult(section: DashboardSection) {
     }
   }, []); // referencia estable — usa refs internamente
 
-  return { reply, loading, consult, session, profile, length, setLength };
+  return { reply, loading, consult, session, profile, length, setLength, tone, setTone };
 }
 
 function buildProfile(session: ReturnType<typeof getLocalSession>) {
@@ -395,9 +399,8 @@ function LengthSelector({ value, onChange }: { value: string; onChange: (l: "bre
 // 1. TAROT UI
 // ─────────────────────────────────────────────────────────────────────────────
 function TarotUI({ section }: { section: DashboardSection }) {
-  const { reply, loading, consult, length, setLength } = useConsult(section);
+  const { reply, loading, consult, length, setLength, tone, setTone } = useConsult(section);
   const [spread, setSpread] = useState<"1" | "3" | "celta">("3");
-  const [tone, setTone] = useState("directo");
   const [question, setQuestion] = useState("");
   const [flipped, setFlipped] = useState<boolean[]>([false, false, false]);
   const [drawn, setDrawn] = useState(false);
@@ -1608,8 +1611,7 @@ function ChinoUI({ section }: { section: DashboardSection }) {
 // 11. HORÓSCOPO DIARIO UI (enhanced)
 // ─────────────────────────────────────────────────────────────────────────────
 function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
-  const { reply, loading, consult, session, length, setLength } = useConsult(section);
-  const [tone, setTone] = useState("directo");
+  const { reply, loading, consult, session, length, setLength, tone, setTone } = useConsult(section);
   const [question, setQuestion] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const ctx = getTodaysAstralContext();
@@ -2889,9 +2891,8 @@ function EmailSubscriptionBanner() {
 }
 
 function GenericConsultUI({ section }: { section: DashboardSection }) {
-  const { reply, loading, consult, length, setLength } = useConsult(section);
+  const { reply, loading, consult, length, setLength, tone, setTone } = useConsult(section);
   const [question, setQuestion] = useState("");
-  const [tone, setTone] = useState("directo");
   const ctx = getTodaysAstralContext();
 
   const SECTION_PROMPTS: Record<string, string[]> = {

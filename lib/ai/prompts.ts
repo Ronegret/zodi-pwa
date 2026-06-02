@@ -364,6 +364,29 @@ TONO OBLIGATORIO: Íntimo, ácido, inteligente. Usa el nombre constantemente. Co
     );
   }
 
+  // ── Instrucción de tono — obligatoria ────────────────────────────────────
+  const toneLabels: Record<string, string> = {
+    suave:      "Suave y empático: cariñoso, comprensivo, sin golpes bajos. Anima y orienta con ternura.",
+    directo:    "Directo y sin rodeos: al grano, sin adornos, útil y concreto.",
+    brutal:     "Brutal sin filtros: dice la verdad aunque duela, sin suavizar, con datos y sin postureo espiritual.",
+    sarcastico: "Sarcástico y ácido: humor inteligente con verdad envenenada, hace reír pero duele un poco.",
+  };
+  const toneKey = (profile.readingTone ?? "directo") as string;
+  const toneDesc = toneLabels[toneKey] ?? toneLabels.directo;
+  baseLines.push(
+    "",
+    `TONO OBLIGATORIO PARA ESTA RESPUESTA: ${toneKey.toUpperCase()} — ${toneDesc} NO uses otro tono.`
+  );
+
+  // ── Temas favoritos — enfocar cuando sean relevantes ─────────────────────
+  if (profile.favoriteTopics && (profile.favoriteTopics as string[]).length > 0) {
+    baseLines.push(
+      `TEMAS FAVORITOS DEL USUARIO: ${(profile.favoriteTopics as string[]).join(", ")}. ` +
+      `Cuando la consulta sea general (sin tema específico), PRIORIZA estos temas. ` +
+      `El usuario quiere que las lecturas generales giren alrededor de lo que más le importa.`
+    );
+  }
+
   baseLines.push(
     "",
     "Devuelve una respuesta en español con: título, porcentaje de energía, lectura (usa markdown, viñetas, negritas para que sea fácil de leer en el móvil), advertencia, ritual/acción y una frase breve compartible."
