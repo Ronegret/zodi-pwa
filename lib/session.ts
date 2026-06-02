@@ -129,25 +129,11 @@ export function getSavedIdentity(): { uid: string; email: string; onboardingComp
   catch { return null; }
 }
 
-// Marca como no autenticado pero CONSERVA los datos de sesión y onboarding
-// para reconocer al usuario en el próximo login por email/uid
+// Limpia completamente la sesión local al cerrar sesión para evitar contaminación de datos
 export function clearLocalSession() {
   if (typeof window === "undefined") return;
 
-  const raw = window.localStorage.getItem(SESSION_KEY);
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as LocalZodiSession;
-      // Preservar todos los datos, solo marcar como no autenticado
-      window.localStorage.setItem(SESSION_KEY, JSON.stringify({
-        ...parsed,
-        isAuthenticated: false,
-      }));
-    } catch {
-      window.localStorage.removeItem(SESSION_KEY);
-    }
-  }
-
+  window.localStorage.removeItem(SESSION_KEY);
   window.localStorage.removeItem(ONBOARDING_KEY);
   document.cookie = "zodi_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   document.cookie = "zodi_onboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";

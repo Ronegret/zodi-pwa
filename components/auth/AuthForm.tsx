@@ -223,26 +223,25 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     } catch { /* Firestore no disponible */ }
 
     if (!firestoreHasData) {
-      // Si es un login de una cuenta Firebase existente, dejamos entrar aunque Firestore
-      // no responda o falte el perfil. El dashboard pedira completar datos si hace falta.
-      const hadPriorSession = preserved.onboardingCompleted === true;
-      const allowExistingFirebaseUser = !forceNewUser;
+      // Si es un login de una cuenta Firebase existente, pero no tenemos datos locales
+      // ni en Firestore para ESTE usuario, lo mandamos a onboarding para que complete su perfil.
+      const sameUserPriorOnboarding = sameUser && preserved.onboardingCompleted === true;
       setLocalSession({
         isAuthenticated: true,
-        onboardingCompleted: allowExistingFirebaseUser || hadPriorSession,
-        displayName: user.displayName || preserved.displayName || preserved.onboardingData?.displayName || "Viajero ZODI",
-        email: user.email || preserved.email || "",
+        onboardingCompleted: sameUserPriorOnboarding,
+        displayName: user.displayName || (sameUser ? (preserved.displayName || preserved.onboardingData?.displayName) : "") || "Viajero ZODI",
+        email: user.email || (sameUser ? preserved.email : "") || "",
         uid: user.uid, loginAt: Date.now(),
-        astralProfile: preserved.astralProfile,
-        onboardingData: preserved.onboardingData,
+        astralProfile: sameUser ? preserved.astralProfile : undefined,
+        onboardingData: sameUser ? preserved.onboardingData : undefined,
       });
     }
 
     // Decisión de navegación:
-    // - Firestore tiene datos → dashboard
-    // - Login de cuenta existente → dashboard
-    // - Registro/Google nuevo sin datos → onboarding
-    const goToDashboard = firestoreHasData || !forceNewUser || preserved.onboardingCompleted === true;
+    // - Si tenemos datos de Firestore → dashboard
+    // - Si es el mismo usuario y ya tenía onboarding completado localmente → dashboard
+    // - En cualquier otro caso (usuario nuevo o sin datos) → onboarding
+    const goToDashboard = firestoreHasData || (sameUser && preserved.onboardingCompleted === true);
     router.push(goToDashboard ? "/dashboard" : "/onboarding");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
