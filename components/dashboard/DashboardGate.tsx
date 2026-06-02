@@ -25,10 +25,15 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
         const db = getFirebaseDb();
         if (!db) return false;
 
-        const [userSnap, astralSnap] = await Promise.all([
+        const timeout = new Promise<null>(res => setTimeout(() => res(null), 3000));
+        const firestoreRead = Promise.all([
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
+        const timedResult = await Promise.race([firestoreRead, timeout]);
+        if (!timedResult) return false; // timeout
+
+        const [userSnap, astralSnap] = timedResult;
 
         if (!userSnap.exists() || !userSnap.data().onboardingCompleted) {
           return false;
@@ -104,7 +109,13 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        // Timeout de 4s: si Firebase Auth no responde, redirigir a login
+        const authTimeout = setTimeout(() => {
+          if (!cancelled) router.replace("/auth/login");
+        }, 4000);
+
         unsubscribe = onAuthStateChanged(auth, async (user) => {
+          clearTimeout(authTimeout);
           if (!user) {
             router.replace("/auth/login");
             return;
@@ -197,6 +208,7 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
       if (unsubscribe) unsubscribe();
       clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   if (!ready) {

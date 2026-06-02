@@ -171,22 +171,30 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     }
 
     // ── VÍA LENTA: usuario nuevo o sin datos locales → esperar Firestore ──
-    // (solo llega aquí forceNewUser=true o usuario completamente desconocido)
+    // Timeout de 2.5s: si Firestore no responde, navegamos igual (sin bloquear al usuario)
     let firestoreHasData = false;
     try {
-      const [{ getDoc, doc }, { getFirebaseDb }] = await Promise.all([
-        import("firebase/firestore"),
-        import("@/lib/firebase/client"),
-      ]);
-      const db = getFirebaseDb();
-      if (db) {
+      const timeout = new Promise<null>(res => setTimeout(() => res(null), 2500));
+      const firestoreCheck = (async () => {
+        const [{ getDoc, doc }, { getFirebaseDb }] = await Promise.all([
+          import("firebase/firestore"),
+          import("@/lib/firebase/client"),
+        ]);
+        const db = getFirebaseDb();
+        if (!db) return null;
         const [uSnap, aSnap] = await Promise.all([
           getDoc(doc(db, "users", user.uid)),
           getDoc(doc(db, "astralProfiles", user.uid)),
         ]);
+        return { uSnap, aSnap };
+      })();
+
+      const result = await Promise.race([firestoreCheck, timeout]);
+      if (result) {
+        const { uSnap, aSnap } = result;
         if (uSnap.exists() && uSnap.data()?.onboardingCompleted) {
           const ud = uSnap.data();
-          if (!ud) return; // guard: existe pero data() devolvió null (edge case)
+          if (!ud) return;
           const ad = (aSnap.exists() && aSnap.data()) ? aSnap.data()! : ud;
           setLocalSession({
             isAuthenticated: true, onboardingCompleted: true,
@@ -220,7 +228,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           firestoreHasData = true;
         }
       }
-    } catch { /* Firestore no disponible */ }
+    } catch { /* Firestore no disponible o timeout */ }
 
     if (!firestoreHasData) {
       // Si es un login de una cuenta Firebase existente, pero no tenemos datos locales
