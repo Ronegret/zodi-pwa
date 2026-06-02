@@ -1,14 +1,50 @@
 import { buildReadingPrompt, zodiSystemPrompt } from "@/lib/ai/prompts";
 import type { ReadingKind, UserProfile } from "@/types/zodi";
 
-// "anthropic" se acepta como alias de "claude" (nombre de la empresa vs nombre del proveedor)
 export type AIProvider = "openai" | "claude" | "anthropic" | "gemini" | "mock" | "auto";
 
-// El chat route confirma: claude-sonnet-4-6 con 400 tokens = 3.4s en Vercel ✓
-// Reading usa el mismo modelo del env var pero con tokens controlados por tipo
+// Lecturas extendidas — más tokens, más tiempo
 const EXTENDED_KINDS: ReadingKind[] = ["numerology", "natal-chart", "name-reading", "celtic-tarot"];
-const EXTENDED_MAX_TOKENS = 900;  // ~6s con sonnet — margen antes del límite 10s
-const DEFAULT_MAX_TOKENS  = 550;  // ~3.5s con sonnet — igual que chat
+const EXTENDED_MAX_TOKENS = 900;
+const DEFAULT_MAX_TOKENS  = 550;
+
+// ── Routing de modelos ────────────────────────────────────────────────────────
+// Lecturas simples usan Haiku (20× más barato). Lecturas complejas usan Sonnet.
+const HAIKU_KINDS: ReadingKind[] = [
+  "crystals", "biorhythm", "runes", "dream", "roast",
+  "chinese-horoscope", "mayan-horoscope",
+];
+
+// ── Response cache en memoria ─────────────────────────────────────────────────
+// Lecturas genéricas por signo+fecha no cambian entre usuarios → se reutilizan.
+// En Vercel, las funciones warm conservan el módulo entre invocaciones (~5-30 min).
+const CACHEABLE_KINDS: ReadingKind[] = [
+  "daily-horoscope", "weekly-horoscope", "monthly-horoscope",
+];
+const responseCache = new Map<string, { text: string; cachedAt: number }>();
+const CACHE_TTL_MS  = 4 * 60 * 60 * 1000; // 4 horas
+
+function cacheKey(kind: ReadingKind, zodiac: string): string | null {
+  if (!CACHEABLE_KINDS.includes(kind) || !zodiac) return null;
+  const date = new Date().toISOString().slice(0, 10);
+  return `${kind}:${zodiac}:${date}`;
+}
+
+function getCache(key: string): string | null {
+  const entry = responseCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.cachedAt > CACHE_TTL_MS) { responseCache.delete(key); return null; }
+  return entry.text;
+}
+
+function setCache(key: string, text: string): void {
+  responseCache.set(key, { text, cachedAt: Date.now() });
+  // Evitar memory leak: limpiar entradas viejas si el mapa crece demasiado
+  if (responseCache.size > 500) {
+    const oldest = [...responseCache.entries()].sort((a, b) => a[1].cachedAt - b[1].cachedAt);
+    for (const [k] of oldest.slice(0, 100)) responseCache.delete(k);
+  }
+}
 
 export type GenerateReadingParams = {
   provider?: AIProvider;
@@ -32,10 +68,7 @@ export type ZodiReadingResponse = {
   provider: AIProvider;
   fallback?: boolean;
   reason?: string;
-  prompt: {
-    system: string;
-    user: string;
-  };
+  prompt: { system: string; user: string };
 };
 
 export async function generateReading(params: GenerateReadingParams): Promise<ZodiReadingResponse> {
@@ -48,7 +81,6 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
     return localFallback(params.kind, params.profile, promptBundle, "mock");
   }
 
-  // Normalizar "anthropic" a "claude" para el routing interno
   const normalizedProvider: AIProvider = resolvedProvider === "anthropic" ? "claude" : resolvedProvider;
 
   const available: AIProvider[] = (params.provider && params.provider !== "auto")
@@ -64,10 +96,19 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
     return localFallback(params.kind, params.profile, promptBundle, "mock", "Sin proveedores configurados.");
   }
 
+  // ── Response cache — lecturas genéricas por signo+fecha ───────────────────
+  const ck = cacheKey(params.kind, params.profile.zodiac ?? "");
+  if (ck) {
+    const cached = getCache(ck);
+    if (cached) {
+      return normalizeReading(cached, params.kind, promptBundle, normalizedProvider);
+    }
+  }
+
   const maxTokens = EXTENDED_KINDS.includes(params.kind) ? EXTENDED_MAX_TOKENS : DEFAULT_MAX_TOKENS;
 
   const attempts = available.map((p): Promise<string> => {
-    if (p === "claude" || p === "anthropic") return callClaude(promptBundle.system, promptBundle.user, maxTokens);
+    if (p === "claude" || p === "anthropic") return callClaude(promptBundle.system, promptBundle.user, maxTokens, params.kind);
     if (p === "openai") return callOpenAI(promptBundle.system, promptBundle.user, maxTokens);
     if (p === "gemini") return callGemini(promptBundle.system, promptBundle.user, maxTokens);
     return Promise.reject(new Error(`Provider ${p} no implementado`));
@@ -75,6 +116,7 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
 
   try {
     const text = await Promise.any(attempts);
+    if (ck) setCache(ck, text); // guardar en cache si es cacheable
     return normalizeReading(text, params.kind, promptBundle, normalizedProvider);
   } catch (aggErr: unknown) {
     const errors = aggErr instanceof AggregateError
@@ -87,19 +129,22 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
 
 function resolveProvider(provider: AIProvider = "auto"): AIProvider {
   if (provider !== "auto") return provider;
-
   if (process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY) return "claude";
   if (process.env.OPENAI_API_KEY) return "openai";
   if (process.env.GEMINI_API_KEY) return "gemini";
-
   return "mock";
 }
 
-async function callClaude(system: string, user: string, maxTokens = DEFAULT_MAX_TOKENS): Promise<string> {
+// ── Claude — prompt caching + routing Haiku/Sonnet ───────────────────────────
+async function callClaude(system: string, user: string, maxTokens = DEFAULT_MAX_TOKENS, kind?: ReadingKind): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
-  // Timeouts generosos: prompts largos (horóscopo + personalización completa) necesitan margen
+  // Haiku para lecturas simples (20× más barato), Sonnet para lecturas complejas
+  const model = (kind && HAIKU_KINDS.includes(kind))
+    ? (process.env.CLAUDE_HAIKU_MODEL || "claude-haiku-4-5-20251001")
+    : (process.env.CLAUDE_MODEL       || "claude-sonnet-4-6");
+
   const timeoutMs = maxTokens > 800 ? 14000 : 11000;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -108,11 +153,21 @@ async function callClaude(system: string, user: string, maxTokens = DEFAULT_MAX_
       "Content-Type": "application/json",
       "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
+      // Prompt caching: el system prompt se cachea 5 min en Anthropic.
+      // Requests siguientes del mismo usuario en sesión pagan 10% del costo.
+      "anthropic-beta": "prompt-caching-2024-07-31",
     },
     body: JSON.stringify({
-      model: process.env.CLAUDE_MODEL || "claude-sonnet-4-6",
+      model,
       max_tokens: maxTokens,
-      system,
+      // system como array con cache_control — cachea el bloque estático
+      system: [
+        {
+          type: "text",
+          text: system,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
       messages: [{ role: "user", content: user }],
     }),
     signal: AbortSignal.timeout(timeoutMs),
@@ -276,13 +331,11 @@ function localFallback(
   const ritual    = ritualForKind(kind);
   const roast = "El destino te mandó señales. Tu bandeja mental las marcó como spam.";
   const text  = `${title}\n\nEnergía: ${vibeScore}%\n\n${reading}\n\nAdvertencia: ${warning}\n\nAcción mágica: ${ritual}\n\n${roast}`;
-
   return { status: "fallback", title, vibeScore, reading, warning, ritual, roast, text, provider, fallback: true, reason, prompt };
 }
 
 function fallbackText(kind: ReadingKind, sign: string, tone: UserProfile["readingTone"] | undefined): string {
   const toneLine = tone === "brutal" || tone === "sarcastico" ? "sin envolverlo en incienso caro" : "con calma y foco";
-
   const lines: Record<ReadingKind, string> = {
     "daily-horoscope":   `${sign} entra hoy con energía de reinicio: menos drama, más criterio. Lee el ambiente antes de responder y decide ${toneLine}.`,
     "weekly-horoscope":  "Esta semana pide ordenar prioridades. Si algo se repite, no es misterio: es patrón esperando que lo mires de frente.",
@@ -304,7 +357,6 @@ function fallbackText(kind: ReadingKind, sign: string, tone: UserProfile["readin
     roast:               `${sign}, tu intuición está gritando y tu ego pide subtítulos. Hoy bloquea el autosabotaje antes de que se ponga creativo.`,
     assistant:           "ZODI está contigo: pregunta claro, recibe claro. El caos responde mejor cuando no lo alimentas con veinte pestañas abiertas.",
   };
-
   return lines[kind];
 }
 
