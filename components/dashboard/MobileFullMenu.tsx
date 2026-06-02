@@ -103,27 +103,22 @@ export function MobileFullMenu({
             onClick={onClose}
           />
 
-          {/* Sheet */}
+          {/* Sheet — pantalla completa en mobile */}
           <motion.div
             key="sheet"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 32, stiffness: 340 }}
-            className="fixed bottom-0 left-0 right-0 z-[56] flex max-h-[90dvh] flex-col rounded-t-2xl"
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed inset-0 z-[56] flex flex-col"
             style={{
-              background: "linear-gradient(180deg, rgb(14,14,22) 0%, rgb(8,8,16) 100%)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderBottom: "none",
+              background: "linear-gradient(160deg, rgb(10,10,18) 0%, rgb(6,6,14) 60%, rgb(8,4,16) 100%)",
             }}
           >
-            {/* Handle bar */}
-            <div className="flex justify-center pt-3 pb-1 shrink-0">
-              <div className="h-1 w-10 rounded-full bg-white/20" />
-            </div>
-
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pb-3 pt-1 shrink-0 border-b border-white/07">
+            <div className="flex items-center justify-between px-5 pb-3 pt-5 shrink-0 border-b border-white/07"
+              style={{ paddingTop: "max(1.25rem, env(safe-area-inset-top, 1.25rem))" }}
+            >
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-lime-300/70">Navegación</p>
                 <h2 className="text-lg font-black leading-tight">Todo en ZODI</h2>
@@ -186,7 +181,7 @@ export function MobileFullMenu({
             </div>
 
             {/* Sections scroll */}
-            <div className="flex-1 overflow-y-auto px-4 pb-16 no-scrollbar" style={{ paddingBottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" }}>
+            <div className="flex-1 overflow-y-auto px-4 no-scrollbar" style={{ paddingBottom: "calc(2rem + env(safe-area-inset-bottom, 0px))" }}>
               {categories.map((cat) => {
                 const items = cat.slugs
                   .map((slug) => dashboardSections.find((s) => s.slug === slug))

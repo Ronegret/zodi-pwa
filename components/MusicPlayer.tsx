@@ -27,15 +27,15 @@ export function MusicPlayer() {
 
   if (dismissed) return null;
 
-  // En el dashboard — mini player compacto en la derecha, siempre con play visible
+  // En el dashboard — mini player en esquina superior-derecha del nav (mobile) o sidebar (desktop)
   if (isDash) {
     return (
       <AnimatePresence>
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.8, duration: 0.4 }}
-          className="fixed bottom-[88px] right-4 z-40 lg:bottom-6 lg:right-6"
+          className="fixed bottom-[76px] right-3 z-30 lg:bottom-4 lg:right-4"
         >
           {expanded ? (
             /* Panel expandido */
@@ -76,13 +76,13 @@ export function MusicPlayer() {
               </button>
             </motion.div>
           ) : (
-            /* Botón colapsado — siempre muestra play/pause claramente */
+            /* Botón colapsado — compacto, no invasivo */
             <motion.button
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setExpanded(true)}
               aria-label={isPlaying ? "Pausar música" : "Reproducir música ZODI"}
-              className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-lime-300/35 bg-[rgba(4,4,10,0.92)] shadow-[0_4px_20px_rgba(0,0,0,0.6)] transition hover:border-lime-300/65"
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-black/80 shadow-[0_2px_12px_rgba(0,0,0,0.7)] transition hover:border-lime-300/40 lg:h-11 lg:w-11 lg:rounded-2xl"
             >
               {/* Vinilo de fondo */}
               <motion.div

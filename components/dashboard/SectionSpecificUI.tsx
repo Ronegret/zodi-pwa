@@ -2143,42 +2143,30 @@ function PerfilUI() {
           </div>
         </div>
 
-        {/* Avatar */}
+        {/* Avatar — solo foto propia */}
         <div className="mb-4">
-          <span className="text-[10px] uppercase tracking-widest text-white/40">Imagen de perfil</span>
-          <div className="mt-2 flex items-center gap-3">
-            <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden border-2 border-lime-300/40">
-              <Image src={avatar} alt="Avatar" fill className="object-cover" unoptimized={avatar.startsWith("data:")} />
+          <span className="text-[10px] uppercase tracking-widest text-white/40">Foto de perfil</span>
+          <div className="mt-2 flex items-center gap-4">
+            {/* Preview */}
+            <div className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-lime-300/40 shadow-[0_0_12px_rgba(184,255,23,0.15)]">
+              {avatar.startsWith("data:") ? (
+                <img src={avatar} alt="Tu foto" className="h-full w-full object-cover" />
+              ) : (
+                <Image src={avatar} alt="Tu foto" fill className="object-cover" />
+              )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-white/60 leading-snug mb-1">Elige un avatar o sube tu foto</p>
+            {/* Acciones */}
+            <div className="flex-1">
               <button
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
-                className="text-xs font-bold text-lime-200/80 hover:text-lime-200 transition underline"
+                className="flex items-center gap-2 rounded-xl border border-lime-300/30 bg-lime-300/10 px-4 py-2.5 text-sm font-black text-lime-200 transition hover:bg-lime-300/20 active:scale-95"
               >
-                Subir foto propia
+                <span>📷</span> Elegir foto
               </button>
+              <p className="mt-1.5 text-[11px] text-white/35">JPG, PNG, WebP · Máx 2MB</p>
               <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
             </div>
-          </div>
-          {/* Avatar grid — 5 cols móvil, 7 tablet, 13 desktop */}
-          <div className="mt-3 grid grid-cols-5 sm:grid-cols-7 md:grid-cols-[repeat(13,minmax(0,1fr))] gap-2">
-            {AVATAR_PRESETS.map((src, i) => (
-              <button
-                key={src}
-                type="button"
-                onClick={() => setAvatar(src)}
-                title={`Avatar ${i + 1}`}
-                className={`relative aspect-square w-full rounded-lg overflow-hidden transition-all duration-200 ${
-                  avatar === src
-                    ? "ring-2 ring-lime-300 scale-105 shadow-[0_0_8px_rgba(184,255,23,0.5)]"
-                    : "opacity-55 hover:opacity-100 hover:scale-105"
-                }`}
-              >
-                <Image src={src} alt={`Avatar ${i + 1}`} fill className="object-cover" />
-              </button>
-            ))}
           </div>
         </div>
 

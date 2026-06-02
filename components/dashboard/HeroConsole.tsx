@@ -94,11 +94,12 @@ function getDailyPhrase(
   return { phrase, moonLine };
 }
 
-// ── Saludo según hora del día ─────────────────────────────────────────────────
-function getTimeGreeting(): string {
-  const h = new Date().getHours();
+// ── Saludo según hora LOCAL del usuario ───────────────────────────────────────
+function getLocalTimeGreeting(): string {
+  const h = new Date().getHours(); // usa siempre la hora del navegador (timezone local)
   if (h < 6)  return "Madrugada de señales";
   if (h < 12) return "Buenos días";
+  if (h < 14) return "Buena mañana";
   if (h < 18) return "Buenas tardes";
   if (h < 22) return "Buenas noches";
   return "Ya es tarde";
@@ -118,114 +119,123 @@ function energyColor(score: number): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CRYSTAL BALL BG — reemplaza el video; solo transform:rotate (sin repaints)
+// NEON AURA — animación pura de colores, sin imágenes
 // ─────────────────────────────────────────────────────────────────────────────
-function CrystalBallBg() {
+function NeonAura() {
   return (
     <div
-      className="absolute inset-0 overflow-hidden rounded-2xl flex items-center justify-center pointer-events-none select-none"
+      className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none select-none"
       aria-hidden
     >
-      {/* Gradiente base oscuro-violeta */}
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-950/40 via-black/60 to-lime-950/20" />
+      {/* Fondo base */}
+      <div className="absolute inset-0 bg-[#050508]" />
 
-      {/* Halo central — glow radial estático */}
-      <div
-        className="absolute h-56 w-56 sm:h-80 sm:w-80 rounded-full"
+      {/* Orb principal lime — pulsa desde el centro */}
+      <motion.div
+        className="absolute rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(155,77,255,0.12) 0%, rgba(184,255,23,0.06) 45%, transparent 70%)",
-          filter: "blur(4px)",
+          width: "55%", height: "55%",
+          top: "22%", left: "22%",
+          background: "radial-gradient(circle, rgba(184,255,23,0.13) 0%, rgba(184,255,23,0.04) 50%, transparent 75%)",
+          filter: "blur(28px)",
         }}
+        animate={{ scale: [1, 1.18, 0.95, 1], opacity: [0.7, 1, 0.65, 0.7] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* ── Anillo exterior — orbita grande, lime ─────────────────────── */}
-      {/* Logo ~112px → primer anillo ~200px, segundo ~280px, tercero ~360px */}
+      {/* Orb violet — deriva lentamente */}
       <motion.div
-        className="absolute h-48 w-48 sm:h-64 sm:w-64"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-        style={{ willChange: "transform" }}
-      >
-        <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-          <circle
-            cx="100" cy="100" r="97"
-            stroke="rgba(184,255,23,0.30)" strokeWidth="1.2"
-            strokeDasharray="3 12" strokeLinecap="round"
-          />
-        </svg>
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 h-3 w-3 rounded-full bg-lime-300"
-          style={{ boxShadow: "0 0 12px 5px rgba(184,255,23,0.9), 0 0 24px 10px rgba(184,255,23,0.35)" }}
-        />
-      </motion.div>
-
-      {/* ── Anillo medio — cyan, antihorario ──────────────────────────── */}
-      <motion.div
-        className="absolute h-64 w-64 sm:h-80 sm:w-80"
-        animate={{ rotate: -360 }}
-        transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-        style={{ willChange: "transform" }}
-      >
-        <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-          <circle cx="100" cy="100" r="97" stroke="rgba(51,247,255,0.18)" strokeWidth="0.8" strokeDasharray="8 20" />
-        </svg>
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-cyan-300"
-          style={{ boxShadow: "0 0 10px 4px rgba(51,247,255,0.9), 0 0 20px 8px rgba(51,247,255,0.3)" }}
-        />
-      </motion.div>
-
-      {/* ── Anillo orbital violeta — más grande, muy lento ────────────── */}
-      <motion.div
-        className="absolute h-80 w-80 sm:h-96 sm:w-96"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-        style={{ willChange: "transform" }}
-      >
-        <svg className="w-full h-full" viewBox="0 0 200 200" fill="none">
-          <circle cx="100" cy="100" r="97" stroke="rgba(155,77,255,0.12)" strokeWidth="0.6" strokeDasharray="2 18" />
-        </svg>
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-violet-400"
-          style={{ boxShadow: "0 0 8px 3px rgba(155,77,255,0.8)" }}
-        />
-      </motion.div>
-
-      {/* ── Logo ZODI circular — aparece gradualmente ───────────────── */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.55 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-        className="absolute"
-      >
-        {/* Círculo contenedor con borde neon sutil */}
-        <div
-          className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-full overflow-hidden"
-          style={{
-            border: "1px solid rgba(184,255,23,0.25)",
-            boxShadow: "0 0 20px rgba(184,255,23,0.15), inset 0 0 20px rgba(155,77,255,0.1)",
-            background: "radial-gradient(circle, rgba(10,10,20,0.7) 0%, rgba(4,4,10,0.85) 100%)",
-          }}
-        >
-          <Image
-            src="/zodi-art/brand/isotipo.png"
-            alt="ZODI"
-            fill
-            className="object-contain p-2 mix-blend-screen"
-            priority
-            draggable={false}
-          />
-        </div>
-      </motion.div>
-
-      {/* ── Pulso interior — halo que respira ────────────────────────── */}
-      <motion.div
-        className="absolute h-20 w-20 sm:h-28 sm:w-28 rounded-full"
-        animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(155,77,255,0.2) 0%, transparent 70%)",
-          willChange: "transform, opacity",
+          width: "45%", height: "45%",
+          top: "30%", right: "5%",
+          background: "radial-gradient(circle, rgba(139,92,246,0.18) 0%, rgba(109,40,217,0.06) 55%, transparent 80%)",
+          filter: "blur(32px)",
+        }}
+        animate={{
+          x: [0, -30, 15, 0],
+          y: [0, 20, -10, 0],
+          opacity: [0.5, 0.85, 0.55, 0.5],
+        }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Orb cyan — deriva opuesto */}
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: "35%", height: "35%",
+          bottom: "15%", left: "8%",
+          background: "radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 70%)",
+          filter: "blur(24px)",
+        }}
+        animate={{
+          x: [0, 25, -10, 0],
+          y: [0, -18, 8, 0],
+          opacity: [0.4, 0.75, 0.4, 0.4],
+        }}
+        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+      />
+
+      {/* Línea de horizonte neon — lime */}
+      <motion.div
+        className="absolute"
+        style={{
+          height: "1px",
+          left: "5%", right: "5%",
+          bottom: "28%",
+          background: "linear-gradient(90deg, transparent, rgba(184,255,23,0.22), rgba(184,255,23,0.12), transparent)",
+          filter: "blur(0.5px)",
+        }}
+        animate={{ opacity: [0.4, 0.9, 0.4], scaleX: [0.8, 1, 0.85, 0.8] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Línea de horizonte — violet */}
+      <motion.div
+        className="absolute"
+        style={{
+          height: "1px",
+          left: "15%", right: "15%",
+          bottom: "18%",
+          background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent)",
+          filter: "blur(0.5px)",
+        }}
+        animate={{ opacity: [0.3, 0.7, 0.3], scaleX: [0.9, 1, 0.9] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+      />
+
+      {/* Partículas flotantes — pequeños puntos neon */}
+      {[
+        { x: "15%", y: "20%", color: "rgba(184,255,23,0.7)", size: 2, dur: 5 },
+        { x: "75%", y: "35%", color: "rgba(139,92,246,0.8)", size: 1.5, dur: 7 },
+        { x: "88%", y: "65%", color: "rgba(34,211,238,0.6)", size: 2, dur: 9 },
+        { x: "8%",  y: "70%", color: "rgba(184,255,23,0.5)", size: 1.5, dur: 6 },
+        { x: "55%", y: "12%", color: "rgba(139,92,246,0.6)", size: 1, dur: 8 },
+        { x: "42%", y: "82%", color: "rgba(34,211,238,0.5)", size: 1.5, dur: 10 },
+      ].map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            left: p.x, top: p.y,
+            width: p.size * 2, height: p.size * 2,
+            background: p.color,
+            boxShadow: `0 0 ${p.size * 4}px ${p.size * 2}px ${p.color}`,
+          }}
+          animate={{
+            opacity: [0.2, 1, 0.2],
+            scale: [0.8, 1.4, 0.8],
+          }}
+          transition={{ duration: p.dur, repeat: Infinity, ease: "easeInOut", delay: i * 0.8 }}
+        />
+      ))}
+
+      {/* Vignette para que los bordes queden oscuros */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "radial-gradient(ellipse at center, transparent 30%, rgba(5,5,8,0.85) 100%)",
         }}
       />
     </div>
@@ -278,7 +288,8 @@ export function HeroConsole() {
     ? getDailyPhrase(sign, ctx, tone)
     : { phrase: "", moonLine: "" };
 
-  const timeGreeting = getTimeGreeting();
+  // Usar timezone local del cliente — solo disponible después del mount
+  const timeGreeting = mounted ? getLocalTimeGreeting() : "Buenos días";
 
   // Detectar si falta la fecha de nacimiento (dato clave para lecturas)
   const missingBirthDate = mounted && !profile?.birthDate && !getLocalSession().onboardingData?.birthDate;
@@ -315,7 +326,7 @@ export function HeroConsole() {
         className="neon-border overflow-hidden rounded-2xl relative"
         style={{ background: "linear-gradient(145deg, rgba(8,8,16,0.92), rgba(5,5,12,0.88))", border: "1px solid rgba(255,255,255,0.07)" }}
       >
-        <CrystalBallBg />
+        <NeonAura />
 
         <div className="p-4 sm:p-6 relative z-[1]">
           {/* Kicker + energy badge: columna en mobile, fila en sm+ */}

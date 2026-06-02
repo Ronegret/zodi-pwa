@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Gem, Share2, Download } from "lucide-react";
 import { dashboardSections } from "@/lib/dashboard-sections";
 
 const featured = [
@@ -42,6 +43,53 @@ const secondaryGroups = [
 export function DashboardLaunchpad() {
   return (
     <section className="mt-4 sm:mt-6 space-y-6 sm:space-y-8">
+
+      {/* ── Banner referidos + descarga ──────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="grid grid-cols-1 sm:grid-cols-2 gap-2.5"
+      >
+        {/* Invita y gana gemas */}
+        <Link
+          href="/dashboard/perfil"
+          className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-lime-300/20 bg-gradient-to-r from-lime-950/60 to-emerald-950/40 px-4 py-3.5 transition-all hover:border-lime-300/40 hover:from-lime-950/80 active:scale-95"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-lime-300/15 border border-lime-300/25">
+            <Gem className="h-5 w-5 text-lime-300" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-black text-lime-200 leading-tight">Invita y gana gemas</p>
+            <p className="mt-0.5 text-[11px] text-white/50 leading-snug">Comparte ZODI · +50 gemas por amigo</p>
+          </div>
+          <Share2 className="h-4 w-4 shrink-0 text-lime-300/60 group-hover:text-lime-300 transition-colors" />
+          {/* Glow bg */}
+          <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ background: "radial-gradient(ellipse at left, rgba(184,255,23,0.06) 0%, transparent 70%)" }}
+          />
+        </Link>
+
+        {/* Descarga la app */}
+        <Link
+          href="/dashboard/premium"
+          className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-violet-400/20 bg-gradient-to-r from-violet-950/60 to-purple-950/40 px-4 py-3.5 transition-all hover:border-violet-400/40 active:scale-95"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 border border-violet-400/25">
+            <Download className="h-5 w-5 text-violet-300" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-black text-violet-200 leading-tight">Instala ZODI gratis</p>
+            <p className="mt-0.5 text-[11px] text-white/50 leading-snug">Añade a tu pantalla de inicio · Sin app store</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-violet-500/20 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-violet-300">
+            PWA
+          </span>
+          <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ background: "radial-gradient(ellipse at left, rgba(139,92,246,0.06) 0%, transparent 70%)" }}
+          />
+        </Link>
+      </motion.div>
 
       {/* ── Sección principal — 8 cards destacadas ─────────────────────────── */}
       <div>

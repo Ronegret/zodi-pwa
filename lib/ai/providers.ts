@@ -92,7 +92,7 @@ async function callClaude(system: string, user: string): Promise<string> {
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 7000);
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -103,8 +103,8 @@ async function callClaude(system: string, user: string): Promise<string> {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: process.env.CLAUDE_MODEL || "claude-sonnet-4-6",
-        max_tokens: 1400,
+        model: process.env.CLAUDE_MODEL || "claude-haiku-4-5-20251001",
+        max_tokens: 800,
         system,
         messages: [{ role: "user", content: user }],
       }),
@@ -135,13 +135,13 @@ async function callGemini(system: string, user: string): Promise<string> {
   const ai = new GoogleGenAI({ apiKey });
 
   const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Gemini timeout")), 8000)
+    setTimeout(() => reject(new Error("Gemini timeout")), 7000)
   );
 
   const geminiPromise = ai.models.generateContent({
     model: "gemini-1.5-flash",
     contents: [{ role: "user", parts: [{ text: user }] }],
-    config: { systemInstruction: system, temperature: 0.85, maxOutputTokens: 1400 },
+    config: { systemInstruction: system, temperature: 0.85, maxOutputTokens: 800 },
   });
 
   const response = await Promise.race([geminiPromise, timeoutPromise]);
@@ -155,7 +155,7 @@ async function callOpenAI(system: string, user: string): Promise<string> {
   if (!apiKey) throw new Error("La señal astral no está activa.");
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 7000);
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -164,7 +164,7 @@ async function callOpenAI(system: string, user: string): Promise<string> {
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-4o-mini",
         temperature: 0.85,
-        max_tokens: 1200,
+        max_tokens: 800,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
