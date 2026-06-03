@@ -2129,51 +2129,245 @@ function PerfilUI() {
 
   const sunSign = birthDate ? calculateSunSign(birthDate) : ap?.sunSign;
 
+  // ── Datos astrales para los badges ─────────────────────────────────────────
+  const astralBadges = [
+    {
+      key: "solar",
+      label: "Signo Solar",
+      value: sunSign || ap?.sunSign || "–",
+      desc: "Tu esencia, ego y energía central",
+      img: sunSign || ap?.sunSign
+        ? `/zodi-art/signos/${(sunSign || ap?.sunSign || "").toLowerCase()}.png`
+        : null,
+      emoji: "☀️",
+      color: "from-amber-400/30 to-orange-500/20",
+      border: "border-amber-400/30",
+      glow: "rgba(251,191,36,0.25)",
+    },
+    {
+      key: "luna",
+      label: "Signo Lunar",
+      value: ap?.moonSign || "–",
+      desc: "Cómo sientes y tu mundo interior",
+      img: ap?.moonSign ? `/zodi-art/signos/${ap.moonSign.toLowerCase()}.png` : null,
+      emoji: "🌙",
+      color: "from-slate-400/30 to-blue-500/20",
+      border: "border-slate-400/30",
+      glow: "rgba(148,163,184,0.25)",
+    },
+    {
+      key: "asc",
+      label: "Ascendente",
+      value: ap?.ascendant || "–",
+      desc: "Cómo te perciben los demás",
+      img: ap?.ascendant ? `/zodi-art/signos/${ap.ascendant.toLowerCase()}.png` : null,
+      emoji: "⬆️",
+      color: "from-violet-400/30 to-purple-500/20",
+      border: "border-violet-400/30",
+      glow: "rgba(167,139,250,0.25)",
+    },
+    {
+      key: "vida",
+      label: "Número de Vida",
+      value: ap?.lifePathNumber ? String(ap.lifePathNumber) : "–",
+      desc: "Tu misión y camino de vida",
+      img: null,
+      emoji: "🔢",
+      color: "from-lime-400/30 to-emerald-500/20",
+      border: "border-lime-400/30",
+      glow: "rgba(163,230,53,0.25)",
+      bigNumber: ap?.lifePathNumber,
+    },
+    {
+      key: "chino",
+      label: "Zodíaco Chino",
+      value: ap?.chineseZodiac || "–",
+      desc: "Tu animal según el calendario chino",
+      img: null,
+      emoji: "🐉",
+      emojiMap: {
+        Rata:"🐭",Buey:"🐮",Tigre:"🐯",Conejo:"🐰",Dragón:"🐲",Serpiente:"🐍",
+        Caballo:"🐴",Cabra:"🐐",Mono:"🐵",Gallo:"🐓",Perro:"🐶",Cerdo:"🐷",
+      } as Record<string,string>,
+      color: "from-red-400/30 to-orange-600/20",
+      border: "border-red-400/30",
+      glow: "rgba(248,113,113,0.25)",
+    },
+    {
+      key: "maya",
+      label: "Signo Maya",
+      value: ap?.mayanSign || "–",
+      desc: "Tu energía en el calendario sagrado maya",
+      img: null,
+      emoji: "🌿",
+      color: "from-teal-400/30 to-cyan-500/20",
+      border: "border-teal-400/30",
+      glow: "rgba(45,212,191,0.25)",
+    },
+  ];
+
   return (
     <div className="grid gap-4 w-full max-w-full">
-      {/* ── Información personal ── */}
+
+      {/* ══════════════════════════════════════════════════════
+          CABECERA DE PERFIL — avatar grande + nombre + gemas
+          ══════════════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="glass-panel rounded-xl p-4 sm:p-5"
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0e0e18] to-[#080810] p-5"
+        style={{ boxShadow: "0 0 40px rgba(184,255,23,0.06), inset 0 1px 0 rgba(255,255,255,0.05)" }}
       >
-        {/* Header: título + gemas */}
-        <div className="flex items-center justify-between gap-2 mb-4">
-          <div>
-            <h2 className="text-lg font-black leading-tight">Información personal</h2>
-            <p className="text-[11px] text-white/40 mt-0.5">El correo no se puede cambiar. Todo lo demás, sí.</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-1 rounded-full border border-lime-300/30 bg-lime-300/10 px-2.5 py-1">
-            <Gem className="h-3 w-3 text-lime-300" />
-            <span className="text-xs font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>{gems}</span>
-          </div>
-        </div>
+        {/* fondo decorativo */}
+        <div className="pointer-events-none absolute inset-0 opacity-30"
+          style={{ background: "radial-gradient(ellipse 60% 50% at 80% 50%, rgba(155,77,255,0.18), transparent)" }} />
 
-        {/* Avatar — solo foto propia */}
-        <div className="mb-4">
-          <span className="text-[10px] uppercase tracking-widest text-white/40">Foto de perfil</span>
-          <div className="mt-2 flex items-center gap-4">
-            {/* Preview */}
-            <div className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-lime-300/40 shadow-[0_0_12px_rgba(184,255,23,0.15)]">
+        <div className="relative flex items-center gap-5">
+          {/* Avatar grande con botón de cambio */}
+          <div className="relative shrink-0">
+            <div className="relative h-20 w-20 rounded-full overflow-hidden border-2 border-lime-300/50"
+              style={{ boxShadow: "0 0 20px rgba(184,255,23,0.2)" }}>
               {avatar.startsWith("data:") ? (
-                <img src={avatar} alt="Tu foto" className="h-full w-full object-cover" />
+                <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
-                <Image src={avatar} alt="Tu foto" fill className="object-cover" />
+                <Image src={avatar} alt="Avatar" fill className="object-cover" />
               )}
             </div>
-            {/* Acciones */}
-            <div className="flex-1">
-              <button
-                type="button"
-                onClick={() => avatarInputRef.current?.click()}
-                className="flex items-center gap-2 rounded-xl border border-lime-300/30 bg-lime-300/10 px-4 py-2.5 text-sm font-black text-lime-200 transition hover:bg-lime-300/20 active:scale-95"
-              >
-                <span>📷</span> Elegir foto
-              </button>
-              <p className="mt-1.5 text-[11px] text-white/35">JPG, PNG, WebP · Máx 2MB</p>
-              <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border border-lime-300/50 bg-black text-lime-300 shadow-lg transition hover:bg-lime-300/10 active:scale-90"
+              title="Cambiar foto"
+            >
+              <Camera className="h-3.5 w-3.5" />
+            </button>
+            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
+          </div>
+
+          {/* Nombre + signo + gemas */}
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 mb-0.5">
+              {username ? `@${username}` : "Tu perfil"}
+            </p>
+            <h2 className="text-2xl font-black text-white leading-tight truncate">
+              {displayName || "Viajero ZODI"}
+            </h2>
+            {sunSign && (
+              <p className="mt-1 text-sm font-bold text-lime-300">
+                ☀️ {sunSign}{ap?.moonSign ? ` · 🌙 ${ap.moonSign}` : ""}
+              </p>
+            )}
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-lime-300/25 bg-lime-300/8 px-3 py-1">
+              <Gem className="h-3.5 w-3.5 text-lime-300" />
+              <span className="text-sm font-black text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>{gems}</span>
+              <span className="text-xs text-white/40">gemas</span>
             </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ══════════════════════════════════════════════════════
+          PERFIL ASTRAL — badges circulares con imagen + desc
+          ══════════════════════════════════════════════════════ */}
+      {ap && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05 }}
+          className="glass-panel rounded-2xl p-5"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-black">Tu mapa astral</h2>
+              <p className="text-xs text-white/40 mt-0.5">Los 6 pilares de tu carta natal</p>
+            </div>
+            <a href="/onboarding"
+              className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-bold text-white/40 hover:text-lime-200 hover:border-lime-300/25 transition">
+              <RefreshCw className="h-3 w-3" /> Recalcular
+            </a>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {astralBadges.map(b => {
+              const displayEmoji = (b as any).emojiMap?.[b.value] ?? b.emoji;
+              return (
+                <div
+                  key={b.key}
+                  className={`relative flex flex-col items-center rounded-2xl border ${b.border} bg-gradient-to-b ${b.color} p-3 pt-4 text-center`}
+                  style={{ boxShadow: `0 4px 20px ${b.glow}, inset 0 1px 0 rgba(255,255,255,0.06)` }}
+                >
+                  {/* Círculo imagen/emoji */}
+                  <div
+                    className="relative mb-2.5 h-14 w-14 rounded-full overflow-hidden border-2 border-white/15 bg-black/40"
+                    style={{ boxShadow: `0 0 16px ${b.glow}` }}
+                  >
+                    {b.img ? (
+                      <Image src={b.img} alt={b.value} fill className="object-cover scale-110" />
+                    ) : (b as any).bigNumber ? (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <span className="text-2xl font-black text-white" style={{ textShadow: `0 0 12px ${b.glow}` }}>
+                          {(b as any).bigNumber}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-2xl">
+                        {displayEmoji}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Nombre del signo */}
+                  <p className="text-sm font-black text-white leading-tight mb-0.5 break-words w-full">
+                    {b.value}
+                  </p>
+                  {/* Etiqueta tipo */}
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">
+                    {b.label}
+                  </p>
+                  {/* Descripción */}
+                  <p className="text-[10px] text-white/35 leading-tight">
+                    {b.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Información personal ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.1 }}
+        className="glass-panel rounded-xl p-4 sm:p-5"
+      >
+        {/* Header */}
+        <div className="mb-4">
+          <h2 className="text-base font-black leading-tight">Información personal</h2>
+          <p className="text-xs text-white/40 mt-0.5">El correo no se puede cambiar. Todo lo demás, sí.</p>
+        </div>
+
+        {/* Avatar mini + acciones */}
+        <div className="mb-4 flex items-center gap-4">
+          <div className="relative h-14 w-14 shrink-0 rounded-2xl overflow-hidden border-2 border-lime-300/30"
+            style={{ boxShadow: "0 0 10px rgba(184,255,23,0.12)" }}>
+            {avatar.startsWith("data:") ? (
+              <img src={avatar} alt="Tu foto" className="h-full w-full object-cover" />
+            ) : (
+              <Image src={avatar} alt="Tu foto" fill className="object-cover" />
+            )}
+          </div>
+          <div className="flex-1">
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="flex items-center gap-2 rounded-xl border border-lime-300/30 bg-lime-300/10 px-4 py-2.5 text-sm font-black text-lime-200 transition hover:bg-lime-300/20 active:scale-95"
+            >
+              <Camera className="h-4 w-4" /> Cambiar foto
+            </button>
+            <p className="mt-1.5 text-xs text-white/35">JPG, PNG, WebP · Máx 2MB</p>
           </div>
         </div>
 
@@ -2235,8 +2429,8 @@ function PerfilUI() {
         transition={{ duration: 0.35, delay: 0.05 }}
         className="glass-panel rounded-xl p-4 sm:p-5"
       >
-        <h2 className="text-lg font-black mb-0.5">Datos de nacimiento</h2>
-        <p className="text-[11px] text-white/40 mb-4">ZODI usa estos datos para tus lecturas astrológicas personalizadas.</p>
+        <h2 className="text-base font-black mb-0.5">Datos de nacimiento</h2>
+        <p className="text-xs text-white/40 mb-4">ZODI usa estos datos para tus lecturas astrológicas personalizadas.</p>
 
         {/* Siempre columna única en móvil */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2297,8 +2491,8 @@ function PerfilUI() {
         transition={{ duration: 0.35, delay: 0.1 }}
         className="glass-panel rounded-xl p-4 sm:p-5"
       >
-        <h2 className="text-lg font-black mb-0.5">¿Dónde estás ahora?</h2>
-        <p className="text-[11px] text-white/40 mb-4">ZODI ajusta su lenguaje al lugar donde vives. Chileno, mexicano, rioplatense… como uno de allí.</p>
+        <h2 className="text-base font-black mb-0.5">¿Dónde estás ahora?</h2>
+        <p className="text-xs text-white/40 mb-4">ZODI ajusta su lenguaje al lugar donde vives. Chileno, mexicano, rioplatense… como uno de allí.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <ProfilePlaceInput
             label="País actual"
@@ -2326,8 +2520,8 @@ function PerfilUI() {
         transition={{ duration: 0.4, delay: 0.15 }}
         className="glass-panel rounded-xl p-4 sm:p-5"
       >
-        <h2 className="text-lg font-black mb-0.5">Tu contexto vital</h2>
-        <p className="text-[11px] text-white/40 mb-4">Cuanto más sepa ZODI de ti, más exacta (y ácida) será la lectura. Todo opcional, todo privado.</p>
+        <h2 className="text-base font-black mb-0.5">Tu contexto vital</h2>
+        <p className="text-xs text-white/40 mb-4">Cuanto más sepa ZODI de ti, más exacta (y ácida) será la lectura. Todo opcional, todo privado.</p>
 
         {/* Estado sentimental — grid 2-col en mobile, wrap en desktop */}
         <div className="mb-5">
@@ -2460,8 +2654,8 @@ function PerfilUI() {
         transition={{ duration: 0.35, delay: 0.2 }}
         className="glass-panel rounded-xl p-4 sm:p-5"
       >
-        <h2 className="text-lg font-black mb-0.5">Tono de lecturas</h2>
-        <p className="text-[11px] text-white/40 mb-3">Cómo quieres que ZODI te hable.</p>
+        <h2 className="text-base font-black mb-0.5">Tono de lecturas</h2>
+        <p className="text-xs text-white/40 mb-3">Cómo quieres que ZODI te hable.</p>
         <div className="grid grid-cols-2 gap-2 mb-4">
           {(["suave", "directo", "brutal", "sarcastico"] as const).map(t => {
             const labels: Record<string, string> = {
@@ -2538,31 +2732,6 @@ function PerfilUI() {
         </div>
       </div>
 
-      {/* Perfil astral */}
-      {ap && (
-        <div className="glass-panel rounded-xl p-4 sm:p-5">
-          <h2 className="text-sm font-black mb-3">Tu perfil astral</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {[
-              { label: "Signo",      value: ap.sunSign ?? "–",             emoji: "☀️" },
-              { label: "Luna",       value: ap.moonSign ?? "–",            emoji: "🌙" },
-              { label: "Ascendente", value: ap.ascendant ?? "–",           emoji: "⬆️" },
-              { label: "Vida",       value: String(ap.lifePathNumber ?? "–"), emoji: "🔢" },
-              { label: "Chino",      value: ap.chineseZodiac ?? "–",       emoji: "🐉" },
-              { label: "Maya",       value: ap.mayanSign ?? "–",           emoji: "🌿" },
-            ].map(item => (
-              <div key={item.label} className="rounded-lg border border-white/08 bg-black/30 p-3 text-center">
-                <p className="text-[10px] text-white/40 mb-1">{item.label}</p>
-                <p className="text-xl mb-0.5">{item.emoji}</p>
-                <p className="font-black text-sm leading-tight break-words">{item.value}</p>
-              </div>
-            ))}
-          </div>
-          <a href="/onboarding" className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-white/35 hover:text-lime-200/70 transition">
-            <RefreshCw className="h-3 w-3" /> Recalcular
-          </a>
-        </div>
-      )}
 
       {/* Cuenta */}
       <div className="glass-panel rounded-xl p-4 sm:p-5">

@@ -80,72 +80,19 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     import("@/lib/gamification").then(g => { if (g.getGems().total === 0) g.addGems(15); }).catch(() => {});
 
     // ── VÍA RÁPIDA 1: usuario conocido en localStorage ───────────────────
+    // Navega inmediatamente — los datos locales son la fuente de verdad.
+    // NO sincronizamos Firestore aquí: ese sync asíncrono pisaba datos buenos
+    // con valores nulos de Firestore. La página de perfil ya sincroniza al guardarse.
     if (!forceNewUser && sameUser && preserved.onboardingCompleted) {
       setLocalSession({
         isAuthenticated: true, onboardingCompleted: true,
         uid: user.uid, email: user.email || preserved.email || "",
-        // Preferir displayName del onboardingData sobre el placeholder "Viajero ZODI"
         displayName: user.displayName || preserved.onboardingData?.displayName || preserved.displayName || "Viajero ZODI",
         loginAt: Date.now(),
         astralProfile: preserved.astralProfile,
         onboardingData: preserved.onboardingData,
       });
       router.push("/dashboard");
-
-      // Sincronizar Firestore en background — no bloquea la navegación
-      Promise.all([
-        import("firebase/firestore"),
-        import("@/lib/firebase/client"),
-      ]).then(async ([{ getDoc, doc, setDoc, serverTimestamp }, { getFirebaseDb }]) => {
-        const db = getFirebaseDb();
-        if (!db) return;
-        const [uSnap, aSnap] = await Promise.all([
-          getDoc(doc(db, "users", user.uid)),
-          getDoc(doc(db, "astralProfiles", user.uid)),
-        ]);
-        if (uSnap.exists()) {
-          const ud = uSnap.data();
-          const ad = aSnap.exists() ? aSnap.data() : ud;
-          // Fusionar datos de Firestore con lo que ya tenemos localmente
-          setLocalSession({
-            onboardingData: {
-              ...preserved.onboardingData,
-              displayName: ud.displayName || preserved.onboardingData?.displayName || "",
-              birthDate: ad.birthDate || ud.birthDate || preserved.onboardingData?.birthDate || "",
-              birthTime: ad.birthTime || ud.birthTime || preserved.onboardingData?.birthTime || "",
-              birthCity: ad.birthCity || ud.birthCity || preserved.onboardingData?.birthCity || "",
-              birthCountry: ad.birthCountry || ud.birthCountry || preserved.onboardingData?.birthCountry || "",
-              currentCity: ud.currentCity || preserved.onboardingData?.currentCity || "",
-              currentCountry: ud.currentCountry || preserved.onboardingData?.currentCountry || "",
-              readingTone: ud.readingTone ?? preserved.onboardingData?.readingTone ?? "directo",
-              favoriteTopics: ud.favoriteTopics ?? preserved.onboardingData?.favoriteTopics ?? [],
-              notificationPreferences: ud.notificationPreferences ?? preserved.onboardingData?.notificationPreferences ?? [],
-              lastName: ud.lastName ?? preserved.onboardingData?.lastName ?? "",
-              avatar: ud.avatar ?? preserved.onboardingData?.avatar ?? "/zodi-art/perfil/perfil-1.png",
-              username: ud.username ?? preserved.onboardingData?.username ?? "",
-              genderIdentity: ud.genderIdentity ?? preserved.onboardingData?.genderIdentity ?? "",
-              relationshipStatus: ud.relationshipStatus ?? preserved.onboardingData?.relationshipStatus,
-              partnerName: ud.partnerName ?? preserved.onboardingData?.partnerName,
-              partnerBirthDate: ud.partnerBirthDate ?? preserved.onboardingData?.partnerBirthDate,
-              hasKids: ud.hasKids ?? preserved.onboardingData?.hasKids,
-              kidsCount: ud.kidsCount ?? preserved.onboardingData?.kidsCount,
-              personalBio: ud.personalBio ?? preserved.onboardingData?.personalBio,
-            } as any,
-            astralProfile: {
-              ...preserved.astralProfile,
-              sunSign: ad.sunSign ?? preserved.astralProfile?.sunSign ?? "",
-              moonSign: ad.moonSign ?? preserved.astralProfile?.moonSign ?? "",
-              ascendant: ad.ascendant ?? preserved.astralProfile?.ascendant ?? "",
-              lifePathNumber: ad.lifePathNumber ?? preserved.astralProfile?.lifePathNumber ?? 1,
-              chineseZodiac: ad.chineseZodiac ?? preserved.astralProfile?.chineseZodiac ?? "",
-              mayanSign: ad.mayanSign ?? preserved.astralProfile?.mayanSign ?? "",
-              biorhythmBaseline: ad.biorhythmBaseline ?? preserved.astralProfile?.biorhythmBaseline ?? new Date().toISOString(),
-              natalChartBase: ad.natalChartBase ?? preserved.astralProfile?.natalChartBase ?? "",
-              summary: ad.summary ?? preserved.astralProfile?.summary ?? "",
-            } as any,
-          });
-        }
-      }).catch(() => { /* silencioso — datos locales ya disponibles */ });
       return;
     }
 
@@ -511,7 +458,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             "auth/weak-password",
             "auth/wrong-password",
             "auth/invalid-credential",
-            "auth/user-not-found"
+            "auth/user-not-found",
+            "auth/user-disabled",
+            "auth/too-many-requests",
+            "auth/requires-recent-login",
+            "auth/credential-already-in-use",
+            "auth/account-exists-with-different-credential",
           ].includes(code);
 
           // Si es un error legítimo del usuario (ej. contraseña incorrecta), lo lanzamos para mostrarlo en la UI.
