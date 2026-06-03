@@ -8,13 +8,13 @@ import { Award, BookMarked, MessageCircle, Sparkles } from "lucide-react";
 import { feedPosts } from "@/lib/data";
 
 const TAROT_DECK = [
-  { name: "La Red Flag",        img: "/zodi-art/nuevas/8-Tarot-ZODI/La-Red-Flag.png" },
-  { name: "El Karma",           img: "/zodi-art/nuevas/8-Tarot-ZODI/El-Karma.png" },
-  { name: "La Verdad",          img: "/zodi-art/nuevas/8-Tarot-ZODI/La-Verdad.png" },
-  { name: "El Destino",         img: "/zodi-art/nuevas/8-Tarot-ZODI/El-Destino.png" },
-  { name: "El Ego",             img: "/zodi-art/nuevas/8-Tarot-ZODI/El-Ego.png" },
-  { name: "La Mala Idea",       img: "/zodi-art/nuevas/8-Tarot-ZODI/La-Mala-Idea.png" },
-  { name: "La Venganza Cósmica",img: "/zodi-art/nuevas/8-Tarot-ZODI/La-Venganza-Cosmica.png" },
+  { name: "La Red Flag",        img: "/zodi-art/nuevas/8-Tarot-ZODI/La-Red-Flag.webp" },
+  { name: "El Karma",           img: "/zodi-art/nuevas/8-Tarot-ZODI/El-Karma.webp" },
+  { name: "La Verdad",          img: "/zodi-art/nuevas/8-Tarot-ZODI/La-Verdad.webp" },
+  { name: "El Destino",         img: "/zodi-art/nuevas/8-Tarot-ZODI/El-Destino.webp" },
+  { name: "El Ego",             img: "/zodi-art/nuevas/8-Tarot-ZODI/El-Ego.webp" },
+  { name: "La Mala Idea",       img: "/zodi-art/nuevas/8-Tarot-ZODI/La-Mala-Idea.webp" },
+  { name: "La Venganza Cósmica",img: "/zodi-art/nuevas/8-Tarot-ZODI/La-Venganza-Cosmica.webp" },
 ];
 
 export function DashboardPanels() {
@@ -58,18 +58,18 @@ export function DashboardPanels() {
         {/* Grid de signos del zodiaco */}
         <div className="grid grid-cols-6 gap-1.5 mb-3">
           {[
-            { sign: "Aries", img: "/zodi-art/signos/aries.png" },
-            { sign: "Tauro", img: "/zodi-art/signos/tauro.png" },
-            { sign: "Géminis", img: "/zodi-art/signos/geminis.png" },
-            { sign: "Cáncer", img: "/zodi-art/signos/cancer.png" },
-            { sign: "Leo", img: "/zodi-art/signos/leo.png" },
-            { sign: "Virgo", img: "/zodi-art/signos/virgo.png" },
-            { sign: "Libra", img: "/zodi-art/signos/libra.png" },
-            { sign: "Escorpio", img: "/zodi-art/signos/escorpio.png" },
-            { sign: "Sagitario", img: "/zodi-art/signos/sagitario.png" },
-            { sign: "Capricornio", img: "/zodi-art/signos/capricornio.png" },
-            { sign: "Acuario", img: "/zodi-art/signos/acuario.png" },
-            { sign: "Piscis", img: "/zodi-art/signos/piscis.png" },
+            { sign: "Aries", img: "/zodi-art/signos/aries.webp" },
+            { sign: "Tauro", img: "/zodi-art/signos/tauro.webp" },
+            { sign: "Géminis", img: "/zodi-art/signos/geminis.webp" },
+            { sign: "Cáncer", img: "/zodi-art/signos/cancer.webp" },
+            { sign: "Leo", img: "/zodi-art/signos/leo.webp" },
+            { sign: "Virgo", img: "/zodi-art/signos/virgo.webp" },
+            { sign: "Libra", img: "/zodi-art/signos/libra.webp" },
+            { sign: "Escorpio", img: "/zodi-art/signos/escorpio.webp" },
+            { sign: "Sagitario", img: "/zodi-art/signos/sagitario.webp" },
+            { sign: "Capricornio", img: "/zodi-art/signos/capricornio.webp" },
+            { sign: "Acuario", img: "/zodi-art/signos/acuario.webp" },
+            { sign: "Piscis", img: "/zodi-art/signos/piscis.webp" },
           ].map(({ sign, img }) => (
             <Link key={sign} href="/dashboard/comunidad" title={sign}
               className="group relative aspect-square overflow-hidden rounded-lg border border-white/10 transition hover:border-lime-300/50 hover:scale-105">

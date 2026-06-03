@@ -25,7 +25,7 @@ export default function Error({
       <div className="relative min-h-[100dvh] flex items-center justify-center p-4">
         <div className="absolute inset-0 -z-20">
           <Image
-            src="/zodi-art/oracle-frame-tall.png"
+            src="/zodi-art/oracle-frame-tall.webp"
             alt="Fondo de error"
             fill
             className="object-cover object-center opacity-10"

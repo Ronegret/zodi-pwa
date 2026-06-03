@@ -11,7 +11,7 @@ export default function RegisterPage() {
       <section className="relative flex min-h-[100dvh] flex-col items-center px-3 py-8 sm:px-4 sm:py-12 pt-20">
         <div className="absolute inset-0 -z-20">
           <Image
-            src="/zodi-art/zodi-us.png"
+            src="/zodi-art/zodi-us.webp"
             alt="ZODI Registro"
             fill
             className="object-cover object-center opacity-35"

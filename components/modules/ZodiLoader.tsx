@@ -137,7 +137,7 @@ export function ZodiLoader({ fullscreen = false, compact = false, kind, message 
           className={`relative rounded-full overflow-hidden border-2 border-lime-300/50 shadow-[0_0_24px_rgba(184,255,23,0.30)] ${compact ? "h-16 w-16" : "h-24 w-24"}`}
         >
           <Image
-            src="/zodi-art/brand/isotipo.png"
+            src="/zodi-art/brand/isotipo.webp"
             alt="ZODI cargando"
             fill
             className="object-contain p-1.5 mix-blend-screen"
@@ -200,7 +200,7 @@ export function ZodiSpinner({ size = 20 }: { size?: number }) {
       style={{ width: size, height: size }}
       className="relative flex-shrink-0"
     >
-      <Image src="/zodi-art/brand/isotipo.png" alt="Cargando" fill className="object-contain opacity-80 mix-blend-screen" />
+      <Image src="/zodi-art/brand/isotipo.webp" alt="Cargando" fill className="object-contain opacity-80 mix-blend-screen" />
     </motion.div>
   );
 }

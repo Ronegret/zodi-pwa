@@ -157,7 +157,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             } as any,
             onboardingData: {
               displayName: ud.displayName || "", lastName: ud.lastName || "",
-              username: ud.username || "", avatar: ud.avatar || "/zodi-art/perfil/perfil-1.png",
+              username: ud.username || "", avatar: ud.avatar || "/zodi-art/perfil/perfil-1.webp",
               genderIdentity: ud.genderIdentity || "",
               birthDate: ad.birthDate || ud.birthDate || "",
               birthTime: ad.birthTime || ud.birthTime || "",

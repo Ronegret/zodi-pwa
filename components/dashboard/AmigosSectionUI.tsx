@@ -129,7 +129,7 @@ export function AmigosSectionUI() {
     setMyUid(session.uid ?? "");
     setMySign(profile?.zodiac ?? "");
     setMyName(profile?.displayName?.split(" ")[0] ?? "tú");
-    setMyAvatar(profile?.avatar ?? "/zodi-art/perfil/perfil-1.png");
+    setMyAvatar(profile?.avatar ?? "/zodi-art/perfil/perfil-1.webp");
     setMyUsername((session.onboardingData as any)?.username ?? "");
     setMyReadingTone(profile?.readingTone ?? "directo");
   }, []);
@@ -160,7 +160,7 @@ export function AmigosSectionUI() {
         const d = doc.data();
         if (!uidSet.has(d.receiverUid)) {
           uidSet.add(d.receiverUid);
-          friendsList.push({ requestId: doc.id, uid: d.receiverUid, username: d.receiverUsername ?? "", displayName: d.receiverDisplayName ?? "", sign: d.receiverSign ?? "", avatar: d.receiverAvatar ?? "/zodi-art/perfil/perfil-1.png" });
+          friendsList.push({ requestId: doc.id, uid: d.receiverUid, username: d.receiverUsername ?? "", displayName: d.receiverDisplayName ?? "", sign: d.receiverSign ?? "", avatar: d.receiverAvatar ?? "/zodi-art/perfil/perfil-1.webp" });
         }
       });
 
@@ -168,14 +168,14 @@ export function AmigosSectionUI() {
         const d = doc.data();
         if (!uidSet.has(d.requesterUid)) {
           uidSet.add(d.requesterUid);
-          friendsList.push({ requestId: doc.id, uid: d.requesterUid, username: d.requesterUsername ?? "", displayName: d.requesterDisplayName ?? "", sign: d.requesterSign ?? "", avatar: d.requesterAvatar ?? "/zodi-art/perfil/perfil-1.png" });
+          friendsList.push({ requestId: doc.id, uid: d.requesterUid, username: d.requesterUsername ?? "", displayName: d.requesterDisplayName ?? "", sign: d.requesterSign ?? "", avatar: d.requesterAvatar ?? "/zodi-art/perfil/perfil-1.webp" });
         }
       });
 
       const requestsList: RequestData[] = [];
       incoming.forEach(doc => {
         const d = doc.data();
-        requestsList.push({ id: doc.id, fromUid: d.requesterUid, fromUsername: d.requesterUsername ?? "", fromDisplayName: d.requesterDisplayName ?? "", fromSign: d.requesterSign ?? "", fromAvatar: d.requesterAvatar ?? "/zodi-art/perfil/perfil-1.png" });
+        requestsList.push({ id: doc.id, fromUid: d.requesterUid, fromUsername: d.requesterUsername ?? "", fromDisplayName: d.requesterDisplayName ?? "", fromSign: d.requesterSign ?? "", fromAvatar: d.requesterAvatar ?? "/zodi-art/perfil/perfil-1.webp" });
       });
 
       const pendingSet = new Set<string>();
@@ -212,7 +212,7 @@ export function AmigosSectionUI() {
       snap.forEach(doc => {
         const d = doc.data();
         if (doc.id !== myUid) {
-          results.push({ uid: doc.id, username: d.username ?? "", displayName: d.displayName ?? "", sign: d.sunSign ?? "", avatar: d.avatar ?? "/zodi-art/perfil/perfil-1.png" });
+          results.push({ uid: doc.id, username: d.username ?? "", displayName: d.displayName ?? "", sign: d.sunSign ?? "", avatar: d.avatar ?? "/zodi-art/perfil/perfil-1.webp" });
         }
       });
       setSearchResults(results);
@@ -428,7 +428,7 @@ export function AmigosSectionUI() {
                         src={friend.avatar}
                         alt={friend.displayName}
                         className="h-12 w-12 shrink-0 rounded-full border border-white/10 object-cover"
-                        onError={e => { (e.target as HTMLImageElement).src = "/zodi-art/perfil/perfil-1.png"; }}
+                        onError={e => { (e.target as HTMLImageElement).src = "/zodi-art/perfil/perfil-1.webp"; }}
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -561,7 +561,7 @@ export function AmigosSectionUI() {
                     src={user.avatar}
                     alt={user.displayName}
                     className="h-11 w-11 shrink-0 rounded-full border border-white/10 object-cover"
-                    onError={e => { (e.target as HTMLImageElement).src = "/zodi-art/perfil/perfil-1.png"; }}
+                    onError={e => { (e.target as HTMLImageElement).src = "/zodi-art/perfil/perfil-1.webp"; }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="truncate text-sm font-black text-white">{user.displayName}</p>
@@ -613,7 +613,7 @@ export function AmigosSectionUI() {
                     src={req.fromAvatar}
                     alt={req.fromDisplayName}
                     className="h-11 w-11 shrink-0 rounded-full border border-white/10 object-cover"
-                    onError={e => { (e.target as HTMLImageElement).src = "/zodi-art/perfil/perfil-1.png"; }}
+                    onError={e => { (e.target as HTMLImageElement).src = "/zodi-art/perfil/perfil-1.webp"; }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="truncate text-sm font-black text-white">{req.fromDisplayName}</p>

@@ -495,7 +495,7 @@ function TarotUI({ section }: { section: DashboardSection }) {
                       className="absolute inset-0 w-full h-full backface-hidden rounded-xl border border-white/20 overflow-hidden bg-black shadow-[0_0_20px_rgba(184,255,23,0.15)]"
                       style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
                     >
-                      <div className="absolute inset-0 bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/Imagen-general-tarot-ZODI.png')] bg-cover bg-center opacity-80 hover:opacity-100 hover:scale-105 transition duration-500" />
+                      <div className="absolute inset-0 bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/Imagen-general-tarot-ZODI.webp')] bg-cover bg-center opacity-80 hover:opacity-100 hover:scale-105 transition duration-500" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 pointer-events-none">
                         <span className="text-4xl text-lime-300 animate-pulse text-center drop-shadow-[0_0_10px_rgba(184,255,23,0.8)]">✦</span>
                         <p className="text-[10px] uppercase font-black text-lime-300 tracking-[0.3em] text-center mt-2">Tocar</p>
@@ -508,7 +508,7 @@ function TarotUI({ section }: { section: DashboardSection }) {
                       style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
                     >
                       <div className={`absolute inset-0 bg-cover bg-center opacity-90 mix-blend-screen transition duration-500 ${
-                        ["bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Verdad.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/El-Karma.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Red-Flag.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/El-Destino.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Mala-Idea.png')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Venganza-Cosmica.png')]"][i % 6]
+                        ["bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Verdad.webp')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/El-Karma.webp')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Red-Flag.webp')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/El-Destino.webp')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Mala-Idea.webp')]", "bg-[url('/zodi-art/nuevas/8-Tarot-ZODI/La-Venganza-Cosmica.webp')]"][i % 6]
                       }`} />
                       <div className="absolute inset-0 flex flex-col items-center justify-end p-4 bg-gradient-to-t from-black/90 via-black/40 to-black/10">
                         <p className="text-xs font-black text-lime-300 tracking-[0.2em] uppercase text-center leading-tight drop-shadow-md">
@@ -810,7 +810,7 @@ const SIGN_TO_FILE: Record<string, string> = {
 function signImgPath(sign: string): string {
   const file = SIGN_TO_FILE[sign]
     ?? sign.normalize("NFD").replace(/[̀-ͯ]/g, "");
-  return `/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${file}.png`;
+  return `/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${file}.webp`;
 }
 
 // Tarjeta grande de signo con imagen artwork + radio + sombra neon
@@ -1053,7 +1053,7 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
         {/* Large centered image */}
         <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] max-h-[500px] bg-black">
           <Image
-            src={`/zodi-art/nuevas/7-Numerologia/${targetNumber}.png`}
+            src={`/zodi-art/nuevas/7-Numerologia/${targetNumber}.webp`}
             alt={`Número ${targetNumber}`}
             fill
             className="object-contain"
@@ -1112,7 +1112,7 @@ function NumerologiaUI({ section }: { section: DashboardSection }) {
                     targetNumber === n ? "border-lime-300 ring-2 ring-lime-300 shadow-[0_0_15px_rgba(184,255,23,0.3)] scale-105" : "border-white/10 opacity-70 hover:opacity-100 hover:border-lime-300/40"
                   }`}
                 >
-                  <Image src={`/zodi-art/nuevas/7-Numerologia/${n}.png`} alt={`Número ${n}`} fill className="object-cover" />
+                  <Image src={`/zodi-art/nuevas/7-Numerologia/${n}.webp`} alt={`Número ${n}`} fill className="object-cover" />
                 </button>
               ))}
             </div>
@@ -1894,19 +1894,19 @@ function ProfileSaveBtn({ onClick, saving, saved, label = "Guardar cambios" }: {
 
 // Avatares disponibles en /public/zodi-art/perfil/
 const AVATAR_PRESETS = [
-  "/zodi-art/perfil/perfil-1.png",
-  "/zodi-art/perfil/perfil-2.png",
-  "/zodi-art/perfil/perfil-3.png",
-  "/zodi-art/perfil/perfil-4.png",
-  "/zodi-art/perfil/perfil-5.png",
-  "/zodi-art/perfil/perfil-6.png",
-  "/zodi-art/perfil/perfil-7.png",
-  "/zodi-art/perfil/perfil8.png",
-  "/zodi-art/perfil/perfil-9.png",
-  "/zodi-art/perfil/perfil-10.png",
-  "/zodi-art/perfil/perfil-11.png",
-  "/zodi-art/perfil/perfil-12.png",
-  "/zodi-art/perfil/perfil-13.png",
+  "/zodi-art/perfil/perfil-1.webp",
+  "/zodi-art/perfil/perfil-2.webp",
+  "/zodi-art/perfil/perfil-3.webp",
+  "/zodi-art/perfil/perfil-4.webp",
+  "/zodi-art/perfil/perfil-5.webp",
+  "/zodi-art/perfil/perfil-6.webp",
+  "/zodi-art/perfil/perfil-7.webp",
+  "/zodi-art/perfil/perfil8.webp",
+  "/zodi-art/perfil/perfil-9.webp",
+  "/zodi-art/perfil/perfil-10.webp",
+  "/zodi-art/perfil/perfil-11.webp",
+  "/zodi-art/perfil/perfil-12.webp",
+  "/zodi-art/perfil/perfil-13.webp",
 ];
 
 function PerfilUI() {
@@ -1922,7 +1922,7 @@ function PerfilUI() {
   const [displayName, setDisplayName] = useState(() => { const s = getSes(); return s.onboardingData?.displayName ?? s.displayName ?? ""; });
   const [lastName, setLastName]   = useState(() => getOd()?.lastName ?? "");
   const [username, setUsername]   = useState(() => getOd()?.username ?? "");
-  const [avatar, setAvatar]       = useState(() => getOd()?.avatar ?? "/zodi-art/perfil/perfil-1.png");
+  const [avatar, setAvatar]       = useState(() => getOd()?.avatar ?? "/zodi-art/perfil/perfil-1.webp");
   // Editable: nacimiento
   const [birthDate, setBirthDate]     = useState(() => getOd()?.birthDate ?? "");
   const [birthTime, setBirthTime]     = useState(() => getOd()?.birthTime ?? "");
@@ -2175,7 +2175,7 @@ function PerfilUI() {
       value: ap?.lifePathNumber ? String(ap.lifePathNumber) : "–",
       desc: "Tu misión y camino de vida",
       img: ap?.lifePathNumber
-        ? `/zodi-art/nuevas/7-Numerologia/${ap.lifePathNumber}.png`
+        ? `/zodi-art/nuevas/7-Numerologia/${ap.lifePathNumber}.webp`
         : null,
       emoji: "🔢",
       color: "from-lime-400/30 to-emerald-500/20",

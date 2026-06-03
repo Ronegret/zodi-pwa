@@ -22,7 +22,7 @@ const mainConsultas = [
   {
     title: "Horóscopo personal",
     body: "Abre el día con una lectura clara sobre amor, dinero, trabajo y energía. Sin sermones: señales útiles, humor ácido y algo que puedas aplicar hoy mismo.",
-    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-diario.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-diario.webp",
     action: "Ver horóscopos",
     href: "/auth/register",
     badge: "🔥 Más popular",
@@ -31,7 +31,7 @@ const mainConsultas = [
   {
     title: "Tarot y tiradas",
     body: "Elige el tono y deja que ZODI traduzca el caos: situación, bloqueo, consejo y esa verdad incómoda que probablemente ya sabías.",
-    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Tarot-acido.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Tarot-acido.webp",
     action: "Tirar las cartas",
     href: "/auth/register",
     badge: "🃏 7 cartas ZODI",
@@ -40,7 +40,7 @@ const mainConsultas = [
   {
     title: "Numerología profunda",
     body: "Calcula camino de vida, vibración del nombre y fechas clave. Los números no te salvan, pero sí delatan patrones con una precisión molesta.",
-    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Numerologia.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Numerologia.webp",
     action: "Calcular números",
     href: "/auth/register",
     badge: "🔢 IA avanzada",
@@ -49,7 +49,7 @@ const mainConsultas = [
   {
     title: "Horóscopo chino",
     body: "Tu animal, elemento, ciclos y compatibilidades. Ideal para entender ritmos largos y no llamar \"destino\" a una mala costumbre que repites desde 2018.",
-    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-chino.png",
+    image: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-chino.webp",
     action: "Descubrir mi ciclo",
     href: "/auth/register",
     badge: "🐉 Ciclo 12 años",
@@ -222,7 +222,7 @@ export function MarketingHome() {
       <section className="relative overflow-hidden">
 
         {/* Fondo */}
-        <div className="absolute inset-0 bg-[url('/zodi-art/poster-chaos.png')] bg-cover bg-center opacity-30" />
+        <div className="absolute inset-0 bg-[url('/zodi-art/poster-chaos.webp')] bg-cover bg-center opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-b from-[rgba(5,5,7,0.6)] via-[rgba(5,5,7,0.5)] to-[rgba(5,5,7,1)] lg:bg-[linear-gradient(110deg,rgba(5,5,7,.92)_40%,rgba(5,5,7,0.2)_100%)]" />
 
         <div className="relative mx-auto max-w-7xl px-4 pt-10 pb-0 lg:grid lg:min-h-[92vh] lg:grid-cols-[1fr_0.9fr] lg:items-center lg:gap-12 lg:pt-16 lg:pb-16">
@@ -308,7 +308,7 @@ export function MarketingHome() {
             <div className="relative lg:hidden w-full max-w-xs mx-auto">
               <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,5,7,1)] via-transparent to-transparent z-10 h-full" style={{ top: "60%" }} />
               <Image
-                src="/zodi-art/nuevas/2-Portada--Home/ZODI-senalando-al-usuario.png"
+                src="/zodi-art/nuevas/2-Portada--Home/ZODI-senalando-al-usuario.webp"
                 alt="ZODI apuntando — tu oráculo personal"
                 width={380}
                 height={480}
@@ -320,12 +320,12 @@ export function MarketingHome() {
             {/* Desktop: imagen hero principal en panel glass */}
             <div className="hidden lg:block glass-panel neon-border rounded-2xl p-4 w-full max-w-lg">
               <button
-                onClick={() => setLightbox("/zodi-art/nuevas/2-Portada--Home/Hero-principal-portada.png")}
+                onClick={() => setLightbox("/zodi-art/nuevas/2-Portada--Home/Hero-principal-portada.webp")}
                 className="group relative block w-full overflow-hidden rounded-xl"
                 aria-label="Ver imagen completa"
               >
                 <Image
-                  src="/zodi-art/nuevas/2-Portada--Home/Hero-principal-portada.png"
+                  src="/zodi-art/nuevas/2-Portada--Home/Hero-principal-portada.webp"
                   alt="Oráculo cyberpunk ZODI"
                   width={540}
                   height={540}
@@ -563,7 +563,7 @@ export function MarketingHome() {
           3 FEATURES CON PERSONAJES
       ══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden px-4 py-14">
-        <div className="absolute inset-0 bg-[url('/zodi-art/oracle-frame-tall.png')] bg-cover bg-center opacity-20" />
+        <div className="absolute inset-0 bg-[url('/zodi-art/oracle-frame-tall.webp')] bg-cover bg-center opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
         <div className="relative mx-auto max-w-7xl">
           <div className="mb-8">
@@ -572,9 +572,9 @@ export function MarketingHome() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-con-cartas-flotando.png", title: "Tarot vivo", body: "Cartas, energía y respuestas directas. A veces abraza. A veces te mira fijo hasta que entiendes.", cta: "Tirar cartas" },
-              { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-con-energia-en-la-mano.png", title: "Rituales diarios", body: "Misiones pequeñas, rachas y recordatorios para ordenar la energía sin convertir tu agenda en un monasterio.", cta: "Mis rituales" },
-              { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-riendose-con-sarcasmo.png", title: "Humor ácido", body: "Lecturas con carácter y frases para compartir. Sinceridad que duele poquito pero ilumina bastante.", cta: "Roast horóscopo" },
+              { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-con-cartas-flotando.webp", title: "Tarot vivo", body: "Cartas, energía y respuestas directas. A veces abraza. A veces te mira fijo hasta que entiendes.", cta: "Tirar cartas" },
+              { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-con-energia-en-la-mano.webp", title: "Rituales diarios", body: "Misiones pequeñas, rachas y recordatorios para ordenar la energía sin convertir tu agenda en un monasterio.", cta: "Mis rituales" },
+              { img: "/zodi-art/nuevas/2-Portada--Home/ZODI-riendose-con-sarcasmo.webp", title: "Humor ácido", body: "Lecturas con carácter y frases para compartir. Sinceridad que duele poquito pero ilumina bastante.", cta: "Roast horóscopo" },
             ].map((card, i) => (
               <FadeUp key={card.title} delay={i * 0.1}>
                 <motion.article whileHover={{ y: -8 }} className="glass-panel group overflow-hidden rounded-2xl h-full flex flex-col">
@@ -606,7 +606,7 @@ export function MarketingHome() {
           COMUNIDAD
       ══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden px-4 py-14 sm:py-20">
-        <div className="absolute inset-0 bg-[url('/zodi-art/hoodie-phone-wide.png')] bg-cover bg-center opacity-40" />
+        <div className="absolute inset-0 bg-[url('/zodi-art/hoodie-phone-wide.webp')] bg-cover bg-center opacity-40" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,7,.96)_0%,rgba(5,5,7,.7)_60%,rgba(5,5,7,.5)_100%)]" />
         <div className="relative mx-auto max-w-7xl">
           <FadeUp>

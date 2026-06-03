@@ -20,18 +20,18 @@ const TOTAL_STEPS = 3;
 
 // ── Mapa de signos: imagen + gradiente de fondo ───────────────────────────────
 const SIGN_META: Record<string, { img: string; gradient: string; element: string; emoji: string }> = {
-  "Aries":       { img: "/zodi-art/signos/aries.png",       gradient: "from-red-600/60 via-orange-500/40 to-transparent",      element: "Fuego 🔥", emoji: "♈" },
-  "Tauro":       { img: "/zodi-art/signos/tauro.png",       gradient: "from-emerald-700/60 via-green-600/40 to-transparent",   element: "Tierra 🌿", emoji: "♉" },
-  "Géminis":     { img: "/zodi-art/signos/geminis.png",     gradient: "from-yellow-500/60 via-amber-400/40 to-transparent",    element: "Aire 💨", emoji: "♊" },
-  "Cáncer":      { img: "/zodi-art/signos/cancer.png",      gradient: "from-slate-500/60 via-blue-400/40 to-transparent",      element: "Agua 🌊", emoji: "♋" },
-  "Leo":         { img: "/zodi-art/signos/leo.png",         gradient: "from-amber-500/60 via-yellow-400/40 to-transparent",    element: "Fuego 🔥", emoji: "♌" },
-  "Virgo":       { img: "/zodi-art/signos/virgo.png",       gradient: "from-green-700/60 via-lime-600/40 to-transparent",      element: "Tierra 🌿", emoji: "♍" },
-  "Libra":       { img: "/zodi-art/signos/libra.png",       gradient: "from-pink-500/60 via-rose-400/40 to-transparent",       element: "Aire 💨", emoji: "♎" },
-  "Escorpio":    { img: "/zodi-art/signos/escorpio.png",    gradient: "from-red-900/60 via-purple-700/40 to-transparent",      element: "Agua 🌊", emoji: "♏" },
-  "Sagitario":   { img: "/zodi-art/signos/sagitario.png",   gradient: "from-purple-600/60 via-violet-500/40 to-transparent",   element: "Fuego 🔥", emoji: "♐" },
-  "Capricornio": { img: "/zodi-art/signos/capricornio.png", gradient: "from-stone-700/60 via-zinc-600/40 to-transparent",      element: "Tierra 🌿", emoji: "♑" },
-  "Acuario":     { img: "/zodi-art/signos/acuario.png",     gradient: "from-cyan-600/60 via-sky-500/40 to-transparent",        element: "Aire 💨", emoji: "♒" },
-  "Piscis":      { img: "/zodi-art/signos/piscis.png",      gradient: "from-teal-600/60 via-purple-500/40 to-transparent",     element: "Agua 🌊", emoji: "♓" },
+  "Aries":       { img: "/zodi-art/signos/aries.webp",       gradient: "from-red-600/60 via-orange-500/40 to-transparent",      element: "Fuego 🔥", emoji: "♈" },
+  "Tauro":       { img: "/zodi-art/signos/tauro.webp",       gradient: "from-emerald-700/60 via-green-600/40 to-transparent",   element: "Tierra 🌿", emoji: "♉" },
+  "Géminis":     { img: "/zodi-art/signos/geminis.webp",     gradient: "from-yellow-500/60 via-amber-400/40 to-transparent",    element: "Aire 💨", emoji: "♊" },
+  "Cáncer":      { img: "/zodi-art/signos/cancer.webp",      gradient: "from-slate-500/60 via-blue-400/40 to-transparent",      element: "Agua 🌊", emoji: "♋" },
+  "Leo":         { img: "/zodi-art/signos/leo.webp",         gradient: "from-amber-500/60 via-yellow-400/40 to-transparent",    element: "Fuego 🔥", emoji: "♌" },
+  "Virgo":       { img: "/zodi-art/signos/virgo.webp",       gradient: "from-green-700/60 via-lime-600/40 to-transparent",      element: "Tierra 🌿", emoji: "♍" },
+  "Libra":       { img: "/zodi-art/signos/libra.webp",       gradient: "from-pink-500/60 via-rose-400/40 to-transparent",       element: "Aire 💨", emoji: "♎" },
+  "Escorpio":    { img: "/zodi-art/signos/escorpio.webp",    gradient: "from-red-900/60 via-purple-700/40 to-transparent",      element: "Agua 🌊", emoji: "♏" },
+  "Sagitario":   { img: "/zodi-art/signos/sagitario.webp",   gradient: "from-purple-600/60 via-violet-500/40 to-transparent",   element: "Fuego 🔥", emoji: "♐" },
+  "Capricornio": { img: "/zodi-art/signos/capricornio.webp", gradient: "from-stone-700/60 via-zinc-600/40 to-transparent",      element: "Tierra 🌿", emoji: "♑" },
+  "Acuario":     { img: "/zodi-art/signos/acuario.webp",     gradient: "from-cyan-600/60 via-sky-500/40 to-transparent",        element: "Aire 💨", emoji: "♒" },
+  "Piscis":      { img: "/zodi-art/signos/piscis.webp",      gradient: "from-teal-600/60 via-purple-500/40 to-transparent",     element: "Agua 🌊", emoji: "♓" },
 };
 
 const CALC_PHRASES = [
@@ -43,7 +43,7 @@ const CALC_PHRASES = [
 ];
 
 const initialData: OnboardingData = {
-  displayName: "", username: "", avatar: "/zodi-art/perfil/perfil-1.png",
+  displayName: "", username: "", avatar: "/zodi-art/perfil/perfil-1.webp",
   genderIdentity: "", birthDate: "", birthTime: "", birthCity: "", birthCountry: "",
   currentCity: "", currentCountry: "",
   readingTone: "sarcastico",
@@ -221,7 +221,7 @@ export function OnboardingFlow() {
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             className="h-32 w-32 overflow-hidden rounded-full border-2 border-lime-300/50 shadow-[0_0_40px_rgba(184,255,23,0.4)]"
           >
-            <Image src="/zodi-art/brand/isotipo.png" alt="ZODI calculando" width={128} height={128} className="h-full w-full object-contain p-2 mix-blend-screen" />
+            <Image src="/zodi-art/brand/isotipo.webp" alt="ZODI calculando" width={128} height={128} className="h-full w-full object-contain p-2 mix-blend-screen" />
           </motion.div>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="h-3 w-3 rounded-full bg-lime-300 shadow-[0_0_12px_rgba(184,255,23,1)]" />
@@ -252,7 +252,7 @@ export function OnboardingFlow() {
   return (
     <section className="relative mx-auto flex min-h-dvh max-w-2xl flex-col px-4 py-6">
       {/* Fondo */}
-      <div className="absolute inset-0 -z-10 bg-[url('/zodi-art/oracle-frame-tall.png')] bg-cover bg-center opacity-10" />
+      <div className="absolute inset-0 -z-10 bg-[url('/zodi-art/oracle-frame-tall.webp')] bg-cover bg-center opacity-10" />
       <div className="spark-field -z-10" />
 
       {/* Header */}

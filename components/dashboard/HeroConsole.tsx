@@ -355,7 +355,7 @@ export function HeroConsole() {
             {/* ZODI character — se escala con el ancho del hero */}
             <div className="hidden md:flex shrink-0 items-end self-stretch -mb-1 -mr-1 lg:-mb-2 lg:-mr-2">
               <Image
-                src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.png"
+                src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.webp"
                 alt="ZODI"
                 width={200}
                 height={250}
@@ -478,7 +478,7 @@ export function HeroConsole() {
       <div className="hidden lg:flex glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 xl:p-6 flex-col gap-4 xl:gap-5">
         {/* Decorative sigil */}
         <Image
-          src="/zodi-art/brand/isotipo.png"
+          src="/zodi-art/brand/isotipo.webp"
           alt=""
           aria-hidden="true"
           width={280}

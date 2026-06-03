@@ -249,7 +249,7 @@ export function WelcomeSplash({ children }: { children: React.ReactNode }) {
                   style={{ background: "radial-gradient(circle, rgba(184,255,23,0.25) 0%, transparent 70%)" }}
                 />
                 <Image
-                  src="/zodi-art/brand/logo.png"
+                  src="/zodi-art/brand/logo.webp"
                   alt="ZODI"
                   width={140}
                   height={70}

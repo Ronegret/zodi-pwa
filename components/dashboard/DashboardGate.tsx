@@ -64,7 +64,7 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
           onboardingData: {
             displayName: userData.displayName || "",
             username: userData.username || "",
-            avatar: userData.avatar || "/zodi-art/perfil/perfil-1.png",
+            avatar: userData.avatar || "/zodi-art/perfil/perfil-1.webp",
             genderIdentity: userData.genderIdentity || "",
             birthDate: astralData.birthDate || userData.birthDate || "",
             birthTime: astralData.birthTime || userData.birthTime || "",

@@ -94,7 +94,7 @@ export async function GET(req: Request) {
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td width="80" valign="top">
-                    <img src="https://zodi.aibueno.es/zodi-art/zodi-us.png" width="70" style="display:block; border-radius: 10px; border: 1px solid #9b4dff;">
+                    <img src="https://zodi.aibueno.es/zodi-art/zodi-us.webp" width="70" style="display:block; border-radius: 10px; border: 1px solid #9b4dff;">
                   </td>
                   <td valign="top" style="padding-left: 15px;">
                     <h4 style="color: #ffffff; font-size: 16px; margin: 0 0 5px 0; text-transform: uppercase;">Habla con ZODI</h4>
