@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
+
+// useLayoutEffect runs synchronously before browser paint → eliminates skeleton flash
+// Falls back to useEffect on server to avoid SSR warnings
+const useMountEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import { motion, AnimatePresence } from "framer-motion";
 import { RadioTower, Sparkles, Gem, Flame, Zap, ArrowRight } from "lucide-react";
 import { getTodaysAstralContext, getSignEnergyScore } from "@/lib/astral";
@@ -160,7 +164,7 @@ export function HeroConsole() {
   const [mounted, setMounted] = useState(false);
   const [gems, setGems] = useState(0);
 
-  useEffect(() => {
+  useMountEffect(() => {
     const sessionProfile = getSessionProfile();
     const session = getLocalSession();
     const xpData = getXpData();
@@ -170,7 +174,6 @@ export function HeroConsole() {
     const lvl = getLevel(totalXp);
     const { current, needed, percent } = xpToNextLevel(totalXp);
 
-    // Si el perfil no tiene tono, leer del onboardingData
     const tone = session.onboardingData?.readingTone ?? "directo";
     const mergedProfile = sessionProfile
       ? { ...sessionProfile, readingTone: sessionProfile.readingTone ?? tone }

@@ -342,13 +342,50 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    // Redirect para todos los dispositivos — más fiable que popup en producción.
-    // El popup depende del contexto síncrono del gesto del usuario y es bloqueado
-    // por muchos navegadores/configuraciones. El redirect funciona siempre.
+    // Detectar iOS Safari / PWA standalone → redirect directo (popups bloqueados)
+    const isIosSafari =
+      typeof navigator !== "undefined" &&
+      /iphone|ipad|ipod/i.test(navigator.userAgent) &&
+      !/chrome|crios|fxios/i.test(navigator.userAgent);
+    const isPwaStandalone =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as any).standalone === true);
+
+    // Para iOS/PWA: redirect directo. Para el resto: popup (más rápido, 1-2s vs 4-6s)
+    // signInWithPopup es import estático → se llama dentro del contexto síncrono del clic
+    if (!isIosSafari && !isPwaStandalone) {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        if (result.user) {
+          setGoogleLoading(false);
+          const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
+          await applyFirebaseUser(result.user, isNew);
+        }
+        return;
+      } catch (e: any) {
+        const code = e?.code ?? "";
+        // Popup bloqueado → fallback a redirect silencioso
+        if (code === "auth/popup-blocked" || code === "auth/popup-cancelled" || code === "auth/cancelled-popup-request") {
+          // sigue al bloque de redirect de abajo
+        } else if (code === "auth/popup-closed-by-user") {
+          setGoogleLoading(false);
+          authHandledRef.current = false;
+          return; // usuario cerró el popup — no mostrar error
+        } else if (code) {
+          setMessage(`Error de Google (${code}). Intenta de nuevo o usa email.`);
+          setMsgType("error");
+          setGoogleLoading(false);
+          authHandledRef.current = false;
+          return;
+        }
+      }
+    }
+
+    // Redirect: iOS/PWA o cuando el popup fue bloqueado
     try {
       sessionStorage.setItem("zodi.google_redirect_pending", "1");
       await signInWithRedirect(auth, googleProvider);
-      // La página navega a Google. El resultado vuelve en getRedirectResult.
     } catch (redirectErr: any) {
       const redirectCode = (redirectErr as { code?: string })?.code ?? "";
       sessionStorage.removeItem("zodi.google_redirect_pending");
@@ -356,8 +393,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       authHandledRef.current = false;
       if (redirectCode === "auth/unauthorized-domain") {
         setMessage("⚠️ Dominio no autorizado en Firebase Console.");
-      } else if (redirectCode === "auth/network-request-failed") {
-        setMessage("Sin conexión a internet. Verifica tu red e inténtalo de nuevo.");
       } else {
         setMessage(`No se pudo conectar con Google (${redirectCode || "error"}).`);
       }

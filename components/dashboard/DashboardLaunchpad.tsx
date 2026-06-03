@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
+const useMountEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import { motion } from "framer-motion";
 import { Gem, Share2, Download, Zap } from "lucide-react";
 import { dashboardSections } from "@/lib/dashboard-sections";
@@ -38,7 +39,7 @@ function getDailySignPhrase(sign: string): string {
 function DailySignalWidget() {
   const [data, setData] = useState<{ sign: string; phrase: string; score: number; moonPhase: string } | null>(null);
 
-  useEffect(() => {
+  useMountEffect(() => {
     const session = getLocalSession();
     const od = session.onboardingData;
     const ap = session.astralProfile;
@@ -165,7 +166,7 @@ const secondaryGroups = [
 
 export function DashboardLaunchpad() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  useMountEffect(() => { setMounted(true); }, []);
 
   return (
     <section className="mt-4 sm:mt-6 space-y-6 sm:space-y-8">
