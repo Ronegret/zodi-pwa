@@ -8,6 +8,7 @@ import { RadioTower, Sparkles, Gem, Flame, Zap, ArrowRight } from "lucide-react"
 import { getTodaysAstralContext } from "@/lib/astral";
 import { getSessionProfile, getLocalSession } from "@/lib/session";
 import { getXpData, getStreak, getLevel, xpToNextLevel, getGems, getLevelTitle } from "@/lib/gamification";
+import { getNameCard } from "@/lib/nameCard";
 import type { UserProfile } from "@/types/zodi";
 
 type AstralCtx = ReturnType<typeof getTodaysAstralContext>;
@@ -380,12 +381,34 @@ export function HeroConsole() {
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {firstName && (
-                    <h1
-                      className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black leading-[1.05] tracking-tight"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      {firstName},
-                    </h1>
+                    <>
+                      <h1
+                        className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black leading-[1.05] tracking-tight"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        {firstName},
+                      </h1>
+                      {/* Significado del nombre */}
+                      {(() => {
+                        const card = getNameCard(profile?.displayName);
+                        if (!card) return null;
+                        return (
+                          <motion.p
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1, duration: 0.45 }}
+                            className="mt-1 text-[11px] sm:text-xs text-white/42 leading-snug tracking-wide"
+                          >
+                            <span className="font-semibold text-white/60 italic">"{firstName}"</span>
+                            {" "}— {card.meaning}
+                            <span className="text-white/28"> · {card.origin}</span>
+                            {card.saint && card.saint !== "— " && (
+                              <span className="text-lime-200/40"> · ✦ {card.saint}</span>
+                            )}
+                          </motion.p>
+                        );
+                      })()}
+                    </>
                   )}
                   {phrase ? (
                     <motion.p
