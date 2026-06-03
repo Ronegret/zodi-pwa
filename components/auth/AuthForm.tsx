@@ -768,10 +768,26 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         </Link>
       </p>
 
-      <div className="mt-4 pt-4 border-t border-white/08 text-center">
+      <div className="mt-4 pt-4 border-t border-white/08 flex flex-col items-center gap-2 text-center">
         <Link href="/" className="text-xs text-white/35 hover:text-white/60 transition">
           ← Volver a la web sin iniciar sesión
         </Link>
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof window === "undefined") return;
+            if ("caches" in window) {
+              window.caches.keys()
+                .then(keys => Promise.all(keys.map(k => window.caches.delete(k))))
+                .finally(() => location.reload());
+            } else {
+              location.reload();
+            }
+          }}
+          className="text-xs text-white/20 hover:text-white/45 transition"
+        >
+          ¿Problemas para entrar? Limpiar caché
+        </button>
       </div>
     </div>
   );

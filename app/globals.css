@@ -84,6 +84,7 @@ body {
   background-color: var(--ink);
   color: var(--text-primary);
   font-family: var(--font-body);
+  font-size: 16px;
   font-feature-settings: "kern", "liga", "calt";
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

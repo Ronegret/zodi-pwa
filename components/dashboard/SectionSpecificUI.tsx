@@ -2129,16 +2129,19 @@ function PerfilUI() {
 
   const sunSign = birthDate ? calculateSunSign(birthDate) : ap?.sunSign;
 
+  // normaliza acentos para los nombres de archivo (ej. "Géminis"→"Geminis", "Dragón"→"dragon")
+  const toFilename = (s: string) =>
+    s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+
   // ── Datos astrales para los badges ─────────────────────────────────────────
+  const solar = sunSign || ap?.sunSign || "";
   const astralBadges = [
     {
       key: "solar",
       label: "Signo Solar",
-      value: sunSign || ap?.sunSign || "–",
+      value: solar || "–",
       desc: "Tu esencia, ego y energía central",
-      img: sunSign || ap?.sunSign
-        ? `/zodi-art/signos/${(sunSign || ap?.sunSign || "").toLowerCase()}.png`
-        : null,
+      img: solar ? signImgPath(solar) : null,
       emoji: "☀️",
       color: "from-amber-400/30 to-orange-500/20",
       border: "border-amber-400/30",
@@ -2149,7 +2152,7 @@ function PerfilUI() {
       label: "Signo Lunar",
       value: ap?.moonSign || "–",
       desc: "Cómo sientes y tu mundo interior",
-      img: ap?.moonSign ? `/zodi-art/signos/${ap.moonSign.toLowerCase()}.png` : null,
+      img: ap?.moonSign ? signImgPath(ap.moonSign) : null,
       emoji: "🌙",
       color: "from-slate-400/30 to-blue-500/20",
       border: "border-slate-400/30",
@@ -2160,7 +2163,7 @@ function PerfilUI() {
       label: "Ascendente",
       value: ap?.ascendant || "–",
       desc: "Cómo te perciben los demás",
-      img: ap?.ascendant ? `/zodi-art/signos/${ap.ascendant.toLowerCase()}.png` : null,
+      img: ap?.ascendant ? signImgPath(ap.ascendant) : null,
       emoji: "⬆️",
       color: "from-violet-400/30 to-purple-500/20",
       border: "border-violet-400/30",
@@ -2171,12 +2174,14 @@ function PerfilUI() {
       label: "Número de Vida",
       value: ap?.lifePathNumber ? String(ap.lifePathNumber) : "–",
       desc: "Tu misión y camino de vida",
-      img: null,
+      img: ap?.lifePathNumber
+        ? `/zodi-art/nuevas/7-Numerologia/${ap.lifePathNumber}.png`
+        : null,
       emoji: "🔢",
       color: "from-lime-400/30 to-emerald-500/20",
       border: "border-lime-400/30",
       glow: "rgba(163,230,53,0.25)",
-      bigNumber: ap?.lifePathNumber,
+      bigNumber: !ap?.lifePathNumber ? undefined : ap.lifePathNumber,
     },
     {
       key: "chino",
@@ -2184,7 +2189,7 @@ function PerfilUI() {
       value: ap?.chineseZodiac || "–",
       desc: "Tu animal según el calendario chino",
       img: ap?.chineseZodiac
-        ? `/zodi-art/chino/C_${ap.chineseZodiac.toLowerCase()}.png`
+        ? `/zodi-art/chino/C_${toFilename(ap.chineseZodiac).toLowerCase()}.png`
         : null,
       emoji: "🐉",
       color: "from-red-400/30 to-orange-600/20",
@@ -2320,11 +2325,11 @@ function PerfilUI() {
                     {b.value}
                   </p>
                   {/* Etiqueta tipo */}
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">
+                  <p className="text-xs font-bold uppercase tracking-widest text-white/50 mb-1">
                     {b.label}
                   </p>
                   {/* Descripción */}
-                  <p className="text-[10px] text-white/35 leading-tight">
+                  <p className="text-xs text-white/40 leading-tight">
                     {b.desc}
                   </p>
                 </div>

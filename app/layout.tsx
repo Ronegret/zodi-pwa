@@ -11,24 +11,22 @@ const syne = Syne({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-syne",
-  display: "optional",   // evita FOUT — usa cache del SW en visitas recurrentes
-  preload: true,
+  display: "swap",
 });
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
   weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-jakarta",
-  display: "optional",
-  preload: true,
+  display: "swap",
 });
 
 const mono = JetBrains_Mono({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "700"],
   variable: "--font-mono",
-  display: "optional",
-  preload: false,        // mono solo se usa en detalles — no bloquear carga
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
