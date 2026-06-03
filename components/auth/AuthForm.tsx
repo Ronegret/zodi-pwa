@@ -336,7 +336,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         }
       });
 
-    // Auto-redirect si ya hay sesión activa (Firebase persiste entre visitas)
+    // Auto-redirect solo si el usuario NO está iniciando login manualmente.
+    // authHandledRef = true significa que loginWithGoogle está en curso → no interferir.
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (redirectPending && !redirectChecked) return;
       if (user && !authHandledRef.current) {
@@ -344,10 +345,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         if (googleTimeout) clearTimeout(googleTimeout);
         try {
           await applyFirebaseUser(user);
-        } catch (e) {
+        } catch {
           authHandledRef.current = false;
           setGoogleLoading(false);
-          // Solo mostrar error si venía de un intento de Google
           const pending = sessionStorage.getItem("zodi.google_redirect_pending");
           if (pending) {
             sessionStorage.removeItem("zodi.google_redirect_pending");
@@ -364,26 +364,63 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     };
   }, [applyFirebaseUser]);
 
-  // ── Google OAuth — popup con fallback a redirect si está bloqueado ───────────
+  // ── Google OAuth ──────────────────────────────────────────────────────────
+  // IMPORTANTE: NO se comprueba authHandledRef aquí.
+  // authHandledRef se usa para que onAuthStateChanged no interfiera con una
+  // operación ya en curso — pero nunca debe bloquear el botón del usuario.
+  // googleLoading es el único guard del botón (evita doble clic).
   async function loginWithGoogle() {
-    if (authHandledRef.current || googleLoading) return;
+    if (googleLoading) return;
     setMessage("");
     setMsgType("info");
     setGoogleLoading(true);
+    authHandledRef.current = true; // evita que onAuthStateChanged interfiera
 
     const auth = getFirebaseAuth();
     if (!auth) {
       setMessage("Firebase no configurado. Revisa las variables de entorno.");
       setMsgType("error");
       setGoogleLoading(false);
+      authHandledRef.current = false;
       return;
     }
 
+    // Detectar iOS Safari / PWA standalone → usar redirect directamente
+    // (popup siempre bloqueado en esos contextos)
+    const isIosSafari =
+      typeof navigator !== "undefined" &&
+      /iphone|ipad|ipod/i.test(navigator.userAgent) &&
+      !/chrome|crios|fxios/i.test(navigator.userAgent);
+    const isPwaStandalone =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as any).standalone === true);
+
+    if (isIosSafari || isPwaStandalone) {
+      try {
+        sessionStorage.setItem("zodi.google_redirect_pending", "1");
+        await signInWithRedirect(auth, googleProvider);
+        return; // la página se recarga — el resultado llega en getRedirectResult
+      } catch (redirectErr: any) {
+        const redirectCode = (redirectErr as { code?: string })?.code ?? "";
+        sessionStorage.removeItem("zodi.google_redirect_pending");
+        setMessage(
+          redirectCode === "auth/unauthorized-domain"
+            ? "⚠️ Dominio no autorizado en Firebase. Contacta con el administrador."
+            : `No se pudo redirigir a Google (${redirectCode || "error desconocido"}).`
+        );
+        setMsgType("error");
+        setGoogleLoading(false);
+        authHandledRef.current = false;
+      }
+      return;
+    }
+
+    // Desktop / Android → popup primero, redirect como fallback
     try {
       const { signInWithPopup, getAdditionalUserInfo } = await import("firebase/auth");
       const result = await signInWithPopup(auth, googleProvider);
-      if (result.user && !authHandledRef.current) {
-        authHandledRef.current = true;
+      if (result.user) {
         setGoogleLoading(false);
         const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
         await applyFirebaseUser(result.user, isNew);
@@ -391,28 +428,34 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     } catch (e: any) {
       const code = e?.code ?? "";
       console.error("[ZODI] Error Google Sign-In:", e);
-      if (code === "auth/popup-blocked") {
-        // Fallback a redirect si el navegador bloquea popups (muy común en móviles)
+
+      if (code === "auth/popup-blocked" || code === "auth/popup-cancelled") {
+        // Fallback a redirect cuando el navegador bloquea el popup
         try {
           sessionStorage.setItem("zodi.google_redirect_pending", "1");
           await signInWithRedirect(auth, googleProvider);
           return;
         } catch (redirectErr: any) {
-          const redirectCode = redirectErr?.code ?? "";
-          setMessage(`Google no pudo completar el redireccionamiento (${redirectCode}).`);
+          const redirectCode = (redirectErr as { code?: string })?.code ?? "";
+          sessionStorage.removeItem("zodi.google_redirect_pending");
+          setMessage(`Google no pudo redirigir (${redirectCode}). Intenta con email.`);
           setMsgType("error");
         }
       } else if (code === "auth/unauthorized-domain") {
-        setMessage("⚠️ Este dominio no está autorizado en Firebase Console → Authentication → Authorized Domains.");
+        setMessage("⚠️ Este dominio no está autorizado en Firebase. Contacta con soporte.");
         setMsgType("error");
       } else if (code === "auth/operation-not-allowed") {
-        setMessage("⚠️ Google Sign-In no está activado en Firebase Console → Authentication → Sign-in method.");
+        setMessage("⚠️ Google Sign-In no está activado. Contacta con soporte.");
+        setMsgType("error");
+      } else if (code === "auth/network-request-failed") {
+        setMessage("Sin conexión a internet. Verifica tu red e inténtalo de nuevo.");
         setMsgType("error");
       } else if (code && code !== "auth/popup-closed-by-user") {
-        setMessage(`Google no pudo completar el inicio de sesión (${code}). Intenta de nuevo o usa email.`);
+        setMessage(`Error de Google (${code}). Intenta de nuevo o usa email.`);
         setMsgType("error");
       }
       setGoogleLoading(false);
+      authHandledRef.current = false; // permitir reintento
     }
   }
 

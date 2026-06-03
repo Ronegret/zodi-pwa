@@ -10,7 +10,7 @@ const withSerwist = withSerwistInit({
 
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com https://www.googletagmanager.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://lh3.googleusercontent.com",
@@ -21,11 +21,12 @@ const CSP = [
     "https://zodi-2.firebaseapp.com https://zodi-2.web.app " +
     "https://www.googleapis.com https://oauth2.googleapis.com " +
     "https://accounts.google.com https://apis.google.com " +
+    "https://www.gstatic.com " +
     "https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com " +
     "https://fcmregistrations.googleapis.com",
   // frame-src: para el manejador de auth de Firebase
   "frame-src 'self' https://zodi-2.firebaseapp.com https://zodi-2.web.app " +
-    "https://apis.google.com https://accounts.google.com",
+    "https://apis.google.com https://accounts.google.com https://www.gstatic.com",
 ].join("; ");
 
 const nextConfig: NextConfig = {
