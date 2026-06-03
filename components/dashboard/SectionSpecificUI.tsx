@@ -1641,12 +1641,9 @@ function HoroscopoDiarioUI({ section }: { section: DashboardSection }) {
   const currentImg = `${normalizeSign(targetSign)}.png`;
 
   useEffect(() => {
-    if (!hasAutoConsulted) {
-      setHasAutoConsulted(true);
-      const extra = `Signo: ${targetSign}. Fecha: ${ctx.dateReadable}. ${ctx.dayName}. Sol en ${ctx.sunTransit}. Luna: ${ctx.moonPhase}. Vibración del día: ${ctx.dayVibration}. Tono: ${tone}.`;
-      consult(`${section.prompt}\n${extra}`);
-    }
-  }, [hasAutoConsulted, targetSign, tone, ctx, consult, section.prompt]);
+    getHoroscope();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetSign, tone, length, activeCategory]);
 
   async function getHoroscope(sign?: string) {
     const s = sign ?? targetSign;

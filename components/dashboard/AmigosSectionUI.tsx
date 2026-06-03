@@ -325,9 +325,14 @@ export function AmigosSectionUI() {
     const prompt = `Analiza la compatibilidad entre ${myName} (${myProfile.zodiac}, Luna ${myProfile.moonSign}, Asc ${myProfile.ascendant}) y ${friend.displayName || friend.username} (${friend.sign}). Incluye: química natural, puntos de choque, cómo se comunican, área más fuerte y consejo directo. Estilo ZODI: directo, gracioso, sin postureo espiritual. Máximo 200 palabras.`;
 
     try {
+      const { getFirebaseToken } = await import("@/lib/firebase/client");
+      const token = await getFirebaseToken();
       const res = await fetch("/api/ai/reading", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({ kind: "compatibility", input: prompt, profile: myProfile }),
       });
       const data = await res.json().catch(() => ({}));

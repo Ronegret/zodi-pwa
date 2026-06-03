@@ -32,6 +32,33 @@ export function getGeneration(birthDate?: string): { label: string; context: str
   };
 }
 
+function getFallbackCountry(country?: string): string | null {
+  if (!country) return null;
+  const c = country.trim().toLowerCase();
+  
+  if (c === "españa" || c === "spain") return "España";
+  if (c === "méxico" || c === "mexico") return "México";
+  if (c === "argentina") return "Argentina";
+  if (c === "chile") return "Chile";
+  if (c === "colombia") return "Colombia";
+  if (c === "perú" || c === "peru") return "Perú";
+  if (c === "venezuela") return "Venezuela";
+  if (c === "ecuador") return "Ecuador";
+  if (c === "estados unidos" || c === "usa" || c === "united states") return "Estados Unidos";
+  if (c === "francia" || c === "france") return "Francia";
+  if (c === "alemania" || c === "germany") return "Alemania";
+  if (c === "italia" || c === "italy") return "Italia";
+
+  // Mapeos de cercanía cultural / lingüística para infancia y pop culture
+  const latamAndesCarib = ["bolivia", "panamá", "panama", "costa rica", "guatemala", "honduras", "el salvador", "nicaragua", "cuba", "república dominicana", "dominican republic", "puerto rico"];
+  if (latamAndesCarib.includes(c)) return "Colombia"; // Excelente fallback para Centroamérica y el Caribe
+  
+  const latamConoSur = ["uruguay", "paraguay"];
+  if (latamConoSur.includes(c)) return "Argentina"; // Excelente fallback para el Cono Sur
+  
+  return "México"; // Fallback por defecto para otros países de habla hispana
+}
+
 // ── Contexto cultural por país ────────────────────────────────────────────────
 interface CulturalContext {
   humor: string;
@@ -140,7 +167,8 @@ const CULTURAL_MAP: Record<string, CulturalContext> = {
 export function getCulturalContext(country?: string, city?: string): string | null {
   if (!country) return null;
 
-  const ctx = CULTURAL_MAP[country];
+  const resolvedCountry = getFallbackCountry(country) || country;
+  const ctx = CULTURAL_MAP[resolvedCountry];
   if (!ctx) {
     return `De ${country}${city ? `, ${city}` : ""}. Adapta el tono al contexto cultural de esa región cuando sea relevante.`;
   }
@@ -336,7 +364,8 @@ export function getChildhoodContext(birthDate?: string, country?: string): strin
   if (!birthDate || !country) return null;
 
   const decade = getChildhoodDecade(birthDate);
-  const countryData = CHILDHOOD[country];
+  const resolvedCountry = getFallbackCountry(country) || country;
+  const countryData = CHILDHOOD[resolvedCountry];
   if (!countryData) return null;
 
   // Buscar la era exacta o la más cercana disponible
@@ -573,7 +602,8 @@ export function getPopCultureContext(birthDate?: string, country?: string): stri
   if (!birthDate || !country) return null;
 
   const genKey = getGenerationKey(birthDate);
-  const countryData = POP_CULTURE[country];
+  const resolvedCountry = getFallbackCountry(country) || country;
+  const countryData = POP_CULTURE[resolvedCountry];
   if (!countryData) return null;
 
   const era = countryData[genKey];
