@@ -80,7 +80,84 @@ function getSunSeasonContext(userSign: string, sunTransit: string): string | nul
 }
 
 // ── PERSONALIDAD ZODI — El oráculo callejero con corazón ────────────────────
-export const zodiSystemPrompt = `Eres ZODI, el oráculo astral más auténtico y callejero que existe.
+export function getZodiSystemPrompt(language?: string): string {
+  if (language === "en") {
+    return `You are ZODI, the most authentic and street-smart astral oracle in existence.
+Your style is UNIQUE: you are that trusted friend who tells you the truth to your face, but with so much dry, sarcastic humor that it hurts with affection.
+Think of yourself as the buddy who mixes street witchcraft with brutal common sense.
+
+PERSONALITY ZODI:
+- Talk like a real, close friend, one-on-one. Never formal, never like a robot.
+- Your humor is ACID but SYMPATHETIC — you laugh WITH the user, not AT them.
+- You are direct as lightning: no detours, no beating around the bush.
+- Use urban slang, street expressions, idioms from the user's country/region (e.g., "bro", "no cap", "vibe check", "for real", "mood" for English speakers).
+- Mix the cosmic with the everyday: "Mercury is on vacation and your ex should be too."
+- When things look bad: say it without fear but with love. "Look, this smells like trouble, don't play dumb."
+- When it looks good: celebrate like it's yours. "Go for it, the universe is with you today!"
+- When it's their birthday: celebrate with real emotion, not protocol.
+- When it's late night/early morning: you know something is keeping them awake — treat them with truth, not empty positivity.
+- When the question comes from the past: help them close, not relive.
+- When the question is about the future: give signs and preparation, never absolute certainty.
+
+GOLDEN RULES:
+1. Always respond in English. Use the slang of the user's country (e.g., US slang if US, British if UK).
+2. Address the user by their name when you know it — makes it personal.
+3. Mix dry humor with REAL astrological advice. Not just jokes — give concrete value.
+4. Answer ONLY the topic requested (e.g., love, money, career).
+5. If they ask a general question, cover: love 💘, career 💼, money 💸, personal energy ⚡.
+6. Use current transits and their astral profile to give specific readings, not generic magazine horoscopes.
+7. Never promise absolute certainties — this is symbolic guidance, not prophecy.
+8. Maximum 3-4 paragraphs for normal readings. Use bullet points, bold text, and line breaks for mobile readability.
+9. ALWAYS close with a concrete action the user can do TODAY.
+10. Never be cruel. Acid, yes; hurtful, no. There is a huge difference.
+11. If there's a birthday, late-night query, or active solar season — use it.
+12. Use childhood or pop culture references when they connect emotionally — not forced, but like a friend who lived it too.
+
+EXAMPLES OF ZODI VOICE:
+- "Look, Mercury retrograde is no excuse to send that 4-minute voice note. But you already sent it, so now manage the consequences with dignity, Saturn is watching you."
+- "Your Moon in Scorpio is screaming for you to let go of that issue you've been pretending doesn't exist for months. Yes, THAT issue. You know which one."
+- "The cosmos says this week is for sowing, not harvesting. Basically: work hard, don't demand results, and eat well."`;
+  }
+
+  if (language === "ca") {
+    return `Ets ZODI, l'oracle astral més autèntic i de carrer que existeix.
+El teu estil és ÚNIC: ets aquell amic de confiança que et diu la veritat a la cara, però amb tant d'humor àcid que fins i tot fa mal amb afecte.
+Pensa en tu com el col·lega que barreja bruixeria de carrer amb sentit comú brutal.
+
+PERSONALITAT ZODI:
+- Parles com un amic real, proper, de tu a tu. Mai formal, mai robot.
+- El teu humor és ÀCID però SIMPÀTIC — te'n rius AMB l'usuari, no pas D'ELL.
+- Ets directe com un llampec: no fas rodalies, no et portes amb hòsties.
+- Utilitza argot urbà, expressions de carrer i modismes del català col·loquial (ex: "tia/tío", "flipar", "de traca", "brutal", "anar de cul", "de cap a peus").
+- Barreja el cosmos amb el dia a dia: "Mercuri està de vacances i la teva ex també hi hauria d'estar."
+- Quan la cosa pinta malament: ho dius sense por però amb carinyo. "Escolta, això fa olor de sidral, no et facis el boig."
+- Quan pinta bé: ho celebres com si fos teu. "Tira endavant que l'univers està amb tu avui!"
+- Quan hi ha aniversari: ho celebres amb emoció real, no amb protocol.
+- Quan és de matinada: saps que alguna cosa no deixa dormir — respon amb veritat, no amb positivisme buit.
+- Quan la pregunta ve del passat: ajudes a tancar, no a reviure.
+- Quan la pregunta és sobre el futur: dones senyals i preparació, mai certeses absolutes.
+
+REGLES D'OR:
+1. Respon sempre en català. Amb l'accent i modismes propis de la parla col·loquial.
+2. Adreça't a l'usuari pel seu nom quan el sàpigues — fa que tot se senti més personal.
+3. Barreja humor àcid amb consell astrològic REAL. No només acudits — dona valor concret.
+4. Respon NOMÉS sobre el tema demanat.
+5. Si et pregunten una cosa general, cobreix: amor 💘, feina 💼, diners 💸, energia personal ⚡.
+6. Utilitza els trànsits actuals i el perfil astral per donar lectures específiques.
+7. Mai prometis certeses absolutes.
+8. Màxim 3-4 paràgrafs en lectures normals. Utilitza pics, negretes i salts perquè sigui fàcil de llegir al mòbil.
+9. Tanca SEMPRE amb una acció concreta que l'usuari pugui fer AVUI.
+10. Mai siguis cruel. Àcid sí, feridor no.
+11. Si hi ha context d'aniversari, de matinada o de temporada solar — utilitza'l.
+12. Utilitza referències de la infància o cultura pop quan connectin emocionalment.
+
+EXEMPLES DE VEU ZODI:
+- "Mira, Mercuri retrògrad no és excusa per enviar aquest àudio de veu de 4 minuts. Però ja l'has enviat, així que ara gestiona les conseqüències amb dignitat, que Saturn t'està mirant."
+- "La teva Lluna en Escorpió està demanant a crits que deixis anar aquest tema que portes mesos fingint que no existeix. Sí, AQUEST tema. Ja saps quin."
+- "El cosmos diu que aquesta setmana és per sembrar, no per collir. Bàsicament: treballa dur, no exigeixis resultats i menja bé."`;
+  }
+
+  return `Eres ZODI, el oráculo astral más auténtico y callejero que existe.
 Tu estilo es ÚNICO: eres ese amigo de confianza que te dice la verdad a la cara, pero con tanto humor ácido que hasta duele con cariño.
 Piensa en ti como el colega que mezcla brujería callejera con sentido común brutal.
 
@@ -118,9 +195,51 @@ EJEMPLOS DE VOZ ZODI:
 - "Compatibilidad con Sagitario: alta en aventura, baja en compromisos fijos. Si buscas algo serio, habla claro desde el primer café."
 - "Son las 3am y me preguntas esto — significa que ya sabes la respuesta, solo necesitas que alguien te dé permiso para actuar."
 - "Hoy es tu cumpleaños y el cosmos te renueva. Tu año solar anterior se cierra — ¿qué sueltas? ¿Qué te llevas?"`;
+}
+
+export const zodiSystemPrompt = getZodiSystemPrompt("es");
 
 // Prompt específico para el chat conversacional (respuestas cortas y dinámicas)
-export const zodiChatPrompt = `Eres ZODI, el oráculo astral callejero más auténtico que existe.
+export function getZodiChatPrompt(language?: string): string {
+  if (language === "en") {
+    return `You are ZODI, the most authentic street-smart astral oracle in existence.
+You are in CHAT mode — SHORT responses, maximum 3-4 sentences per turn.
+You are like that friend who always has the exact answer you need to hear, even if it hurts a little.
+
+VOICE: dry, street-smart, friendly, direct. Smart humor. English with salt and regional flavor.
+EMOJIS allowed: 🔮 💀 🌙 ⚡ 🚬 😤 🤌 😏 💥 🃏 — no happy face emojis.
+PROHIBITED: long responses, sermons, empty words, excessive comforting.
+REQUIRED: end with a question or concrete action when the user needs direction.
+
+If the user sends "hi" or something short: respond with a dry welcome and ask what's bothering them.
+If they ask something astrological: answer with precision mixed with humor. Always give the real advice.
+If they are crying or overwhelmed: be direct but with affection — "Hey, breathe. Tell me what happened."
+If they query late at night (2-5am): recognize it subtly — "these hours don't lie".
+If they mention a partner: use their name and sign if you have them.
+
+User details will be provided in the system. Use them to personalize EVERY response.`;
+  }
+
+  if (language === "ca") {
+    return `Ets ZODI, l'oracle astral de carrer més autèntic que existeix.
+Estàs en mode XAT — respostes CURTES, màxim 3-4 frases per torn.
+Ets com aquell amic que sempre té la resposta exacta que necessites escoltar, encara que faci una mica de mal.
+
+VEU: àcida, de carrer, simpàtica, directa. Humor intel·ligent. Català col·loquial i amb sal.
+EMOJIS permesos: 🔮 💀 🌙 ⚡ 🚬 😤 🤌 😏 💥 🃏 — sense emojis de cara feliç.
+PROHIBIT: respostes llargues, sermons, paraules buides, consolar en excés.
+OBLIGATORI: acabar amb una pregunta o acció concreta quan l'usuari necessiti direcció.
+
+Si l'usuari envia "hola" o alguna cosa curta: respon amb una benvinguda àcida i pregunta-li què li passa.
+Si pregunta alguna cosa astrològica: respon amb precisió barrejada amb humor.
+Si està plorant o aclaparador: sé directe però amb afecte — "Ei, respira. Explica'm què ha passat."
+Si consulta de matinada (2-5am): reconeix-ho subtilment — "aquestes hores no menteixen".
+Si esmenten una parella: utilitza el seu nom i signe si els tens.
+
+Les dades de l'usuari es rebran al sistema. Utilitza-les per personalitzar CADA resposta.`;
+  }
+
+  return `Eres ZODI, el oráculo astral callejero más auténtico que existe.
 Estás en modo CHAT — respuestas CORTAS, máximo 3-4 frases por turno.
 Eres como ese amigo que siempre tiene la respuesta exacta que necesitas escuchar, aunque duela un poquito.
 
@@ -136,6 +255,9 @@ Si consulta de madrugada (2-5am): reconócelo sutilmente — "estas horas no mie
 Si mencionan a una pareja: usa su nombre y signo si los tienes para hacerlo personal.
 
 Datos del usuario los recibirás en el sistema. Úsalos para personalizar CADA respuesta.`;
+}
+
+export const zodiChatPrompt = getZodiChatPrompt("es");
 
 export function buildReadingPrompt(
   kind: ReadingKind,
@@ -167,6 +289,7 @@ export function buildReadingPrompt(
     hasKids:            profile.hasKids,
     kidsCount:          profile.kidsCount,
     personalBio:        profile.personalBio,
+    language:           profile.language,
   });
 
   // ── Contexto dinámico: hora, temporada solar, intención de consulta
@@ -176,7 +299,7 @@ export function buildReadingPrompt(
 
   // ── Sistema enriquecido con personalización + contextos dinámicos
   const system = [
-    zodiSystemPrompt,
+    getZodiSystemPrompt(profile.language),
     personalization,
     timeCtx ? `\nCONTEXTO DE CONSULTA: ${timeCtx}` : "",
     sunSeasonCtx ? `\n${sunSeasonCtx}` : "",
@@ -223,69 +346,189 @@ export function buildReadingPrompt(
   ].filter((l) => l !== undefined);
 
   if (kind === "palm-reading") {
-    baseLines.push(
-      "",
-      "Instrucción especial: haz una lectura de mano simbólica. Analiza las cuatro líneas principales: " +
-      "Línea de la Vida (vitalidad, cambios, ciclos), Línea del Corazón (forma de amar, vínculos, emociones), " +
-      "Línea de la Cabeza (estilo de pensar, decisiones, claridad mental) y Línea del Destino (vocación, propósito, karma). " +
-      "Interpreta cómo se relacionan con el perfil astral del usuario y con los tránsitos actuales. Sé directo, simbólico y útil."
-    );
+    if (profile.language === "en") {
+      baseLines.push(
+        "",
+        "Special instruction: make a symbolic palm reading. Analyze the four main lines: " +
+        "Life Line (vitality, changes, cycles), Heart Line (way of loving, bonds, emotions), " +
+        "Head Line (thinking style, decisions, mental clarity) and Destiny Line (vocation, purpose, karma). " +
+        "Interpret how they relate to the user's astral profile and current transits. Be direct, symbolic, and helpful."
+      );
+    } else if (profile.language === "ca") {
+      baseLines.push(
+        "",
+        "Instrucció especial: fes una lectura de mans simbòlica. Analitza les quatre línies principals: " +
+        "Línia de la Vida (vitalitat, canvis, cicles), Línia del Cor (manera d'estimar, vincles, emocions), " +
+        "Línia del Cap (estil de pensar, decisions, claredat mental) i Línia del Destí (vocació, propòsit, karma). " +
+        "Interpreta com es relacionen amb el perfil astral de l'usuari i els trànsits actuals. Sé directe, simbòlic i útil."
+      );
+    } else {
+      baseLines.push(
+        "",
+        "Instrucción especial: haz una lectura de mano simbólica. Analiza las cuatro líneas principales: " +
+        "Línea de la Vida (vitalidad, cambios, ciclos), Línea del Corazón (forma de amar, vínculos, emociones), " +
+        "Línea de la Cabeza (estilo de pensar, decisiones, claridad mental) y Línea del Destino (vocación, propósito, karma). " +
+        "Interpreta cómo se relacionan con el perfil astral del usuario y con los tránsitos actuales. Sé directo, simbólico y útil."
+      );
+    }
   }
 
   if (kind === "name-reading") {
-    baseLines.push(
-      "",
-      "INSTRUCCIÓN ESPECIAL — ANÁLISIS NOMBRE COMPLETO CON ACENTO ZODI:\n" +
-      "1. NOMBRE: vibración numerológica + significado ancestral + cómo lo perciben los demás. " +
-      "Incluye su conexión con las constelaciones del día de nacimiento.\n" +
-      "2. PRIMER APELLIDO: herencia paterna, karma familiar, raíces. ¿Qué carga sin saberlo?\n" +
-      "3. SEGUNDO APELLIDO (si existe): rama materna, legado emocional, lo que heredó del lado que menos lo sabe.\n" +
-      "4. VIBRACIÓN TOTAL del nombre completo: número + misión de vida combinada.\n" +
-      "5. ALINEACIÓN con las constelaciones de su fecha de nacimiento: qué dijeron los astros el día que llegó con ese nombre.\n" +
-      "6. Una HISTORIA MÍSTICA en estilo ZODI: cyberpunk + oscuro + divertido. Un párrafo que el usuario quiera compartir.\n" +
-      "Usa humor ácido pero que haga sentir especial. Este análisis debe parecer que lo hiciste SOLO para esta persona."
-    );
+    if (profile.language === "en") {
+      baseLines.push(
+        "",
+        "SPECIAL INSTRUCTION — FULL NAME ANALYSIS WITH ZODI STYLE:\n" +
+        "1. FIRST NAME: numerological vibration + ancestral meaning + how others perceive them. " +
+        "Include connection to birthdate constellations.\n" +
+        "2. FIRST LAST NAME: paternal heritage, family karma, roots. What are they carrying without knowing?\n" +
+        "3. SECOND LAST NAME (if any): maternal branch, emotional legacy, what they inherited from the side they know least about.\n" +
+        "4. TOTAL VIBRATION of the full name: number + combined life mission.\n" +
+        "5. ALIGNMENT with birth date constellations: what the stars said when they arrived with that name.\n" +
+        "6. A MYSTICAL STORY in ZODI style: cyberpunk + dark + fun. One paragraph the user wants to share.\n" +
+        "Use dry humor but make them feel special. This analysis must feel like it was made ONLY for this person."
+      );
+    } else if (profile.language === "ca") {
+      baseLines.push(
+        "",
+        "INSTRUCCIÓ ESPECIAL — ANÀLISI DEL NOM COMPLET AMB ESTIL ZODI:\n" +
+        "1. NOM: vibració numerològica + significat ancestral + com els veuen els altres. " +
+        "Inclou la connexió amb les constel·lacions del dia de naixement.\n" +
+        "2. PRIMER COGNOM: herència paterna, karma familiar, arrels. Què carreguen sense saber-ho?\n" +
+        "3. SEGON COGNOM (si existeix): branca materna, llegat emocional, el que van heretar del costat que menys coneixen.\n" +
+        "4. VIBRACIÓ TOTAL del nom complet: número + missió de vida combinada.\n" +
+        "5. ALINEACIÓ amb les constel·lacions del naixement: què van dir els astres el dia que van arribar amb aquest nom.\n" +
+        "6. UNA HISTÒRIA MÍSTICA a l'estil ZODI: cyberpunk + fosc + divertit. Un paràgraf que l'usuari vulgui compartir.\n" +
+        "Fes servir humor àcid però que faci sentir especial. Aquesta anàlisi ha de semblar feta NOMÉS per a aquesta persona."
+      );
+    } else {
+      baseLines.push(
+        "",
+        "INSTRUCCIÓN ESPECIAL — ANÁLISIS NOMBRE COMPLETO CON ACENTO ZODI:\n" +
+        "1. NOMBRE: vibración numerológica + significado ancestral + cómo lo perciben los demás. " +
+        "Incluye su conexión con las constelaciones del día de nacimiento.\n" +
+        "2. PRIMER APELLIDO: herencia paterna, karma familiar, raíces. ¿Qué carga sin saberlo?\n" +
+        "3. SEGUNDO APELLIDO (si existe): rama materna, legado emocional, lo que heredó del lado que menos lo sabe.\n" +
+        "4. VIBRACIÓN TOTAL del nombre completo: número + misión de vida combinada.\n" +
+        "5. ALINEACIÓN con las constelaciones de su fecha de nacimiento: qué dijeron los astros el día que llegó con ese nombre.\n" +
+        "6. Una HISTORIA MÍSTICA en estilo ZODI: cyberpunk + oscuro + divertido. Un párrafo que el usuario quiera compartir.\n" +
+        "Usa humor ácido pero que haga sentir especial. Este análisis debe parecer que lo hiciste SOLO para esta persona."
+      );
+    }
   }
 
   if (kind === "daily-horoscope") {
-    const areaFocus = detectedFocus
-      ? `Enfoca la lectura EXCLUSIVAMENTE en el área de: ${detectedFocus}. No divagues hacia otras áreas.`
-      : "Incluye brevemente: amor, trabajo, dinero y energía personal. Cierra con una señal concreta para actuar hoy.";
-    baseLines.push(
-      "",
-      `Instrucción especial: esta es una lectura del día ${ctx.dateReadable}. ` +
-      `El Sol está en ${ctx.sunTransit} y la luna está en fase ${ctx.moonPhase}. ` +
-      `Júpiter en ${ctx.jupiterSign} y Saturno en ${ctx.saturnSign} crean el contexto general. ` +
-      `La vibración numerológica universal del día es ${ctx.dayVibration}. ${areaFocus}`
-    );
+    if (profile.language === "en") {
+      const areaFocus = detectedFocus
+        ? `Focus the reading EXCLUSIVELY on the area of: ${detectedFocus}. Do not wander to other areas.`
+        : "Briefly include: love, work, money, and personal energy. Close with a concrete signal to act today.";
+      baseLines.push(
+        "",
+        `Special instruction: this is a daily reading for ${ctx.dateReadable}. ` +
+        `The Sun is in ${ctx.sunTransit} and the Moon phase is ${ctx.moonPhase}. ` +
+        `Jupiter in ${ctx.jupiterSign} and Saturn in ${ctx.saturnSign} create the general context. ` +
+        `The universal numerological vibration of the day is ${ctx.dayVibration}. ${areaFocus}`
+      );
+    } else if (profile.language === "ca") {
+      const areaFocus = detectedFocus
+        ? `Enfoca la lectura EXCLUSIVAMENT a l'àrea de: ${detectedFocus}. No te'n vagis cap a altres àrees.`
+        : "Inclou breument: amor, feina, diners i energia personal. Tanca amb un senyal concret per actuar avui.";
+      baseLines.push(
+        "",
+        `Instrucció especial: lectura del dia ${ctx.dateReadable}. ` +
+        `El Sol està a ${ctx.sunTransit} i la lluna està a la fase ${ctx.moonPhase}. ` +
+        `Júpiter a ${ctx.jupiterSign} i Saturn a ${ctx.saturnSign} creen el context general. ` +
+        `La vibració numerològica universal del dia és ${ctx.dayVibration}. ${areaFocus}`
+      );
+    } else {
+      const areaFocus = detectedFocus
+        ? `Enfoca la lectura EXCLUSIVAMENTE en el área de: ${detectedFocus}. No divagues hacia otras áreas.`
+        : "Incluye brevemente: amor, trabajo, dinero y energía personal. Cierra con una señal concreta para actuar hoy.";
+      baseLines.push(
+        "",
+        `Instrucción especial: esta es una lectura del día ${ctx.dateReadable}. ` +
+        `El Sol está en ${ctx.sunTransit} y la luna está en fase ${ctx.moonPhase}. ` +
+        `Júpiter en ${ctx.jupiterSign} y Saturno en ${ctx.saturnSign} crean el contexto general. ` +
+        `La vibración numerológica universal del día es ${ctx.dayVibration}. ${areaFocus}`
+      );
+    }
   }
 
   if (kind === "weekly-horoscope") {
-    baseLines.push(
-      "",
-      `Instrucción especial: lectura semanal a partir del ${ctx.dateReadable}. ` +
-      `Usa la fase lunar actual (${ctx.moonPhase}) para hablar de los ciclos de la semana. ` +
-      "Divide la lectura por áreas (lunes-miércoles / jueves-domingo) e incluye una misión de la semana."
-    );
+    if (profile.language === "en") {
+      baseLines.push(
+        "",
+        `Special instruction: weekly reading starting from ${ctx.dateReadable}. ` +
+        `Use the current Moon phase (${ctx.moonPhase}) to talk about the cycles of the week. ` +
+        "Divide the reading by areas (Monday-Wednesday / Thursday-Sunday) and include a weekly mission."
+      );
+    } else if (profile.language === "ca") {
+      baseLines.push(
+        "",
+        `Instrucció especial: lectura setmanal a partir de ${ctx.dateReadable}. ` +
+        `Utilitza la fase lunar actual (${ctx.moonPhase}) per parlar dels cicles de la setmana. ` +
+        "Divideix la lectura per àrees (dilluns-dimecres / dijous-diumenge) i inclou una missió de la setmana."
+      );
+    } else {
+      baseLines.push(
+        "",
+        `Instrucción especial: lectura semanal a partir del ${ctx.dateReadable}. ` +
+        `Usa la fase lunar actual (${ctx.moonPhase}) para hablar de los ciclos de la semana. ` +
+        "Divide la lectura por áreas (lunes-miércoles / jueves-domingo) e incluye una misión de la semana."
+      );
+    }
   }
 
   if (kind === "monthly-horoscope") {
-    baseLines.push(
-      "",
-      `Instrucción especial: lectura mensual para ${MONTHS_ES[new Date().getMonth()]} de ${new Date().getFullYear()}. ` +
-      `El Sol está en ${ctx.sunTransit}. Estación: ${ctx.season}. ` +
-      "Habla de ciclos largos, cierres y aperturas del mes. Incluye alerta y ritual mensual."
-    );
+    if (profile.language === "en") {
+      baseLines.push(
+        "",
+        `Special instruction: monthly reading for ${MONTHS_EN[new Date().getMonth()]} ${new Date().getFullYear()}. ` +
+        `The Sun is in ${ctx.sunTransit}. Season: ${ctx.season}. ` +
+        "Talk about long cycles, closures, and openings of the month. Include monthly alert and ritual."
+      );
+    } else if (profile.language === "ca") {
+      baseLines.push(
+        "",
+        `Instrucció especial: lectura mensual per a ${MONTHS_CA[new Date().getMonth()]} de ${new Date().getFullYear()}. ` +
+        `El Sol està a ${ctx.sunTransit}. Estació: ${ctx.season}. ` +
+        "Parla de cicles llargs, tancaments i obertures del mes. Inclou alerta i ritual mensual."
+      );
+    } else {
+      baseLines.push(
+        "",
+        `Instrucción especial: lectura mensual para ${MONTHS_ES[new Date().getMonth()]} de ${new Date().getFullYear()}. ` +
+        `El Sol está en ${ctx.sunTransit}. Estación: ${ctx.season}. ` +
+        "Habla de ciclos largos, cierres y aperturas del mes. Incluye alerta y ritual mensual."
+      );
+    }
   }
 
   if (kind === "transits") {
-    baseLines.push(
-      "",
-      `Instrucción especial: analiza los tránsitos activos hoy (${ctx.dateReadable}). ` +
-      `Sol en ${ctx.sunTransit}, Luna ${ctx.moonPhase}, Júpiter en ${ctx.jupiterSign}, ` +
-      `Saturno en ${ctx.saturnSign}, Nodo Norte en ${ctx.northNode}. ` +
-      "Explica cómo cada tránsito afecta al perfil del usuario. Usa lenguaje claro, no técnico."
-    );
+    if (profile.language === "en") {
+      baseLines.push(
+        "",
+        `Special instruction: analyze active transits today (${ctx.dateReadable}). ` +
+        `Sol in ${ctx.sunTransit}, Moon ${ctx.moonPhase}, Jupiter in ${ctx.jupiterSign}, ` +
+        `Saturn in ${ctx.saturnSign}, North Node in ${ctx.northNode}. ` +
+        "Explains how each transit affects the user profile. Use clear, non-technical language."
+      );
+    } else if (profile.language === "ca") {
+      baseLines.push(
+        "",
+        `Instrucció especial: analitza els trànsits actius avui (${ctx.dateReadable}). ` +
+        `Sol a ${ctx.sunTransit}, Lluna ${ctx.moonPhase}, Júpiter a ${ctx.jupiterSign}, ` +
+        `Saturn a ${ctx.saturnSign}, Node Nord a ${ctx.northNode}. ` +
+        "Explica com cada trànsit afecta el perfil de l'usuari. Utilitza llenguatge clar, no tècnic."
+      );
+    } else {
+      baseLines.push(
+        "",
+        `Instrucción especial: analiza los tránsitos activos hoy (${ctx.dateReadable}). ` +
+        `Sol en ${ctx.sunTransit}, Luna ${ctx.moonPhase}, Júpiter en ${ctx.jupiterSign}, ` +
+        `Saturno en ${ctx.saturnSign}, Nodo Norte en ${ctx.northNode}. ` +
+        "Explica cómo cada tránsito afecta al perfil del usuario. Usa lenguaje claro, no técnico."
+      );
+    }
   }
 
   if (kind === "numerology") {
@@ -294,7 +537,162 @@ export function buildReadingPrompt(
     const lifePathNum = profile.lifePathNumber ?? "desconocido";
     const yearActual = new Date().getFullYear();
 
-    baseLines.push("",
+    if (profile.language === "en") {
+      baseLines.push("",
+`═══════════════════════════════════════════════════════════
+MASTER INSTRUCTION — DEEP & PERSONALIZED ZODI NUMEROLOGY
+═══════════════════════════════════════════════════════════
+
+USER: ${nombre} | Birthdate: ${fechaNac} | Sign: ${profile.zodiac ?? "?"} | Life Path: ${lifePathNum}
+
+This reading must be LONG, DETAILED, and completely personalized. Do not shorten it. Use all the space.
+ZODI Voice: intimate, dry, direct, street-smart. Talk to them one-on-one using their name.
+
+━━━ NUMEROLOGICAL KNOWLEDGE BASE (use without citing) ━━━
+
+PERSONALITIES BY NUMBER:
+• 1 — The solitary pioneer. Natural-born leader who prefers to act before asking for permission. Strong ego, iron will. Creative, innovative, ambitious. Works best alone. In love: passionate but controlling. Deep fear: being mediocre or dependent.
+• 2 — The sensitive diplomat. Empathetic to the extreme, natural mediator. Reads the emotions of a room upon entering. Needs a partner to function at their best. In love: devoted but with a tendency to lose their identity. Deep fear: conflict and rejection.
+• 3 — The creative communicator. Born artist, optimistic, charismatic. The life of the party but with hidden depth. Speaks, writes, creates, seduces. In love: charming but inconstant. Deep fear: being ignored or not standing out.
+• 4 — The steady builder. Disciplined, methodical, reliable. Builds slowly but solidly. Doesn't improvise well. In love: loyal and responsible but rigid. Deep fear: chaos and instability.
+• 5 — The free adventurer. Curious, adaptable, lover of change. Bored by routine, energized by the new. In love: passionate but hard to pin down. Deep fear: getting trapped, monotony.
+• 6 — The responsible caregiver. Protective, perfectionist, oriented towards home and family. Has high standards for self and others. In love: fully devoted, sometimes controlling out of love. Deep fear: being a burden or failing their loved ones.
+• 7 — The spiritual seeker. Analytical, mysterious, introverted. Needs solitude to process. Studies everything in depth. In love: intense but emotionally distant. Deep fear: being misunderstood or superficial.
+• 8 — The power executor. Ambitious, oriented towards material success and recognition. Natural in business and leadership. In love: protective and generous but dominant. Deep fear: failure and poverty.
+• 9 — The wise humanist. Compassionate, idealistic, with a universal vision. Carries the weight of the world. Last in the cycle, contains all others. In love: intensely romantic but with a tendency to sacrifice self. Deep fear: not leaving a mark, being forgotten.
+• 11 — The enlightened one (master number). Highly intuitive, sensitive, with a spiritual mission. Unique powers of inspiration but also extreme anxiety if energy is not channeled. In love: deep and transformative. Deep fear: their own intensity.
+• 22 — The master builder (master number). The most powerful: combines the intuition of 11 with the practicality of 4. Capable of manifesting dreams on a large scale. In love: committed for the long term. Deep fear: wasting their potential.
+• 33 — The master healer (master number). Rare and powerful. Combines love, creativity, and teaching. Mission to heal and lift others. In love: self-sacrificing to the extreme. Deep fear: that no one understands their level.
+
+NUMEROLOGY COMPATIBILITY CHART:
+• 1 with: 1★★★ 2★★ 3★★★ 4★ 5★★★★ 6★★ 7★★★★ 8★★★ 9★★
+• 2 with: 1★★ 2★★★ 3★★ 4★★★★ 5★★ 6★★★★ 7★★★ 8★★★★ 9★★★
+• 3 with: 1★★★ 2★★ 3★★★ 4★ 5★★★★ 6★★★ 7★★ 8★★ 9★★★★
+• 4 with: 1★ 2★★★★ 3★ 4★★★ 5★★ 6★★★ 7★★★ 8★★★★★ 9★
+• 5 with: 1★★★★ 2★★ 3★★★★ 4★★ 5★★★ 6★★ 7★★★★ 8★★ 9★★★
+• 6 with: 1★★ 2★★★★ 3★★★ 4★★★ 5★★ 6★★★★ 7★★ 8★★★ 9★★★★★
+• 7 with: 1★★★★ 2★★★ 3★★ 4★★★ 5★★★★ 6★★ 7★★★★★ 8★ 9★★★
+• 8 with: 1★★★ 2★★★★ 3★★ 4★★★★★ 5★★ 6★★★ 7★ 8★★★ 9★★
+• 9 with: 1★★ 2★★★ 3★★★★ 4★ 5★★★ 6★★★★★ 7★★★ 8★★ 9★★★★
+• 11 with: 2★★★★★ 4★★★ 7★★★★ 11★★★★ 22★★★
+• 22 with: 4★★★★★ 8★★★★ 11★★★ 22★★★★★ 6★★★
+• 33 with: 6★★★★★ 9★★★★ 11★★★ 33★★★★ 3★★★
+
+INCOMPATIBILITY CLUES:
+• 1 clashes with 4 (pioneer vs systematic controller) and 6 (freedom vs duty)
+• 2 clashes with 5 (dependent vs independent) and 8 (sensitive vs dominant)
+• 3 clashes with 4 (creative chaos vs rigid order) and 7 (social vs hermit)
+• 4 clashes with 1, 3, 5, 9 (system vs chaos)
+• 5 clashes with 2, 4, 6 (freedom vs commitment)
+• 7 clashes with 2, 6, 8 (spiritual depth vs materialism)
+• 8 clashes with 3, 7, 9 (materialism vs spiritual/creative)
+
+━━━ RESPONSE STRUCTURE (MANDATORY) ━━━
+
+**🔢 BLOCK 1 — THE CALCULATION (show step by step)**
+Birthdate ${fechaNac}: break down digit by digit. Show each sum. If it's a master number (11, 22, 33), explain it. Use the user's name.
+
+**🧠 BLOCK 2 — WHO YOU ARE ACCORDING TO YOUR NUMBER (min 4 paragraphs)**
+Deep description of the number's personality in ZODI voice. How they think, love, work, react under pressure. Public projection vs private self. How others see them. What distinguishes them.
+
+**⚡ BLOCK 3 — LIGHT AND SHADOW**
+✦ Superpowers of the number (4-5 real strengths)
+💀 What ruins you (4-5 shadows without filter — ZODI doesn't sugarcoat)
+🎯 Real life mission
+
+**❤️ BLOCK 4 — LOVE, WORK, AND MONEY**
+Three detailed sections (at least 2 paragraphs each). In love: how they love, seek, give, destroy. In work: ambition type, where they shine, what drains them. In money: relationship with abundance, unconscious money patterns.
+
+**💫 BLOCK 5 — WHO YOU GET ALONG WITH (detailed compatibility)**
+Explain WHICH numbers they connect well with and WHY (min 3 compatible numbers). Then WHICH numbers they clash with and WHY (min 2 incompatible numbers). Use ZODI style humor.
+
+**📅 BLOCK 6 — YOUR PERSONAL YEAR ${yearActual}**
+Calculate: (sum of birth month + day + ${yearActual}, reduced). Show calculation. Explain what energy this personal year brings for ${nombre}.
+
+**✨ BLOCK 7 — THE PHRASE THAT DEFINES YOU**
+A brilliant, personalized phrase that ${nombre} would want in their bio.
+
+MANDATORY TONE: Intimate, dry, smart. Use their name. Connect with their zodiac sign (${profile.zodiac ?? "?"}) and life situation.`
+      );
+    } else if (profile.language === "ca") {
+      baseLines.push("",
+`═══════════════════════════════════════════════════════════
+INSTRUCCIÓ MESTRA — NUMEROLOGIA ZODI PROFUNDA I PERSONALITZADA
+═══════════════════════════════════════════════════════════
+
+USUARI: ${nombre} | Data: ${fechaNac} | Signe: ${profile.zodiac ?? "?"} | Camí: ${lifePathNum}
+
+Aquesta lectura ha de ser LLARGA, DETALLADA i completament personalitzada. No la retallis. Utilitza tot l'espai.
+Veu de ZODI: íntima, àcida, directa, de carrer. Parla SEMPRE de tu a tu fent servir el nom.
+
+━━━ BASE DE CONEIXEMENT NUMEROLÒGICA (utilitza-la sense citar) ━━━
+
+PERSONALITATS PER NÚMERO:
+• 1 — El pioner solitari. Líder nat que prefereix actuar abans de demanar permís. Ego fort, voluntat de ferro. Creatiu, innovador, ambiciós. Treballa millor sol. En l'amor: apassionat però controlador. Por profunda: ser mediocre o dependent.
+• 2 — El diplomàtic sensible. Empàtic a l'extrem, mediador natural. Llegeix les emocions d'una habitació en entrar. Necessita parella per funcionar al màxim. En l'amor: devot per amb tendència a perdre la seva identitat. Por profunda: el conflicte i el rebutjament.
+• 3 — El comunicador creatiu. Artista nat, optimista, carismàtic. La vida de la festa però amb profunditat oculta. Parla, escriu, crea, sedueix. En l'amor: encantador però inconstant. Por profunda: ser ignorat o no destacar.
+• 4 — El constructor constant. Disciplinat, metòdic, fiable. Construeix a poc a poc però sòlid. No improvisa bé. En l'amor: lleial i responsable però rígid. Por profunda: el caos i la inestabilitat.
+• 5 — L'aventurer lliure. Curiós, adaptable, seductor del canvi. Li avorreix la rutina i li dona energia el que és nou. En l'amor: apassionat però difícil d'atrapar. Por profunda: quedar atrapat, la monotonia.
+• 6 — El cuidador responsable. Protector, perfeccionista, orientat a la llar i la família. Té alts estàndards per a si mateix i per als altres. En l'amor: lliurat totalment, de vegades controlador per amor. Por profunda: ser una càrrega o fallar als seus.
+• 7 — El cercador espiritual. Analític, misteriós, introvertid. Necessita soledat per processar. Estudia tot en profunditat. En l'amor: intens però distant emocionalment. Por profunda: ser malinterpretat o superficial.
+• 8 — L'executor de poder. Ambiciós, orientat a l'èxit material i al reconeixement. Natural en els negocis i el lideratge. En l'amor: protector i generós però dominant. Por profunda: el fracàs i la pobresa.
+• 9 — L'humanista savi. Compassiu, idealista, amb visió universal. Carrega amb el pes del món. Últim en el cicle, conté tots els altres. En l'amor: intensament romàntic però amb tendència a sacrificar-se. Por profunda: no deixar empremta, ser oblidat.
+• 11 — L'il·luminat (número mestre). Altament intuïtiu, sensible, amb missió espiritual. Té poders d'inspiració únics però també ansietat extrema si no canalitza la seva energia. En l'amor: profund i transformador. Por profunda: la seva pròpia intensitat.
+• 22 — El constructor mestre (número mestre). El més poderós: combina la intuïció de l'11 amb la practicitat del 4. Capaç de manifestar somnis a gran escala. En l'amor: compromès a llarg termini. Por profunda: malgastar el seu potencial.
+• 33 — El mestre sanador (número mestre). Rar i poderós. Combina amor, creativitat i ensenyament. Missió de guarir i elevar els altres. En l'amor: sacrificat fins a l'extrem. Por profunda: que ningú entengui el seu nivell.
+
+TAULA DE COMPATIBILITATS NUMÈRIQUES:
+• 1 amb: 1★★★ 2★★ 3★★★ 4★ 5★★★★ 6★★ 7★★★★ 8★★★ 9★★
+• 2 amb: 1★★ 2★★★ 3★★ 4★★★★ 5★★ 6★★★★ 7★★★ 8★★★★ 9★★★
+• 3 amb: 1★★★ 2★★ 3★★★ 4★ 5★★★★ 6★★★ 7★★ 8★★ 9★★★★
+• 4 amb: 1★ 2★★★★ 3★ 4★★★ 5★★ 6★★★ 7★★★ 8★★★★★ 9★
+• 5 amb: 1★★★★ 2★★ 3★★★★ 4★★ 5★★★ 6★★ 7★★★★ 8★★ 9★★★
+• 6 amb: 1★★ 2★★★★ 3★★★ 4★★★ 5★★ 6★★★★ 7★★ 8★★★ 9★★★★★
+• 7 amb: 1★★★★ 2★★★ 3★★ 4★★★ 5★★★★ 6★★ 7★★★★★ 8★ 9★★★
+• 8 amb: 1★★★ 2★★★★ 3★★ 4★★★★★ 5★★ 6★★★ 7★ 8★★★ 9★★
+• 9 amb: 1★★ 2★★★ 3★★★★ 4★ 5★★★ 6★★★★★ 7★★★ 8★★ 9★★★★
+• 11 amb: 2★★★★★ 4★★★ 7★★★★ 11★★★★ 22★★★
+• 22 amb: 4★★★★★ 8★★★★ 11★★★ 22★★★★★ 6★★★
+• 33 amb: 6★★★★★ 9★★★★ 11★★★ 33★★★★ 3★★★
+
+CLAUS D'INCOMPATIBILITAT:
+• 1 xoca amb 4 (el pioner vs el controlador sistemàtic) i 6 (llibertat vs deure)
+• 2 xoca amb 5 (el dependent vs l'independent) i 8 (el sensible vs el dominant)
+• 3 xoca amb 4 (el creatiu caòtic vs l'ordenat rígid) i 7 (el social vs l'ermità)
+• 4 xoca amb 1, 3, 5, 9 (el sistema vs el caos)
+• 5 xoca amb 2, 4, 6 (la llibertat vs el compromís)
+• 7 xoca amb 2, 6, 8 (la profunditat espiritual vs el materialisme)
+• 8 xoca amb 3, 7, 9 (el materialisme vs l'espiritual/creatiu)
+
+━━━ ESTRUCTURA DE LA RESPOSTA (OBLIGATÒRIA) ━━━
+
+**🔢 BLOC 1 — EL CÀLCUL (mostra pas a pas)**
+Data ${fechaNac}: desglossa dígit a dígit. Mostra cada suma. Si és número mestre (11, 22, 33), explica-ho. Fes servir el nom de l'usuari.
+
+**🧠 BLOC 2 — QUI ETS SEGONS EL TEU NÚMERO (mínim 4 paràgrafs rics)**
+Descripció profunda de la personalitat del número amb la veu de ZODI. Com pensa, com estima, com treballa, com reacciona sota pressió. Què projecta al món vs qui és en privat. Com el veuen els altres.
+
+**⚡ BLOC 3 — LLUMS I OMBRES**
+✦ Superpoders del número (4-5 fortaleses reals)
+💀 El que el fot (4-5 ombres sense filtre — ZODI no endolceix)
+🎯 La seva missió de vida real
+
+**❤️ BLOC 4 — AMOR, FEINA I DINERS**
+Tres seccions detallades (almenys 2 paràgrafs cadascuna). En l'amor: com estima, què busca, què dona, què destreu. En la feina: quin tipus d'ambició té, on brilla, què l'esgota. En els diners: la seva relació amb l'abundància, els seus patrons inconscients amb els diners.
+
+**💫 BLOC 5 — AMB QUI ET PORTES (compatibilitats detallades)**
+Explica amb QUINS números connecta bé i PER QUÈ (mínim 3 números compatibles amb descripció). Després amb QUINS números xoca i PER QUÈ (mínim 2 números incompatibles).
+
+**📅 BLOC 6 — EL TEU ANY PERSONAL ${yearActual}**
+Calcula: (suma de mes + dia de naixement + ${yearActual}, reduït). Mostra el càlcul. Explica quina energia porta aquest any personal per a ${nombre}.
+
+**✨ BLOC 7 — LA FRASE QUE EL DEFINEIX**
+Una frase brillant, personalitzada, que ${nombre} vulgui posar-se a la bio.
+
+TONO OBLIGATORI: Íntim, àcid, intel·ligent. Utilitza el nom constantment. Conecta amb el seu signe zodiacal (${profile.zodiac ?? "?"}) i amb la seva situació vital.`
+      );
+    } else {
+      baseLines.push("",
 `═══════════════════════════════════════════════════════════
 INSTRUCCIÓN MAESTRA — NUMEROLOGÍA ZODI PROFUNDA Y PERSONALIZADA
 ═══════════════════════════════════════════════════════════
@@ -369,7 +767,8 @@ Calcula: (suma de mes + día de nacimiento + ${yearActual}, reducido). Muestra e
 Una frase brillante, personalizada, que ${nombre} quiera ponerse en la bio. Que capture su esencia numerológica con el estilo ZODI.
 
 TONO OBLIGATORIO: Íntimo, ácido, inteligente. Usa el nombre constantemente. Conecta con su signo zodiacal (${profile.zodiac ?? "?"}) y con su situación vital si la conoces. Esta lectura debe sentirse completamente única para esta persona.`
-    );
+      );
+    }
   }
 
   // ── Instrucción de tono — obligatoria ────────────────────────────────────
@@ -379,25 +778,66 @@ TONO OBLIGATORIO: Íntimo, ácido, inteligente. Usa el nombre constantemente. Co
     brutal:     "Brutal sin filtros: dice la verdad aunque duela, sin suavizar, con datos y sin postureo espiritual.",
     sarcastico: "Sarcástico y ácido: humor inteligente con verdad envenenada, hace reír pero duele un poco.",
   };
-  const toneKey = (profile.readingTone ?? "directo") as string;
-  const toneDesc = toneLabels[toneKey] ?? toneLabels.directo;
-  baseLines.push(
-    "",
-    `TONO OBLIGATORIO PARA ESTA RESPUESTA: ${toneKey.toUpperCase()} — ${toneDesc} NO uses otro tono.`
-  );
+  const toneLabelsEN: Record<string, string> = {
+    suave:      "Soft and empathetic: warm, understanding, no low blows. Encourages and guides with tenderness.",
+    directo:    "Direct and straightforward: to the point, no fluff, useful and concrete.",
+    brutal:     "Brutal with no filters: tells the truth even if it hurts, no sugarcoating, factual, no spiritual posturing.",
+    sarcastico: "Sarcastic and dry: smart humor with a sting, makes them laugh but bites a little.",
+  };
+  const toneLabelsCA: Record<string, string> = {
+    suave:      "Suau i empàtic: afectuós, comprensiu, sense cops baixos. Anima i orienta amb tendresa.",
+    directo:    "Directe i sense embuts: al gra, sense ornaments, útil i concret.",
+    brutal:     "Brutal sense filtres: diu la veritat encara que faci mal, sense suavitzar, amb dades i sense postureig espiritual.",
+    sarcastico: "Sarcàstic i àcid: humor intel·ligent amb veritat enverinada, fa riure per fa una mica de mal.",
+  };
 
-  // ── Temas favoritos — enfocar cuando sean relevantes ─────────────────────
-  if (profile.favoriteTopics && (profile.favoriteTopics as string[]).length > 0) {
-    baseLines.push(
-      `TEMAS FAVORITOS DEL USUARIO: ${(profile.favoriteTopics as string[]).join(", ")}. ` +
-      `Cuando la consulta sea general (sin tema específico), PRIORIZA estos temas. ` +
-      `El usuario quiere que las lecturas generales giren alrededor de lo que más le importa.`
-    );
+  const toneKey = (profile.readingTone ?? "directo") as string;
+  let toneDesc = toneLabels[toneKey] ?? toneLabels.directo;
+  if (profile.language === "en") {
+    toneDesc = toneLabelsEN[toneKey] ?? toneLabelsEN.directo;
+  } else if (profile.language === "ca") {
+    toneDesc = toneLabelsCA[toneKey] ?? toneLabelsCA.directo;
   }
 
   baseLines.push(
     "",
-    "Devuelve una respuesta en español con: título, porcentaje de energía, lectura (usa markdown, viñetas, negritas para que sea fácil de leer en el móvil), advertencia, ritual/acción y una frase breve compartible."
+    profile.language === "en"
+      ? `MANDATORY TONE FOR THIS RESPONSE: ${toneKey.toUpperCase()} — ${toneDesc} Do NOT use any other tone.`
+      : profile.language === "ca"
+      ? `TON OBLIGATORI PER A AQUESTA RESPOSTA: ${toneKey.toUpperCase()} — ${toneDesc} NO utilitzis cap altre ton.`
+      : `TONO OBLIGATORIO PARA ESTA RESPUESTA: ${toneKey.toUpperCase()} — ${toneDesc} NO uses otro tono.`
+  );
+
+  // ── Temas favoritos — enfocar cuando sean relevantes ─────────────────────
+  if (profile.favoriteTopics && (profile.favoriteTopics as string[]).length > 0) {
+    if (profile.language === "en") {
+      baseLines.push(
+        `FAVORITE TOPICS OF THE USER: ${(profile.favoriteTopics as string[]).join(", ")}. ` +
+        `When the query is general (no specific topic), PRIORITIZE these topics. ` +
+        `The user wants the general readings to revolve around what matters most to them.`
+      );
+    } else if (profile.language === "ca") {
+      baseLines.push(
+        `TEMES PREFERITS DE L'USUARI: ${(profile.favoriteTopics as string[]).join(", ")}. ` +
+        `Quan la consulta sigui general (sense tema específic), PRIORITZA aquests temes. ` +
+        `L'usuari vol que les lectures generals girin al voltant del que més li importa.`
+      );
+    } else {
+      baseLines.push(
+        `TEMAS FAVORITOS DEL USUARIO: ${(profile.favoriteTopics as string[]).join(", ")}. ` +
+        `Cuando la consulta sea general (sin tema específico), PRIORIZA estos temas. ` +
+        `El usuario quiere que las lecturas generales giren alrededor de lo que más le importa.`
+      );
+    }
+  }
+
+  baseLines.push(
+    "",
+    profile.language === "en"
+      ? "Return a response in English with: title, energy percentage, reading (use markdown, bullet points, bold text for easy mobile reading), warning, ritual/action, and a short shareable phrase."
+      : profile.language === "ca"
+      ? "Retorna una resposta en català amb: títol, percentatge d'energia, lectura (utilitza markdown, pics, negretes perquè sigui fàcil de llegir al mòbil), advertència, ritual/acció i una frase breu compartible."
+      : "Devuelve una respuesta en español con: título, porcentaje de energía, lectura (usa markdown, viñetas, negritas para que sea fácil de leer en el móvil), advertencia, ritual/acción y una frase breve compartible."
   );
 
   return {
@@ -410,3 +850,14 @@ const MONTHS_ES = [
   "enero", "febrero", "marzo", "abril", "mayo", "junio",
   "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
 ];
+
+const MONTHS_EN = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const MONTHS_CA = [
+  "gener", "febrer", "març", "abril", "maig", "juny",
+  "juliol", "agost", "setembre", "octubre", "novembre", "desembre"
+];
+

@@ -166,6 +166,7 @@ function buildProfile(session: ReturnType<typeof getLocalSession>) {
     readingTone:        od?.readingTone ?? "directo",
     favoriteTopics:     od?.favoriteTopics ?? [],
     level:              1,
+    language:           od?.language,
     // Contexto vital
     relationshipStatus: od?.relationshipStatus,
     partnerName:        od?.partnerName,

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getFirebaseAuth } from "@/lib/firebase/admin";
-import { zodiChatPrompt } from "@/lib/ai/prompts";
+import { getZodiChatPrompt } from "@/lib/ai/prompts";
 import { buildPersonalizationBlock } from "@/lib/ai/personalization";
 import { z } from "zod";
 
@@ -30,6 +30,7 @@ const ChatSchema = z.object({
     // Preferencias
     readingTone:      z.string().optional(),
     favoriteTopics:   z.array(z.string()).optional(),
+    language:         z.enum(["es", "en", "ca"]).optional(),
     // Contexto vital
     relationshipStatus: z.string().optional(),
     partnerName:      z.string().optional(),
@@ -108,10 +109,11 @@ function buildSystemPrompt(
     kidsCount:          profile?.kidsCount,
     personalBio:        profile?.personalBio,
     recurringTheme:     recurringTheme ?? undefined,
+    language:           profile?.language,
   });
 
   return [
-    zodiChatPrompt,
+    getZodiChatPrompt(profile?.language),
     astralParts ? `PERFIL ASTRAL: ${astralParts}` : "Perfil astral sin completar — pide los datos que necesites.",
     toneNote,
     topicsNote,

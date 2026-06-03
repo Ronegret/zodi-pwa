@@ -101,6 +101,7 @@ export function ZodiOracle() {
             // ── Preferencias
             readingTone:     od?.readingTone,
             favoriteTopics:  od?.favoriteTopics,
+            language:        od?.language,
             // ── Contexto vital (clave para personalización real)
             relationshipStatus: od?.relationshipStatus,
             partnerName:     od?.partnerName,
