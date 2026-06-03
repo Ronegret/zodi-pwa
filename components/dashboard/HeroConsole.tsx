@@ -8,7 +8,7 @@ import { RadioTower, Sparkles, Gem, Flame, Zap, ArrowRight } from "lucide-react"
 import { getTodaysAstralContext } from "@/lib/astral";
 import { getSessionProfile, getLocalSession } from "@/lib/session";
 import { getXpData, getStreak, getLevel, xpToNextLevel, getGems, getLevelTitle } from "@/lib/gamification";
-import { getNameCard } from "@/lib/nameCard";
+import { getNameCard, getSignRuler, getDailyCrystal } from "@/lib/nameCard";
 import type { UserProfile } from "@/types/zodi";
 
 type AstralCtx = ReturnType<typeof getTodaysAstralContext>;
@@ -388,7 +388,7 @@ export function HeroConsole() {
                       >
                         {firstName},
                       </h1>
-                      {/* Significado del nombre */}
+                      {/* Línea 1 — Significado del nombre */}
                       {(() => {
                         const card = getNameCard(profile?.displayName);
                         if (!card) return null;
@@ -404,6 +404,30 @@ export function HeroConsole() {
                             {card.saint && card.saint !== "— " && (
                               <span className="text-lime-200/40"> · ✦ {card.saint}</span>
                             )}
+                          </motion.p>
+                        );
+                      })()}
+                      {/* Línea 2 — Planeta regente + cristal del día */}
+                      {(() => {
+                        const ruler   = getSignRuler(sign);
+                        const crystal = getDailyCrystal(sign);
+                        if (!ruler) return null;
+                        return (
+                          <motion.p
+                            initial={{ opacity: 0, y: 4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2, duration: 0.45 }}
+                            className="mt-0.5 text-[11px] sm:text-xs leading-snug tracking-wide"
+                          >
+                            <span className="text-violet-300/60">
+                              {ruler.symbol} {ruler.planet}
+                            </span>
+                            <span className="text-white/22"> · {ruler.keyword}</span>
+                            <span className="text-white/22"> · </span>
+                            <span className="text-lime-300/55">
+                              {crystal.emoji} {crystal.name}
+                            </span>
+                            <span className="text-white/28"> · {crystal.intent}</span>
                           </motion.p>
                         );
                       })()}

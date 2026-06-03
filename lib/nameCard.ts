@@ -108,7 +108,70 @@ const DATA: Record<string, NameCard> = {
   miriam:     { meaning: "La amada",                   origin: "Hebreo",       saint: "15 ago" },
 };
 
-// Normaliza: quita tildes, minúsculas
+// ── Planeta regente por signo ─────────────────────────────────────────────────
+export type PlanetData = { planet: string; symbol: string; keyword: string };
+
+const SIGN_RULERS: Record<string, PlanetData> = {
+  Aries:       { planet: "Marte",    symbol: "♂",  keyword: "acción y energía" },
+  Tauro:       { planet: "Venus",    symbol: "♀",  keyword: "placer y valor" },
+  Géminis:     { planet: "Mercurio", symbol: "☿",  keyword: "mente y comunicación" },
+  Cáncer:      { planet: "Luna",     symbol: "☽",  keyword: "emoción e instinto" },
+  Leo:         { planet: "Sol",      symbol: "☀",  keyword: "identidad y poder" },
+  Virgo:       { planet: "Mercurio", symbol: "☿",  keyword: "análisis y detalle" },
+  Libra:       { planet: "Venus",    symbol: "♀",  keyword: "armonía y justicia" },
+  Escorpio:    { planet: "Plutón",   symbol: "♇",  keyword: "transformación y poder" },
+  Sagitario:   { planet: "Júpiter",  symbol: "♃",  keyword: "expansión y sabiduría" },
+  Capricornio: { planet: "Saturno",  symbol: "♄",  keyword: "disciplina y estructura" },
+  Acuario:     { planet: "Urano",    symbol: "♅",  keyword: "innovación y libertad" },
+  Piscis:      { planet: "Neptuno",  symbol: "♆",  keyword: "intuición y misterio" },
+};
+
+export function getSignRuler(sign?: string): PlanetData | null {
+  if (!sign) return null;
+  return SIGN_RULERS[sign] ?? null;
+}
+
+// ── Cristal del día ───────────────────────────────────────────────────────────
+export type CrystalData = { name: string; emoji: string; intent: string };
+
+const CRYSTALS: CrystalData[] = [
+  { name: "Amatista",        emoji: "💜", intent: "intuición" },
+  { name: "Cuarzo rosa",     emoji: "🌸", intent: "amor propio" },
+  { name: "Obsidiana",       emoji: "🖤", intent: "protección" },
+  { name: "Citrino",         emoji: "🌕", intent: "abundancia" },
+  { name: "Lapislázuli",     emoji: "💙", intent: "comunicación" },
+  { name: "Selenita",        emoji: "🤍", intent: "claridad mental" },
+  { name: "Turmalina negra", emoji: "⬛", intent: "bloqueo energético" },
+  { name: "Malaquita",       emoji: "💚", intent: "transformación" },
+  { name: "Cuarzo claro",    emoji: "🔮", intent: "amplificación" },
+  { name: "Ojo de tigre",    emoji: "🟤", intent: "enfoque" },
+  { name: "Ágata azul",      emoji: "🔵", intent: "equilibrio" },
+  { name: "Pirita",          emoji: "✨", intent: "prosperidad" },
+];
+
+// Bias por elemento para que el cristal tenga afinidad con el signo
+const ELEMENT_BIAS: Record<string, number> = {
+  Fuego: 0, Tierra: 3, Aire: 4, Agua: 0,
+};
+
+const SIGN_ELEMENT: Record<string, string> = {
+  Aries: "Fuego", Leo: "Fuego", Sagitario: "Fuego",
+  Tauro: "Tierra", Virgo: "Tierra", Capricornio: "Tierra",
+  Géminis: "Aire", Libra: "Aire", Acuario: "Aire",
+  Cáncer: "Agua", Escorpio: "Agua", Piscis: "Agua",
+};
+
+export function getDailyCrystal(sign?: string): CrystalData {
+  const element = SIGN_ELEMENT[sign ?? ""] ?? "Fuego";
+  const bias    = ELEMENT_BIAS[element] ?? 0;
+  const now     = new Date();
+  const start   = new Date(now.getFullYear(), 0, 0).getTime();
+  const day     = Math.floor((now.getTime() - start) / 86400000);
+  const idx     = (day * 5 + bias) % CRYSTALS.length;
+  return CRYSTALS[idx];
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function normalize(name: string): string {
   return name
     .toLowerCase()
