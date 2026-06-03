@@ -114,7 +114,8 @@ function energyColor(score: number): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NEON AURA — animación pura de colores, sin imágenes
+// NEON AURA — animación GPU-only: solo transform + opacity, sin filter dinámico
+// will-change promueve cada orb a su propia capa de composición → 0 repaints
 // ─────────────────────────────────────────────────────────────────────────────
 function NeonAura() {
   return (
@@ -133,6 +134,7 @@ function NeonAura() {
           top: "22%", left: "22%",
           background: "radial-gradient(circle, rgba(184,255,23,0.13) 0%, rgba(184,255,23,0.04) 50%, transparent 75%)",
           filter: "blur(28px)",
+          willChange: "transform, opacity",
         }}
         animate={{ scale: [1, 1.18, 0.95, 1], opacity: [0.7, 1, 0.65, 0.7] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -146,6 +148,7 @@ function NeonAura() {
           top: "30%", right: "5%",
           background: "radial-gradient(circle, rgba(139,92,246,0.18) 0%, rgba(109,40,217,0.06) 55%, transparent 80%)",
           filter: "blur(32px)",
+          willChange: "transform, opacity",
         }}
         animate={{
           x: [0, -30, 15, 0],
@@ -163,6 +166,7 @@ function NeonAura() {
           bottom: "15%", left: "8%",
           background: "radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 70%)",
           filter: "blur(24px)",
+          willChange: "transform, opacity",
         }}
         animate={{
           x: [0, 25, -10, 0],
@@ -172,7 +176,7 @@ function NeonAura() {
         transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
       />
 
-      {/* Línea de horizonte neon — lime */}
+      {/* Líneas de horizonte — solo opacity + scaleX (GPU-composited) */}
       <motion.div
         className="absolute"
         style={{
@@ -180,13 +184,11 @@ function NeonAura() {
           left: "5%", right: "5%",
           bottom: "28%",
           background: "linear-gradient(90deg, transparent, rgba(184,255,23,0.22), rgba(184,255,23,0.12), transparent)",
-          filter: "blur(0.5px)",
+          willChange: "opacity, transform",
         }}
         animate={{ opacity: [0.4, 0.9, 0.4], scaleX: [0.8, 1, 0.85, 0.8] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
-
-      {/* Línea de horizonte — violet */}
       <motion.div
         className="absolute"
         style={{
@@ -194,13 +196,13 @@ function NeonAura() {
           left: "15%", right: "15%",
           bottom: "18%",
           background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent)",
-          filter: "blur(0.5px)",
+          willChange: "opacity, transform",
         }}
         animate={{ opacity: [0.3, 0.7, 0.3], scaleX: [0.9, 1, 0.9] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       />
 
-      {/* Partículas flotantes — pequeños puntos neon */}
+      {/* Partículas flotantes */}
       {[
         { x: "15%", y: "20%", color: "rgba(184,255,23,0.7)", size: 2, dur: 5 },
         { x: "75%", y: "35%", color: "rgba(139,92,246,0.8)", size: 1.5, dur: 7 },
@@ -217,21 +219,17 @@ function NeonAura() {
             width: p.size * 2, height: p.size * 2,
             background: p.color,
             boxShadow: `0 0 ${p.size * 4}px ${p.size * 2}px ${p.color}`,
+            willChange: "opacity, transform",
           }}
-          animate={{
-            opacity: [0.2, 1, 0.2],
-            scale: [0.8, 1.4, 0.8],
-          }}
+          animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.4, 0.8] }}
           transition={{ duration: p.dur, repeat: Infinity, ease: "easeInOut", delay: i * 0.8 }}
         />
       ))}
 
-      {/* Vignette para que los bordes queden oscuros */}
+      {/* Vignette */}
       <div
         className="absolute inset-0"
-        style={{
-          background: "radial-gradient(ellipse at center, transparent 30%, rgba(5,5,8,0.85) 100%)",
-        }}
+        style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(5,5,8,0.85) 100%)" }}
       />
     </div>
   );

@@ -180,7 +180,7 @@ export function ZodiLoader({ fullscreen = false, compact = false, kind, message 
 
   if (fullscreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
         <div className="glass-panel rounded-2xl p-8 mx-4 max-w-sm w-full">
           {content}
         </div>

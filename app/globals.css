@@ -562,6 +562,14 @@ h1, h2, h3, h4, h5, h6 {
   padding-bottom: calc(var(--nav-h) + 8px + var(--sab));
 }
 
+/* ── Contención de repaints para elementos animados ─────────────────────── */
+
+/* El hero card del dashboard contiene sus propias animaciones (NeonAura).
+   contain:strict aísla sus repaints del resto de la página */
+.hero-dark-card {
+  contain: layout style paint;
+}
+
 /* ── Mobile performance ──────────────────────────────────────────────────── */
 
 @media (pointer: coarse), (max-width: 768px) {
@@ -583,8 +591,7 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
   }
 
-  /* Hide fixed atmospheric bg images on mobile — they're <8% opacity and
-     invisible, but keeping them as fixed layers forces full-page repaints */
+  /* Hide fixed atmospheric bg images on mobile */
   .dashboard-bg,
   body::after {
     display: none;

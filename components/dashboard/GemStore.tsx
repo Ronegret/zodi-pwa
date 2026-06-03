@@ -71,7 +71,7 @@ export function GemStore() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-lime-400 bg-lime-400/20 px-6 py-3 text-sm font-bold text-lime-100 shadow-[0_0_30px_rgba(184,255,23,0.3)] backdrop-blur-md"
+            className="fixed top-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full border border-lime-400 bg-black/90 px-6 py-3 text-sm font-bold text-lime-100 shadow-[0_0_30px_rgba(184,255,23,0.3)]"
           >
             <Check className="h-5 w-5 text-lime-300" />
             {successMsg}

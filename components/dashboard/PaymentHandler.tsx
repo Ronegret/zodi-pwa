@@ -31,7 +31,7 @@ export function PaymentHandler() {
 
   return (
     <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-      <div className="glass-panel px-6 py-3 rounded-full border border-lime-400/50 flex items-center gap-3 bg-black/80 backdrop-blur-md shadow-[0_0_30px_rgba(184,255,23,0.3)]">
+      <div className="glass-panel px-6 py-3 rounded-full border border-lime-400/50 flex items-center gap-3 bg-black/95 shadow-[0_0_30px_rgba(184,255,23,0.3)]">
         <Sparkles className="w-5 h-5 text-lime-300 animate-pulse" />
         <span className="text-white font-bold">
           Pago confirmado. Estamos actualizando tus gemas.
