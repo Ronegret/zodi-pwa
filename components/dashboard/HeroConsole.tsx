@@ -509,32 +509,49 @@ export function HeroConsole() {
             </span>
           </div>
 
-          {/* ── Mobile profile strip — solo en mobile (oculto en lg+) ── */}
+          {/* ── Mobile profile strip + XP bar — solo en mobile (oculto en lg+) ── */}
           {mounted && (
-            <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-white/08 bg-black/35 px-3 py-2.5 lg:hidden">
-              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-lime-300/20">
-                {avatar.startsWith("data:") ? (
-                  <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
-                ) : (
-                  <Image src={avatar} alt="Avatar" fill className="object-cover" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-black truncate leading-tight">{profile?.displayName ?? "—"}</p>
-                <p className="text-[10px] text-white/45 mt-0.5">
-                  {sign ? `${sign} · Nv ${level}` : levelTitle}
-                </p>
-              </div>
-              <div className="flex items-center gap-2.5 shrink-0">
-                {streak > 0 && (
+            <div className="mt-3 lg:hidden">
+              <div className="flex items-center gap-2.5 rounded-t-xl border border-b-0 border-white/08 bg-black/35 px-3 py-2.5">
+                <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-lime-300/20">
+                  {avatar.startsWith("data:") ? (
+                    <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <Image src={avatar} alt="Avatar" fill className="object-cover" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-black truncate leading-tight">{profile?.displayName ?? "—"}</p>
+                  <p className="text-[10px] text-white/45 mt-0.5">
+                    {sign ? `${sign} · ${levelTitle}` : levelTitle}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2.5 shrink-0">
+                  {streak > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Flame className="h-3 w-3 text-orange-400" />
+                      <span className="text-[11px] font-black text-orange-300">{streak}d</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-1">
-                    <Flame className="h-3 w-3 text-orange-400" />
-                    <span className="text-[11px] font-black text-orange-300">{streak}d</span>
+                    <Gem className="h-3 w-3 text-lime-300" />
+                    <span className="text-[11px] font-black text-lime-200">{gems}</span>
                   </div>
-                )}
-                <div className="flex items-center gap-1">
-                  <Gem className="h-3 w-3 text-lime-300" />
-                  <span className="text-[11px] font-black text-lime-200">{gems}</span>
+                </div>
+              </div>
+              {/* XP bar */}
+              <div className="rounded-b-xl border border-white/08 bg-black/35 px-3 pb-2.5 pt-1.5">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] text-white/35 font-bold">Nv {level} · {xpCurrent}/{xpNeeded} XP</span>
+                  <span className="text-[10px] font-black text-lime-300/70">{xpPercent}%</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/10 border border-white/08">
+                  <motion.div
+                    className="h-full rounded-full bg-gradient-to-r from-lime-300 via-fuchsia-400 to-cyan-300"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${xpPercent}%` }}
+                    transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                  />
                 </div>
               </div>
             </div>

@@ -8,14 +8,18 @@ import {
   Send, RefreshCw, Star, Zap, Heart, Brain,
   LogOut, Trash2, Save, Camera, Check, X, Shuffle,
   Copy, Share2, BookOpen, AlertTriangle, Sparkles, ChartNoAxesCombined,
-  Waves, NotebookPen, Gem, Lock, ChevronDown
+  Waves, NotebookPen, Gem, Lock, ChevronDown, Flame
 } from "lucide-react";
 import { getLocalSession, setLocalSession, signOutZodi } from "@/lib/session";
 import { COUNTRY_LIST, getCitiesForCountry } from "@/lib/places";
 import { getTodaysAstralContext, calculateSunSign, generateAstralProfile } from "@/lib/astral";
 import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
-import { addXp, updateStreak, XP_PER_ACTION, getGems } from "@/lib/gamification";
+import { AmigosSectionUI } from "@/components/dashboard/AmigosSectionUI";
+import {
+  addXp, updateStreak, XP_PER_ACTION, getGems, getXpData, getStreak,
+  getLevel, getLevelTitle, xpToNextLevel,
+} from "@/lib/gamification";
 import { InstallPwaCard } from "@/components/pwa/PwaBoot";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1917,6 +1921,7 @@ function PerfilUI() {
   // Editable: identidad
   const [displayName, setDisplayName] = useState(() => { const s = getSes(); return s.onboardingData?.displayName ?? s.displayName ?? ""; });
   const [lastName, setLastName]   = useState(() => getOd()?.lastName ?? "");
+  const [username, setUsername]   = useState(() => getOd()?.username ?? "");
   const [avatar, setAvatar]       = useState(() => getOd()?.avatar ?? "/zodi-art/perfil/perfil-1.png");
   // Editable: nacimiento
   const [birthDate, setBirthDate]     = useState(() => getOd()?.birthDate ?? "");
@@ -1976,7 +1981,7 @@ function PerfilUI() {
     const newOd = {
       displayName: name,
       lastName: lastName.trim(),
-      username: od?.username ?? "",
+      username: username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "") || od?.username || "",
       avatar,
       genderIdentity: od?.genderIdentity ?? "",
       birthDate,
@@ -2179,6 +2184,22 @@ function PerfilUI() {
             <span className="flex-1 text-sm text-white/45 truncate min-w-0">{email || "Sin correo"}</span>
             <Lock className="h-3 w-3 text-white/20 shrink-0" />
           </div>
+        </div>
+
+        {/* Usuario — necesario para que otros te encuentren en Amigos */}
+        <div className="mb-4">
+          <span className="text-[10px] uppercase tracking-widest text-white/40">@Usuario</span>
+          <div className="relative mt-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-white/35 pointer-events-none">@</span>
+            <input
+              value={username}
+              onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+              placeholder="tu_usuario"
+              maxLength={24}
+              className="w-full rounded-lg border border-white/10 bg-black/45 pl-7 pr-3 py-2.5 text-sm text-white outline-none focus:border-lime-300/55"
+            />
+          </div>
+          <p className="mt-1 text-[10px] text-white/30">Solo letras minúsculas, números y guión bajo. Tus amigos te buscan por aquí.</p>
         </div>
 
         {/* Nombre + Apellido — siempre columna única en móvil */}
@@ -3096,6 +3117,298 @@ function HistorialUI() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 14. LOGROS UI
+// ─────────────────────────────────────────────────────────────────────────────
+const ACHIEVEMENTS = [
+  { id: "first",    emoji: "🔮", title: "Primera señal",      desc: "Hiciste tu primera consulta en ZODI",          check: (xp: number) => xp >= 10,   next: "Haz tu primera consulta" },
+  { id: "xp100",   emoji: "⭐", title: "100 puntos de luz",  desc: "Acumulaste 100 XP",                             check: (xp: number) => xp >= 100,  next: "100 XP en total" },
+  { id: "level2",  emoji: "🌙", title: "Lector de señales",  desc: "Alcanzaste el nivel 2",                        check: (xp: number) => xp >= 150,  next: "150 XP" },
+  { id: "streak3", emoji: "🔥", title: "Racha de 3 días",    desc: "3 días seguidos consultando el cosmos",         check: (xp: number, s: number) => s >= 3,  next: "Consulta 3 días seguidos", streak: true },
+  { id: "xp500",   emoji: "💎", title: "Medio camino",       desc: "500 XP acumulados",                            check: (xp: number) => xp >= 500,  next: "500 XP en total" },
+  { id: "level3",  emoji: "🌟", title: "Buscador astral",    desc: "Nivel 3 desbloqueado",                         check: (xp: number) => xp >= 350,  next: "350 XP" },
+  { id: "streak7", emoji: "💥", title: "Racha semanal",      desc: "7 días seguidos sin fallar",                   check: (xp: number, s: number) => s >= 7,  next: "7 días seguidos", streak: true },
+  { id: "xp1000",  emoji: "🏆", title: "Mil puntos de luz",  desc: "1.000 XP — ya eres de los nuestros",          check: (xp: number) => xp >= 1000, next: "1000 XP" },
+  { id: "level5",  emoji: "🔱", title: "Custodio de Runas",  desc: "Nivel 5 — estás en el top de usuarios ZODI",  check: (xp: number) => xp >= 2000, next: "2000 XP" },
+  { id: "streak30",emoji: "🌈", title: "Constancia astral",  desc: "30 días seguidos. Esto es dedicación real.",   check: (xp: number, s: number) => s >= 30, next: "30 días seguidos", streak: true },
+  { id: "xp5000",  emoji: "🌌", title: "Navegante del cosmos",desc: "5.000 XP — leyenda en camino",               check: (xp: number) => xp >= 5000, next: "5000 XP" },
+  { id: "level10", emoji: "⚡", title: "Arcana Hacker",      desc: "Nivel 10. El 1% de usuarios ZODI.",            check: (xp: number) => xp >= 14000,next: "14000 XP" },
+];
+
+function LogrosUI() {
+  const [xpData, setXpData]       = useState({ total: 0, today: 0, lastDate: "" });
+  const [streakData, setStreak]   = useState({ count: 0, lastDate: "" });
+  const [mounted, setMounted]     = useState(false);
+
+  useEffect(() => {
+    setXpData(getXpData());
+    setStreak(getStreak());
+    setMounted(true);
+  }, []);
+
+  const xp      = xpData.total;
+  const streak  = streakData.count;
+  const unlocked = ACHIEVEMENTS.filter(a => a.check(xp, streak));
+  const locked   = ACHIEVEMENTS.filter(a => !a.check(xp, streak));
+
+  if (!mounted) return <div className="flex justify-center py-12 text-white/30"><div className="h-6 w-6 animate-spin rounded-full border-2 border-lime-300 border-t-transparent" /></div>;
+
+  return (
+    <div className="space-y-5">
+      {/* Resumen */}
+      <div className="glass-panel rounded-2xl p-5">
+        <p className="zodi-kicker mb-3">Tu progreso</p>
+        <div className="grid grid-cols-3 gap-3 text-center">
+          {[
+            { label: "Desbloqueados", value: unlocked.length, color: "text-lime-300" },
+            { label: "Bloqueados",    value: locked.length,   color: "text-white/40" },
+            { label: "Total",         value: ACHIEVEMENTS.length, color: "text-violet-300" },
+          ].map(({ label, value, color }) => (
+            <div key={label} className="rounded-xl border border-white/08 bg-black/30 py-3">
+              <p className={`text-2xl font-black ${color}`}>{value}</p>
+              <p className="text-[10px] text-white/40 mt-0.5">{label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desbloqueados */}
+      {unlocked.length > 0 && (
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-lime-300/70 mb-2">✦ Desbloqueados ({unlocked.length})</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {unlocked.map(a => (
+              <motion.div key={a.id} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-3 rounded-xl border border-lime-300/20 bg-lime-300/05 p-3">
+                <span className="text-2xl shrink-0">{a.emoji}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-black text-lime-200 truncate">{a.title}</p>
+                  <p className="text-[11px] text-white/45 leading-snug">{a.desc}</p>
+                </div>
+                <span className="ml-auto shrink-0 text-lime-300 text-lg">✓</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bloqueados */}
+      {locked.length > 0 && (
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-white/35 mb-2">🔒 Por desbloquear ({locked.length})</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {locked.map(a => (
+              <div key={a.id} className="flex items-center gap-3 rounded-xl border border-white/06 bg-black/25 p-3 opacity-60">
+                <span className="text-2xl shrink-0 grayscale">{a.emoji}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-black text-white/50 truncate">{a.title}</p>
+                  <p className="text-[11px] text-white/30">Necesitas: {a.next}</p>
+                </div>
+                <span className="ml-auto shrink-0 text-white/20 text-lg">🔒</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 15. RACHAS UI
+// ─────────────────────────────────────────────────────────────────────────────
+function RachasUI() {
+  const [streakData, setStreak] = useState({ count: 0, lastDate: "" });
+  const [xpData, setXpData]     = useState({ total: 0, today: 0, lastDate: "" });
+  const [mounted, setMounted]   = useState(false);
+
+  useEffect(() => {
+    setStreak(getStreak());
+    setXpData(getXpData());
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="flex justify-center py-12 text-white/30"><div className="h-6 w-6 animate-spin rounded-full border-2 border-lime-300 border-t-transparent" /></div>;
+
+  const streak       = streakData.count;
+  const today        = new Date().toISOString().slice(0, 10);
+  const consultedToday = xpData.today > 0 || xpData.lastDate === today;
+
+  // Últimos 14 días
+  const days = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (13 - i));
+    const iso = d.toISOString().slice(0, 10);
+    const isToday = iso === today;
+    // Aproximación: si está dentro de la racha, consideramos activo
+    const daysSinceToday = 13 - i;
+    const active = daysSinceToday < streak || (isToday && consultedToday);
+    return { iso, isToday, active };
+  });
+
+  const milestones = [3, 7, 14, 30, 60, 100];
+  const nextMilestone = milestones.find(m => m > streak) ?? 100;
+
+  return (
+    <div className="space-y-4">
+      {/* Racha actual */}
+      <div className="glass-panel rounded-2xl p-6 text-center">
+        <p className="zodi-kicker mb-2">Racha actual</p>
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          className="text-7xl font-black text-white my-2"
+        >
+          {streak}
+        </motion.div>
+        <div className="flex items-center justify-center gap-1.5">
+          <Flame className="h-5 w-5 text-orange-400" />
+          <span className="text-lg font-black text-orange-300">{streak === 1 ? "día seguido" : "días seguidos"}</span>
+        </div>
+        {!consultedToday && streak > 0 && (
+          <p className="mt-3 text-sm text-orange-200/70 font-medium">⚠️ Consulta hoy para mantener la racha</p>
+        )}
+        {consultedToday && (
+          <p className="mt-3 text-sm text-lime-300/70 font-medium">✓ Ya consultaste hoy — racha a salvo</p>
+        )}
+      </div>
+
+      {/* Calendario últimos 14 días */}
+      <div className="glass-panel rounded-2xl p-4">
+        <p className="zodi-kicker mb-3">Últimos 14 días</p>
+        <div className="grid grid-cols-7 gap-1.5">
+          {days.map(({ iso, isToday, active }) => (
+            <div
+              key={iso}
+              className={`aspect-square rounded-lg flex items-center justify-center text-[10px] font-black transition ${
+                isToday
+                  ? active ? "bg-lime-300 text-black" : "border-2 border-lime-300/50 text-lime-300/50"
+                  : active ? "bg-orange-400/70 text-white" : "bg-white/05 text-white/20"
+              }`}
+              title={iso}
+            >
+              {active ? (isToday ? "✓" : "🔥") : "·"}
+            </div>
+          ))}
+        </div>
+        <div className="mt-2 flex gap-3 text-[10px] text-white/35">
+          <span>🔥 = día activo</span>
+          <span>✓ = hoy</span>
+          <span>· = sin consulta</span>
+        </div>
+      </div>
+
+      {/* Próximo hito */}
+      <div className="glass-panel rounded-2xl p-4">
+        <p className="zodi-kicker mb-2">Próximo hito</p>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-bold">{streak} / {nextMilestone} días</span>
+          <span className="text-sm font-black text-orange-300">{Math.round((streak / nextMilestone) * 100)}%</span>
+        </div>
+        <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-orange-400 to-red-400"
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(100, (streak / nextMilestone) * 100)}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          />
+        </div>
+        <p className="mt-2 text-[11px] text-white/40">Te faltan {Math.max(0, nextMilestone - streak)} días para desbloquear el hito de {nextMilestone}d</p>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 16. PUNTOS UI
+// ─────────────────────────────────────────────────────────────────────────────
+function PuntosUI() {
+  const [xpData, setXpData]   = useState({ total: 0, today: 0, lastDate: "" });
+  const [gems, setGems]        = useState(0);
+  const [mounted, setMounted]  = useState(false);
+
+  useEffect(() => {
+    setXpData(getXpData());
+    setGems(getGems().total);
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="flex justify-center py-12 text-white/30"><div className="h-6 w-6 animate-spin rounded-full border-2 border-lime-300 border-t-transparent" /></div>;
+
+  const level      = getLevel(xpData.total);
+  const title      = getLevelTitle(level);
+  const { current, needed, percent } = xpToNextLevel(xpData.total);
+  const nextTitle  = getLevelTitle(level + 1);
+
+  const topActions = Object.entries(XP_PER_ACTION)
+    .filter(([k]) => k !== "_default")
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  return (
+    <div className="space-y-4">
+      {/* Nivel actual */}
+      <div className="glass-panel rounded-2xl p-5">
+        <p className="zodi-kicker mb-3">Tu nivel</p>
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border-2 border-lime-300/40 bg-lime-300/10 text-3xl font-black text-lime-300">
+            {level}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xl font-black text-white">{title}</p>
+            <p className="text-[11px] text-white/40 mt-0.5">Siguiente nivel: {nextTitle}</p>
+            <div className="mt-2 h-2 rounded-full bg-white/10 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-lime-300 via-fuchsia-400 to-cyan-300"
+                initial={{ width: 0 }}
+                animate={{ width: `${percent}%` }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+              />
+            </div>
+            <p className="mt-1 text-[10px] text-white/35">{current}/{needed} XP ({percent}%)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats globales */}
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { label: "XP Total",    value: xpData.total, color: "text-lime-300",  emoji: "⚡" },
+          { label: "XP Hoy",     value: xpData.today, color: "text-cyan-300",  emoji: "📅" },
+          { label: "Gemas",      value: gems,          color: "text-fuchsia-300",emoji: "💎" },
+        ].map(({ label, value, color, emoji }) => (
+          <div key={label} className="glass-panel rounded-xl p-3 text-center">
+            <p className="text-lg">{emoji}</p>
+            <p className={`text-xl font-black ${color} mt-0.5`}>{value}</p>
+            <p className="text-[10px] text-white/35 mt-0.5">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabla de XP por acción */}
+      <div className="glass-panel rounded-2xl p-4">
+        <p className="zodi-kicker mb-3">¿Qué da más XP?</p>
+        <div className="space-y-1.5">
+          {topActions.map(([action, xp]) => (
+            <div key={action} className="flex items-center gap-2">
+              <div className="h-1.5 flex-1 rounded-full bg-white/08 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-lime-300/60 to-lime-300/20"
+                  style={{ width: `${(xp / 100) * 100}%` }}
+                />
+              </div>
+              <span className="text-[11px] text-white/60 w-32 truncate text-right">{action}</span>
+              <span className="text-[11px] font-black text-lime-300 w-12 text-right">+{xp}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-[10px] text-white/30">El XP se acumula con cada lectura completada. Cuanto más profunda la consulta, más XP.</p>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN ROUTER
 // ─────────────────────────────────────────────────────────────────────────────
 export function SectionSpecificUI({ section }: { section: DashboardSection }) {
@@ -3108,8 +3421,9 @@ export function SectionSpecificUI({ section }: { section: DashboardSection }) {
     case "mano":
       return <ManoUI section={section} />;
     case "compatibilidad":
-    case "amigos":
       return <CompatibilidadUI section={section} />;
+    case "amigos":
+      return <AmigosSectionUI />;
     case "numerologia":
       return <NumerologiaUI section={section} />;
     case "roast":
@@ -3139,6 +3453,13 @@ export function SectionSpecificUI({ section }: { section: DashboardSection }) {
     case "guardados":
     case "favoritos":
       return <HistorialUI />;
+    case "logros":
+      return <LogrosUI />;
+    case "rachas":
+      return <RachasUI />;
+    case "puntos":
+    case "ranking":
+      return <PuntosUI />;
     default:
       return <GenericConsultUI section={section} />;
   }

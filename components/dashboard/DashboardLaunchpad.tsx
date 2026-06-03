@@ -4,8 +4,103 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Gem, Share2, Download } from "lucide-react";
+import { Gem, Share2, Download, Zap } from "lucide-react";
 import { dashboardSections } from "@/lib/dashboard-sections";
+import { getLocalSession } from "@/lib/session";
+import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
+
+// Frases diarias por signo (mismas que HeroConsole para coherencia)
+const SIGN_PHRASES: Record<string, string[]> = {
+  Aries:       ["No te pida permiso el cosmos. Muévete tú primero.",       "Tu energía hoy no admite espera. O la usas o la pierdes.",       "El fuego está activo. Apunta antes de lanzar.",                   "Hoy tienes ventaja. No la desperdicies siendo educado.",         "Impulso sin dirección es solo ruido. Enfoca."],
+  Tauro:       ["Lento y concreto gana. Lo apresurado hoy cuesta el doble.","Tu intuición sobre el dinero hoy está afinada. Escúchala.",       "Venus te cuida, pero no toma las decisiones por ti.",             "La paciencia no es rendirse. Hoy eso importa.",                  "Lo que construyes con calma dura. Lo de hoy puede ser de esos."],
+  Géminis:     ["Dos opciones, dos voces. Hoy escoge una y actúa.",          "La mente acelerada es tu poder y tu trampa. Úsala bien hoy.",     "Comunicación en modo máximo. Di lo que realmente piensas.",       "Mercurio activo. Tus palabras hoy tienen más peso del habitual.", "Eres el más adaptable de todos. Hoy eso vale oro."],
+  Cáncer:      ["Tu instinto no miente. Confía en lo que sientes sin explicarlo.", "El hogar emocional primero. El resto puede esperar.",             "Luna te mueve. Hoy es día de sentir, no solo de hacer.",          "Lo que cuidas con amor siempre vuelve.",                          "Intuición al 100%. No la ignores por miedo a parecer sensible."],
+  Leo:         ["Hoy el escenario es tuyo. No llegues tarde a tu propio show.", "El sol en ti brilla cuando actúas desde la autenticidad.",        "Energía de liderazgo alta. Úsala para elevar, no para demostrar.","Tu presencia ya es poder. No necesitas probarlo.",                "La generosidad de Leo hoy tiene retorno multiplicado."],
+  Virgo:       ["El detalle que nadie ve es el que tú ya notaste. Actúa.",    "La perfección es enemiga del progreso. Hoy, entrega.",            "Tu análisis es preciso hoy. No sobre-pienses lo que ya sabes.",   "Mercurio afilado. Una solución que llevas semanas buscando llega.", "La crítica más útil es la que ya tienes en mente."],
+  Libra:       ["La indecisión tiene fecha de caducidad. Hoy es el día.",     "Equilibrar no significa complacer. Recuerda la diferencia.",       "Venus te da carisma extra hoy. Úsalo para lo que importa.",       "La justicia que buscas en otros empieza en ti.",                  "Armonía no es ausencia de conflicto. Es gestión inteligente."],
+  Escorpio:    ["Lo que no has querido ver, hoy lo ves. Prepárate.",          "Tu radar emocional está en modo experto. Fíate.",                 "La intensidad es tu idioma. Hoy habla sin filtros.",              "Lo que transformas no vuelve. Asegúrate de que vale.",            "El poder que no usas se vuelve en tu contra. Hora de actuar."],
+  Sagitario:   ["La aventura sin propósito es solo movimiento. Apunta lejos.","Tu optimismo hoy no es ingenuidad. Es visión. Expándela.",         "Júpiter activo. Las oportunidades llegan a quien está en marcha.","La verdad incómoda dicha hoy vale más que mil verdades cómodas.", "No hay mapa perfecto. Sal igual."],
+  Capricornio: ["La constancia hoy da frutos que el impulso no da.",          "Tu estructura mental es tu activo más valioso. Úsala.",           "Saturno te respalda cuando actúas con intención.",                "Lo que construyes en silencio impresiona en voz alta más tarde.", "Hoy no es día de atajos. Pero el camino largo tiene recompensa."],
+  Acuario:     ["La idea que tienes desde hace semanas merece luz hoy.",       "Tu visión del futuro es correcta. El timing es lo que falta.",    "Urano activo. Los cambios raros de hoy tienen sentido mañana.",   "Diferente no es equivocado. Es pionero.",                         "La distancia emocional que sientes es información. Procésala."],
+  Piscis:      ["Tu intuición hoy supera a cualquier análisis. Confía.",       "Lo que sueñas en modo despierto suele ser la respuesta real.",    "Neptuno activo. Las señales que ignoras hoy vuelven amplificadas.","La empatía es poder cuando tiene dirección.",                     "Fluir no es rendirse. Hoy distingue ambas cosas."],
+};
+
+function getDailySignPhrase(sign: string): string {
+  const phrases = SIGN_PHRASES[sign] ?? SIGN_PHRASES["Aries"];
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0).getTime();
+  const day = Math.floor((now.getTime() - start) / 86400000);
+  return phrases[day % phrases.length];
+}
+
+function getEnergyScore(sign: string): number {
+  const seed = sign.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const day  = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  return 62 + ((seed * 7 + day * 3) % 35);
+}
+
+// Widget de señal diaria — usa datos locales, 0 llamadas a API
+function DailySignalWidget() {
+  const [data, setData] = useState<{ sign: string; phrase: string; score: number; moonPhase: string } | null>(null);
+
+  useEffect(() => {
+    const session = getLocalSession();
+    const od = session.onboardingData;
+    const ap = session.astralProfile;
+    const sign = (od?.birthDate ? calculateSunSign(od.birthDate) : ap?.sunSign) ?? "";
+    if (!sign) return;
+    const ctx = getTodaysAstralContext();
+    setData({
+      sign,
+      phrase: getDailySignPhrase(sign),
+      score: getEnergyScore(sign),
+      moonPhase: ctx.moonPhase,
+    });
+  }, []);
+
+  if (!data) return null;
+
+  const colors: Record<string, string> = {
+    Aries:"from-red-500/20",Tauro:"from-emerald-500/20",Géminis:"from-yellow-500/20",
+    Cáncer:"from-slate-400/20",Leo:"from-amber-500/20",Virgo:"from-lime-500/20",
+    Libra:"from-pink-500/20",Escorpio:"from-purple-600/20",Sagitario:"from-violet-500/20",
+    Capricornio:"from-stone-500/20",Acuario:"from-cyan-500/20",Piscis:"from-teal-500/20",
+  };
+  const grad = colors[data.sign] ?? "from-violet-500/20";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.05 }}
+    >
+      <Link
+        href="/dashboard/horoscopo"
+        className={`group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r ${grad} to-transparent px-4 py-4 transition-all hover:border-white/20 active:scale-[0.99]`}
+      >
+        {/* Score badge */}
+        <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl border border-white/15 bg-black/40">
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/40">hoy</span>
+          <span className="text-lg font-black text-white leading-tight">{data.score}%</span>
+          <Zap className="h-3 w-3 text-lime-300 mt-0.5" />
+        </div>
+
+        {/* Phrase */}
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/40 mb-0.5">
+            {data.sign} · {data.moonPhase}
+          </p>
+          <p className="text-sm sm:text-base font-semibold text-white/85 leading-snug line-clamp-2">
+            {data.phrase}
+          </p>
+        </div>
+
+        {/* CTA arrow */}
+        <span className="shrink-0 text-white/30 transition group-hover:text-lime-300 group-hover:translate-x-1">→</span>
+      </Link>
+    </motion.div>
+  );
+}
 
 // ── Skeleton cards mientras hidrata ──────────────────────────────────────────
 function FeaturedSkeleton() {
@@ -79,6 +174,9 @@ export function DashboardLaunchpad() {
 
   return (
     <section className="mt-4 sm:mt-6 space-y-6 sm:space-y-8">
+
+      {/* ── Señal del día — cliente-side, 0 API calls ──────────────────── */}
+      <DailySignalWidget />
 
       {/* ── Banner referidos + descarga ──────────────────────────────────── */}
       <motion.div
