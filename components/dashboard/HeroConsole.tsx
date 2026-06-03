@@ -399,8 +399,7 @@ export function HeroConsole() {
                             transition={{ delay: 0.1, duration: 0.45 }}
                             className="mt-1 text-[11px] sm:text-xs text-white/42 leading-snug tracking-wide"
                           >
-                            <span className="font-semibold text-white/60 italic">"{firstName}"</span>
-                            {" "}— {card.meaning}
+                            {card.meaning}
                             <span className="text-white/28"> · {card.origin}</span>
                             {card.saint && card.saint !== "— " && (
                               <span className="text-lime-200/40"> · ✦ {card.saint}</span>
