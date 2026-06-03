@@ -23,19 +23,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         style={{ background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.65) 100%)" }}
       />
 
-      <AnimatedShell>
-        <DashboardGate>
-          <WelcomeSplash>
+      <DashboardGate>
+        <WelcomeSplash>
+          <AnimatedShell>
             <div className="mx-auto flex w-full max-w-[1500px] xl:max-w-[1700px] 2xl:max-w-[1920px] gap-3 sm:gap-5 px-3 py-4 sm:px-5 xl:px-8">
               <Sidebar />
               <div className="min-w-0 flex-1 pb-nav lg:pb-6">
                 {children}
               </div>
             </div>
-            <BottomNav />
-          </WelcomeSplash>
-        </DashboardGate>
-      </AnimatedShell>
+          </AnimatedShell>
+          <BottomNav />
+        </WelcomeSplash>
+      </DashboardGate>
     </div>
   );
 }

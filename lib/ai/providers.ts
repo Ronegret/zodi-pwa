@@ -24,10 +24,12 @@ const CACHEABLE_KINDS: ReadingKind[] = [
 const responseCache = new Map<string, { text: string; cachedAt: number }>();
 const CACHE_TTL_MS  = 4 * 60 * 60 * 1000; // 4 horas
 
-function cacheKey(kind: ReadingKind, zodiac: string): string | null {
+function cacheKey(kind: ReadingKind, zodiac: string, tone?: string, input?: string): string | null {
   if (!CACHEABLE_KINDS.includes(kind) || !zodiac) return null;
   const date = new Date().toISOString().slice(0, 10);
-  return `${kind}:${zodiac}:${date}`;
+  const normTone = (tone || "directo").trim().toLowerCase();
+  const normInput = (input || "").trim().toLowerCase();
+  return `${kind}:${zodiac}:${normTone}:${normInput}:${date}`;
 }
 
 function getCache(key: string): string | null {
@@ -97,7 +99,7 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
   }
 
   // ── Response cache — lecturas genéricas por signo+fecha ───────────────────
-  const ck = cacheKey(params.kind, params.profile.zodiac ?? "");
+  const ck = cacheKey(params.kind, params.profile.zodiac ?? "", params.profile.readingTone, params.input);
   if (ck) {
     const cached = getCache(ck);
     if (cached) {

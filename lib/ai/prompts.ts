@@ -145,6 +145,14 @@ export function buildReadingPrompt(
 ) {
   const ctx = getTodaysAstralContext();
 
+  let detectedFocus = focusDomain;
+  if (!detectedFocus && input) {
+    const match = input.match(/Enfócate especialmente en el área de:\s*([^.]+)/i);
+    if (match) {
+      detectedFocus = match[1].trim();
+    }
+  }
+
   // ── Bloque de personalización cultural del usuario (incluye contexto vital)
   const personalization = buildPersonalizationBlock({
     displayName:        profile.displayName,
@@ -175,10 +183,10 @@ export function buildReadingPrompt(
   ].filter(Boolean).join("\n");
 
   // ── Instrucción de foco de dominio (cuando el usuario pide algo específico)
-  const domainInstruction = focusDomain
-    ? `INSTRUCCIÓN OBLIGATORIA: Esta lectura es específicamente sobre "${focusDomain}". ` +
+  const domainInstruction = detectedFocus
+    ? `INSTRUCCIÓN OBLIGATORIA: Esta lectura es específicamente sobre "${detectedFocus}". ` +
       `Responde SOLO sobre ese tema. No menciones otras áreas a menos que sean directamente relevantes. ` +
-      `Si no tienes nada concreto que decir sobre "${focusDomain}", sé honesto y breve en esa parte.`
+      `Si no tienes nada concreto que decir sobre "${detectedFocus}", sé honesto y breve en esa parte.`
     : "";
 
   const baseLines = [
@@ -240,8 +248,8 @@ export function buildReadingPrompt(
   }
 
   if (kind === "daily-horoscope") {
-    const areaFocus = focusDomain
-      ? `Enfoca la lectura EXCLUSIVAMENTE en el área de: ${focusDomain}. No divagues hacia otras áreas.`
+    const areaFocus = detectedFocus
+      ? `Enfoca la lectura EXCLUSIVAMENTE en el área de: ${detectedFocus}. No divagues hacia otras áreas.`
       : "Incluye brevemente: amor, trabajo, dinero y energía personal. Cierra con una señal concreta para actuar hoy.";
     baseLines.push(
       "",
