@@ -88,7 +88,7 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
       const session = getLocalSession();
 
       // ── VÍA RÁPIDA: sesión local completa ────────────────────────────────
-      if (session.isAuthenticated && session.onboardingCompleted && session.onboardingData?.birthDate) {
+      if (session.isAuthenticated && session.onboardingCompleted) {
         if (!cancelled) setReady(true);
         return;
       }
@@ -132,7 +132,7 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
           const sameEmail = !!(user.email && currentSession.email && user.email === currentSession.email);
 
           // Sesión local válida y completa
-          if ((sameUid || sameEmail) && currentSession.onboardingCompleted && currentSession.onboardingData?.birthDate) {
+          if ((sameUid || sameEmail) && currentSession.onboardingCompleted) {
             setLocalSession({ uid: user.uid, loginAt: Date.now() });
             if (!cancelled) setReady(true);
             return;
@@ -151,8 +151,7 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
           const identity = getSavedIdentity();
           const identityMatch = identity &&
             (identity.uid === user.uid || identity.email === user.email) &&
-            identity.onboardingCompleted &&
-            identity.onboardingData?.birthDate;
+            identity.onboardingCompleted;
 
           if (identityMatch && identity) {
             setLocalSession({
@@ -173,7 +172,7 @@ export function DashboardGate({ children }: { children: React.ReactNode }) {
           }
 
           // Sesión local del mismo usuario con datos completos
-          if ((sameUid || sameEmail) && currentSession.onboardingCompleted && currentSession.onboardingData?.birthDate) {
+          if ((sameUid || sameEmail) && currentSession.onboardingCompleted) {
             setLocalSession({ uid: user.uid, loginAt: Date.now() });
             if (currentSession.onboardingData && currentSession.astralProfile) {
               import("@/lib/firebase/profile").then(({ saveOnboardingProfile }) =>

@@ -90,11 +90,23 @@ export function getLocalSession(): LocalZodiSession {
 export function setLocalSession(session: Partial<LocalZodiSession>) {
   if (typeof window === "undefined") return;
   const current = getLocalSession();
-  // Mergear onboardingData en profundidad para no perder campos al actualizar parcialmente
+
+  // Detectar cambio de usuario — no heredar datos personales del usuario anterior
+  const isSameUser = !session.uid || !current.uid || session.uid === current.uid;
+
+  // Mergear onboardingData en profundidad para el mismo usuario.
+  // Si cambia el usuario, no mezclar con datos del anterior.
   const mergedOnboarding = session.onboardingData
-    ? { ...current.onboardingData, ...session.onboardingData }
-    : current.onboardingData;
-  const nextSession = { ...current, ...session, onboardingData: mergedOnboarding };
+    ? { ...(isSameUser ? current.onboardingData : {}), ...session.onboardingData }
+    : isSameUser ? current.onboardingData : undefined;
+
+  // Preservar astralProfile para el mismo usuario cuando no se proporciona explícitamente.
+  // Si cambia el usuario, limpiar el perfil anterior.
+  const mergedAstral = session.astralProfile !== undefined
+    ? session.astralProfile
+    : isSameUser ? current.astralProfile : undefined;
+
+  const nextSession = { ...current, ...session, onboardingData: mergedOnboarding, astralProfile: mergedAstral };
   window.localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
 
   // Guardar identidad duradera cuando el onboarding está completo

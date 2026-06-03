@@ -317,6 +317,17 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         setGoogleLoading(false);
         if (authHandledRef.current) return; // ya fue manejado por onAuthStateChanged
 
+        // Si el usuario tiene sesión activa (ej. token en IndexedDB de login anterior)
+        // procesarlo aunque getRedirectResult haya fallado — el error puede ser de red
+        // o un estado inválido del redirect, no necesariamente que el auth falló.
+        if (auth.currentUser && !authHandledRef.current) {
+          authHandledRef.current = true;
+          applyFirebaseUser(auth.currentUser, false).catch(() => {
+            authHandledRef.current = false;
+          });
+          return;
+        }
+
         // Solo mostrar error si el usuario HABÍA iniciado un intento de Google
         // (redirectPending estaba en sessionStorage). Sin esto, cualquier error
         // de getRedirectResult al cargar la página se muestra aunque nadie haya
@@ -515,7 +526,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         }
       }
 
-      // Fallback local
+      // Fallback local — solo cuando Firebase NO está configurado (modo desarrollo/offline)
+      // Si Firebase SÍ está configurado pero falló con un error no-de-usuario, mostrar
+      // un error de red claro en vez de intentar el fallback local que confunde al usuario.
+      if (isFirebaseConfigured) {
+        authHandledRef.current = false;
+        setMessage("No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.");
+        setMsgType("error");
+        return;
+      }
+
       const usersStr = window.localStorage.getItem("zodi.local_users") || "[]";
       let users: any[] = [];
       try { users = JSON.parse(usersStr); } catch { /* ignore */ }
