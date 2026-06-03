@@ -114,8 +114,8 @@ function energyColor(score: number): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NEON AURA — animación GPU-only: solo transform + opacity, sin filter dinámico
-// will-change promueve cada orb a su propia capa de composición → 0 repaints
+// NEON AURA — fondo estático. Sin animaciones de blur = 0 repaints.
+// filter:blur() + scale/opacity animation causaba repaints continuos en CPU.
 // ─────────────────────────────────────────────────────────────────────────────
 function NeonAura() {
   return (
@@ -123,114 +123,27 @@ function NeonAura() {
       className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none select-none"
       aria-hidden
     >
-      {/* Fondo base */}
-      <div className="absolute inset-0 bg-[#050508]" />
-
-      {/* Orb principal lime — pulsa desde el centro */}
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: "55%", height: "55%",
-          top: "22%", left: "22%",
-          background: "radial-gradient(circle, rgba(184,255,23,0.13) 0%, rgba(184,255,23,0.04) 50%, transparent 75%)",
-          filter: "blur(28px)",
-          willChange: "transform, opacity",
-        }}
-        animate={{ scale: [1, 1.18, 0.95, 1], opacity: [0.7, 1, 0.65, 0.7] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Orb violet — deriva lentamente */}
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: "45%", height: "45%",
-          top: "30%", right: "5%",
-          background: "radial-gradient(circle, rgba(139,92,246,0.18) 0%, rgba(109,40,217,0.06) 55%, transparent 80%)",
-          filter: "blur(32px)",
-          willChange: "transform, opacity",
-        }}
-        animate={{
-          x: [0, -30, 15, 0],
-          y: [0, 20, -10, 0],
-          opacity: [0.5, 0.85, 0.55, 0.5],
-        }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Orb cyan — deriva opuesto */}
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: "35%", height: "35%",
-          bottom: "15%", left: "8%",
-          background: "radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 70%)",
-          filter: "blur(24px)",
-          willChange: "transform, opacity",
-        }}
-        animate={{
-          x: [0, 25, -10, 0],
-          y: [0, -18, 8, 0],
-          opacity: [0.4, 0.75, 0.4, 0.4],
-        }}
-        transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-      />
-
-      {/* Líneas de horizonte — solo opacity + scaleX (GPU-composited) */}
-      <motion.div
-        className="absolute"
-        style={{
-          height: "1px",
-          left: "5%", right: "5%",
-          bottom: "28%",
-          background: "linear-gradient(90deg, transparent, rgba(184,255,23,0.22), rgba(184,255,23,0.12), transparent)",
-          willChange: "opacity, transform",
-        }}
-        animate={{ opacity: [0.4, 0.9, 0.4], scaleX: [0.8, 1, 0.85, 0.8] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute"
-        style={{
-          height: "1px",
-          left: "15%", right: "15%",
-          bottom: "18%",
-          background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent)",
-          willChange: "opacity, transform",
-        }}
-        animate={{ opacity: [0.3, 0.7, 0.3], scaleX: [0.9, 1, 0.9] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-      />
-
-      {/* Partículas flotantes */}
-      {[
-        { x: "15%", y: "20%", color: "rgba(184,255,23,0.7)", size: 2, dur: 5 },
-        { x: "75%", y: "35%", color: "rgba(139,92,246,0.8)", size: 1.5, dur: 7 },
-        { x: "88%", y: "65%", color: "rgba(34,211,238,0.6)", size: 2, dur: 9 },
-        { x: "8%",  y: "70%", color: "rgba(184,255,23,0.5)", size: 1.5, dur: 6 },
-        { x: "55%", y: "12%", color: "rgba(139,92,246,0.6)", size: 1, dur: 8 },
-        { x: "42%", y: "82%", color: "rgba(34,211,238,0.5)", size: 1.5, dur: 10 },
-      ].map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            left: p.x, top: p.y,
-            width: p.size * 2, height: p.size * 2,
-            background: p.color,
-            boxShadow: `0 0 ${p.size * 4}px ${p.size * 2}px ${p.color}`,
-            willChange: "opacity, transform",
-          }}
-          animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.4, 0.8] }}
-          transition={{ duration: p.dur, repeat: Infinity, ease: "easeInOut", delay: i * 0.8 }}
-        />
-      ))}
-
+      <div className="absolute inset-0" style={{
+        background: `
+          radial-gradient(ellipse 60% 50% at 30% 40%, rgba(184,255,23,0.10) 0%, transparent 70%),
+          radial-gradient(ellipse 50% 60% at 75% 35%, rgba(139,92,246,0.14) 0%, transparent 65%),
+          radial-gradient(ellipse 40% 50% at 15% 70%, rgba(34,211,238,0.09) 0%, transparent 60%),
+          #050508
+        `
+      }} />
+      {/* Líneas de horizonte estáticas */}
+      <div className="absolute" style={{
+        height: "1px", left: "5%", right: "5%", bottom: "28%",
+        background: "linear-gradient(90deg, transparent, rgba(184,255,23,0.18), rgba(184,255,23,0.10), transparent)",
+      }} />
+      <div className="absolute" style={{
+        height: "1px", left: "15%", right: "15%", bottom: "18%",
+        background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.22), transparent)",
+      }} />
       {/* Vignette */}
-      <div
-        className="absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(5,5,8,0.85) 100%)" }}
-      />
+      <div className="absolute inset-0" style={{
+        background: "radial-gradient(ellipse at center, transparent 30%, rgba(5,5,8,0.85) 100%)"
+      }} />
     </div>
   );
 }

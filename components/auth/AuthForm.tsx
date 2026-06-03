@@ -342,78 +342,26 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    // Detectar iOS Safari / PWA standalone → usar redirect directamente
-    // (popup siempre bloqueado en esos contextos)
-    const isIosSafari =
-      typeof navigator !== "undefined" &&
-      /iphone|ipad|ipod/i.test(navigator.userAgent) &&
-      !/chrome|crios|fxios/i.test(navigator.userAgent);
-    const isPwaStandalone =
-      typeof window !== "undefined" &&
-      (window.matchMedia("(display-mode: standalone)").matches ||
-        (navigator as any).standalone === true);
-
-    if (isIosSafari || isPwaStandalone) {
-      try {
-        sessionStorage.setItem("zodi.google_redirect_pending", "1");
-        await signInWithRedirect(auth, googleProvider);
-        return; // la página se recarga — el resultado llega en getRedirectResult
-      } catch (redirectErr: any) {
-        const redirectCode = (redirectErr as { code?: string })?.code ?? "";
-        sessionStorage.removeItem("zodi.google_redirect_pending");
-        setMessage(
-          redirectCode === "auth/unauthorized-domain"
-            ? "⚠️ Dominio no autorizado en Firebase. Contacta con el administrador."
-            : `No se pudo redirigir a Google (${redirectCode || "error desconocido"}).`
-        );
-        setMsgType("error");
-        setGoogleLoading(false);
-        authHandledRef.current = false;
-      }
-      return;
-    }
-
-    // Desktop / Android → popup primero, redirect como fallback
-    // signInWithPopup debe llamarse lo más rápido posible desde el clic del usuario
-    // — cualquier await previo puede hacer que el navegador bloquee el popup.
+    // Redirect para todos los dispositivos — más fiable que popup en producción.
+    // El popup depende del contexto síncrono del gesto del usuario y es bloqueado
+    // por muchos navegadores/configuraciones. El redirect funciona siempre.
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      if (result.user) {
-        setGoogleLoading(false);
-        const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
-        await applyFirebaseUser(result.user, isNew);
-      }
-    } catch (e: any) {
-      const code = e?.code ?? "";
-      console.error("[ZODI] Error Google Sign-In:", e);
-
-      if (code === "auth/popup-blocked" || code === "auth/popup-cancelled") {
-        // Fallback a redirect cuando el navegador bloquea el popup
-        try {
-          sessionStorage.setItem("zodi.google_redirect_pending", "1");
-          await signInWithRedirect(auth, googleProvider);
-          return;
-        } catch (redirectErr: any) {
-          const redirectCode = (redirectErr as { code?: string })?.code ?? "";
-          sessionStorage.removeItem("zodi.google_redirect_pending");
-          setMessage(`Google no pudo redirigir (${redirectCode}). Intenta con email.`);
-          setMsgType("error");
-        }
-      } else if (code === "auth/unauthorized-domain") {
-        setMessage("⚠️ Este dominio no está autorizado en Firebase. Contacta con soporte.");
-        setMsgType("error");
-      } else if (code === "auth/operation-not-allowed") {
-        setMessage("⚠️ Google Sign-In no está activado. Contacta con soporte.");
-        setMsgType("error");
-      } else if (code === "auth/network-request-failed") {
-        setMessage("Sin conexión a internet. Verifica tu red e inténtalo de nuevo.");
-        setMsgType("error");
-      } else if (code && code !== "auth/popup-closed-by-user") {
-        setMessage(`Error de Google (${code}). Intenta de nuevo o usa email.`);
-        setMsgType("error");
-      }
+      sessionStorage.setItem("zodi.google_redirect_pending", "1");
+      await signInWithRedirect(auth, googleProvider);
+      // La página navega a Google. El resultado vuelve en getRedirectResult.
+    } catch (redirectErr: any) {
+      const redirectCode = (redirectErr as { code?: string })?.code ?? "";
+      sessionStorage.removeItem("zodi.google_redirect_pending");
       setGoogleLoading(false);
-      authHandledRef.current = false; // permitir reintento
+      authHandledRef.current = false;
+      if (redirectCode === "auth/unauthorized-domain") {
+        setMessage("⚠️ Dominio no autorizado en Firebase Console.");
+      } else if (redirectCode === "auth/network-request-failed") {
+        setMessage("Sin conexión a internet. Verifica tu red e inténtalo de nuevo.");
+      } else {
+        setMessage(`No se pudo conectar con Google (${redirectCode || "error"}).`);
+      }
+      setMsgType("error");
     }
   }
 
