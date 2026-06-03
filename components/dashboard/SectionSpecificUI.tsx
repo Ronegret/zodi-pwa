@@ -2183,12 +2183,10 @@ function PerfilUI() {
       label: "Zodíaco Chino",
       value: ap?.chineseZodiac || "–",
       desc: "Tu animal según el calendario chino",
-      img: null,
+      img: ap?.chineseZodiac
+        ? `/zodi-art/chino/C_${ap.chineseZodiac.toLowerCase()}.png`
+        : null,
       emoji: "🐉",
-      emojiMap: {
-        Rata:"🐭",Buey:"🐮",Tigre:"🐯",Conejo:"🐰",Dragón:"🐲",Serpiente:"🐍",
-        Caballo:"🐴",Cabra:"🐐",Mono:"🐵",Gallo:"🐓",Perro:"🐶",Cerdo:"🐷",
-      } as Record<string,string>,
       color: "from-red-400/30 to-orange-600/20",
       border: "border-red-400/30",
       glow: "rgba(248,113,113,0.25)",
@@ -2290,7 +2288,7 @@ function PerfilUI() {
 
           <div className="grid grid-cols-3 gap-3">
             {astralBadges.map(b => {
-              const displayEmoji = (b as any).emojiMap?.[b.value] ?? b.emoji;
+              const displayEmoji = b.emoji;
               return (
                 <div
                   key={b.key}
