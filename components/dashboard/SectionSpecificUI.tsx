@@ -2432,7 +2432,7 @@ function PerfilUI() {
         transition={{ duration: 0.35, delay: 0.05 }}
         className="glass-panel rounded-xl p-4 sm:p-5"
       >
-        <h2 className="text-base font-black mb-0.5">Datos de nacimiento</h2>
+        <h2 className="text-lg font-black mb-0.5">Datos de nacimiento</h2>
         <p className="text-xs text-white/40 mb-4">ZODI usa estos datos para tus lecturas astrológicas personalizadas.</p>
 
         {/* Siempre columna única en móvil */}
@@ -2494,7 +2494,7 @@ function PerfilUI() {
         transition={{ duration: 0.35, delay: 0.1 }}
         className="glass-panel rounded-xl p-4 sm:p-5"
       >
-        <h2 className="text-base font-black mb-0.5">¿Dónde estás ahora?</h2>
+        <h2 className="text-lg font-black mb-0.5">¿Dónde estás ahora?</h2>
         <p className="text-xs text-white/40 mb-4">ZODI ajusta su lenguaje al lugar donde vives. Chileno, mexicano, rioplatense… como uno de allí.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <ProfilePlaceInput
@@ -2523,7 +2523,7 @@ function PerfilUI() {
         transition={{ duration: 0.4, delay: 0.15 }}
         className="glass-panel rounded-xl p-4 sm:p-5"
       >
-        <h2 className="text-base font-black mb-0.5">Tu contexto vital</h2>
+        <h2 className="text-lg font-black mb-0.5">Tu contexto vital</h2>
         <p className="text-xs text-white/40 mb-4">Cuanto más sepa ZODI de ti, más exacta (y ácida) será la lectura. Todo opcional, todo privado.</p>
 
         {/* Estado sentimental — grid 2-col en mobile, wrap en desktop */}
@@ -2657,7 +2657,7 @@ function PerfilUI() {
         transition={{ duration: 0.35, delay: 0.2 }}
         className="glass-panel rounded-xl p-4 sm:p-5"
       >
-        <h2 className="text-base font-black mb-0.5">Tono de lecturas</h2>
+        <h2 className="text-lg font-black mb-0.5">Tono de lecturas</h2>
         <p className="text-xs text-white/40 mb-3">Cómo quieres que ZODI te hable.</p>
         <div className="grid grid-cols-2 gap-2 mb-4">
           {(["suave", "directo", "brutal", "sarcastico"] as const).map(t => {

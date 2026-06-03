@@ -214,7 +214,7 @@ export function HeroConsole() {
             <span className="text-lg shrink-0">⚠️</span>
             <div className="min-w-0">
               <p className="text-sm font-black text-orange-200 leading-tight">Falta tu fecha de nacimiento</p>
-              <p className="text-[11px] text-orange-200/65 mt-0.5 truncate">Sin ella, tus lecturas son genéricas.</p>
+              <p className="text-[11px] text-orange-200/65 mt-0.5">Sin ella, tus lecturas son genéricas.</p>
             </div>
           </div>
           <Link
@@ -497,7 +497,7 @@ export function HeroConsole() {
           <div className="min-w-0 flex-1">
             <p className="zodi-kicker">Perfil activo</p>
             <h2
-              className="mt-0.5 text-xl font-black truncate"
+              className="mt-0.5 text-xl font-black leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
               {mounted ? (profile?.displayName ?? "—") : <Shimmer w="w-28" />}
@@ -617,7 +617,7 @@ function Metric({ label, value }: { label: string; value: string }) {
             <span className="text-[9px] font-black text-white/25 hover:text-white/50 leading-none">?</span>
           )}
         </div>
-        <p className="text-sm sm:text-base lg:text-lg font-black text-white truncate">{value}</p>
+        <p className="text-sm sm:text-base lg:text-lg font-black text-white leading-tight">{value}</p>
       </button>
 
       <AnimatePresence>
