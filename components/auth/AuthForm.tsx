@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  signInWithRedirect, getRedirectResult,
+  signInWithRedirect, signInWithPopup, getRedirectResult, getAdditionalUserInfo,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, fetchSignInMethodsForEmail,
   onAuthStateChanged, type User
@@ -233,7 +233,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           authHandledRef.current = true;
           setGoogleLoading(false);
           try {
-            const { getAdditionalUserInfo } = await import("firebase/auth");
             const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
             await applyFirebaseUser(result.user, isNew);
           } catch {
@@ -375,8 +374,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     }
 
     // Desktop / Android → popup primero, redirect como fallback
+    // signInWithPopup debe llamarse lo más rápido posible desde el clic del usuario
+    // — cualquier await previo puede hacer que el navegador bloquee el popup.
     try {
-      const { signInWithPopup, getAdditionalUserInfo } = await import("firebase/auth");
       const result = await signInWithPopup(auth, googleProvider);
       if (result.user) {
         setGoogleLoading(false);
