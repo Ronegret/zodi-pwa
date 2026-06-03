@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RadioTower, Sparkles, Gem, Flame, Zap, ArrowRight } from "lucide-react";
-import { getTodaysAstralContext } from "@/lib/astral";
+import { getTodaysAstralContext, getSignEnergyScore } from "@/lib/astral";
 import { getSessionProfile, getLocalSession } from "@/lib/session";
 import { getXpData, getStreak, getLevel, xpToNextLevel, getGems, getLevelTitle } from "@/lib/gamification";
 import { getNameCard, getSignRuler, getDailyCrystal } from "@/lib/nameCard";
@@ -41,29 +41,6 @@ const MOON_SUFFIX: Record<string, string> = {
   "Luna Menguante":   "Modo recarga. La quietud ahora es inversión.",
 };
 
-// ── Energy score para el signo hoy (determinístico por fecha) ─────────────────
-function getSignEnergyToday(sign: string, ctx: AstralCtx): number {
-  const isSunSeason = ctx.sunTransit === sign;
-  const moonName = ctx.moonPhase.replace(/\p{Emoji}/gu, "").trim();
-  const isHighMoon = ["Luna Llena", "Gibosa Creciente", "Luna Creciente"].includes(moonName);
-  const isFireSign = ["Aries", "Leo", "Sagitario"].includes(sign);
-  const isEarthSign = ["Tauro", "Virgo", "Capricornio"].includes(sign);
-
-  let score = 62;
-  if (isSunSeason) score += 15;
-  if (isHighMoon) score += 8;
-  if (ctx.dayVibration === 1 || ctx.dayVibration === 8) score += 7;
-  if (ctx.dayVibration === 7) score += 5;
-  // Deterministic jitter por día del año
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-  );
-  score += ((dayOfYear * 7 + sign.charCodeAt(0)) % 13);
-  if (isFireSign && isHighMoon) score += 3;
-  if (isEarthSign && !isHighMoon) score += 2;
-
-  return Math.min(99, Math.max(58, score));
-}
 
 // ── Frase diaria personalizada ─────────────────────────────────────────────────
 function getDailyPhrase(
@@ -301,7 +278,7 @@ export function HeroConsole() {
   const { level, xpCurrent, xpNeeded, xpPercent, streak } = xpState;
   const levelTitle = getLevelTitle(level);
 
-  const energyScore = mounted && sign ? getSignEnergyToday(sign, ctx) : 0;
+  const energyScore = mounted && sign ? getSignEnergyScore(sign, ctx) : 0;
   const { phrase, moonLine } = mounted && sign
     ? getDailyPhrase(sign, ctx, tone)
     : { phrase: "", moonLine: "" };

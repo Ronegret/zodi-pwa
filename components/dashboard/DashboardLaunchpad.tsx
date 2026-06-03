@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Gem, Share2, Download, Zap } from "lucide-react";
 import { dashboardSections } from "@/lib/dashboard-sections";
 import { getLocalSession } from "@/lib/session";
-import { getTodaysAstralContext, calculateSunSign } from "@/lib/astral";
+import { getTodaysAstralContext, calculateSunSign, getSignEnergyScore } from "@/lib/astral";
 
 // Frases diarias por signo (mismas que HeroConsole para coherencia)
 const SIGN_PHRASES: Record<string, string[]> = {
@@ -33,11 +33,6 @@ function getDailySignPhrase(sign: string): string {
   return phrases[day % phrases.length];
 }
 
-function getEnergyScore(sign: string): number {
-  const seed = sign.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  const day  = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  return 62 + ((seed * 7 + day * 3) % 35);
-}
 
 // Widget de señal diaria — usa datos locales, 0 llamadas a API
 function DailySignalWidget() {
@@ -53,7 +48,7 @@ function DailySignalWidget() {
     setData({
       sign,
       phrase: getDailySignPhrase(sign),
-      score: getEnergyScore(sign),
+      score: getSignEnergyScore(sign, ctx),
       moonPhase: ctx.moonPhase,
     });
   }, []);

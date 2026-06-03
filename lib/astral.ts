@@ -190,6 +190,32 @@ export function getTodaysAstralContext(now = new Date()): TodaysAstralContext {
   };
 }
 
+/** Calcula el score de energía del signo para hoy (determinístico por fecha).
+ *  Fuente única de verdad — usada por HeroConsole y DashboardLaunchpad.
+ */
+export function getSignEnergyScore(sign: string, ctx: TodaysAstralContext): number {
+  const moonName    = ctx.moonPhase.replace(/\p{Emoji}/gu, "").trim();
+  const isHighMoon  = ["Luna Llena", "Gibosa Creciente", "Luna Creciente"].includes(moonName);
+  const isSunSeason = ctx.sunTransit === sign;
+  const isFireSign  = ["Aries", "Leo", "Sagitario"].includes(sign);
+  const isEarthSign = ["Tauro", "Virgo", "Capricornio"].includes(sign);
+
+  let score = 62;
+  if (isSunSeason) score += 15;
+  if (isHighMoon)  score += 8;
+  if (ctx.dayVibration === 1 || ctx.dayVibration === 8) score += 7;
+  if (ctx.dayVibration === 7) score += 5;
+
+  const now       = new Date();
+  const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+  score += ((dayOfYear * 7 + sign.charCodeAt(0)) % 13);
+
+  if (isFireSign && isHighMoon)   score += 3;
+  if (isEarthSign && !isHighMoon) score += 2;
+
+  return Math.min(99, Math.max(58, score));
+}
+
 export const firebaseCollections = [
   "users",
   "astralProfiles",
