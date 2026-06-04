@@ -350,7 +350,7 @@ export function HeroConsole() {
                   {firstName && (
                     <>
                       <h1
-                        className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black leading-[1.05] tracking-tight"
+                        className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black leading-[1.1] tracking-tight break-words"
                         style={{ fontFamily: "var(--font-display)" }}
                       >
                         {firstName},

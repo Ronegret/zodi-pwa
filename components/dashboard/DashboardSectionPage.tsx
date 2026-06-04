@@ -150,7 +150,7 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
               <Icon className="h-6 w-6" />
             </div>
             <p className="mt-6 zodi-kicker">{section.kicker}</p>
-            <h1 className="glitch mt-2 text-3xl font-black md:text-5xl lg:text-6xl" style={{ fontFamily: "var(--font-display)", lineHeight: 1.1, paddingBottom: "0.15em" }}>{section.title}</h1>
+            <h1 className="glitch mt-2 text-2xl font-black sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl" style={{ fontFamily: "var(--font-display)", lineHeight: 1.1, paddingBottom: "0.15em", overflowWrap: "break-word" }}>{section.title}</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-white/70">{section.description}</p>
             <div className="mt-6 flex flex-wrap gap-2">
               {section.chips.map((chip) => (
@@ -190,7 +190,7 @@ export function DashboardSectionPage({ sectionSlug }: { sectionSlug: string }) {
             >
               <p className="zodi-kicker">{plan.signal}</p>
               <h3 className="mt-2 text-2xl font-black" style={{ fontFamily: "var(--font-display)" }}>{plan.name}</h3>
-              <p className="mt-5 text-5xl font-black text-lime-100 drop-shadow-[0_0_12px_rgba(184,255,23,0.5)]">{plan.price}</p>
+              <p className="mt-5 text-3xl font-black text-lime-100 drop-shadow-[0_0_12px_rgba(184,255,23,0.5)] sm:text-4xl md:text-5xl">{plan.price}</p>
               <div className="mt-6 grid gap-2.5">
                 {plan.perks.map((perk) => (
                   <span key={perk} className="rounded-xl border border-white/08 bg-black/40 p-3 text-sm text-white/75">{perk}</span>

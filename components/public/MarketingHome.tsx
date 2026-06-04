@@ -254,7 +254,7 @@ export function MarketingHome() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="max-w-xl text-[2.6rem] font-black leading-[1.04] tracking-tight sm:text-5xl lg:text-[4.2rem]"
+              className="max-w-xl text-[1.75rem] font-black leading-[1.1] tracking-tight sm:text-[2.6rem] lg:text-[4.2rem]"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Tu oráculo personal.<br />
@@ -582,7 +582,7 @@ export function MarketingHome() {
         <div className="relative mx-auto max-w-7xl">
           <div className="mb-8">
             <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/70">Lecturas con carácter</p>
-            <h2 className="mt-3 max-w-2xl text-3xl font-black leading-tight sm:text-4xl">La verdad que ZODI te dice no viene suavizada.</h2>
+            <h2 className="mt-3 max-w-2xl text-xl font-black leading-tight sm:text-3xl md:text-4xl">La verdad que ZODI te dice no viene suavizada.</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
@@ -625,7 +625,7 @@ export function MarketingHome() {
         <div className="relative mx-auto max-w-7xl">
           <FadeUp>
             <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/70">Magia social</p>
-            <h2 className="mt-3 max-w-2xl text-3xl font-black leading-tight sm:text-5xl">Tu futuro, sin filtro.<br />Tu comunidad, sin postureo.</h2>
+            <h2 className="mt-3 max-w-2xl text-xl font-black leading-tight sm:text-3xl md:text-4xl lg:text-5xl">Tu futuro, sin filtro.<br />Tu comunidad, sin postureo.</h2>
             <p className="mt-5 max-w-xl text-base leading-7 text-white/65 sm:text-lg">Comparte lecturas, reacciona, sube de rango y mira lo que están viviendo otros signos. Confesionario cósmico con mejor estética y menos gente diciendo "todo pasa por algo".</p>
             <Link href="/auth/register" className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-lime-300 px-6 py-4 text-sm font-black text-black transition hover:bg-lime-200 active:scale-95 sm:text-base">
               Unirme a la comunidad <ArrowRight className="h-4 w-4" />
@@ -660,7 +660,7 @@ export function MarketingHome() {
                 )}
                 <h3 className="text-2xl font-black mt-2">{plan.name}</h3>
                 <p className="mt-1.5 text-sm text-white/55">{plan.signal}</p>
-                <p className="mt-4 text-4xl font-black text-lime-300">{plan.price}</p>
+                <p className="mt-4 text-2xl font-black text-lime-300 sm:text-3xl md:text-4xl">{plan.price}</p>
                 <div className="mt-5 flex-1 space-y-3">
                   {plan.perks.map((perk) => (
                     <div key={perk} className="flex items-start gap-2.5 text-sm text-white/75">
@@ -770,7 +770,7 @@ export function MarketingHome() {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(184,255,23,0.12)_0%,transparent_65%)]" />
             <div className="relative">
               <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-300/70 mb-3">Tu oráculo te espera</p>
-              <h2 className="text-3xl sm:text-5xl font-black leading-tight mb-4">Empieza a consultar gratis.<br className="hidden sm:block" /> Sin excusas, sin tarjeta.</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight mb-4">Empieza a consultar gratis.<br className="hidden sm:block" /> Sin excusas, sin tarjeta.</h2>
               <p className="text-base text-white/55 max-w-md mx-auto mb-8">Crea tu perfil astral en menos de 2 minutos. ZODI te leerá con más precisión cuanto más lo uses.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link href="/auth/register" className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-lime-300 px-8 py-4 text-base font-black text-black shadow-[0_0_30px_rgba(184,255,23,0.3)] transition hover:bg-lime-200 active:scale-95">
@@ -848,7 +848,7 @@ function DemoReadingSection() {
       <div className="mx-auto max-w-2xl">
         <FadeUp>
           <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/65">Pruébalo ahora</p>
-          <h2 className="mt-3 mb-2 text-3xl font-black sm:text-4xl">Mira lo que ZODI sabe de ti</h2>
+          <h2 className="mt-3 mb-2 text-xl font-black sm:text-3xl md:text-4xl">Mira lo que ZODI sabe de ti</h2>
           <p className="mb-8 text-base text-white/50">Solo con tu fecha de nacimiento. Sin registro. Sin tarjeta. Una muestra de lo que te espera.</p>
         </FadeUp>
         <FadeUp delay={0.1}>
@@ -927,7 +927,7 @@ function Section({ id, kicker, title, children }: { id: string; kicker: string; 
       <div className="mx-auto max-w-7xl">
         <FadeUp>
           <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/65">{kicker}</p>
-          <h2 className="mt-3 mb-8 max-w-3xl text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">{title}</h2>
+          <h2 className="mt-3 mb-8 max-w-3xl text-xl font-black leading-tight sm:text-3xl md:text-4xl lg:text-5xl">{title}</h2>
         </FadeUp>
         {children}
       </div>

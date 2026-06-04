@@ -18,11 +18,11 @@ export function SeoLeadMagnet({ sign }: { sign: string }) {
           <span>Contenido Desbloqueado Parcialmente</span>
         </div>
         
-        <h3 className="text-2xl md:text-3xl font-black text-white mb-3 leading-tight">
+        <h3 className="text-lg sm:text-2xl md:text-3xl font-black text-white mb-3 leading-tight break-words">
           Esto es solo la punta del iceberg para <span className="text-lime-300 capitalize">{sign}</span>.
         </h3>
-        
-        <p className="text-white/70 mb-8 max-w-xl text-lg leading-relaxed">
+
+        <p className="text-white/70 mb-8 max-w-xl text-base sm:text-lg leading-relaxed break-words">
           Las lecturas generales son para novatos. Si quieres que los astros te hablen directo a la cara sin filtros ni espiritualidad barata, necesitas tu Carta Natal calculada con precisión milimétrica.
         </p>
 

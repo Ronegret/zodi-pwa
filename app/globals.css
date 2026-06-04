@@ -139,6 +139,14 @@ body::before {
 /* Apply display font to headings globally */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
+  overflow-wrap: break-word;
+  word-break: break-word;
+  text-wrap: balance;
+}
+
+/* Prevent any text from overflowing its container on mobile */
+p, span, a, li {
+  overflow-wrap: break-word;
 }
 
 /* ── Glass Panel (refined) ─────────────────────────────────────────────────── */

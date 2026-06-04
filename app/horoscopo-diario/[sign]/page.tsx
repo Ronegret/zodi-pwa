@@ -82,10 +82,10 @@ export default async function DailyHoroscopePage({ params }: { params: Promise<{
           <div className="inline-block px-3 py-1 mb-4 rounded-full bg-white/10 border border-white/20 text-xs font-bold uppercase tracking-wider text-white/80">
             Horóscopo Diario Oficial
           </div>
-          <h1 className="text-5xl md:text-7xl font-black text-white capitalize mb-4 glitch relative">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white capitalize mb-4 glitch relative break-words">
             {data.name}
           </h1>
-          <p className="text-xl text-white/50">{data.date}</p>
+          <p className="text-base sm:text-xl text-white/50">{data.date}</p>
         </div>
 
         <div className="glass-panel p-8 md:p-12 rounded-3xl border border-white/10 relative overflow-hidden">
@@ -97,14 +97,14 @@ export default async function DailyHoroscopePage({ params }: { params: Promise<{
             Lectura Astral (Sin Filtros)
           </h2>
           
-          <p className="text-xl md:text-2xl leading-relaxed text-white/90 relative z-10 font-medium">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed text-white/90 relative z-10 font-medium break-words">
             "{data.reading}"
           </p>
 
           <div className="mt-10 grid grid-cols-2 gap-4 relative z-10">
             <div className="bg-white/5 p-4 rounded-xl border border-white/10">
               <span className="block text-xs uppercase text-white/50 font-bold mb-1">Número de la Suerte</span>
-              <span className="text-3xl font-black text-white">{data.luckyNumber}</span>
+              <span className="text-2xl font-black text-white sm:text-3xl">{data.luckyNumber}</span>
             </div>
             <div className="bg-white/5 p-4 rounded-xl border border-white/10">
               <span className="block text-xs uppercase text-white/50 font-bold mb-1">Color Energético</span>

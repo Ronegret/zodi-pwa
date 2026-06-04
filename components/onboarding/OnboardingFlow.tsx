@@ -303,7 +303,7 @@ export function OnboardingFlow() {
             {step === 0 && (
               <div className="p-6 sm:p-8 overflow-y-auto max-h-[75dvh] no-scrollbar">
                 <p className="zodi-kicker">Paso 1 de {TOTAL_STEPS}</p>
-                <h1 className="mt-2 text-3xl font-black leading-tight">
+                <h1 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">
                   ¿Quién eres<br />en este universo?
                 </h1>
                 <p className="mt-2 text-sm text-white/50">Tu identidad y cómo quieres que ZODI te hable.</p>
@@ -395,7 +395,7 @@ export function OnboardingFlow() {
             {step === 1 && (
               <div className="p-6 sm:p-8 overflow-y-auto max-h-[75dvh] no-scrollbar">
                 <p className="zodi-kicker">Paso 2 de {TOTAL_STEPS}</p>
-                <h1 className="mt-2 text-3xl font-black leading-tight">
+                <h1 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">
                   ¿Cuándo y dónde<br />llegaste a este mundo?
                 </h1>
                 <p className="mt-2 text-sm text-white/50">Con esto calculo tu signo solar, lunar, ascendente y carta natal.</p>
@@ -441,7 +441,7 @@ export function OnboardingFlow() {
                     <div className="mt-3 flex items-center gap-3">
                       <span className="text-5xl sm:text-6xl">{signMeta.emoji}</span>
                       <div>
-                        <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-7xl font-black leading-none glitch" style={{ fontFamily:"var(--font-display)" }}>
+                        <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-6xl font-black leading-tight glitch break-words" style={{ fontFamily:"var(--font-display)" }}>
                           {profile.sunSign}
                         </h1>
                         <p className="mt-1 text-sm text-white/60">{signMeta.element} · Camino {profile.lifePathNumber}</p>
