@@ -21,13 +21,23 @@ export function MusicPlayer() {
 
   const toggle = () => {
     if (!audioRef.current) return;
-    if (isPlaying) { audioRef.current.pause(); } else { audioRef.current.play().catch(() => {}); }
-    setIsPlaying(p => !p);
+    const next = !isPlaying;
+    if (next) { audioRef.current.play().catch(() => {}); } else { audioRef.current.pause(); }
+    setIsPlaying(next);
+    // Notifica a la BottomNav del nuevo estado
+    window.dispatchEvent(new CustomEvent("zodi:music-state", { detail: { isPlaying: next } }));
   };
+
+  // Escucha el toggle desde la BottomNav
+  useEffect(() => {
+    window.addEventListener("zodi:music-toggle", toggle);
+    return () => window.removeEventListener("zodi:music-toggle", toggle);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying]);
 
   if (dismissed) return null;
 
-  // En el dashboard — mini player en esquina superior-derecha del nav (mobile) o sidebar (desktop)
+  // En mobile dashboard: la BottomNav controla la música — solo mostrar en desktop
   if (isDash) {
     return (
       <AnimatePresence>
@@ -35,7 +45,7 @@ export function MusicPlayer() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.8, duration: 0.4 }}
-          className="fixed bottom-[76px] right-3 z-30 lg:bottom-4 lg:right-4"
+          className="hidden lg:block fixed bottom-4 right-4 z-30"
         >
           {expanded ? (
             /* Panel expandido */

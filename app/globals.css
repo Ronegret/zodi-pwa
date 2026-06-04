@@ -52,7 +52,7 @@
   --radius-full: 999px;
 
   /* Bottom nav height (thumb zone) */
-  --nav-h: 64px;
+  --nav-h: 64px;   /* altura del contenido. La barra real = nav-h + safe-area-bottom */
 }
 
 /* ── Global Reset ─────────────────────────────────────────────────────────── */

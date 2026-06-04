@@ -91,19 +91,22 @@ export function NeonSwitchLogin({ mode }: Props) {
       {/* ── Interruptor de pared ─────────────────────────────────────────────── */}
       <div className="flex flex-col items-center mb-8">
         {/* Texto de estado */}
-        <motion.p
-          key={isOn ? "on" : "off"}
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 text-xs font-black uppercase tracking-[0.35em] text-center"
-          style={{ color: isOn ? "rgba(184,255,23,0.7)" : "rgba(255,255,255,0.25)" }}
-        >
-          {isOn
-            ? "⚡ El oráculo está activo"
-            : mode === "login"
-              ? "🌑 Activa el interruptor para entrar"
-              : "🌑 Activa el interruptor para crear tu cuenta"}
-        </motion.p>
+        <div className="mb-5 text-center space-y-1">
+          <motion.p
+            key={isOn ? "on" : "off"}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xs font-black uppercase tracking-[0.3em]"
+            style={{ color: isOn ? "rgba(184,255,23,0.8)" : "rgba(255,255,255,0.55)" }}
+          >
+            {isOn ? "⚡ Oráculo activo" : "🌑 Oráculo dormido"}
+          </motion.p>
+          {!isOn && (
+            <p className="text-[11px] text-white/35">
+              {mode === "login" ? "Activa el interruptor para entrar" : "Activa el interruptor para registrarte"}
+            </p>
+          )}
+        </div>
 
         {/* Placa del interruptor */}
         <motion.div
@@ -144,19 +147,19 @@ export function NeonSwitchLogin({ mode }: Props) {
             className="relative rounded-2xl"
             style={{
               width: 88, height: 120,
-              background: isOn ? "linear-gradient(145deg,#111118,#0a0a0f)" : "linear-gradient(145deg,#0e0e14,#070710)",
-              border: isOn ? "2px solid rgba(184,255,23,0.55)" : "2px solid rgba(255,255,255,0.12)",
+              background: isOn ? "linear-gradient(145deg,#111118,#0a0a0f)" : "linear-gradient(145deg,#18181f,#0e0e16)",
+              border: isOn ? "2px solid rgba(184,255,23,0.65)" : "2px solid rgba(255,255,255,0.28)",
               boxShadow: isOn
                 ? "0 0 28px rgba(184,255,23,0.35),0 0 60px rgba(184,255,23,0.12),inset 0 1px 0 rgba(184,255,23,0.15)"
-                : "0 4px 20px rgba(0,0,0,0.8),inset 0 1px 0 rgba(255,255,255,0.05)",
+                : "0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08)",
               transition: "box-shadow 0.4s ease,border-color 0.3s ease,background 0.3s ease",
             }}
           >
             {/* Tornillos decorativos */}
             <div className="absolute top-2.5 left-2.5 w-2.5 h-2.5 rounded-full"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }} />
             <div className="absolute bottom-2.5 right-2.5 w-2.5 h-2.5 rounded-full"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
+              style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)" }} />
 
             {/* Rocker */}
             <motion.div

@@ -21,8 +21,11 @@ import {
   LayoutGrid,
   MessageCircle,
   MoonStar,
+  Music2,
   Orbit,
+  Pause,
   Pickaxe,
+  Play,
   RadioTower,
   Save,
   ScrollText,
@@ -253,12 +256,20 @@ export function Sidebar() {
 // ── Bottom Nav (móvil) ─────────────────────────────────────────────────────────
 export function BottomNav() {
   const pathname = usePathname();
-  const [streak, setStreak]     = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [pressed, setPressed]   = useState<string | null>(null);
+  const [streak, setStreak]       = useState(0);
+  const [menuOpen, setMenuOpen]   = useState(false);
+  const [pressed, setPressed]     = useState<string | null>(null);
+  const [musicPlaying, setMusicPlaying] = useState(false);
 
   useEffect(() => {
     try { setStreak(getStreak().count); } catch { /* ignore */ }
+
+    // Escucha el estado del reproductor (emitido por MusicPlayer)
+    const onState = (e: Event) => {
+      setMusicPlaying((e as CustomEvent<{ isPlaying: boolean }>).detail.isPlaying);
+    };
+    window.addEventListener("zodi:music-state", onState);
+    return () => window.removeEventListener("zodi:music-state", onState);
   }, []);
 
   function handlePress(key: string) {
@@ -271,15 +282,15 @@ export function BottomNav() {
       <MobileFullMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <nav
-        className="bottom-nav-bar fixed bottom-2 left-2 right-2 z-40 rounded-3xl border shadow-[0_8px_32px_rgba(0,0,0,0.8)] lg:hidden sm:bottom-4 sm:left-4 sm:right-4"
+        className="bottom-nav-bar fixed bottom-0 left-0 right-0 z-40 rounded-t-2xl border-t border-l-0 border-r-0 border-b-0 shadow-[0_-4px_24px_rgba(0,0,0,0.7)] lg:hidden"
         style={{
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
           background: "var(--nav-bg)",
-          borderColor: "var(--border)",
+          borderTopColor: "var(--border)",
           transform: "translateZ(0)",
         }}
       >
-        <div className="grid grid-cols-5 items-center" style={{ height: "64px" }}>
+        <div className="grid grid-cols-6 items-center" style={{ height: "64px" }}>
           {bottomNav.map((item) => {
             const isOracle = item.href === "/dashboard/oraculo";
             const isMenu   = item.href === "#menu";
@@ -422,6 +433,33 @@ export function BottomNav() {
               </motion.div>
             );
           })}
+
+          {/* ── Música — 6° botón ─────────────────────────────────────────── */}
+          <motion.button
+            whileTap={{ scale: 0.82 }}
+            transition={{ type: "spring", stiffness: 500, damping: 28 }}
+            onClick={() => window.dispatchEvent(new CustomEvent("zodi:music-toggle"))}
+            aria-label={musicPlaying ? "Pausar música" : "Reproducir música"}
+            className={`relative flex flex-col items-center justify-center gap-0.5 ${musicPlaying ? "text-lime-300" : "text-white/45"}`}
+          >
+            {/* Vinilo animado de fondo */}
+            <div className="relative h-6 w-6 flex items-center justify-center">
+              {musicPlaying ? (
+                <>
+                  <motion.span
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0, 0.4] }}
+                    transition={{ duration: 1.6, repeat: Infinity }}
+                    className="absolute inset-0 rounded-full border border-lime-300/40"
+                  />
+                  <Pause className="h-4 w-4 relative z-10" />
+                </>
+              ) : (
+                <Music2 className="h-4 w-4" />
+              )}
+            </div>
+            <span className="text-[10px] font-semibold leading-tight">Música</span>
+          </motion.button>
+
         </div>
       </nav>
     </>
