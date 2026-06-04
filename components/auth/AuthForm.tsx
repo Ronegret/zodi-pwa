@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  signInWithRedirect, signInWithPopup, getRedirectResult, getAdditionalUserInfo,
+  signInWithRedirect, getRedirectResult, getAdditionalUserInfo,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, fetchSignInMethodsForEmail,
   onAuthStateChanged, type User
@@ -318,20 +318,22 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     return () => {
       if (googleTimeout) clearTimeout(googleTimeout);
       unsub();
+      // Reset so the next effect run (React StrictMode double-invoke / Fast Refresh) can process the user.
+      // Without this, authHandledRef stays true after cleanup and the re-mounted effect skips the user.
+      authHandledRef.current = false;
     };
   }, [applyFirebaseUser]);
 
-  // ── Google OAuth ──────────────────────────────────────────────────────────
-  // IMPORTANTE: NO se comprueba authHandledRef aquí.
-  // authHandledRef se usa para que onAuthStateChanged no interfiera con una
-  // operación ya en curso — pero nunca debe bloquear el botón del usuario.
-  // googleLoading es el único guard del botón (evita doble clic).
+  // ── Google OAuth — siempre redirect (nunca popup) ────────────────────────
+  // signInWithPopup falla con "no se puede abrir esta página" en Chrome/Edge modernos
+  // por bloqueo cross-origin en popups (localhost→firebaseapp.com→google→firebaseapp.com).
+  // signInWithRedirect navega la página principal — sin restricciones de popup.
   async function loginWithGoogle() {
     if (googleLoading) return;
     setMessage("");
     setMsgType("info");
     setGoogleLoading(true);
-    authHandledRef.current = true; // evita que onAuthStateChanged interfiera
+    authHandledRef.current = true;
 
     const auth = getFirebaseAuth();
     if (!auth) {
@@ -342,47 +344,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    // Detectar iOS Safari / PWA standalone → redirect directo (popups bloqueados)
-    const isIosSafari =
-      typeof navigator !== "undefined" &&
-      /iphone|ipad|ipod/i.test(navigator.userAgent) &&
-      !/chrome|crios|fxios/i.test(navigator.userAgent);
-    const isPwaStandalone =
-      typeof window !== "undefined" &&
-      (window.matchMedia("(display-mode: standalone)").matches ||
-        (navigator as any).standalone === true);
-
-    // Para iOS/PWA: redirect directo. Para el resto: popup (más rápido, 1-2s vs 4-6s)
-    // signInWithPopup es import estático → se llama dentro del contexto síncrono del clic
-    if (!isIosSafari && !isPwaStandalone) {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        if (result.user) {
-          setGoogleLoading(false);
-          const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
-          await applyFirebaseUser(result.user, isNew);
-        }
-        return;
-      } catch (e: any) {
-        const code = e?.code ?? "";
-        // Popup bloqueado → fallback a redirect silencioso
-        if (code === "auth/popup-blocked" || code === "auth/popup-cancelled" || code === "auth/cancelled-popup-request") {
-          // sigue al bloque de redirect de abajo
-        } else if (code === "auth/popup-closed-by-user") {
-          setGoogleLoading(false);
-          authHandledRef.current = false;
-          return; // usuario cerró el popup — no mostrar error
-        } else if (code) {
-          setMessage(`Error de Google (${code}). Intenta de nuevo o usa email.`);
-          setMsgType("error");
-          setGoogleLoading(false);
-          authHandledRef.current = false;
-          return;
-        }
-      }
-    }
-
-    // Redirect: iOS/PWA o cuando el popup fue bloqueado
     try {
       sessionStorage.setItem("zodi.google_redirect_pending", "1");
       await signInWithRedirect(auth, googleProvider);
@@ -392,9 +353,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setGoogleLoading(false);
       authHandledRef.current = false;
       if (redirectCode === "auth/unauthorized-domain") {
-        setMessage("⚠️ Dominio no autorizado en Firebase Console.");
+        setMessage("⚠️ Este dominio no está autorizado en Firebase Console → Authentication → Authorized Domains.");
       } else {
-        setMessage(`No se pudo conectar con Google (${redirectCode || "error"}).`);
+        setMessage(`No se pudo conectar con Google (${redirectCode || "error"}). Comprueba tu conexión e inténtalo de nuevo.`);
       }
       setMsgType("error");
     }
