@@ -1,6 +1,7 @@
 import { AnimatedShell } from "@/components/AnimatedShell";
 import { NeonSwitchLogin } from "@/components/auth/NeonSwitchLogin";
 import { PublicNav } from "@/components/public/PublicNav";
+import { Suspense } from "react";
 import Image from "next/image";
 
 export default function RegisterPage() {
@@ -13,7 +14,7 @@ export default function RegisterPage() {
             src="/zodi-art/zodi-us.webp"
             alt="ZODI Registro"
             fill
-            className="object-cover object-center opacity-20"
+            className="object-cover object-center opacity-25"
             priority
             sizes="100vw"
             quality={60}
@@ -22,8 +23,9 @@ export default function RegisterPage() {
         </div>
         <div className="spark-field -z-10" />
         <div className="my-auto w-full max-w-xl">
-          {/* Registro: empieza con el interruptor ON — el oráculo te recibe */}
-          <NeonSwitchLogin mode="register" />
+          <Suspense fallback={<div className="h-96 flex items-center justify-center text-white/50">Cargando...</div>}>
+            <NeonSwitchLogin mode="register" />
+          </Suspense>
         </div>
       </section>
     </AnimatedShell>
