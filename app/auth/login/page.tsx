@@ -8,7 +8,7 @@ export default function LoginPage() {
   return (
     <AnimatedShell>
       <PublicNav />
-      <section className="relative flex min-h-[100dvh] flex-col items-center px-3 py-8 sm:px-4 sm:py-12 pt-24">
+      <section className="relative flex min-h-[100dvh] flex-col items-center justify-center px-3 pt-20 pb-6 sm:pt-24 sm:pb-8">
         <div className="absolute inset-0 -z-20">
           <Image
             src="/zodi-art/tarot-reader.webp"
@@ -21,7 +21,7 @@ export default function LoginPage() {
           />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.9)_100%)]" />
         </div>
-        <div className="my-auto w-full max-w-xl">
+        <div className="w-full max-w-[380px]">
           <Suspense fallback={
             <div className="flex items-center justify-center py-24 text-white/40 text-sm">
               Cargando...

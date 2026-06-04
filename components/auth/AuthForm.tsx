@@ -209,16 +209,16 @@ export function AuthForm({ mode, compact = false }: { mode: "login" | "register"
     const redirectPending = sessionStorage.getItem("zodi.google_redirect_pending");
     if (redirectPending) setGoogleLoading(true);
 
-    // Timeout de seguridad: si google sigue cargando tras 14s, mostrar error
+    // Timeout de seguridad: si google sigue cargando tras 8s, mostrar error
     let googleTimeout: ReturnType<typeof setTimeout> | null = null;
     if (redirectPending) {
       googleTimeout = setTimeout(() => {
         if (authHandledRef.current) return; // ya fue procesado
         sessionStorage.removeItem("zodi.google_redirect_pending");
         setGoogleLoading(false);
-        setMessage("Google tardó demasiado. Vuelve a intentarlo o usa email.");
+        setMessage("Google tardó demasiado. Intenta de nuevo o usa email y contraseña.");
         setMsgType("error");
-      }, 14000);
+      }, 8000);
     }
 
     let redirectChecked = false;
@@ -348,19 +348,15 @@ export function AuthForm({ mode, compact = false }: { mode: "login" | "register"
       return;
     }
 
-    // Móvil y PWA: los popups fallan en móvil porque window.opener queda bloqueado
-    // entre pestañas → ir directo a redirect. Popup solo en desktop.
-    const isMobile =
-      typeof navigator !== "undefined" &&
-      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-        navigator.userAgent.toLowerCase()
-      );
+    // Estrategia: popup en todos los dispositivos (iOS Safari lo abre como
+    // nueva pestaña, Android Chrome lo permite). Solo ir a redirect si el
+    // popup falla o está en modo PWA standalone (donde no hay UI de ventana).
     const isPwaStandalone =
       typeof window !== "undefined" &&
       (window.matchMedia("(display-mode: standalone)").matches ||
         (navigator as any).standalone === true);
 
-    if (!isMobile && !isPwaStandalone) {
+    if (!isPwaStandalone) {
       try {
         const result = await signInWithPopup(auth, googleProvider);
         if (result.user) {
@@ -376,10 +372,8 @@ export function AuthForm({ mode, compact = false }: { mode: "login" | "register"
           code === "auth/popup-cancelled" ||
           code === "auth/cancelled-popup-request" ||
           code === "auth/popup-closed-by-user"
-          // popup-closed-by-user incluye el caso "no se puede abrir esta página":
-          // el popup muestra el error y el usuario lo cierra → caer al redirect
         ) {
-          // fallthrough → intenta redirect abajo
+          // fallthrough → intenta redirect como último recurso
         } else if (code) {
           setMessage(`Error de Google (${code}). Intenta de nuevo o usa email.`);
           setMsgType("error");
