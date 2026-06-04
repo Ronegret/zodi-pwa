@@ -301,7 +301,9 @@ export function AuthForm({ mode, compact = false }: { mode: "login" | "register"
     // Auto-redirect solo si el usuario NO está iniciando login manualmente.
     // authHandledRef = true significa que loginWithGoogle está en curso → no interferir.
     const unsub = onAuthStateChanged(auth, async (user) => {
-      if (redirectPending && !redirectChecked) return;
+      // No bloqueamos por redirectPending: en mobile onAuthStateChanged
+      // dispara ANTES de que getRedirectResult resuelva (race condition iOS Safari).
+      // authHandledRef previene el doble procesamiento.
       if (user && !authHandledRef.current) {
         authHandledRef.current = true;
         if (googleTimeout) clearTimeout(googleTimeout);

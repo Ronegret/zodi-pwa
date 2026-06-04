@@ -8,7 +8,7 @@ export default function LoginPage() {
   return (
     <AnimatedShell>
       <PublicNav />
-      <section className="relative flex min-h-[100dvh] flex-col items-center justify-center px-3 pt-20 pb-6 sm:pt-24 sm:pb-8">
+      <section className="relative min-h-[100dvh] flex flex-col items-center px-3 pt-16 sm:pt-20">
         <div className="absolute inset-0 -z-20">
           <Image
             src="/zodi-art/tarot-reader.webp"

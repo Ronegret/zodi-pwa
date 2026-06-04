@@ -70,7 +70,7 @@ export function NeonSwitchLogin({ mode }: { mode: "login" | "register" }) {
           style={{
             position: "relative",
             width: "100%",
-            height: "min(570px, calc(100dvh - 170px))",
+            height: "min(580px, calc(100dvh - 100px))",
             transformStyle: "preserve-3d",
             transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
             transition: `transform ${FLIP_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`,
