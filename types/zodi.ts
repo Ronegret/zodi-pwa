@@ -68,6 +68,7 @@ export type UserProfile = {
   streak: number;
   rank: string;
   plan: "free" | "premium" | "vip";
+  trialEndsAt?: string;
   language?: "es" | "en" | "ca";
   // Contexto vital
   relationshipStatus?: string;

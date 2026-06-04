@@ -203,8 +203,84 @@ export function HeroConsole() {
   // Detectar si falta la fecha de nacimiento (dato clave para lecturas)
   const missingBirthDate = mounted && !profile?.birthDate && !getLocalSession().onboardingData?.birthDate;
 
+  // Detección de cumpleaños
+  const isBirthday = (() => {
+    if (!mounted) return false;
+    const bd = getLocalSession().onboardingData?.birthDate;
+    if (!bd) return false;
+    const d = new Date(bd + "T12:00:00");
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  })();
+
+  // Trial de 7 días
+  const trialDaysLeft = (() => {
+    if (!mounted) return null;
+    const { trialStartedAt, onboardingData } = getLocalSession();
+    if (!trialStartedAt || !onboardingData) return null;
+    const days = Math.ceil(7 - (Date.now() - trialStartedAt) / 86_400_000);
+    return days > 0 && days <= 7 ? days : null;
+  })();
+
   return (
     <section className="grid gap-3">
+      {/* ── Banner: cumpleaños ───────────────────────────────────────────── */}
+      {isBirthday && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 22 }}
+          className="relative overflow-hidden rounded-xl border border-fuchsia-400/40 bg-gradient-to-r from-fuchsia-900/50 to-violet-900/40 px-4 py-4"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(217,70,239,0.18),transparent_70%)]" />
+          <div className="relative flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl animate-bounce">🎂</span>
+              <div>
+                <p className="font-black text-fuchsia-200 leading-tight">
+                  ¡Feliz cumpleaños, {firstName || "viajero"}!
+                </p>
+                <p className="text-[11px] text-fuchsia-200/60 mt-0.5">
+                  El cosmos lleva tu nombre hoy. Lectura de año solar disponible.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/horoscopo"
+              className="shrink-0 rounded-lg bg-fuchsia-400 px-3 py-2 text-xs font-black text-black hover:bg-fuchsia-300 transition whitespace-nowrap"
+            >
+              Leer →
+            </Link>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── Banner: trial activo ──────────────────────────────────────────── */}
+      {trialDaysLeft !== null && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="flex items-center justify-between gap-3 rounded-xl border border-lime-300/30 bg-lime-300/08 px-4 py-3"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-lg shrink-0">✨</span>
+            <div className="min-w-0">
+              <p className="text-sm font-black text-lime-200 leading-tight">
+                Trial Pro activo — {trialDaysLeft} {trialDaysLeft === 1 ? "día" : "días"} restantes
+              </p>
+              <p className="text-[11px] text-lime-200/55 mt-0.5">Lecturas ilimitadas, todos los tonos, sin restricciones.</p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/premium"
+            className="shrink-0 rounded-lg bg-lime-300 px-3 py-2 text-xs font-black text-black hover:bg-lime-200 transition whitespace-nowrap"
+          >
+            Ver planes →
+          </Link>
+        </motion.div>
+      )}
+
       {/* ── Banner: falta fecha de nacimiento ─────────────────────────────── */}
       {missingBirthDate && (
         <motion.div

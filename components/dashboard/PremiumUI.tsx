@@ -1,12 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Flame, Crown, ShieldHalf } from "lucide-react";
+import { Sparkles, Flame, Crown, ShieldHalf, Infinity, Star } from "lucide-react";
 import { getLocalSession } from "@/lib/session";
+
+const SUBSCRIPTION_PLANS = [
+  {
+    id: "pro_monthly",
+    name: "ZODI Pro",
+    price: "4,99€/mes",
+    badge: null,
+    perks: ["Lecturas ilimitadas", "Todos los tonos (brutal, sarcástico)", "Respuestas extensas", "7 días de prueba gratis"],
+    cta: "Probar 7 días gratis",
+    accent: "border-lime-300/40 bg-lime-300/05",
+    ctaClass: "bg-lime-300 text-black hover:bg-lime-200 shadow-[0_0_15px_rgba(184,255,23,0.3)]",
+  },
+  {
+    id: "pro_annual",
+    name: "ZODI Pro Anual",
+    price: "39,99€/año",
+    badge: "Ahorra 33%",
+    perks: ["Todo lo de Pro Mensual", "Ahorro de 20€ al año", "Soporte prioritario", "Acceso anticipado a nuevas secciones"],
+    cta: "Suscribirse anual",
+    accent: "border-violet-400/40 bg-violet-500/05",
+    ctaClass: "bg-violet-500 text-white hover:bg-violet-400",
+  },
+];
 
 export function PremiumUI() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const session = getLocalSession();
+
+  const handleSubscribe = async (planId: string) => {
+    if (!session.uid || !session.email) {
+      alert("Debes iniciar sesión para suscribirte.");
+      return;
+    }
+    setLoadingId(planId);
+    try {
+      const { getFirebaseToken } = await import("@/lib/firebase/client");
+      const token = await getFirebaseToken();
+      const res = await fetch("/api/checkout/subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ uid: session.uid, email: session.email, planId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Error al iniciar la suscripción: " + (data.error ?? "Desconocido"));
+      }
+    } catch {
+      alert("Error de conexión.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
   const handleBuyGems = async (packId: string) => {
     if (!session.uid || !session.email) {
@@ -42,6 +92,54 @@ export function PremiumUI() {
 
   return (
     <div className="grid gap-5">
+
+      {/* ── PLANES DE SUSCRIPCIÓN ────────────────────────────────────────────── */}
+      <div className="glass-panel rounded-2xl p-6 border border-white/10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-05 pointer-events-none">
+          <Star className="w-40 h-40 text-violet-300" />
+        </div>
+        <h2 className="text-2xl font-black mb-1 flex items-center gap-2 relative z-10">
+          <Crown className="h-6 w-6 text-lime-300" />
+          Planes Pro
+        </h2>
+        <p className="text-white/60 mb-6 text-sm relative z-10">
+          Sin restricciones, sin límites diarios. 7 días de prueba gratis sin compromiso.
+        </p>
+
+        <div className="grid sm:grid-cols-2 gap-4 relative z-10">
+          {SUBSCRIPTION_PLANS.map(plan => (
+            <div key={plan.id} className={`rounded-xl border p-5 flex flex-col ${plan.accent}`}>
+              {plan.badge && (
+                <span className="mb-3 self-start rounded-full border border-violet-400/40 bg-violet-500/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-violet-200">
+                  {plan.badge}
+                </span>
+              )}
+              <h3 className="font-black text-lg text-white">{plan.name}</h3>
+              <p className="text-2xl font-black text-white mt-1 mb-3">{plan.price}</p>
+              <ul className="space-y-1.5 mb-5 flex-1">
+                {plan.perks.map(perk => (
+                  <li key={perk} className="flex items-start gap-2 text-sm text-white/70">
+                    <span className="mt-0.5 text-lime-300 shrink-0">✓</span>
+                    {perk}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handleSubscribe(plan.id)}
+                disabled={loadingId !== null}
+                className={`w-full rounded-xl py-3 font-black transition disabled:opacity-50 ${plan.ctaClass}`}
+              >
+                {loadingId === plan.id ? "Redirigiendo..." : plan.cta}
+              </button>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-white/35 mt-5 flex items-center justify-center gap-2">
+          <ShieldHalf className="w-3 h-3" /> Pagos seguros con Stripe · Cancela cuando quieras
+        </p>
+      </div>
+
+      {/* ── TIENDA DE GEMAS ──────────────────────────────────────────────────── */}
       <div className="glass-panel rounded-md p-6 border border-lime-300/30 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10">
           <Crown className="w-32 h-32 text-lime-300" />

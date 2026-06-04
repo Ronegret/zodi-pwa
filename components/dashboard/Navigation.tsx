@@ -230,16 +230,14 @@ export function Sidebar() {
         {/* Theme toggle */}
         <button
           onClick={toggle}
-          title={theme === "dark" ? "Activar modo NEON" : "Volver al modo oscuro"}
+          title={`Tema actual: ${theme} → cambiar`}
           className="flex items-center gap-2 rounded-lg px-3 py-2 transition hover:bg-white/[0.05] w-full"
         >
-          {theme === "dark" ? (
-            <Zap className="h-3.5 w-3.5 text-yellow-300/80" />
-          ) : (
-            <Sparkles className="h-3.5 w-3.5 text-lime-300/80" />
-          )}
+          {theme === "dark"  && <Zap       className="h-3.5 w-3.5 text-yellow-300/80" />}
+          {theme === "light" && <Sparkles  className="h-3.5 w-3.5 text-sky-400/80" />}
+          {theme === "neon"  && <MoonStar  className="h-3.5 w-3.5 text-lime-300/80" />}
           <span className="text-xs font-bold text-white/45">
-            {theme === "dark" ? "⚡ Modo NEON" : "🌌 Modo Oscuro"}
+            {theme === "dark"  ? "⚡ Modo NEON" : theme === "light" ? "🌌 Modo Oscuro" : "☀️ Modo Claro"}
           </span>
         </button>
 

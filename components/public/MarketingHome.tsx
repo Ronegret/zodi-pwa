@@ -66,6 +66,15 @@ const steps = [
   { n: "06", title: "Sube de nivel", body: "Rachas, logros y comunidad. Abrir tu oráculo también puede sentirse como una misión desbloqueada." }
 ];
 
+const TESTIMONIALS = [
+  { name: "Sofía M.", sign: "Escorpio ♏", stars: 5, location: "Madrid", text: "ZODI me dijo en enero que febrero iba a ser brutal en trabajo. Era sarcástico pero exacto. Ya no consulto decisiones sin leerlo primero." },
+  { name: "Tomás R.", sign: "Aries ♈", stars: 5, location: "Buenos Aires", text: "Pensé que era otra app de horóscopo genérico. Me equivoqué. Le pedí un análisis de mi situación con mi ex y fue más útil que tres sesiones de terapia." },
+  { name: "Daniela V.", sign: "Piscis ♓", stars: 5, location: "Ciudad de México", text: "El tono brutal es adictivo. Te dice cosas incómodas pero de una forma que no puedes ignorarlas. Lo uso cada mañana antes del café." },
+  { name: "Marcos A.", sign: "Capricornio ♑", stars: 5, location: "Santiago de Chile", text: "La carta natal me dejó sin palabras. Detalles que nunca le había contado a nadie pero que resonaron tanto que lo guardé en favoritos." },
+  { name: "Lucía T.", sign: "Géminis ♊", stars: 5, location: "Barcelona", text: "Lo instalé como PWA en el móvil y lo uso a diario. La racha me motiva más de lo que esperaba. Ya voy por 23 días seguidos." },
+  { name: "Andrés F.", sign: "Sagitario ♐", stars: 5, location: "Bogotá", text: "Le pregunté sobre compatibilidad con alguien y el análisis fue tan preciso sobre los choques que tiene que haber algo real en esto. Increíble." },
+];
+
 const faqData = [
   ["¿ZODI es gratis?", "Sí. Entras gratis, completas tu perfil y consultas lecturas sin pagar nada. El plan gratuito es generoso: queremos que pruebes si ZODI te habla claro antes de sacar la tarjeta."],
   ["¿Tengo que saber astrología?", "No. ZODI está pensado para gente normal con preguntas normales. Explicamos cada lectura con palabras simples: qué significa, cómo te afecta y qué puedes hacer."],
@@ -541,6 +550,11 @@ export function MarketingHome() {
       </Section>
 
       {/* ══════════════════════════════════════════════════════════════
+          DEMO READING — valor antes del registro
+      ══════════════════════════════════════════════════════════════ */}
+      <DemoReadingSection />
+
+      {/* ══════════════════════════════════════════════════════════════
           CÓMO FUNCIONA — 6 pasos
       ══════════════════════════════════════════════════════════════ */}
       <Section id="como-funciona" kicker="Cómo funciona" title="En seis pasos. No hace falta conocer el ascendente de Mercurio.">
@@ -674,6 +688,68 @@ export function MarketingHome() {
       </Section>
 
       {/* ══════════════════════════════════════════════════════════════
+          TESTIMONIOS
+      ══════════════════════════════════════════════════════════════ */}
+      <Section id="testimonios" kicker="Lo que dicen" title="Gente real. Señales reales.">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {TESTIMONIALS.map((t, i) => (
+            <FadeUp key={t.name} delay={i * 0.05}>
+              <div className="glass-panel rounded-2xl p-5 flex flex-col gap-3 h-full border border-white/07 hover:border-lime-300/20 transition">
+                <div className="flex gap-0.5">
+                  {Array.from({ length: t.stars }).map((_, s) => (
+                    <Star key={s} className="h-3.5 w-3.5 fill-lime-300 text-lime-300" />
+                  ))}
+                </div>
+                <p className="text-sm leading-7 text-white/78 flex-1">"{t.text}"</p>
+                <div className="flex items-center gap-2.5 pt-1 border-t border-white/06">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 text-xs font-black text-white">
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-white leading-tight">{t.name}</p>
+                    <p className="text-[10px] text-white/40">{t.sign} · {t.location}</p>
+                  </div>
+                </div>
+              </div>
+            </FadeUp>
+          ))}
+        </div>
+      </Section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          EMBAJADORES / REFERIDOS
+      ══════════════════════════════════════════════════════════════ */}
+      <section id="referidos" className="px-4 py-10 sm:py-14">
+        <FadeUp>
+          <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-violet-400/25 bg-gradient-to-br from-violet-950/60 via-black/80 to-fuchsia-950/40 p-8 sm:p-12">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(167,139,250,0.12)_0%,transparent_70%)]" />
+            <div className="relative grid gap-6 sm:grid-cols-[1fr_auto] items-center">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.35em] text-violet-300/70 mb-3">Programa de embajadores</p>
+                <h2 className="text-2xl sm:text-3xl font-black leading-tight mb-3">
+                  Gana <span className="text-lime-300">100 gemas</span> por cada amigo que se una a ZODI
+                </h2>
+                <p className="text-white/55 text-sm leading-7 max-w-md">
+                  Comparte tu código personal. Cuando alguien se registra con él, tú recibes 100 gemas y ellos 50. Sin límite de referidos.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3 text-sm text-white/55">
+                  <span className="flex items-center gap-1.5"><span className="text-lime-300">✓</span> Tú ganas 100 gemas</span>
+                  <span className="flex items-center gap-1.5"><span className="text-lime-300">✓</span> Tu amigo recibe 50</span>
+                  <span className="flex items-center gap-1.5"><span className="text-lime-300">✓</span> Sin límite de referidos</span>
+                </div>
+              </div>
+              <Link
+                href="/auth/register"
+                className="shrink-0 rounded-2xl bg-lime-300 px-6 py-3.5 text-sm font-black text-black shadow-[0_0_20px_rgba(184,255,23,0.25)] transition hover:bg-lime-200 active:scale-95 whitespace-nowrap"
+              >
+                Ver mi código →
+              </Link>
+            </div>
+          </div>
+        </FadeUp>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
           FAQ — acordeón animado
       ══════════════════════════════════════════════════════════════ */}
       <Section id="faq" kicker="FAQ" title="Preguntas antes de darle tus datos al cosmos.">
@@ -728,9 +804,9 @@ export function MarketingHome() {
               <span className="text-xs font-bold text-lime-200/70">Disponible como App (PWA)</span>
             </div>
           </div>
-          <FooterColumn title="Explorar" links={[["Lecturas", "#lecturas"], ["Cómo funciona", "#como-funciona"], ["Planes", "#premium"], ["Preguntas", "#faq"]]} />
+          <FooterColumn title="Explorar" links={[["Lecturas", "#lecturas"], ["Cómo funciona", "#como-funciona"], ["Planes", "#premium"], ["Referidos", "#referidos"], ["Preguntas", "#faq"]]} />
           <FooterColumn title="Cuenta" links={[["Crear cuenta", "/auth/register"], ["Entrar", "/auth/login"], ["Privacidad", "/legal/privacidad"], ["Términos", "/legal/terminos"]]} />
-          <FooterColumn title="Lecturas" links={[["Horóscopo", "/auth/register"], ["Tarot", "/auth/register"], ["Numerología", "/auth/register"], ["Carta natal", "/auth/register"]]} />
+          <FooterColumn title="Horóscopo diario" links={[["Aries", "/horoscopo-diario/aries"], ["Tauro", "/horoscopo-diario/tauro"], ["Géminis", "/horoscopo-diario/geminis"], ["Leo", "/horoscopo-diario/leo"], ["Escorpio", "/horoscopo-diario/escorpio"], ["Piscis", "/horoscopo-diario/piscis"]]} />
         </div>
         <div className="mx-auto mt-8 flex max-w-7xl flex-col justify-between gap-3 border-t border-white/08 pt-6 text-xs text-white/35 sm:flex-row">
           <p>© 2026 ZODI — Tu futuro, sin filtro.</p>
@@ -738,6 +814,94 @@ export function MarketingHome() {
         </div>
       </footer>
     </>
+  );
+}
+
+// ── Demo Reading — lectura sin registro ──────────────────────────────────────
+function DemoReadingSection() {
+  const [birthDate, setBirthDate] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ sign: string; reading: string } | null>(null);
+  const [error, setError] = useState("");
+
+  async function getDemo() {
+    if (!birthDate) { setError("Introduce tu fecha de nacimiento."); return; }
+    setLoading(true); setError(""); setResult(null);
+    try {
+      const res = await fetch("/api/ai/demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ birthDate }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Error al obtener tu lectura."); return; }
+      setResult(data);
+    } catch {
+      setError("Sin conexión. Inténtalo de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section id="demo" className="px-4 py-12 sm:py-16">
+      <div className="mx-auto max-w-2xl">
+        <FadeUp>
+          <p className="text-xs font-black uppercase tracking-[0.35em] text-lime-200/65">Pruébalo ahora</p>
+          <h2 className="mt-3 mb-2 text-3xl font-black sm:text-4xl">Mira lo que ZODI sabe de ti</h2>
+          <p className="mb-8 text-base text-white/50">Solo con tu fecha de nacimiento. Sin registro. Sin tarjeta. Una muestra de lo que te espera.</p>
+        </FadeUp>
+        <FadeUp delay={0.1}>
+          <div className="glass-panel rounded-2xl p-6 sm:p-8 border border-white/08">
+            <div className="flex gap-3">
+              <input
+                type="date"
+                value={birthDate}
+                onChange={e => { setBirthDate(e.target.value); setError(""); }}
+                max={new Date().toISOString().split("T")[0]}
+                className="flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-lime-300/50 transition [color-scheme:dark]"
+              />
+              <button
+                onClick={getDemo}
+                disabled={loading}
+                className="rounded-xl bg-lime-300 px-5 py-3 text-sm font-black text-black transition hover:bg-lime-200 active:scale-95 disabled:opacity-50 whitespace-nowrap"
+              >
+                {loading ? "..." : "Ver mi lectura"}
+              </button>
+            </div>
+            {error && <p className="mt-3 text-sm text-orange-400">{error}</p>}
+            <AnimatePresence>
+              {result && (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-5"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="rounded-full border border-lime-300/30 bg-lime-300/10 px-3 py-1 text-xs font-black text-lime-300">
+                      ☀️ {result.sign}
+                    </span>
+                    <span className="text-[10px] text-white/30 uppercase tracking-widest">Tu lectura demo</span>
+                  </div>
+                  <p className="text-base leading-[1.85] text-white/88 rounded-xl border border-lime-300/20 bg-black/40 p-4">
+                    {result.reading}
+                  </p>
+                  <div className="mt-4 flex items-center gap-3">
+                    <Link
+                      href="/auth/register"
+                      className="flex items-center gap-2 rounded-xl bg-lime-300 px-5 py-3 text-sm font-black text-black hover:bg-lime-200 transition active:scale-95"
+                    >
+                      Lectura completa gratis <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <p className="text-xs text-white/35">Sin tarjeta · En 2 minutos</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </FadeUp>
+      </div>
+    </section>
   );
 }
 

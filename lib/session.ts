@@ -14,6 +14,7 @@ export type LocalZodiSession = {
   email?: string;
   uid?: string;
   loginAt?: number;
+  trialStartedAt?: number;
   astralProfile?: AstralProfile;
   onboardingData?: OnboardingData;
 };
@@ -174,12 +175,14 @@ export function completeLocalOnboarding(data: OnboardingData, astralProfile: Ast
 
   const currentSession = getLocalSession();
 
+  const existing = getLocalSession();
   setLocalSession({
     isAuthenticated: true,
     onboardingCompleted: true,
     displayName: data.displayName,
     onboardingData: data,
-    astralProfile
+    astralProfile,
+    trialStartedAt: existing.trialStartedAt ?? Date.now(),
   });
 
   if (currentSession.uid?.startsWith("local_")) {

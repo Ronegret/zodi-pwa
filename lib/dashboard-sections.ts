@@ -344,13 +344,13 @@ export const dashboardSections: DashboardSection[] = [
   ),
   section(
     "ranking", "Rituales Energéticos", "Tu energía, tus reglas",
-    "Limpia, protege y activa tu energía con rituales simbólicos diarios. ZODI te dice cuál necesitas hoy y por qué.",
+    "Ritual personalizado para hoy según tu signo y el tránsito planetario del día.",
     "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Rituales-energeticos.webp",
     Trophy, "crystals",
-    "Genera un ritual energético personalizado para hoy: tipo de ritual (limpieza, protección, manifestación o activación), pasos concretos, cristal o elemento sugerido, y una intención clara. Usa mi perfil astral.",
-    ["Limpieza", "Protección", "Manifestación", "Activación", "Cristales"],
-    "Ver mis rituales",
-    "Los rituales son acciones simbólicas con intención. No necesitan ser complicados: encender una vela con una intención clara, escribir algo y quemarlo, ducharte visualizando que limpias energía pesada... La clave no es el ritual en sí, es el momento de pausa consciente que crea. ZODI sugiere el más apropiado para tu perfil hoy."
+    `Hoy es [FECHA_HOY] y el tránsito principal es [TRANSITO_HOY]. Genera un ritual energético personalizado para hoy usando ESE tránsito + el perfil astral del usuario. Incluye: 1) Tipo de ritual (limpieza/protección/manifestación/activación) con justificación del tránsito. 2) 3 pasos concretos y realizables en 10 minutos. 3) Elemento o cristal sugerido y por qué. 4) Una intención específica para recitar. 5) Señal de que funcionó (qué notar las próximas 24h). Sé concreto, no genérico.`,
+    ["Tránsito", "Limpieza", "Protección", "Manifestación", "Intención"],
+    "Ver mi ritual de hoy",
+    "Los rituales son acciones simbólicas con intención. ZODI adapta el ritual al tránsito planetario del día y a tu signo natal: no es lo mismo hacer un ritual de limpieza en Luna llena que en cuarto menguante. Pasos concretos, sin misticismo vacío."
   ),
   section(
     "puntos", "Puntos y niveles", "Progreso visible",
@@ -403,14 +403,14 @@ export const dashboardSections: DashboardSection[] = [
     "Una selección personal de las lecturas que más han resonado. Diferente de 'guardados' en que aquí solo pones lo que de verdad quieres releer. Las frases que dieron exactamente donde debían. Los consejos que sigues sin querer admitir que los seguiste."
   ),
   section(
-    "predicciones", "Predicciones", "Más personal",
-    "Mensajes más profundos según tu perfil, tus temas favoritos y lo que vienes consultando.",
+    "predicciones", "Predicciones", "Con fechas reales",
+    "3 predicciones concretas para los próximos 90 días. Con mes, área de vida y consejo de acción.",
     "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Prediccion-del-dia.webp",
     Sparkles, "assistant",
-    "Genera una predicción personalizada por amor, trabajo, dinero y energía.",
-    ["Amor", "Trabajo", "Dinero", "Energía", "Siguiente paso"],
-    "Ver predicciones",
-    "Predicciones personalizadas basadas en tu perfil astral completo: signo solar, Luna, Ascendente, año numerológico y los temas que más consultas en ZODI. Cuanto más completo está tu perfil, más específicas y útiles son estas lecturas."
+    `Genera EXACTAMENTE 3 predicciones concretas para los próximos 90 días. Formato para cada una: ÁREA (Amor/Trabajo/Dinero/Salud/Oportunidad) | FECHA APROXIMADA (mes y quincena, ej: "segunda semana de julio") | DESCRIPCIÓN concreta de qué esperar | CONSEJO de acción específico. Sé preciso, no genérico. Nada de "las energías fluirán". Di qué pasará y cuándo.`,
+    ["Amor", "Trabajo", "Dinero", "Fechas", "Consejo"],
+    "Ver mis predicciones",
+    "Predicciones con fechas reales: no 'las energías fluyen', sino qué esperar y cuándo. Basadas en tu perfil astral completo y los ciclos planetarios de los próximos 90 días. Cuanto más completo esté tu perfil, más precisas son."
   ),
   section(
     "historial", "Historial", "Tu línea de señales",

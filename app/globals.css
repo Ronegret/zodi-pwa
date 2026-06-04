@@ -854,6 +854,53 @@ nav[style*="translateZ"] {
    Alternativa más agresiva y de alto contraste al modo oscuro base.
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════════════════
+   TEMA CLARO
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  color-scheme: light;
+  --nav-bg: rgb(242, 242, 238);
+  --sidebar-bg: linear-gradient(180deg, rgb(238,238,234) 0%, rgb(245,245,240) 100%);
+}
+[data-theme="light"] body {
+  background: #f5f5f0;
+  color: #0a0a14;
+}
+[data-theme="light"] .glass-panel {
+  background: rgba(255,255,255,0.82);
+  border-color: rgba(0,0,0,0.08);
+  backdrop-filter: blur(8px);
+}
+[data-theme="light"] .neon-border::before { display: none; }
+[data-theme="light"] .zodi-kicker { color: #4f1eff; }
+[data-theme="light"] .glitch { color: #0a0a14; }
+[data-theme="light"] .text-white\/70,
+[data-theme="light"] .text-white\/75,
+[data-theme="light"] .text-white\/80,
+[data-theme="light"] .text-white\/88,
+[data-theme="light"] .text-white\/90,
+[data-theme="light"] .text-white\/95 { color: rgba(10,10,20,0.72); }
+[data-theme="light"] .text-white\/40,
+[data-theme="light"] .text-white\/50,
+[data-theme="light"] .text-white\/55 { color: rgba(10,10,20,0.45); }
+[data-theme="light"] .text-white { color: #0a0a14; }
+[data-theme="light"] .bg-black\/40,
+[data-theme="light"] .bg-black\/45,
+[data-theme="light"] .bg-black\/60 { background: rgba(0,0,0,0.04); }
+[data-theme="light"] .border-white\/10 { border-color: rgba(0,0,0,0.08); }
+[data-theme="light"] .border-white\/15 { border-color: rgba(0,0,0,0.12); }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
+[data-theme="light"] ::selection { background: rgba(184,255,23,0.4); color: #0a0a14; }
+[data-theme="light"] .dashboard-bg { opacity: 0.03 !important; }
+[data-theme="light"] input, [data-theme="light"] textarea {
+  color: #0a0a14;
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+}
+[data-theme="light"] input::placeholder, [data-theme="light"] textarea::placeholder {
+  color: rgba(0,0,0,0.3);
+}
+
 [data-theme="neon"] {
   color-scheme: dark;
 

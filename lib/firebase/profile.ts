@@ -40,6 +40,11 @@ export async function saveOnboardingProfile(uid: string, data: OnboardingData, a
   // Generate a unique referral code based on UID
   const referralCode = uid.substring(0, 8).toUpperCase();
 
+  // Trial de 7 días — solo se activa si el usuario no tiene ya uno asignado
+  const existingDoc = await getDoc(doc(db, "users", uid));
+  const existingTrialEnd = existingDoc.exists() ? existingDoc.data()?.trialEndsAt : null;
+  const trialEndsAt = existingTrialEnd ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
   await Promise.all([
     setDoc(doc(db, "users", uid), {
       displayName: data.displayName || null,
@@ -51,16 +56,16 @@ export async function saveOnboardingProfile(uid: string, data: OnboardingData, a
       readingTone: data.readingTone || "directo",
       favoriteTopics: data.favoriteTopics ?? [],
       notificationPreferences: data.notificationPreferences ?? [],
-      // Guardar datos clave también en users como respaldo (permite recuperar si astralProfiles falla)
       birthDate: data.birthDate || null,
       birthTime: data.birthTime || null,
       birthCity: data.birthCity || null,
       birthCountry: data.birthCountry || null,
       currentCity: data.currentCity || null,
       currentCountry: data.currentCountry || null,
-      // sunSign en users permite búsquedas de compatibilidad sin leer astralProfiles
       sunSign: astralProfile.sunSign || null,
       referralCode,
+      trialEndsAt,
+      plan: existingDoc.exists() && existingDoc.data()?.plan ? existingDoc.data().plan : "free",
       updatedAt: serverTimestamp()
     }, { merge: true }),
     setDoc(doc(db, "astralProfiles", uid), {

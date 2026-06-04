@@ -193,6 +193,20 @@ export function OnboardingFlow() {
       if (getGems().total < 300) addGems(300 - getGems().total);
     } catch { /* ignorar */ }
 
+    // Paso 4: Email de bienvenida — fire & forget, nunca bloquea
+    const welcomeSession = getLocalSession();
+    if (welcomeSession.email) {
+      fetch("/api/email/welcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: welcomeSession.email,
+          displayName: data.displayName,
+          sunSign: profile.sunSign,
+        }),
+      }).catch(() => { /* ignorar */ });
+    }
+
     router.push("/dashboard");
   }
 

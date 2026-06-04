@@ -5,6 +5,7 @@ import { AnimatedShell } from "@/components/AnimatedShell";
 import { BottomNav, Sidebar } from "@/components/dashboard/Navigation";
 import { DashboardGate } from "@/components/dashboard/DashboardGate";
 import { WelcomeSplash } from "@/components/dashboard/WelcomeSplash";
+import { AchievementToast } from "@/components/dashboard/SectionSpecificUI";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -34,6 +35,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
           </AnimatedShell>
           <BottomNav />
+          <AchievementToast />
         </WelcomeSplash>
       </DashboardGate>
     </div>

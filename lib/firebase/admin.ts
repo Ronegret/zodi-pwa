@@ -46,3 +46,8 @@ export function getFirebaseAuth() {
   if (!initFirebaseAdmin()) return null;
   return admin.auth();
 }
+
+export function getFirebaseMessaging() {
+  if (!initFirebaseAdmin()) return null;
+  return admin.messaging();
+}

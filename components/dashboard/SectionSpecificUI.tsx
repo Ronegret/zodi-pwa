@@ -17,7 +17,7 @@ import type { DashboardSection } from "@/lib/dashboard-sections";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
 import { AmigosSectionUI } from "@/components/dashboard/AmigosSectionUI";
 import {
-  addXp, updateStreak, XP_PER_ACTION, getGems, getXpData, getStreak,
+  addXp, updateStreak, XP_PER_ACTION, getGems, getXpData, getStreak, spendGems,
   getLevel, getLevelTitle, xpToNextLevel,
 } from "@/lib/gamification";
 import { InstallPwaCard } from "@/components/pwa/PwaBoot";
@@ -233,6 +233,8 @@ function MarkdownText({ text }: { text: string }) {
 function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: string; loading: boolean; sectionTitle?: string }) {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [shareResult, setShareResult] = useState<"shared" | "downloaded" | null>(null);
   const [xpGained, setXpGained] = useState<number | null>(null);
   const awardedRef = useRef(false);
 
@@ -276,22 +278,34 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
   }
 
   async function share() {
-    const shareText = `Mi lectura ZODI — ${sectionTitle}:\n\n${reply.slice(0, 800)}${reply.length > 800 ? "..." : ""}\n\n🔮 zodi.aibueno.es`;
-    if (typeof navigator !== "undefined" && "share" in navigator) {
-      try {
-        await navigator.share({
-          title: `Mi lectura ZODI: ${sectionTitle}`,
-          text: shareText,
-        });
-        return;
-      } catch {
-        // El usuario canceló o no disponible — fallback a copiar
+    if (sharing) return;
+    setSharing(true);
+    setShareResult(null);
+    try {
+      const session = getLocalSession();
+      const { shareReading } = await import("@/lib/shareCard");
+      const { calculateSunSign } = await import("@/lib/astral");
+      const zodiac =
+        session.astralProfile?.sunSign ||
+        (session.onboardingData?.birthDate ? calculateSunSign(session.onboardingData.birthDate) : "");
+      const result = await shareReading({
+        sectionTitle,
+        reading: reply,
+        zodiac: zodiac || undefined,
+        displayName: session.displayName ?? session.onboardingData?.displayName,
+      });
+      if (result === "shared" || result === "downloaded") {
+        setShareResult(result);
+        setTimeout(() => setShareResult(null), 3000);
+      } else {
+        const shareText = `Mi lectura ZODI — ${sectionTitle}:\n\n${reply.slice(0, 500)}\n\n🔮 zodi.aibueno.es`;
+        navigator.clipboard?.writeText(shareText);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       }
+    } finally {
+      setSharing(false);
     }
-    // Fallback: copiar al portapapeles
-    navigator.clipboard.writeText(shareText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }
 
   if (loading) return (
@@ -331,9 +345,22 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
         </button>
         <button
           onClick={share}
-          className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-2 text-xs font-bold text-white/55 transition hover:text-white/80"
+          disabled={sharing}
+          className={`flex items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-bold transition ${
+            shareResult
+              ? "border-lime-300/50 bg-lime-300/10 text-lime-300"
+              : "border-white/10 text-white/55 hover:text-white/80"
+          }`}
         >
-          <Share2 className="h-3 w-3" /> Compartir
+          {sharing ? (
+            <><div className="h-3 w-3 animate-spin rounded-full border-[1.5px] border-white/40 border-t-white" /> Generando...</>
+          ) : shareResult === "shared" ? (
+            <><Check className="h-3 w-3" /> Compartido</>
+          ) : shareResult === "downloaded" ? (
+            <><Check className="h-3 w-3" /> Descargado</>
+          ) : (
+            <><Share2 className="h-3 w-3" /> Compartir</>
+          )}
         </button>
       </div>
     </div>
@@ -341,31 +368,85 @@ function ReplyBox({ reply, loading, sectionTitle = "Lectura ZODI" }: { reply: st
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TONE SELECTOR
+// TONE SELECTOR — con soft gate de 20 gemas para brutal/sarcástico
 // ─────────────────────────────────────────────────────────────────────────────
+const PREMIUM_TONES = ["brutal", "sarcastico"];
+const TONE_GEM_COST = 20;
+
 function ToneSelector({ value, onChange }: { value: string; onChange: (t: string) => void }) {
+  const [showGate, setShowGate] = useState<string | null>(null);
   const tones = [
-    { key: "suave",    label: "Suave",    emoji: "🌙", desc: "Con cariño" },
-    { key: "directo",  label: "Directo",  emoji: "⚡", desc: "Sin rodeos" },
-    { key: "brutal",   label: "Brutal",   emoji: "🔥", desc: "Sin filtros" },
-    { key: "sarcastico", label: "Sarcástico", emoji: "💀", desc: "Con veneno" },
+    { key: "suave",      label: "Suave",      emoji: "🌙", desc: "Con cariño" },
+    { key: "directo",    label: "Directo",    emoji: "⚡", desc: "Sin rodeos" },
+    { key: "brutal",     label: "Brutal",     emoji: "🔥", desc: "Sin filtros", premium: true },
+    { key: "sarcastico", label: "Sarcástico", emoji: "💀", desc: "Con veneno",  premium: true },
   ];
+
+  function handleToneClick(key: string, isPremium?: boolean) {
+    if (isPremium && value !== key) {
+      const gems = getGems().total;
+      if (gems < TONE_GEM_COST) {
+        setShowGate(key);
+        return;
+      }
+      spendGems(TONE_GEM_COST);
+    }
+    onChange(key);
+    setShowGate(null);
+  }
+
   return (
     <div className="flex flex-wrap gap-2">
       <p className="w-full text-xs uppercase tracking-widest text-white/40 mb-1">Tono de respuesta</p>
       {tones.map(t => (
         <button
           key={t.key}
-          onClick={() => onChange(t.key)}
-          className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-bold transition ${
+          onClick={() => handleToneClick(t.key, (t as any).premium)}
+          className={`relative flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-bold transition ${
             value === t.key
               ? "bg-lime-300 text-black"
               : "border border-white/10 text-white/60 hover:border-lime-300/40 hover:text-lime-200"
           }`}
         >
           {t.emoji} {t.label}
+          {(t as any).premium && value !== t.key && (
+            <span className="ml-0.5 text-[9px] text-fuchsia-400 font-black">💎{TONE_GEM_COST}</span>
+          )}
         </button>
       ))}
+
+      {/* Gate modal */}
+      <AnimatePresence>
+        {showGate && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            className="w-full mt-1 rounded-xl border border-fuchsia-400/30 bg-fuchsia-900/30 p-3"
+          >
+            <p className="text-xs font-black text-fuchsia-200 mb-1">
+              Tono {showGate} requiere {TONE_GEM_COST} gemas 💎
+            </p>
+            <p className="text-[11px] text-white/50 mb-3">
+              Tienes {getGems().total} gemas. Consigue más en la tienda.
+            </p>
+            <div className="flex gap-2">
+              <a
+                href="/dashboard/premium"
+                className="rounded-lg bg-fuchsia-400 px-3 py-1.5 text-xs font-black text-black hover:bg-fuchsia-300 transition"
+              >
+                Conseguir gemas
+              </a>
+              <button
+                onClick={() => setShowGate(null)}
+                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-bold text-white/50 hover:text-white transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -2421,6 +2502,29 @@ function PerfilUI() {
         </div>
 
         <ProfileSaveBtn onClick={saveProfile} saving={saving} saved={saved} />
+
+        {/* Código de referido */}
+        {session.uid && (
+          <div className="mt-4 rounded-xl border border-violet-400/20 bg-violet-500/06 p-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-violet-300/70 mb-2">Código de referido</p>
+            <div className="flex items-center gap-2">
+              <span className="flex-1 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm font-black text-violet-200 font-mono tracking-widest">
+                {session.uid.slice(0, 8).toUpperCase()}
+              </span>
+              <button
+                onClick={() => {
+                  navigator.clipboard?.writeText(
+                    `Únete a ZODI con mi código ${session.uid!.slice(0, 8).toUpperCase()} y consigue 50 gemas gratis 🔮 https://zodi.aibueno.es/auth/register`
+                  );
+                }}
+                className="rounded-lg border border-violet-400/25 bg-violet-500/10 px-3 py-2 text-xs font-bold text-violet-200 hover:bg-violet-500/20 transition whitespace-nowrap"
+              >
+                Copiar enlace
+              </button>
+            </div>
+            <p className="mt-2 text-[10px] text-white/35">Gana 100 gemas por cada amigo que se una con tu código.</p>
+          </div>
+        )}
       </motion.div>
 
       {/* ── Datos de nacimiento ── */}
@@ -2801,9 +2905,42 @@ function PerfilUI() {
 // ─────────────────────────────────────────────────────────────────────────────
 function CartaNatalUI({ section }: { section: DashboardSection }) {
   const { reply, loading, consult, session, length, setLength } = useConsult(section);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const od = session.onboardingData;
   // Si no hay astralProfile guardado pero tenemos birthDate, calculamos al vuelo
   const ap = session.astralProfile ?? (od?.birthDate ? generateAstralProfile(od) : null);
+
+  async function downloadPdf() {
+    if (!ap || !od) return;
+    setPdfLoading(true);
+    try {
+      // Generar el horóscopo para el PDF
+      let horoscopeText = ap.summary ?? `${ap.sunSign} con Luna en ${ap.moonSign} y Ascendente ${ap.ascendant}. Una carta con capas.`;
+      if (reply) {
+        // Si ya hay una lectura generada, usarla (truncada)
+        horoscopeText = reply.replace(/\*\*(.*?)\*\*/g, "$1").replace(/#{1,3}\s/g, "").slice(0, 600);
+      }
+
+      const { generateNatalChartPdf } = await import("@/lib/natalChartPdf");
+      await generateNatalChartPdf({
+        displayName:    session.displayName ?? od.displayName ?? "Viajero ZODI",
+        sunSign:        ap.sunSign ?? "",
+        moonSign:       ap.moonSign ?? "",
+        ascendant:      ap.ascendant ?? "",
+        lifePathNumber: ap.lifePathNumber ?? 0,
+        chineseZodiac:  ap.chineseZodiac ?? "",
+        mayanSign:      ap.mayanSign ?? "",
+        birthDate:      od.birthDate ?? "",
+        birthCity:      od.birthCity ?? "",
+        birthCountry:   od.birthCountry ?? "",
+        horoscopeText,
+      });
+    } catch (e) {
+      console.error("[ZODI PDF]", e);
+    } finally {
+      setPdfLoading(false);
+    }
+  }
 
   const planets = ap
     ? [
@@ -2860,14 +2997,24 @@ function CartaNatalUI({ section }: { section: DashboardSection }) {
           )}
 
           <LengthSelector value={length} onChange={setLength} />
-          <button
-            onClick={generateReading}
-            disabled={loading}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-lime-300 py-3 font-black text-black transition hover:bg-lime-200 disabled:opacity-60 sm:w-auto sm:px-8"
-          >
-            <Sparkles className="h-4 w-4" />
-            {loading ? "Leyendo tu carta natal..." : "Generar lectura completa"}
-          </button>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              onClick={generateReading}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 rounded-xl bg-lime-300 px-6 py-3 font-black text-black transition hover:bg-lime-200 disabled:opacity-60 active:scale-95"
+            >
+              <Sparkles className="h-4 w-4" />
+              {loading ? "Leyendo tu carta natal..." : "Generar lectura completa"}
+            </button>
+            <button
+              onClick={downloadPdf}
+              disabled={pdfLoading}
+              className="flex items-center gap-2 rounded-xl border border-violet-400/30 bg-violet-500/10 px-5 py-3 text-sm font-black text-violet-200 transition hover:bg-violet-500/20 disabled:opacity-50 active:scale-95"
+            >
+              <NotebookPen className="h-4 w-4" />
+              {pdfLoading ? "Generando..." : "Descargar carta PDF"}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="glass-panel rounded-md p-8 text-center">
@@ -3159,13 +3306,23 @@ function HistorialUI() {
   const [readings, setReadings] = useState<SavedReading[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>("Todas");
+  const [streak, setStreakData] = useState({ count: 0, lastDate: "" });
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem("zodi.readings");
       if (raw) setReadings(JSON.parse(raw));
+      setStreakData(getStreak());
     } catch { /* ignore */ }
   }, []);
+
+  // Stats calculadas del historial
+  const topSection = (() => {
+    if (readings.length === 0) return null;
+    const counts: Record<string, number> = {};
+    readings.forEach(r => { counts[r.section] = (counts[r.section] ?? 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  })();
 
   function deleteReading(id: number) {
     const updated = readings.filter(r => r.id !== id);
@@ -3208,6 +3365,21 @@ function HistorialUI() {
 
   return (
     <div className="grid gap-5">
+      {/* ── Stats de evolución ── */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Lecturas", value: readings.length, emoji: "📜", color: "text-lime-300" },
+          { label: "Racha actual", value: `${streak.count}d`, emoji: "🔥", color: "text-orange-300" },
+          { label: "Más consultado", value: topSection ? topSection[0].split(" ")[0] : "—", emoji: "🏆", color: "text-violet-300" },
+        ].map(stat => (
+          <div key={stat.label} className="glass-panel rounded-2xl p-3 text-center">
+            <p className="text-xl mb-0.5">{stat.emoji}</p>
+            <p className={`text-lg font-black ${stat.color} leading-tight`}>{stat.value}</p>
+            <p className="text-[10px] text-white/40 mt-0.5">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Filters */}
       <div className="glass-panel rounded-md p-4">
         <div className="flex items-center justify-between mb-3">
@@ -3290,18 +3462,29 @@ function HistorialUI() {
 // 14. LOGROS UI
 // ─────────────────────────────────────────────────────────────────────────────
 const ACHIEVEMENTS = [
-  { id: "first",    emoji: "🔮", title: "Primera señal",      desc: "Hiciste tu primera consulta en ZODI",          check: (xp: number) => xp >= 10,   next: "Haz tu primera consulta" },
-  { id: "xp100",   emoji: "⭐", title: "100 puntos de luz",  desc: "Acumulaste 100 XP",                             check: (xp: number) => xp >= 100,  next: "100 XP en total" },
-  { id: "level2",  emoji: "🌙", title: "Lector de señales",  desc: "Alcanzaste el nivel 2",                        check: (xp: number) => xp >= 150,  next: "150 XP" },
-  { id: "streak3", emoji: "🔥", title: "Racha de 3 días",    desc: "3 días seguidos consultando el cosmos",         check: (xp: number, s: number) => s >= 3,  next: "Consulta 3 días seguidos", streak: true },
-  { id: "xp500",   emoji: "💎", title: "Medio camino",       desc: "500 XP acumulados",                            check: (xp: number) => xp >= 500,  next: "500 XP en total" },
-  { id: "level3",  emoji: "🌟", title: "Buscador astral",    desc: "Nivel 3 desbloqueado",                         check: (xp: number) => xp >= 350,  next: "350 XP" },
-  { id: "streak7", emoji: "💥", title: "Racha semanal",      desc: "7 días seguidos sin fallar",                   check: (xp: number, s: number) => s >= 7,  next: "7 días seguidos", streak: true },
-  { id: "xp1000",  emoji: "🏆", title: "Mil puntos de luz",  desc: "1.000 XP — ya eres de los nuestros",          check: (xp: number) => xp >= 1000, next: "1000 XP" },
-  { id: "level5",  emoji: "🔱", title: "Custodio de Runas",  desc: "Nivel 5 — estás en el top de usuarios ZODI",  check: (xp: number) => xp >= 2000, next: "2000 XP" },
-  { id: "streak30",emoji: "🌈", title: "Constancia astral",  desc: "30 días seguidos. Esto es dedicación real.",   check: (xp: number, s: number) => s >= 30, next: "30 días seguidos", streak: true },
-  { id: "xp5000",  emoji: "🌌", title: "Navegante del cosmos",desc: "5.000 XP — leyenda en camino",               check: (xp: number) => xp >= 5000, next: "5000 XP" },
-  { id: "level10", emoji: "⚡", title: "Arcana Hacker",      desc: "Nivel 10. El 1% de usuarios ZODI.",            check: (xp: number) => xp >= 14000,next: "14000 XP" },
+  // Primeras consultas
+  { id: "first",      emoji: "🔮", title: "Primera señal",        desc: "Hiciste tu primera consulta en ZODI",                check: (xp: number) => xp >= 10,   next: "Haz tu primera consulta" },
+  { id: "tarot1",     emoji: "🃏", title: "Primer tarot",         desc: "Tiraste las cartas por primera vez",                 check: (xp: number) => xp >= 80,   next: "80 XP (haz una tirada)" },
+  { id: "xp100",      emoji: "⭐", title: "100 puntos de luz",    desc: "Acumulaste 100 XP",                                  check: (xp: number) => xp >= 100,  next: "100 XP en total" },
+  { id: "level2",     emoji: "🌙", title: "Lector de señales",    desc: "Alcanzaste el nivel 2",                              check: (xp: number) => xp >= 150,  next: "150 XP" },
+  { id: "streak3",    emoji: "🔥", title: "Racha de 3 días",      desc: "3 días seguidos consultando el cosmos",              check: (xp: number, s: number) => s >= 3,  next: "Consulta 3 días seguidos", streak: true },
+  { id: "compat1",    emoji: "💫", title: "Química detectada",    desc: "Hiciste tu primer análisis de compatibilidad",       check: (xp: number) => xp >= 250,  next: "250 XP" },
+  { id: "xp500",      emoji: "💎", title: "Medio camino",         desc: "500 XP acumulados",                                  check: (xp: number) => xp >= 500,  next: "500 XP en total" },
+  { id: "level3",     emoji: "🌟", title: "Buscador astral",      desc: "Nivel 3 desbloqueado",                               check: (xp: number) => xp >= 350,  next: "350 XP" },
+  { id: "streak7",    emoji: "💥", title: "Racha semanal",        desc: "7 días seguidos sin fallar",                         check: (xp: number, s: number) => s >= 7,  next: "7 días seguidos", streak: true },
+  { id: "natal1",     emoji: "🗺️",  title: "Mapa descubierto",    desc: "Consultaste tu carta natal completa",                check: (xp: number) => xp >= 600,  next: "600 XP" },
+  { id: "xp1000",     emoji: "🏆", title: "Mil puntos de luz",    desc: "1.000 XP — ya eres de los nuestros",                check: (xp: number) => xp >= 1000, next: "1000 XP" },
+  { id: "runas1",     emoji: "ᚱ",  title: "Las runas hablan",     desc: "Consultaste las runas vikingas por primera vez",     check: (xp: number) => xp >= 900,  next: "900 XP" },
+  { id: "level5",     emoji: "🔱", title: "Custodio de Runas",    desc: "Nivel 5 — top de usuarios ZODI",                    check: (xp: number) => xp >= 2000, next: "2000 XP" },
+  { id: "xp2000",     emoji: "🌠", title: "Ascenso cósmico",      desc: "2.000 XP — el cosmos te conoce",                    check: (xp: number) => xp >= 2000, next: "2000 XP" },
+  { id: "streak14",   emoji: "🌕", title: "Quincena astral",      desc: "14 días seguidos. Hábito real.",                     check: (xp: number, s: number) => s >= 14, next: "14 días seguidos", streak: true },
+  { id: "numerol1",   emoji: "🔢", title: "Los números no mienten",desc: "Hiciste tu primera lectura de numerología",         check: (xp: number) => xp >= 1100, next: "1100 XP" },
+  { id: "streak30",   emoji: "🌈", title: "Constancia astral",    desc: "30 días seguidos. Esto es dedicación real.",         check: (xp: number, s: number) => s >= 30, next: "30 días seguidos", streak: true },
+  { id: "roast1",     emoji: "💀", title: "Aguantó el roast",     desc: "Pediste el Roast Horoscope y sobreviviste",          check: (xp: number) => xp >= 1500, next: "1500 XP" },
+  { id: "xp5000",     emoji: "🌌", title: "Navegante del cosmos", desc: "5.000 XP — leyenda en camino",                      check: (xp: number) => xp >= 5000, next: "5000 XP" },
+  { id: "suenos1",    emoji: "🌙", title: "El soñador consciente",desc: "Interpretaste tu primer sueño con ZODI",             check: (xp: number) => xp >= 1600, next: "1600 XP" },
+  { id: "xp10000",    emoji: "👑", title: "Corona del cosmos",    desc: "10.000 XP — llevas tiempo aquí",                    check: (xp: number) => xp >= 10000,next: "10000 XP" },
+  { id: "level10",    emoji: "⚡", title: "Arcana Hacker",        desc: "Nivel 10. El 1% de usuarios ZODI.",                 check: (xp: number) => xp >= 14000,next: "14000 XP" },
 ];
 
 function LogrosUI() {
@@ -3492,6 +3675,76 @@ function RachasUI() {
 // ─────────────────────────────────────────────────────────────────────────────
 // 16. PUNTOS UI
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// RITUALES — personalizados con tránsito del día
+// ─────────────────────────────────────────────────────────────────────────────
+function RitualesUI({ section }: { section: DashboardSection }) {
+  const { reply, loading, consult, length, setLength, tone, setTone } = useConsult(section);
+  const [mounted, setMounted] = useState(false);
+  const [ritualType, setRitualType] = useState<"limpieza" | "proteccion" | "manifestacion" | "activacion">("limpieza");
+
+  useEffect(() => { setMounted(true); }, []);
+
+  const ctx = mounted ? getTodaysAstralContext() : null;
+
+  const RITUAL_TYPES = [
+    { key: "limpieza" as const,       emoji: "🌊", label: "Limpieza",       desc: "Liberar lo que pesa" },
+    { key: "proteccion" as const,     emoji: "🛡️", label: "Protección",     desc: "Blindar tu energía" },
+    { key: "manifestacion" as const,  emoji: "✨", label: "Manifestación",  desc: "Atraer lo que quieres" },
+    { key: "activacion" as const,     emoji: "⚡", label: "Activación",     desc: "Desbloquear tu potencial" },
+  ];
+
+  async function generateRitual() {
+    if (!ctx) return;
+    const transitInfo = `Hoy es ${ctx.dateReadable}. Fase lunar: ${ctx.moonPhase}. Sol en ${ctx.sunTransit}. Júpiter en ${ctx.jupiterSign}. Vibración del día: ${ctx.dayVibration}.`;
+    await consult(`${transitInfo}\n\nTipo de ritual solicitado: ${ritualType}. ${section.prompt?.replace("[FECHA_HOY]", ctx.dateReadable).replace("[TRANSITO_HOY]", ctx.moonPhase) ?? ""}`);
+  }
+
+  return (
+    <div className="grid gap-5">
+      <div className="glass-panel rounded-2xl p-5">
+        <h2 className="text-xl font-black mb-1">Tu ritual de hoy</h2>
+        {ctx && (
+          <p className="text-xs text-white/40 mb-4">
+            {ctx.moonPhase} · Sol en {ctx.sunTransit} · {ctx.dateReadable}
+          </p>
+        )}
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+          {RITUAL_TYPES.map(r => (
+            <button
+              key={r.key}
+              onClick={() => setRitualType(r.key)}
+              className={`rounded-xl border py-3 px-2 text-center transition active:scale-95 ${
+                ritualType === r.key
+                  ? "border-lime-300 bg-lime-300/10 shadow-[0_0_12px_rgba(184,255,23,0.15)]"
+                  : "border-white/10 hover:border-lime-300/25"
+              }`}
+            >
+              <span className="block text-2xl mb-1">{r.emoji}</span>
+              <p className="text-xs font-black text-white">{r.label}</p>
+              <p className="text-[10px] text-white/40 mt-0.5">{r.desc}</p>
+            </button>
+          ))}
+        </div>
+
+        <ToneSelector value={tone} onChange={setTone} />
+        <div className="mt-3">
+          <LengthSelector value={length} onChange={setLength} />
+        </div>
+        <button
+          onClick={generateRitual}
+          disabled={loading || !mounted}
+          className="mt-4 w-full rounded-xl bg-lime-300 py-3.5 font-black text-black transition hover:bg-lime-200 disabled:opacity-50 active:scale-95"
+        >
+          {loading ? "Los planetas están trabajando..." : `Generar ritual de ${ritualType}`}
+        </button>
+      </div>
+      <ReplyBox reply={reply} loading={loading} sectionTitle={section.title} />
+    </div>
+  );
+}
+
 function PuntosUI() {
   const [xpData, setXpData]   = useState({ total: 0, today: 0, lastDate: "" });
   const [gems, setGems]        = useState(0);
@@ -3628,9 +3881,71 @@ export function SectionSpecificUI({ section }: { section: DashboardSection }) {
     case "rachas":
       return <RachasUI />;
     case "puntos":
-    case "ranking":
       return <PuntosUI />;
+    case "ranking":
+      return <RitualesUI section={section} />;
     default:
       return <GenericConsultUI section={section} />;
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ACHIEVEMENT TOAST — notificación animada al desbloquear logro
+// Exportado para usar en el layout del dashboard
+// ─────────────────────────────────────────────────────────────────────────────
+const ACHIEV_STORAGE = "zodi.achievements_seen";
+
+export function AchievementToast() {
+  const [toast, setToast] = useState<{ emoji: string; title: string; desc: string } | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    function checkAchievements() {
+      try {
+        const xp = getXpData().total;
+        const streak = getStreak().count;
+        const seen: string[] = JSON.parse(localStorage.getItem(ACHIEV_STORAGE) ?? "[]");
+        const newUnlock = ACHIEVEMENTS.find(a => !seen.includes(a.id) && a.check(xp, streak));
+        if (newUnlock) {
+          seen.push(newUnlock.id);
+          localStorage.setItem(ACHIEV_STORAGE, JSON.stringify(seen));
+          setToast({ emoji: newUnlock.emoji, title: newUnlock.title, desc: newUnlock.desc });
+          timerRef.current = setTimeout(() => setToast(null), 5000);
+        }
+      } catch { /* ignore */ }
+    }
+
+    checkAchievements();
+    window.addEventListener("zodi:xp-updated", checkAchievements);
+    return () => {
+      window.removeEventListener("zodi:xp-updated", checkAchievements);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  if (!toast) return null;
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="achievement-toast"
+        initial={{ opacity: 0, y: 40, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 40, scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 320, damping: 26 }}
+        className="fixed bottom-24 inset-x-0 z-[80] flex justify-center pointer-events-none px-4"
+      >
+        <div className="flex items-center gap-3 rounded-2xl border border-lime-300/40 bg-black/90 px-5 py-3.5 shadow-[0_0_30px_rgba(184,255,23,0.2)] backdrop-blur-lg pointer-events-auto">
+          <span className="text-3xl">{toast.emoji}</span>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-lime-300/70">🏆 Logro desbloqueado</p>
+            <p className="font-black text-white leading-tight">{toast.title}</p>
+            <p className="text-xs text-white/50">{toast.desc}</p>
+          </div>
+          <button onClick={() => setToast(null)} className="ml-2 text-white/30 hover:text-white transition">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSessionProfile, getLocalSession } from "@/lib/session";
 import {
   Search, UserPlus, Users, Bell, Check, X, Loader2, Sparkles,
-  Star, HeartHandshake, UserCheck, Clock, ChevronRight,
+  Star, HeartHandshake, UserCheck, Clock, ChevronRight, MessageCircle, Send,
 } from "lucide-react";
 
 const SIGNS = [
@@ -88,6 +88,168 @@ interface SearchUser {
   avatar: string;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FRIEND CHAT PANEL — overlay deslizable desde abajo
+// ─────────────────────────────────────────────────────────────────────────────
+interface ChatMessage { id: string; fromUid: string; text: string }
+
+function FriendChatPanel({
+  friend, myUid, myAvatar, onClose,
+}: {
+  friend: FriendData; myUid: string; myAvatar: string; onClose: () => void;
+}) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputText, setInputText] = useState("");
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const chatId = [myUid, friend.uid].sort().join("_");
+
+  useEffect(() => {
+    let unsub: (() => void) | undefined;
+    (async () => {
+      const [{ collection, query, orderBy, limit, onSnapshot }, { getFirebaseDb }] = await Promise.all([
+        import("firebase/firestore"),
+        import("@/lib/firebase/client"),
+      ]);
+      const db = getFirebaseDb();
+      if (!db) return;
+      const q = query(
+        collection(db, "chats", chatId, "messages"),
+        orderBy("createdAt", "asc"),
+        limit(60),
+      );
+      unsub = onSnapshot(q, snap => {
+        setMessages(snap.docs.map(d => ({
+          id: d.id,
+          fromUid: d.data().fromUid as string,
+          text: d.data().text as string,
+        })));
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 60);
+      });
+    })();
+    return () => unsub?.();
+  }, [chatId]);
+
+  async function sendMessage() {
+    const text = inputText.trim();
+    if (!text || sending) return;
+    setSending(true);
+    setInputText("");
+    try {
+      const [{ collection, addDoc, doc, setDoc, serverTimestamp }, { getFirebaseDb }] = await Promise.all([
+        import("firebase/firestore"),
+        import("@/lib/firebase/client"),
+      ]);
+      const db = getFirebaseDb();
+      if (!db) return;
+      await setDoc(doc(db, "chats", chatId), {
+        participants: [myUid, friend.uid],
+        lastMessage: text,
+        lastMessageAt: serverTimestamp(),
+      }, { merge: true });
+      await addDoc(collection(db, "chats", chatId, "messages"), {
+        fromUid: myUid,
+        text,
+        createdAt: serverTimestamp(),
+      });
+    } catch {
+      setInputText(text);
+    } finally {
+      setSending(false);
+      inputRef.current?.focus();
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ y: "100%" }}
+      animate={{ y: 0 }}
+      exit={{ y: "100%" }}
+      transition={{ type: "spring", stiffness: 340, damping: 36 }}
+      className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl border-t border-white/10 bg-[#08080f] shadow-[0_-8px_40px_rgba(0,0,0,0.85)]"
+      style={{ maxHeight: "72vh" }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-white/08 px-4 py-3 shrink-0">
+        <img
+          src={friend.avatar}
+          alt={friend.displayName}
+          className="h-9 w-9 rounded-full border border-white/15 object-cover shrink-0"
+          onError={e => { (e.target as HTMLImageElement).src = "/zodi-art/perfil/perfil-1.webp"; }}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="truncate text-sm font-black text-white">{friend.displayName || friend.username}</p>
+          <p className="text-[10px] text-white/40">{SIGN_EMOJI[friend.sign] ?? "⭐"} {friend.sign}</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 transition hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto space-y-2 p-4 min-h-0">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center text-white/30">
+            <span className="mb-2 text-3xl">💬</span>
+            <p className="text-sm text-white/50">Primer mensaje entre vosotros.</p>
+            <p className="mt-1 text-xs">Di algo que las estrellas no se esperan.</p>
+          </div>
+        ) : (
+          messages.map(msg => {
+            const isMe = msg.fromUid === myUid;
+            return (
+              <div key={msg.id} className={`flex gap-2 items-end ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                {!isMe && (
+                  <img
+                    src={friend.avatar}
+                    alt=""
+                    className="h-6 w-6 rounded-full border border-white/10 object-cover shrink-0"
+                    onError={e => { (e.target as HTMLImageElement).src = "/zodi-art/perfil/perfil-1.webp"; }}
+                  />
+                )}
+                <div className={`max-w-[74%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
+                  isMe
+                    ? "rounded-tr-sm bg-lime-300 text-black font-medium"
+                    : "rounded-tl-sm bg-white/09 text-white/90"
+                }`}>
+                  {msg.text}
+                </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="flex gap-2 border-t border-white/08 p-3 shrink-0">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputText}
+          onChange={e => setInputText(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+          placeholder="Mensaje..."
+          className="flex-1 rounded-xl border border-white/10 bg-white/06 px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition focus:border-lime-300/40"
+          autoFocus
+        />
+        <button
+          onClick={sendMessage}
+          disabled={!inputText.trim() || sending}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-lime-300 text-black transition hover:bg-lime-200 active:scale-95 disabled:opacity-40"
+        >
+          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 export function AmigosSectionUI() {
   const [tab, setTab] = useState<Tab>("amigos");
 
@@ -116,6 +278,8 @@ export function AmigosSectionUI() {
 
   // Active friend detail (expanded reading)
   const [activeFriendUid, setActiveFriendUid] = useState<string | null>(null);
+  // Active chat
+  const [activeChatFriend, setActiveChatFriend] = useState<FriendData | null>(null);
   const [readings, setReadings] = useState<Record<string, string>>({});
   const [readingLoading, setReadingLoading] = useState<string | null>(null);
 
@@ -502,6 +666,15 @@ export function AmigosSectionUI() {
                                 <p className="text-sm leading-relaxed text-white/75">{readings[friend.uid]}</p>
                               </div>
                             ) : null}
+
+                            {/* Chat button */}
+                            <button
+                              onClick={e => { e.stopPropagation(); setActiveChatFriend(friend); }}
+                              className="flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/25 bg-violet-500/10 py-2.5 text-sm font-bold text-violet-200 transition hover:bg-violet-500/20 active:scale-95"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                              Enviar mensaje
+                            </button>
                           </div>
                         </motion.div>
                       )}
@@ -655,6 +828,31 @@ export function AmigosSectionUI() {
         )}
 
       </AnimatePresence>
+
+      {/* ── CHAT PANEL ── */}
+      <AnimatePresence>
+        {activeChatFriend && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="chat-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+              onClick={() => setActiveChatFriend(null)}
+            />
+            <FriendChatPanel
+              key="chat-panel"
+              friend={activeChatFriend}
+              myUid={myUid}
+              myAvatar={myAvatar}
+              onClose={() => setActiveChatFriend(null)}
+            />
+          </>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

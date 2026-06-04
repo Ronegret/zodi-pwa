@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Heart, MessageCircle, Search, SendHorizonal, Sparkles, Trash2, UserPlus, X } from "lucide-react";
 import { demoProfile } from "@/lib/data";
 import { getSessionProfile } from "@/lib/session";
@@ -96,6 +97,13 @@ export function CommunityHub() {
   const [chatText, setChatText] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("zodi.community_welcomed")) setShowWelcome(true);
+    } catch { /* ignore */ }
+  }, []);
 
   const topic = TOPICS[new Date().getDate() % TOPICS.length];
   const filtered = DEMO_USERS.filter((u) =>
@@ -179,8 +187,53 @@ export function CommunityHub() {
 
   const activeChatUserObj = DEMO_USERS.find((u) => u.username === activeChatUser);
 
+  const WELCOME_PROMPTS = [
+    `¿Qué señal del universo ignoraste esta semana y cómo te pasó la factura?`,
+    `Describe en una frase el caos de tu vida usando solo términos astrológicos.`,
+    `¿Qué tiene que pasar para que dejes de ignorar esa cosa que sabes que tienes que hacer?`,
+  ];
+  const welcomePrompt = WELCOME_PROMPTS[new Date().getDate() % WELCOME_PROMPTS.length];
+
+  function dismissWelcome(withPost?: string) {
+    try { localStorage.setItem("zodi.community_welcomed", "1"); } catch { /* ignore */ }
+    if (withPost) {
+      setPostText(withPost);
+    }
+    setShowWelcome(false);
+  }
+
   return (
     <section className="grid gap-5">
+      {/* ── Onboarding overlay — primera visita ── */}
+      {showWelcome && (
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-2xl border border-lime-300/30 bg-gradient-to-br from-lime-950/60 to-black/80 p-5 sm:p-6"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(184,255,23,0.1),transparent_65%)]" />
+          <div className="relative">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-lime-300/70 mb-2">Tu primer mensaje a la comunidad</p>
+            <p className="text-lg font-black leading-snug mb-1">Bienvenido al caos colectivo 🌌</p>
+            <p className="text-sm text-white/55 mb-4">La comunidad ZODI vive de lo que escribes. ¿Por dónde empiezas?</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => dismissWelcome(welcomePrompt)}
+                className="rounded-xl border border-lime-300/30 bg-lime-300/10 px-3 py-2 text-xs font-bold text-lime-200 transition hover:bg-lime-300/20"
+              >
+                💬 &quot;{welcomePrompt.slice(0, 50)}...&quot;
+              </button>
+              <button
+                onClick={() => dismissWelcome()}
+                className="rounded-xl border border-white/10 px-3 py-2 text-xs font-bold text-white/40 hover:text-white/70 transition"
+              >
+                Explorar primero
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Tema del día */}
       <div className="glass-panel neon-border rounded-md p-5">
         <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-lime-200/70">
