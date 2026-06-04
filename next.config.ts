@@ -18,6 +18,7 @@ const CSP = [
   "connect-src 'self' " +
     "https://firestore.googleapis.com https://identitytoolkit.googleapis.com " +
     "https://securetoken.googleapis.com wss://*.firebaseio.com " +
+    "https://firebase.googleapis.com " +
     "https://zodi-2.firebaseapp.com https://zodi-2.web.app " +
     "https://www.googleapis.com https://oauth2.googleapis.com " +
     "https://accounts.google.com https://apis.google.com " +
