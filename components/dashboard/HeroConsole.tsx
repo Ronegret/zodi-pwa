@@ -427,16 +427,28 @@ export function HeroConsole() {
               )}
             </div>
 
-            {/* ZODI character — se escala con el ancho del hero */}
-            <div className="hidden md:flex shrink-0 items-end self-stretch -mb-1 -mr-1 lg:-mb-2 lg:-mr-2">
-              <Image
-                src="/zodi-art/nuevas/4-Poses-del-personaje-ZODI/ZODI-modo-intenso.webp"
-                alt="ZODI"
-                width={200}
-                height={250}
-                className="object-contain object-bottom drop-shadow-[0_0_30px_rgba(184,255,23,0.35)] lg:w-[240px] lg:h-[300px] xl:w-[280px] xl:h-[350px]"
-              />
-            </div>
+            {/* Cartas del tarot: signo + perfil */}
+            {mounted && (
+              <div className="hidden md:flex shrink-0 items-end self-stretch gap-2.5 pb-1 -mr-1">
+                {/* Carta 1 — Signo zodiacal */}
+                <TarotCard
+                  src={sign ? `/zodi-art/nuevas/5-Signos-del-zodiaco-occidental/${sign}.webp` : null}
+                  fallbackText={sign || "?"}
+                  label={sign || "Signo"}
+                  sublabel="Tu signo solar"
+                  glowColor="rgba(184,255,23,0.55)"
+                />
+                {/* Carta 2 — Avatar de perfil */}
+                <TarotCard
+                  src={avatar !== "/icons/icon-192-v3.png" ? avatar : null}
+                  fallbackText={firstName?.[0] ?? "Z"}
+                  label={firstName || "Perfil"}
+                  sublabel={levelTitle}
+                  glowColor="rgba(139,92,246,0.55)"
+                  isAvatar
+                />
+              </div>
+            )}
           </div>
 
           {/* Energy bar for sign */}
@@ -627,6 +639,101 @@ function Metric({ label, value }: { label: string; value: string }) {
           </>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Mini carta tarot ──────────────────────────────────────────────────────────
+function TarotCard({
+  src,
+  fallbackText,
+  label,
+  sublabel,
+  glowColor,
+  isAvatar = false,
+}: {
+  src: string | null;
+  fallbackText: string;
+  label: string;
+  sublabel: string;
+  glowColor: string;
+  isAvatar?: boolean;
+}) {
+  const W = 88;   // px ancho de cada carta
+  const H = 130;  // px alto
+
+  return (
+    <div className="flex flex-col items-center gap-1.5" style={{ width: W }}>
+      {/* Marco de carta */}
+      <div
+        style={{
+          width: W,
+          height: H,
+          borderRadius: 12,
+          position: "relative",
+          overflow: "hidden",
+          border: `1.5px solid ${glowColor.replace("0.55", "0.7")}`,
+          boxShadow: `0 0 18px ${glowColor}, 0 0 40px ${glowColor.replace("0.55", "0.2")}, 0 12px 32px rgba(0,0,0,0.7)`,
+          background: "linear-gradient(170deg, #0d0d1a 0%, #06060f 100%)",
+          flexShrink: 0,
+        }}
+      >
+        {src ? (
+          <Image
+            src={src}
+            alt={label}
+            fill
+            className={`object-cover select-none ${isAvatar ? "object-center" : "object-top"}`}
+            sizes={`${W}px`}
+          />
+        ) : (
+          /* Fallback: inicial con glow */
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span
+              className="text-3xl font-black"
+              style={{ color: glowColor.replace("0.55", "0.9"), textShadow: `0 0 20px ${glowColor}` }}
+            >
+              {fallbackText}
+            </span>
+          </div>
+        )}
+
+        {/* Viñeta inferior */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.75), transparent)" }}
+        />
+
+        {/* Esquinas decorativas */}
+        {[
+          { t: 4, l: 4, r: "auto", b: "auto" },
+          { t: 4, l: "auto", r: 4, b: "auto" },
+          { t: "auto", l: 4, r: "auto", b: 4 },
+          { t: "auto", l: "auto", r: 4, b: 4 },
+        ].map((pos, i) => (
+          <svg
+            key={i}
+            viewBox="0 0 8 8"
+            width="8"
+            height="8"
+            className="absolute pointer-events-none"
+            style={{ top: pos.t, left: pos.l, right: pos.r, bottom: pos.b,
+              transform: `rotate(${i * 90}deg)` }}
+          >
+            <path d="M0,0 L5,0 M0,0 L0,5" stroke={glowColor.replace("0.55", "0.7")} strokeWidth="1" fill="none"/>
+          </svg>
+        ))}
+      </div>
+
+      {/* Etiqueta */}
+      <div className="text-center leading-tight">
+        <p className="text-[10px] font-black text-white/80 truncate" style={{ maxWidth: W }}>
+          {label}
+        </p>
+        <p className="text-[9px] text-white/35 truncate" style={{ maxWidth: W }}>
+          {sublabel}
+        </p>
+      </div>
     </div>
   );
 }
