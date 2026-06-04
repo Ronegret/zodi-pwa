@@ -107,7 +107,12 @@ export async function generateReading(params: GenerateReadingParams): Promise<Zo
     }
   }
 
-  const maxTokens = EXTENDED_KINDS.includes(params.kind) ? EXTENDED_MAX_TOKENS : DEFAULT_MAX_TOKENS;
+  // Ajustar tokens según la longitud solicitada (extraída del input si viene como hint)
+  const isBrief   = /\[LONGITUD:\s*Respuesta BREVE/i.test(params.input);
+  const isExtensa = /\[LONGITUD:\s*Respuesta EXTENSA/i.test(params.input);
+  const maxTokens = EXTENDED_KINDS.includes(params.kind)
+    ? EXTENDED_MAX_TOKENS
+    : isBrief ? 220 : isExtensa ? 800 : DEFAULT_MAX_TOKENS;
 
   const attempts = available.map((p): Promise<string> => {
     if (p === "claude" || p === "anthropic") return callClaude(promptBundle.system, promptBundle.user, maxTokens, params.kind);
