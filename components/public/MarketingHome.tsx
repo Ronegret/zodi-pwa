@@ -467,11 +467,11 @@ export function MarketingHome() {
           {/* Gradiente scroll right hint */}
           <div className="pointer-events-none absolute right-0 top-0 bottom-6 w-16 bg-gradient-to-l from-[#050507] to-transparent z-10" />
           <div className="no-scrollbar flex snap-x gap-3 sm:gap-4 overflow-x-auto pb-4" style={{ scrollPaddingLeft: "1rem" }}>
-            {["La-Red-Flag.png","El-Karma.png","La-Verdad.png","El-Destino.png","El-Ego.png","La-Mala-Idea.png","La-Venganza-Cosmica.png"].map((card, idx) => (
+            {["La-Red-Flag.webp","El-Karma.webp","La-Verdad.webp","El-Destino.webp","El-Ego.webp","La-Mala-Idea.webp","La-Venganza-Cosmica.webp"].map((card, idx) => (
               <FadeUp key={card} delay={idx * 0.07}>
                 <button
                   type="button"
-                  aria-label={`Ampliar carta ${card.replace(".png","").replaceAll("-"," ")}`}
+                  aria-label={`Ampliar carta ${card.replace(".webp","").replaceAll("-"," ")}`}
                   onClick={() => setLightbox(`/zodi-art/nuevas/8-Tarot-ZODI/${card}`)}
                   className="group relative block w-40 sm:w-52 shrink-0 snap-center overflow-hidden rounded-2xl glass-panel p-2 transition hover:border-lime-300/50 active:scale-95"
                 >
@@ -483,7 +483,7 @@ export function MarketingHome() {
                     className="h-auto w-full rounded-xl object-contain transition duration-500 group-hover:scale-[1.04]"
                   />
                   <div className="mt-2 pb-1 text-center">
-                    <p className="text-[11px] font-black text-white/50 truncate">{card.replace(".png","").replaceAll("-"," ")}</p>
+                    <p className="text-[11px] font-black text-white/50 truncate">{card.replace(".webp","").replaceAll("-"," ")}</p>
                   </div>
                 </button>
               </FadeUp>
@@ -508,8 +508,8 @@ export function MarketingHome() {
         <div className="relative">
           <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#050507] to-transparent z-10" />
           <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto pb-4">
-            {["Avatar_Aries.png","Avatar_Tauro.png","Avatar_Geminis.png","Avatar_Cancer.png","Avatar_Leo.png","Avatar_Virgo.png","Avatar_Libra.png","Avatar_Escorpio.png","Avatar_Sagitario.png","Avatar_Capricornio.png","Avatar_Acuario.png","Avatar_Piscis.png"].map((avatar, idx) => {
-              const signo = avatar.replace("Avatar_","").replace(".png","");
+            {["Avatar_Aries.webp","Avatar_Tauro.webp","Avatar_Geminis.webp","Avatar_Cancer.webp","Avatar_Leo.webp","Avatar_Virgo.webp","Avatar_Libra.webp","Avatar_Escorpio.webp","Avatar_Sagitario.webp","Avatar_Capricornio.webp","Avatar_Acuario.webp","Avatar_Piscis.webp"].map((avatar, idx) => {
+              const signo = avatar.replace("Avatar_","").replace(".webp","");
               return (
                 <FadeUp key={avatar} delay={idx * 0.04}>
                   <button

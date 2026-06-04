@@ -574,10 +574,10 @@ export function HeroConsole() {
           transition={{ delay: 0.5, duration: 0.4 }}
           className="grid grid-cols-4 gap-2"
         >
-          <Metric label="Signo" value={sign} />
-          <Metric label="Luna" value={profile.moonSign || "—"} />
-          <Metric label="Asc." value={profile.ascendant || "—"} />
-          <Metric label="Camino" value={profile.lifePathNumber ? String(profile.lifePathNumber) : "—"} />
+          <Metric label="Signo"  value={sign}                                          imageSrc={signImg(sign)} />
+          <Metric label="Luna"   value={profile.moonSign   || "—"}                    imageSrc={signImg(profile.moonSign   || "")} />
+          <Metric label="Asc."   value={profile.ascendant  || "—"}                    imageSrc={signImg(profile.ascendant  || "")} />
+          <Metric label="Camino" value={profile.lifePathNumber ? String(profile.lifePathNumber) : "—"} imageSrc={numImg(profile.lifePathNumber)} />
         </motion.div>
       )}
     </section>
@@ -592,7 +592,23 @@ const METRIC_INFO: Record<string, string> = {
   "Camino": "Tu Camino de vida — un número calculado con tu fecha de nacimiento (se suman todos los dígitos). Define tu misión vital y los temas que van a repetirse en tu historia.",
 };
 
-function Metric({ label, value }: { label: string; value: string }) {
+const SIGN_FILE: Record<string, string> = {
+  "Aries": "aries", "Tauro": "tauro", "Géminis": "geminis", "Geminis": "geminis",
+  "Cáncer": "cancer", "Cancer": "cancer", "Leo": "leo", "Virgo": "virgo",
+  "Libra": "libra", "Escorpio": "escorpio", "Sagitario": "sagitario",
+  "Capricornio": "capricornio", "Acuario": "acuario", "Piscis": "piscis",
+};
+function signImg(sign: string): string | undefined {
+  if (!sign || sign === "—") return undefined;
+  const file = SIGN_FILE[sign] ?? sign.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  return `/zodi-art/signos/${file}.webp`;
+}
+function numImg(n: number | undefined): string | undefined {
+  if (!n) return undefined;
+  return `/zodi-art/nuevas/7-Numerologia/${n}.webp`;
+}
+
+function Metric({ label, value, imageSrc }: { label: string; value: string; imageSrc?: string }) {
   const [open, setOpen] = useState(false);
   const info = METRIC_INFO[label];
 
@@ -600,17 +616,22 @@ function Metric({ label, value }: { label: string; value: string }) {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full rounded-xl border border-white/08 bg-black/40 p-2.5 sm:p-3.5 text-left transition hover:bg-black/55 active:scale-95"
+        className="w-full rounded-xl border border-white/08 bg-black/40 p-2.5 sm:p-3.5 text-left transition hover:bg-black/55 active:scale-95 overflow-hidden"
         aria-expanded={open}
         title={info}
       >
-        <div className="flex items-center justify-between gap-1 mb-0.5 sm:mb-1">
+        {imageSrc && (
+          <div className="absolute inset-0 opacity-20 pointer-events-none">
+            <Image src={imageSrc} alt="" fill className="object-cover object-center" sizes="120px" />
+          </div>
+        )}
+        <div className="relative flex items-center justify-between gap-1 mb-0.5 sm:mb-1">
           <p className="zodi-kicker text-[9px] sm:text-[10px]">{label}</p>
           {info && (
             <span className="text-[9px] font-black text-white/25 hover:text-white/50 leading-none">?</span>
           )}
         </div>
-        <p className="text-sm sm:text-base lg:text-lg font-black text-white leading-tight">{value}</p>
+        <p className="relative text-sm sm:text-base lg:text-lg font-black text-white leading-tight">{value}</p>
       </button>
 
       <AnimatePresence>
