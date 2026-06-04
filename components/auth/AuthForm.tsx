@@ -13,7 +13,7 @@ import { ArrowLeft, AtSign, CheckCircle2, Eye, EyeOff, Loader2, Lock, UserRound,
 import { getFirebaseAuth, googleProvider, isFirebaseConfigured } from "@/lib/firebase/client";
 import { getLocalSession, setLocalSession, getSavedIdentity } from "@/lib/session";
 
-export function AuthForm({ mode }: { mode: "login" | "register" }) {
+export function AuthForm({ mode, compact = false }: { mode: "login" | "register"; compact?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref");
@@ -571,16 +571,18 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const isGoogleBusy    = googleLoading;
 
   return (
-    <div className="glass-panel neon-border w-full max-w-xl rounded-md p-4 sm:p-7">
-      <Link href="/" className="mb-5 inline-flex items-center gap-2 text-sm text-white/50 hover:text-lime-300 transition group">
-        <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
-        Volver al inicio
-      </Link>
+    <div className={`glass-panel neon-border w-full max-w-xl rounded-md ${compact ? "p-3" : "p-4 sm:p-7"} ${compact ? "h-full flex flex-col" : ""}`}>
+      {!compact && (
+        <Link href="/" className="mb-5 inline-flex items-center gap-2 text-sm text-white/50 hover:text-lime-300 transition group">
+          <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
+          Volver al inicio
+        </Link>
+      )}
 
-      <p className="text-[10px] sm:text-xs uppercase tracking-[0.32em] text-lime-200/70">
+      <p className={`text-[10px] uppercase tracking-[0.32em] text-lime-200/70 ${compact ? "" : "sm:text-xs"}`}>
         {mode === "login" ? "Entrada" : "Registro"}
       </p>
-      <h1 className="mt-1 sm:mt-3 text-2xl sm:text-4xl font-black">
+      <h1 className={`font-black ${compact ? "mt-0.5 text-xl leading-tight" : "mt-1 sm:mt-3 text-2xl sm:text-4xl"}`}>
         {mode === "login" ? "Vuelve al oráculo." : "Crea tu cuenta astral."}
       </h1>
 
@@ -589,7 +591,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         type="button"
         onClick={loginWithGoogle}
         disabled={isGoogleBusy || loading}
-        className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-md border border-white/20 bg-white/5 px-4 py-3 font-bold text-white disabled:opacity-60 hover:bg-white/10 active:scale-95 transition"
+        className={`flex w-full items-center justify-center gap-2.5 rounded-md border border-white/20 bg-white/5 px-4 font-bold text-white disabled:opacity-60 hover:bg-white/10 active:scale-95 transition ${compact ? "mt-2.5 py-2 text-sm" : "mt-5 py-3"}`}
       >
         {isGoogleBusy ? (
           <Loader2 className="h-5 w-5 animate-spin shrink-0" />
@@ -604,23 +606,23 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         {isGoogleBusy ? "Conectando con Google..." : "Continuar con Google"}
       </button>
 
-      <div className="my-4 sm:my-5 flex items-center gap-3">
+      <div className={`flex items-center gap-3 ${compact ? "my-2" : "my-4 sm:my-5"}`}>
         <div className="h-px flex-1 bg-white/10" />
-        <span className="text-[10px] sm:text-xs text-white/40">o con email</span>
+        <span className="text-[10px] text-white/40">o con email</span>
         <div className="h-px flex-1 bg-white/10" />
       </div>
 
       {/* ── Formulario ── */}
       <form
         id="zodi-auth-form"
-        className="grid gap-2 sm:gap-3"
+        className={`grid ${compact ? "gap-1.5" : "gap-2 sm:gap-3"}`}
         onSubmit={(e) => { e.preventDefault(); void continueWithEmail(); }}
       >
         {mode === "register" && (
           <>
-            <Field icon={UserRound} label="Nombre" value={name} onChange={setName} type="text" name="name" autoComplete="name" placeholder="Tu nombre visible" />
-            <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3">
-              <span className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/45">Idioma</span>
+            <Field icon={UserRound} label="Nombre" value={name} onChange={setName} type="text" name="name" autoComplete="name" placeholder="Tu nombre visible" compact={compact} />
+            <label className={`block rounded-md border border-white/10 bg-black/35 ${compact ? "p-2" : "p-2 sm:p-3"}`}>
+              <span className="mb-0.5 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/45">Idioma</span>
               <select className="w-full bg-transparent text-white outline-none text-sm" defaultValue="es">
                 <option value="es" className="bg-black">Español</option>
                 <option value="en" className="bg-black">English</option>
@@ -633,8 +635,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         {/* Email con verificación en tiempo real (registro) */}
         {mode === "register" ? (
           <div>
-            <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3 cursor-text transition focus-within:border-lime-300/40">
-              <span className="mb-1 sm:mb-2 flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/45">
+            <label className={`block rounded-md border border-white/10 bg-black/35 cursor-text transition focus-within:border-lime-300/40 ${compact ? "p-2" : "p-2 sm:p-3"}`}>
+              <span className={`flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/45 ${compact ? "mb-0.5" : "mb-1 sm:mb-2"}`}>
                 <AtSign className="h-3.5 w-3.5" /> Correo
               </span>
               <div className="flex items-center gap-2">
@@ -683,7 +685,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             )}
           </div>
         ) : (
-          <Field icon={AtSign} label="Correo" value={email} onChange={setEmail} type="email" name="email" autoComplete="email" placeholder="tu@email.com" />
+          <Field icon={AtSign} label="Correo" value={email} onChange={setEmail} type="email" name="email" autoComplete="email" placeholder="tu@email.com" compact={compact} />
         )}
 
         <div className="relative">
@@ -692,6 +694,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             name={mode === "login" ? "current-password" : "new-password"}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             placeholder="Mínimo 6 caracteres"
+            compact={compact}
           />
           <button type="button" onClick={() => setShowPwd(v => !v)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
@@ -703,11 +706,11 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         {mode === "register" && (
           <Field icon={Lock} label="Confirmar contraseña" value={confirm} onChange={setConfirm}
             type={showPwd ? "text" : "password"} name="confirm-password" autoComplete="new-password"
-            placeholder="Repite tu contraseña" />
+            placeholder="Repite tu contraseña" compact={compact} />
         )}
       </form>
 
-      <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-white/62">
+      <div className={`flex flex-wrap items-center justify-between gap-2 text-xs text-white/62 ${compact ? "mt-2" : "mt-3 sm:mt-4 sm:text-sm"}`}>
         {mode === "login" ? (
           <label className="flex cursor-pointer items-center gap-2">
             <input type="checkbox" name="remember" defaultChecked />
@@ -727,7 +730,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       </div>
 
       <button type="submit" form="zodi-auth-form" disabled={loading || isGoogleBusy}
-        className="mt-4 sm:mt-5 w-full rounded-md bg-lime-300 px-4 py-2.5 sm:py-3 text-sm sm:text-base font-black text-black disabled:opacity-60 active:scale-95 transition"
+        className={`w-full rounded-md bg-lime-300 px-4 font-black text-black disabled:opacity-60 active:scale-95 transition ${compact ? "mt-2 py-2 text-sm" : "mt-4 sm:mt-5 py-2.5 sm:py-3 text-sm sm:text-base"}`}
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
@@ -740,7 +743,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       </button>
 
       {message && (
-        <div className={`mt-4 flex items-start gap-2.5 rounded-md border p-3 text-sm ${
+        <div className={`flex items-start gap-2.5 rounded-md border p-2.5 text-xs ${compact ? "mt-1.5" : "mt-4 text-sm"} ${
           msgType === "success"
             ? "border-green-400/30 bg-green-400/10 text-green-100"
             : (msgType === "error" || message.startsWith("⚠️"))
@@ -752,50 +755,53 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         </div>
       )}
 
-      <p className="mt-5 text-sm text-white/55">
+      <p className={`text-white/55 ${compact ? "mt-2 text-xs" : "mt-5 text-sm"}`}>
         {mode === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
         <Link className="text-lime-200 hover:underline" href={mode === "login" ? "/auth/register" : "/auth/login"}>
           {mode === "login" ? "Crear cuenta gratis" : "Entrar"}
         </Link>
       </p>
 
-      <div className="mt-4 pt-4 border-t border-white/08 flex flex-col items-center gap-2 text-center">
-        <Link href="/" className="text-xs text-white/35 hover:text-white/60 transition">
-          ← Volver a la web sin iniciar sesión
-        </Link>
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof window === "undefined") return;
-            if ("caches" in window) {
-              window.caches.keys()
-                .then(keys => Promise.all(keys.map(k => window.caches.delete(k))))
-                .finally(() => location.reload());
-            } else {
-              location.reload();
-            }
-          }}
-          className="text-xs text-white/20 hover:text-white/45 transition"
-        >
-          ¿Problemas para entrar? Limpiar caché
-        </button>
-      </div>
+      {!compact && (
+        <div className="mt-4 pt-4 border-t border-white/08 flex flex-col items-center gap-2 text-center">
+          <Link href="/" className="text-xs text-white/35 hover:text-white/60 transition">
+            ← Volver a la web sin iniciar sesión
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window === "undefined") return;
+              if ("caches" in window) {
+                window.caches.keys()
+                  .then(keys => Promise.all(keys.map(k => window.caches.delete(k))))
+                  .finally(() => location.reload());
+              } else {
+                location.reload();
+              }
+            }}
+            className="text-xs text-white/20 hover:text-white/45 transition"
+          >
+            ¿Problemas para entrar? Limpiar caché
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function Field({ icon: Icon, label, value, onChange, type, placeholder, name, autoComplete }: {
+function Field({ icon: Icon, label, value, onChange, type, placeholder, name, autoComplete, compact = false }: {
   icon: typeof AtSign; label: string; value: string;
   onChange: (v: string) => void; type: string;
   placeholder?: string; name: string; autoComplete: string;
+  compact?: boolean;
 }) {
   return (
-    <label className="block rounded-md border border-white/10 bg-black/35 p-2 sm:p-3 cursor-text transition focus-within:border-lime-300/40">
-      <span className="mb-1 sm:mb-2 flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/45">
-        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {label}
+    <label className={`block rounded-md border border-white/10 bg-black/35 cursor-text transition focus-within:border-lime-300/40 ${compact ? "p-2" : "p-2 sm:p-3"}`}>
+      <span className={`flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/45 ${compact ? "mb-0.5" : "mb-1 sm:mb-2"}`}>
+        <Icon className="h-3.5 w-3.5" /> {label}
       </span>
       <input
-        className="w-full bg-transparent text-white outline-none placeholder:text-white/30 text-sm sm:text-base"
+        className="w-full bg-transparent text-white outline-none placeholder:text-white/30 text-sm"
         type={type} name={name} autoComplete={autoComplete} value={value}
         placeholder={placeholder} onChange={e => onChange(e.target.value)}
       />

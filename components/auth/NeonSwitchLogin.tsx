@@ -5,15 +5,25 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AuthForm } from "@/components/auth/AuthForm";
 
-/* ─── Imagen de la carta ────────────────────────────────────────────────────
-   Guarda la imagen en: /public/zodi-art/carta-identificacion.webp
-   Relación de aspecto recomendada: 2:3 (ej. 800×1200 px)
-──────────────────────────────────────────────────────────────────────────── */
-const CARD_IMAGE = "/zodi-art/carta-identificacion.webp";
+function ImageWithFallback({ src, fallback, alt, cardW }: { src: string; fallback: string; alt: string; cardW: number }) {
+  const [imgSrc, setImgSrc] = useState(src);
+  return (
+    <Image
+      src={imgSrc}
+      alt={alt}
+      fill
+      className="object-cover object-top select-none"
+      priority
+      draggable={false}
+      sizes={`${cardW}px`}
+      onError={() => setImgSrc(fallback)}
+    />
+  );
+}
 
-/* ─── Dimensiones de la carta ───────────────────────────────────────────── */
-const CARD_W = 380;    // px — máximo ancho
-const CARD_H = 570;    // px — alto fijo (ratio 2:3 aprox)
+const CARD_IMAGE    = "/zodi-art/carta-identificacion.png";
+const CARD_FALLBACK = "/zodi-art/nuevas/2-Portada--Home/Hero-principal-portada.webp";
+const CARD_W        = 380;
 
 export function NeonSwitchLogin({ mode }: { mode: "login" | "register" }) {
   const [flipped, setFlipped] = useState(false);
@@ -21,7 +31,6 @@ export function NeonSwitchLogin({ mode }: { mode: "login" | "register" }) {
 
   useEffect(() => {
     setReady(true);
-    // Si viene de redirect de Google → mostrar formulario directamente
     if (sessionStorage.getItem("zodi.google_redirect_pending")) {
       setFlipped(true);
     }
@@ -29,15 +38,16 @@ export function NeonSwitchLogin({ mode }: { mode: "login" | "register" }) {
 
   return (
     <div className="w-full flex flex-col items-center" style={{ maxWidth: CARD_W }}>
-      {/* ── Contenedor 3D ─────────────────────────────────────────────── */}
+      {/* ── Contenedor 3D ──────────────────────────────────────────────── */}
       <div style={{ width: "100%", perspective: "1400px" }}>
 
-        {/* Wrapper del flip */}
+        {/* Wrapper del flip — altura adaptada al viewport */}
         <div
           style={{
             position: "relative",
             width: "100%",
-            height: CARD_H,
+            /* En mobile: deja espacio para la nav (~96px) + padding top/bottom (~64px) */
+            height: "min(570px, calc(100dvh - 170px))",
             transformStyle: "preserve-3d",
             transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
             transition: "transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
@@ -56,8 +66,6 @@ export function NeonSwitchLogin({ mode }: { mode: "login" | "register" }) {
           </div>
 
           {/* ── CARA TRASERA — formulario ───────────────────────────── */}
-          {/* SIEMPRE en el DOM: getRedirectResult debe ejecutarse aunque
-              la carta esté mostrando el frente */}
           <div
             style={{
               position: "absolute",
@@ -66,14 +74,15 @@ export function NeonSwitchLogin({ mode }: { mode: "login" | "register" }) {
               WebkitBackfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
               overflowY: "auto",
+              overflowX: "hidden",
             }}
           >
-            <div className="flex flex-col gap-1.5">
-              {/* Botón volver — siempre arriba del todo */}
+            <div className="flex flex-col h-full">
+              {/* Botón volver — siempre arriba */}
               <button
                 type="button"
                 onClick={() => setFlipped(false)}
-                className="self-start flex items-center gap-1.5 text-xs text-white/30 hover:text-lime-300/60 transition-colors px-1 py-1"
+                className="shrink-0 self-start flex items-center gap-1.5 text-xs text-white/30 hover:text-lime-300/60 transition-colors px-1 py-1 mb-1"
               >
                 <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
                   <path d="M8 2L4 6L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -81,7 +90,9 @@ export function NeonSwitchLogin({ mode }: { mode: "login" | "register" }) {
                 Volver a la carta
               </button>
 
-              <AuthForm mode={mode} />
+              <div className="flex-1 min-h-0">
+                <AuthForm mode={mode} compact />
+              </div>
             </div>
           </div>
         </div>
@@ -101,7 +112,6 @@ function CardFront({
   onFlip: () => void;
 }) {
   return (
-    /* Wrapper del float — solo anima el movimiento vertical */
     <motion.div
       style={{ width: "100%", height: "100%", position: "relative", cursor: "pointer" }}
       animate={ready ? { y: [0, -14, 0] } : { y: 0 }}
@@ -141,17 +151,13 @@ function CardFront({
           ].join(", "),
         }}
       >
-        <Image
+        <ImageWithFallback
           src={CARD_IMAGE}
+          fallback={CARD_FALLBACK}
           alt="LA IDENTIFICACIÓN — Haz clic para entrar"
-          fill
-          className="object-cover object-top select-none"
-          priority
-          draggable={false}
-          sizes={`${CARD_W}px`}
+          cardW={CARD_W}
         />
 
-        {/* Overlay sutil para dar depth al borde */}
         <div
           aria-hidden
           style={{
