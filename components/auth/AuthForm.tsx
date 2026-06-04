@@ -348,17 +348,19 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
-    // iOS Safari y PWA standalone no soportan popups — ir directo a redirect
-    const isIosSafari =
+    // Móvil y PWA: los popups fallan en móvil porque window.opener queda bloqueado
+    // entre pestañas → ir directo a redirect. Popup solo en desktop.
+    const isMobile =
       typeof navigator !== "undefined" &&
-      /iphone|ipad|ipod/i.test(navigator.userAgent) &&
-      !/chrome|crios|fxios/i.test(navigator.userAgent);
+      /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+        navigator.userAgent.toLowerCase()
+      );
     const isPwaStandalone =
       typeof window !== "undefined" &&
       (window.matchMedia("(display-mode: standalone)").matches ||
         (navigator as any).standalone === true);
 
-    if (!isIosSafari && !isPwaStandalone) {
+    if (!isMobile && !isPwaStandalone) {
       try {
         const result = await signInWithPopup(auth, googleProvider);
         if (result.user) {
@@ -388,7 +390,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       }
     }
 
-    // Redirect: iOS/PWA, popup bloqueado, o popup con error
+    // Redirect: móvil, PWA, popup bloqueado, o popup con error
     try {
       sessionStorage.setItem("zodi.google_redirect_pending", "1");
       await signInWithRedirect(auth, googleProvider);
