@@ -1,5 +1,5 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
+import { getAuth, initializeAuth, browserLocalPersistence, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -16,28 +16,36 @@ export const isFirebaseConfigured = Boolean(
 );
 
 let app: FirebaseApp | undefined;
+let authInstance: ReturnType<typeof getAuth> | undefined;
 
 export function getFirebaseApp() {
-  if (!isFirebaseConfigured) {
-    return undefined;
-  }
-
+  if (!isFirebaseConfigured) return undefined;
   if (!app) {
     app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
   }
-
   return app;
 }
 
 export function getFirebaseAuth() {
   const firebaseApp = getFirebaseApp();
-  if (!firebaseApp) {
-    return undefined;
+  if (!firebaseApp) return undefined;
+
+  if (!authInstance) {
+    try {
+      // browserLocalPersistence usa localStorage en vez de IndexedDB —
+      // evita que el auth quede colgado en móvil incógnito donde IndexedDB
+      // falla silenciosamente.
+      authInstance = initializeAuth(firebaseApp, {
+        persistence: browserLocalPersistence,
+      });
+    } catch {
+      // Si ya fue inicializado por otro módulo, reutilizar
+      authInstance = getAuth(firebaseApp);
+    }
+    authInstance.useDeviceLanguage();
   }
 
-  const auth = getAuth(firebaseApp);
-  auth.useDeviceLanguage();
-  return auth;
+  return authInstance;
 }
 
 export function getFirebaseDb() {
