@@ -238,27 +238,16 @@ export function MarketingHome() {
 
           {/* ── Texto + CTAs ── */}
           <div className="flex flex-col items-start">
-            {/* Badge */}
-            <motion.p
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mb-4 inline-flex items-center gap-2 rounded-full border border-lime-300/35 bg-lime-300/10 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-lime-300 sm:text-xs"
-            >
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-lime-300 animate-pulse" />
-              Oráculo Astral con IA · Gratis
-            </motion.p>
-
             {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="max-w-xl text-[1.75rem] font-black leading-[1.1] tracking-tight sm:text-[2.6rem] lg:text-[4.2rem]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Tu oráculo personal.<br />
-              <span className="text-lime-300">Con personalidad.</span>
+              El cosmos sabe<br />
+              <span className="text-lime-300">lo que no quieres ver.</span>
             </motion.h1>
 
             {/* Subheadline */}
@@ -343,13 +332,40 @@ export function MarketingHome() {
                 />
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </button>
-              {/* Mini stats bajo la imagen */}
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                {[["🔮", "17+", "lecturas"], ["🎭", "4", "tonos"], ["⚡", "IA", "real"]].map(([e, n, l]) => (
-                  <div key={l} className="rounded-xl border border-white/08 bg-black/30 py-2.5">
-                    <div className="text-base">{e}</div>
-                    <div className="text-sm font-black text-lime-300">{n}</div>
-                    <div className="text-[10px] text-white/40">{l}</div>
+              {/* Mini cartas tarot — stats */}
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {([
+                  { emoji: "🔮", num: "17+", label: "lecturas", glow: "rgba(184,255,23,0.5)", border: "rgba(184,255,23,0.4)", img: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Horoscopo-diario.webp" },
+                  { emoji: "🎭", num: "4",   label: "tonos",    glow: "rgba(139,92,246,0.5)", border: "rgba(139,92,246,0.4)", img: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Consejo-cosmico-sin-filtro.webp" },
+                  { emoji: "⚡", num: "IA",  label: "real",     glow: "rgba(34,211,238,0.5)", border: "rgba(34,211,238,0.4)", img: "/zodi-art/nuevas/3-Secciones-principales-de-la-web/Tu-destino-hoy.webp" },
+                ] as const).map(({ emoji, num, label, glow, border, img }) => (
+                  <div
+                    key={label}
+                    className="relative overflow-hidden rounded-xl flex flex-col items-center justify-end pb-2.5 pt-0"
+                    style={{
+                      height: 110,
+                      border: `1.5px solid ${border}`,
+                      boxShadow: `0 0 14px ${glow}, 0 0 30px ${glow.replace("0.5", "0.15")}`,
+                      background: "linear-gradient(170deg,#0a0a14,#05050c)",
+                    }}
+                  >
+                    {/* Imagen de fondo */}
+                    <Image src={img} alt={label} fill className="object-cover opacity-35 select-none" sizes="120px" />
+                    {/* Viñeta */}
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 30%, transparent 100%)" }} />
+                    {/* Esquinas */}
+                    {[[2,2,"auto","auto"],[2,"auto",2,"auto"],["auto",2,"auto",2],["auto","auto",2,2]].map((p,i)=>(
+                      <svg key={i} viewBox="0 0 8 8" width="7" height="7" className="absolute pointer-events-none"
+                        style={{ top:p[0], left:p[1], right:p[2], bottom:p[3], transform:`rotate(${i*90}deg)` }}>
+                        <path d="M0,0 L5,0 M0,0 L0,5" stroke={border} strokeWidth="1.2" fill="none"/>
+                      </svg>
+                    ))}
+                    {/* Contenido */}
+                    <div className="relative z-10 text-center">
+                      <div className="text-lg leading-none">{emoji}</div>
+                      <div className="text-sm font-black leading-tight" style={{ color: glow.replace("0.5","0.95"), textShadow: `0 0 10px ${glow}` }}>{num}</div>
+                      <div className="text-[10px] text-white/50 leading-tight">{label}</div>
+                    </div>
                   </div>
                 ))}
               </div>
