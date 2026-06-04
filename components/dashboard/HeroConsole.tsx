@@ -305,8 +305,7 @@ export function HeroConsole() {
         </motion.div>
       )}
 
-      <section className="grid gap-3 lg:grid-cols-[1.4fr_0.6fr] xl:grid-cols-[1.55fr_0.45fr]">
-      {/* ── LEFT: Hero personalizado ─────────────────────────────────────── */}
+      {/* ── Hero personalizado ──────────────────────────────────────────── */}
       <div
         className="hero-dark-card neon-border overflow-hidden rounded-2xl relative"
         style={{ background: "linear-gradient(145deg, rgba(8,8,16,0.92), rgba(5,5,12,0.88))", border: "1px solid rgba(255,255,255,0.07)" }}
@@ -474,11 +473,15 @@ export function HeroConsole() {
             <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 font-medium">
               🔢 {ctx.dayVibration}
             </span>
+            <span className="rounded-full border border-violet-400/20 bg-violet-500/08 px-2.5 py-1 font-medium text-violet-300/70">
+              <RadioTower className="inline h-2.5 w-2.5 mr-1 -mt-0.5" />
+              Júpiter en {ctx.jupiterSign} · Saturno en {ctx.saturnSign}
+            </span>
           </div>
 
-          {/* ── Mobile profile strip + XP bar — solo en mobile (oculto en lg+) ── */}
+          {/* ── Profile strip + XP bar ──────────────────────────────────────── */}
           {mounted && (
-            <div className="mt-3 lg:hidden">
+            <div className="mt-3">
               <div className="flex items-center gap-2.5 rounded-t-xl border border-b-0 border-white/08 bg-black/35 px-3 py-2.5">
                 <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-lime-300/20">
                   {avatar.startsWith("data:") ? (
@@ -550,115 +553,14 @@ export function HeroConsole() {
         </div>
       </div>
 
-      {/* ── RIGHT: Profile card — solo en desktop (lg+) ─────────────────── */}
-      <div className="hidden lg:flex glass-panel relative overflow-hidden rounded-2xl p-4 sm:p-5 xl:p-6 flex-col gap-4 xl:gap-5">
-        {/* Decorative sigil */}
-        <Image
-          src="/zodi-art/brand/isotipo.webp"
-          alt=""
-          aria-hidden="true"
-          width={280}
-          height={280}
-          className="pointer-events-none absolute -right-14 -bottom-14 h-48 w-48 opacity-[0.07] mix-blend-screen"
-        />
 
-        {/* Avatar + name */}
-        <div className="relative flex items-center gap-3">
-          <div className="relative h-14 w-14 xl:h-16 xl:w-16 overflow-hidden rounded-2xl border-2 border-lime-300/35 shrink-0">
-            {!mounted ? (
-              <div className="h-full w-full animate-pulse bg-white/10" />
-            ) : avatar.startsWith("data:") ? (
-              <img src={avatar} alt="Avatar" className="h-full w-full object-cover" />
-            ) : (
-              <Image src={avatar} alt="Avatar" fill className="object-cover" />
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="zodi-kicker">Perfil activo</p>
-            <h2
-              className="mt-0.5 text-xl font-black leading-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {mounted ? (profile?.displayName ?? "—") : <Shimmer w="w-28" />}
-            </h2>
-            {mounted && (
-              <p className="text-[10px] font-black uppercase tracking-widest text-lime-200/80 mt-0.5">
-                {levelTitle}
-              </p>
-            )}
-          </div>
-          {/* Gems + streak badges */}
-          <div className="flex flex-col items-end gap-1.5 shrink-0">
-            <div className="flex items-center gap-1 rounded-full border border-lime-300/25 bg-lime-300/08 px-2.5 py-1">
-              <Gem className="h-3 w-3 text-lime-300" />
-              <span className="text-xs font-bold text-lime-200" style={{ fontFamily: "var(--font-mono)" }}>
-                {mounted ? gems : 0}
-              </span>
-            </div>
-            {streak > 0 && (
-              <div className="flex items-center gap-1 rounded-full border border-orange-400/25 bg-orange-400/08 px-2.5 py-1">
-                <Flame className="h-3 w-3 text-orange-400" />
-                <span className="text-xs font-bold text-orange-200" style={{ fontFamily: "var(--font-mono)" }}>
-                  {streak}d
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Sign + Moon */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-xl border border-white/08 bg-black/35 p-3">
-            <p className="zodi-kicker mb-1">Signo</p>
-            <p className="text-base font-black">{mounted ? (profile?.zodiac ?? "—") : "—"}</p>
-          </div>
-          <div className="rounded-xl border border-white/08 bg-black/35 p-3">
-            <p className="zodi-kicker mb-1">Luna</p>
-            <p className="text-base font-black">{mounted ? (profile?.moonSign ?? "—") : "—"}</p>
-          </div>
-        </div>
-
-        {/* XP bar */}
-        <div>
-          <div className="mb-1.5 flex items-center justify-between text-xs text-white/55">
-            <span className="font-bold text-white/75">Nivel {level}</span>
-            <span style={{ fontFamily: "var(--font-mono)" }}>{xpCurrent}/{xpNeeded} XP</span>
-          </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-black/60 border border-white/10 p-0.5">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-lime-300 via-fuchsia-400 to-cyan-300"
-              initial={{ width: 0 }}
-              animate={{ width: `${xpPercent}%` }}
-              transition={{ delay: 0.6, duration: 1.2, ease: "easeOut" }}
-            />
-          </div>
-        </div>
-
-        {/* Jupiter/Saturn line */}
-        <div className="flex items-center gap-2.5 rounded-xl border border-violet-400/18 bg-violet-500/08 px-3 py-2.5">
-          <RadioTower className="h-4 w-4 shrink-0 text-violet-300" />
-          <span className="text-xs font-medium text-white/75 leading-snug">
-            Júpiter en {ctx.jupiterSign} · Saturno en {ctx.saturnSign}
-          </span>
-        </div>
-
-        {/* Edit profile link */}
-        <Link
-          href="/dashboard/perfil"
-          className="mt-auto block text-center text-[11px] font-bold uppercase tracking-widest text-white/35 transition hover:text-lime-200/70"
-        >
-          Editar perfil
-        </Link>
-      </div>
-      </section>
-
-      {/* ── Astral stats strip — solo en mobile/tablet (lg tiene el panel derecho) ── */}
+      {/* ── Astral stats strip ──────────────────────────────────────────────── */}
       {mounted && profile && sign && (
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.4 }}
-          className="grid grid-cols-4 gap-2 lg:hidden"
+          className="grid grid-cols-4 gap-2"
         >
           <Metric label="Signo" value={sign} />
           <Metric label="Luna" value={profile.moonSign || "—"} />
