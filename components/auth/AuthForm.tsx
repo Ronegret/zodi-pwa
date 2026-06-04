@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  signInWithRedirect, getRedirectResult, getAdditionalUserInfo,
+  signInWithRedirect, signInWithPopup, getRedirectResult, getAdditionalUserInfo,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, fetchSignInMethodsForEmail,
   onAuthStateChanged, type User
@@ -249,9 +249,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           } catch {
             authHandledRef.current = false;
             setGoogleLoading(false);
-            setMessage("Error al cargar tu perfil. Recarga e intentalo de nuevo.");
+            setMessage("Error al cargar tu perfil. Recarga e inténtalo de nuevo.");
             setMsgType("error");
           }
+        } else if (redirectPending) {
+          // getRedirectResult devolvió null pero había un redirect pendiente.
+          // Firebase puede tardar en inicializar desde IndexedDB — NO detener el spinner.
+          // onAuthStateChanged lo procesará cuando esté listo.
+          // El timeout de 14s lo maneja si nunca llega.
         } else {
           setGoogleLoading(false);
         }
@@ -324,10 +329,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     };
   }, [applyFirebaseUser]);
 
-  // ── Google OAuth — siempre redirect (nunca popup) ────────────────────────
-  // signInWithPopup falla con "no se puede abrir esta página" en Chrome/Edge modernos
-  // por bloqueo cross-origin en popups (localhost→firebaseapp.com→google→firebaseapp.com).
-  // signInWithRedirect navega la página principal — sin restricciones de popup.
+  // ── Google OAuth ──────────────────────────────────────────────────────────
+  // Estrategia: popup primero (más rápido, sin navegación de página).
+  // Si el popup falla o se cierra → fallback automático a signInWithRedirect.
   async function loginWithGoogle() {
     if (googleLoading) return;
     setMessage("");
@@ -344,6 +348,47 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       return;
     }
 
+    // iOS Safari y PWA standalone no soportan popups — ir directo a redirect
+    const isIosSafari =
+      typeof navigator !== "undefined" &&
+      /iphone|ipad|ipod/i.test(navigator.userAgent) &&
+      !/chrome|crios|fxios/i.test(navigator.userAgent);
+    const isPwaStandalone =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as any).standalone === true);
+
+    if (!isIosSafari && !isPwaStandalone) {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        if (result.user) {
+          setGoogleLoading(false);
+          const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
+          await applyFirebaseUser(result.user, isNew);
+        }
+        return;
+      } catch (e: any) {
+        const code = e?.code ?? "";
+        if (
+          code === "auth/popup-blocked" ||
+          code === "auth/popup-cancelled" ||
+          code === "auth/cancelled-popup-request" ||
+          code === "auth/popup-closed-by-user"
+          // popup-closed-by-user incluye el caso "no se puede abrir esta página":
+          // el popup muestra el error y el usuario lo cierra → caer al redirect
+        ) {
+          // fallthrough → intenta redirect abajo
+        } else if (code) {
+          setMessage(`Error de Google (${code}). Intenta de nuevo o usa email.`);
+          setMsgType("error");
+          setGoogleLoading(false);
+          authHandledRef.current = false;
+          return;
+        }
+      }
+    }
+
+    // Redirect: iOS/PWA, popup bloqueado, o popup con error
     try {
       sessionStorage.setItem("zodi.google_redirect_pending", "1");
       await signInWithRedirect(auth, googleProvider);
