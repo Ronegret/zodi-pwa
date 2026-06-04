@@ -1,16 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
-
+// AnimatedShell: solo un fade muy rápido — sin y-movement que causa parpadeo visible
+// en navegaciones rápidas o dispositivos lentos.
 export function AnimatedShell({ children }: { children: React.ReactNode }) {
   return (
-    <motion.main
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.15, ease: "easeOut" }}
-      className="relative min-h-[100dvh] pb-24 lg:pb-8"
+    <main
+      className="relative min-h-[100dvh] pb-24 lg:pb-8 animate-fade-in"
     >
       {children}
-    </motion.main>
+    </main>
   );
 }

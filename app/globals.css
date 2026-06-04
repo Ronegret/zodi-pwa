@@ -398,6 +398,15 @@ p, span, a, li {
   to   { opacity: 1; }
 }
 
+/* Respeta preferencia del sistema de reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ── ZODI Landing Hero — Full Animation System ───────────────────────────── */
 
 @keyframes hero-orb-1 {
@@ -508,7 +517,7 @@ p, span, a, li {
 }
 
 .animate-fade-in {
-  animation: fade-in 0.35s ease both;
+  animation: fade-in 0.12s ease both;
 }
 
 /* ── Hover Micro-animations ──────────────────────────────────────────────── */
@@ -812,12 +821,13 @@ p, span, a, li {
 
 /* ── Transiciones de página suaves ──────────────────────────────────────── */
 @keyframes page-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
+/* Sin translateY — el movimiento vertical causa parpadeo visible en secciones del dashboard */
 .page-enter {
-  animation: page-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-in 0.18s ease-out both;
 }
 
 /* ── Scroll suave en contenedores internos ───────────────────────────────── */
