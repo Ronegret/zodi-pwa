@@ -2044,13 +2044,33 @@ function PerfilUI() {
   function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Imagen demasiado grande. Máximo 2 MB. Prueba con una imagen más pequeña.");
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Imagen demasiado grande. Máximo 15 MB.");
       e.target.value = "";
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => { if (typeof reader.result === "string") setAvatar(reader.result); };
+    reader.onload = (ev) => {
+      const img = new window.Image();
+      img.onload = () => {
+        // Comprimir a max 400×400 JPEG 80% → ~30-80 KB base64
+        // Firestore tiene límite de 1 MB por doc; sin compresión las fotos lo superan
+        const MAX = 400;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          if (width >= height) { height = Math.round((height / width) * MAX); width = MAX; }
+          else                 { width  = Math.round((width  / height) * MAX); height = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, width, height);
+        setAvatar(canvas.toDataURL("image/jpeg", 0.80));
+      };
+      img.src = ev.target?.result as string;
+    };
     reader.readAsDataURL(file);
   }
 
