@@ -1,6 +1,7 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -36,6 +37,11 @@ export function getFirebaseAuth() {
 export function getFirebaseDb() {
   const firebaseApp = getFirebaseApp();
   return firebaseApp ? getFirestore(firebaseApp) : undefined;
+}
+
+export function getFirebaseStorage() {
+  const firebaseApp = getFirebaseApp();
+  return firebaseApp ? getStorage(firebaseApp) : undefined;
 }
 
 // Obtiene el token esperando el estado de auth (hasta 3s).

@@ -130,7 +130,25 @@ function useConsult(section: DashboardSection) {
         setReply(data?.error || data?.text || "Error del servidor. Reintenta en un momento.");
         return;
       }
-      setReply(data.text || data.reading || "El universo tardó demasiado. Reintenta.");
+      const text = data.text || data.reading || "El universo tardó demasiado. Reintenta.";
+      setReply(text);
+
+      // Persistir lectura en Firestore (fire & forget — no bloquea la UX)
+      const uid = getLocalSession().uid;
+      if (uid && !uid.startsWith("local_") && text && !text.startsWith("El universo tardó")) {
+        import("@/lib/firebase/client").then(({ getFirebaseDb }) => {
+          const db = getFirebaseDb();
+          if (!db) return;
+          import("firebase/firestore").then(({ collection, addDoc, serverTimestamp }) => {
+            addDoc(collection(db, "readings", uid, "items"), {
+              section:   sec.slug ?? sec.title ?? "desconocido",
+              title:     sec.title ?? "",
+              text,
+              createdAt: serverTimestamp(),
+            }).catch(() => {}); // silencioso si falla
+          });
+        });
+      }
     } catch {
       setReply("Señal cortada. El universo también tiene días de mala cobertura.");
     } finally {
@@ -2053,8 +2071,7 @@ function PerfilUI() {
     reader.onload = (ev) => {
       const img = new window.Image();
       img.onload = () => {
-        // Comprimir a max 400×400 JPEG 80% → ~30-80 KB base64
-        // Firestore tiene límite de 1 MB por doc; sin compresión las fotos lo superan
+        // 1. Comprimir a max 400×400 JPEG 80% para preview local
         const MAX = 400;
         let { width, height } = img;
         if (width > MAX || height > MAX) {
@@ -2062,12 +2079,32 @@ function PerfilUI() {
           else                 { width  = Math.round((width  / height) * MAX); height = MAX; }
         }
         const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = width; canvas.height = height;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
         ctx.drawImage(img, 0, 0, width, height);
-        setAvatar(canvas.toDataURL("image/jpeg", 0.80));
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.80);
+        setAvatar(dataUrl); // preview inmediato
+
+        // 2. Subir a Firebase Storage en background (sin bloquear UX)
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          try {
+            const [{ getFirebaseAuth, getFirebaseStorage }, { ref, uploadBytes, getDownloadURL }] = await Promise.all([
+              import("@/lib/firebase/client"),
+              import("firebase/storage"),
+            ]);
+            const uid = getFirebaseAuth()?.currentUser?.uid;
+            const storage = getFirebaseStorage();
+            if (!uid || !storage) return;
+            const storageRef = ref(storage, `avatars/${uid}/profile.jpg`);
+            await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
+            const url = await getDownloadURL(storageRef);
+            setAvatar(url); // reemplaza el dataUrl por la URL permanente
+          } catch {
+            // Si Storage falla, el dataUrl comprimido sigue funcionando como fallback
+          }
+        }, "image/jpeg", 0.80);
       };
       img.src = ev.target?.result as string;
     };
