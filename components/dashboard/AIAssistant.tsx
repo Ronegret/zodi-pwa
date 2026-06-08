@@ -63,15 +63,24 @@ export function AIAssistant() {
 
   // Lazy init: read localStorage once on mount, not on every re-render
   const [sign] = useState(() => getLocalSession().astralProfile?.sunSign);
+  const [firstName] = useState(() => {
+    const s = getLocalSession();
+    const raw = s.onboardingData?.displayName || s.displayName || "";
+    return raw.split(" ")[0] || "";
+  });
 
   const personalizedPrompts = sign
     ? [
-        `Que le espera hoy a ${sign}?`,
-        "Hazme una lectura brutal pero util.",
-        "Que patron repito que ya deberia haber cortado?",
-        "Dame una senal concreta sobre amor.",
-        "Cual es mi mayor bloqueo ahora mismo?",
-        "Dame un consejo corto y sin adornos.",
+        firstName
+          ? `¿Qué energía le espera hoy a ${firstName}, siendo ${sign}?`
+          : `¿Qué energía le espera hoy a ${sign}?`,
+        firstName
+          ? `${firstName}, ¿qué dice el cosmos sobre tu trabajo esta semana?`
+          : "¿Qué dice el cosmos sobre mi trabajo esta semana?",
+        "¿Qué estoy cargando que ya debería soltar?",
+        "Dame una lectura honesta sobre el amor, sin rodeos.",
+        "¿Cuál es mi mayor bloqueo ahora mismo y cómo lo rompo?",
+        "Dame un consejo corto y concreto para hoy.",
       ]
     : quickPrompts;
 
@@ -270,7 +279,7 @@ export function AIAssistant() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             rows={2}
-            placeholder="Pregunta lo que pesa... (Enter para enviar)"
+            placeholder={firstName ? `¿Qué quieres preguntarle al oráculo, ${firstName}? (Enter para enviar)` : "Pregunta lo que pesa... (Enter para enviar)"}
             className="min-w-0 flex-1 resize-none rounded-md border border-white/10 bg-black/45 px-3 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-lime-300/50"
           />
           <button
@@ -287,8 +296,11 @@ export function AIAssistant() {
 
       {/* Quick prompts panel */}
       <div className="glass-panel rounded-md p-4">
-        <p className="text-xs uppercase tracking-[0.28em] text-fuchsia-200/70 mb-4">
-          {sign ? `Preguntas para ${sign}` : "Ideas para preguntar"}
+        <p className="text-sm font-black text-white mb-0.5">
+          {firstName ? `Hola ${firstName} ✦` : "Preguntas sugeridas"}
+        </p>
+        <p className="text-[10px] text-white/35 mb-4">
+          {sign ? `${sign} · elige una o escribe la tuya` : "Elige una o escribe la tuya"}
         </p>
         <div className="grid gap-2">
           {personalizedPrompts.map((prompt) => (

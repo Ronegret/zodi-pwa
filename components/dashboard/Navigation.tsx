@@ -307,24 +307,48 @@ export function BottomNav() {
                   whileTap={{ scale: 0.82 }}
                   transition={{ type: "spring", stiffness: 500, damping: 28 }}
                   onClick={() => { handlePress(item.href); window.dispatchEvent(new CustomEvent("open-oracle")); }}
-                  className="relative flex flex-col items-center justify-center gap-0.5 text-white/50"
+                  className="relative flex flex-col items-center justify-center gap-0.5 text-lime-300/90"
                 >
-                  <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/08 border border-white/15">
-                    <item.icon className="h-5 w-5" />
-                    <span className="oracle-pulse-ring absolute inset-0 rounded-full border border-lime-300/30 pointer-events-none" />
-                    <AnimatePresence>
-                      {isPressed && (
-                        <motion.span
-                          key="burst"
-                          className="pointer-events-none absolute rounded-full border-2 border-lime-300"
-                          initial={{ width: 44, height: 44, opacity: 0.9, x: "-50%", y: "-50%", left: "50%", top: "50%", scale: 1 }}
-                          animate={{ scale: 2.5, opacity: 0 }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
-                        />
-                      )}
-                    </AnimatePresence>
+                  {/* Sparkle wrapper — positions particles around the circle */}
+                  <div className="relative h-11 w-11">
+                    {/* Orbiting sparkle particles */}
+                    {[
+                      { x: 20, y: -18, delay: 0 },
+                      { x: 23, y: 8,   delay: 0.9 },
+                      { x: -21, y: -14, delay: 1.8 },
+                      { x: -19, y: 12, delay: 2.7 },
+                    ].map(({ x, y, delay }) => (
+                      <motion.span
+                        key={`sp-${delay}`}
+                        className="pointer-events-none absolute text-lime-300 font-black select-none"
+                        style={{ fontSize: 8, left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)`, transform: "translate(-50%,-50%)" }}
+                        animate={{ opacity: [0, 1, 0], scale: [0.3, 1.3, 0.3] }}
+                        transition={{ repeat: Infinity, duration: 3.2, delay, ease: "easeInOut" }}
+                      >
+                        ✦
+                      </motion.span>
+                    ))}
+                    {/* Icon circle */}
+                    <div
+                      className="relative flex h-11 w-11 items-center justify-center rounded-full bg-lime-300/12 border border-lime-300/40"
+                      style={{ boxShadow: "0 0 10px rgba(184,255,23,0.22), 0 0 22px rgba(184,255,23,0.08)" }}
+                    >
+                      <item.icon className="h-5 w-5 text-lime-200" />
+                      <span className="oracle-pulse-ring absolute inset-0 rounded-full border border-lime-300/40 pointer-events-none" />
+                      <AnimatePresence>
+                        {isPressed && (
+                          <motion.span
+                            key="burst"
+                            className="pointer-events-none absolute rounded-full border-2 border-lime-300"
+                            initial={{ width: 44, height: 44, opacity: 0.9, x: "-50%", y: "-50%", left: "50%", top: "50%", scale: 1 }}
+                            animate={{ scale: 2.5, opacity: 0 }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                          />
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
-                  <span className="text-[10px] font-semibold leading-tight">{item.label}</span>
+                  <span className="text-[10px] font-semibold leading-tight text-lime-300/80">{item.label}</span>
                 </motion.button>
               );
             }
