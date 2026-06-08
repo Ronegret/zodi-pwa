@@ -2085,6 +2085,10 @@ function PerfilUI() {
         ctx.drawImage(img, 0, 0, width, height);
         const dataUrl = canvas.toDataURL("image/jpeg", 0.80);
         setAvatar(dataUrl); // preview inmediato
+        // Persistir el dataUrl en localStorage AHORA — sin esperar a "Guardar".
+        // Si el usuario navega antes de hacer clic en Guardar, la foto no se pierde.
+        const currentOd = getLocalSession().onboardingData;
+        if (currentOd) setLocalSession({ onboardingData: { ...currentOd, avatar: dataUrl } });
 
         // 2. Subir a Firebase Storage en background (sin bloquear UX)
         canvas.toBlob(async (blob) => {
@@ -2101,8 +2105,19 @@ function PerfilUI() {
             await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
             const url = await getDownloadURL(storageRef);
             setAvatar(url); // reemplaza el dataUrl por la URL permanente
+            // Actualizar localStorage y Firestore con la URL permanente
+            const od2 = getLocalSession().onboardingData;
+            if (od2) setLocalSession({ onboardingData: { ...od2, avatar: url } });
+            const [{ getFirebaseDb }, { doc, setDoc, serverTimestamp }] = await Promise.all([
+              import("@/lib/firebase/client"),
+              import("firebase/firestore"),
+            ]);
+            const db = getFirebaseDb();
+            if (db && uid) {
+              setDoc(doc(db, "users", uid), { avatar: url, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+            }
           } catch {
-            // Si Storage falla, el dataUrl comprimido sigue funcionando como fallback
+            // Si Storage falla, el dataUrl comprimido ya está en localStorage como fallback
           }
         }, "image/jpeg", 0.80);
       };
@@ -2999,6 +3014,50 @@ function CartaNatalUI({ section }: { section: DashboardSection }) {
     }
   }
 
+  // ── Datos enriquecidos por signo ───────────────────────────────────────────
+  const SIGN_DATA: Record<string, { element: string; modality: string; ruler: string; traits: string[]; shadow: string; color: string }> = {
+    "Aries":       { element: "Fuego",  modality: "Cardinal", ruler: "Marte",    traits: ["Valentía", "Iniciativa", "Liderazgo"],  shadow: "Impulsividad",  color: "text-red-400" },
+    "Tauro":       { element: "Tierra", modality: "Fijo",     ruler: "Venus",    traits: ["Perseverancia", "Sensualidad", "Lealtad"], shadow: "Terquedad",  color: "text-green-400" },
+    "Géminis":     { element: "Aire",   modality: "Mutable",  ruler: "Mercurio", traits: ["Ingenio", "Curiosidad", "Adaptabilidad"], shadow: "Dispersión", color: "text-yellow-300" },
+    "Cáncer":      { element: "Agua",   modality: "Cardinal", ruler: "Luna",     traits: ["Intuición", "Empatía", "Protección"],    shadow: "Susceptibilidad", color: "text-blue-300" },
+    "Leo":         { element: "Fuego",  modality: "Fijo",     ruler: "Sol",      traits: ["Carisma", "Generosidad", "Creatividad"], shadow: "Ego",          color: "text-orange-400" },
+    "Virgo":       { element: "Tierra", modality: "Mutable",  ruler: "Mercurio", traits: ["Precisión", "Análisis", "Servicio"],    shadow: "Autocrítica",  color: "text-lime-300" },
+    "Libra":       { element: "Aire",   modality: "Cardinal", ruler: "Venus",    traits: ["Diplomacia", "Justicia", "Encanto"],    shadow: "Indecisión",   color: "text-pink-300" },
+    "Escorpio":    { element: "Agua",   modality: "Fijo",     ruler: "Plutón",   traits: ["Intensidad", "Transformación", "Poder"], shadow: "Obsesión",    color: "text-purple-400" },
+    "Sagitario":   { element: "Fuego",  modality: "Mutable",  ruler: "Júpiter",  traits: ["Libertad", "Optimismo", "Filosofía"],   shadow: "Exceso",       color: "text-amber-400" },
+    "Capricornio": { element: "Tierra", modality: "Cardinal", ruler: "Saturno",  traits: ["Ambición", "Disciplina", "Paciencia"],  shadow: "Rigidez",      color: "text-stone-300" },
+    "Acuario":     { element: "Aire",   modality: "Fijo",     ruler: "Urano",    traits: ["Originalidad", "Visión", "Humanismo"],  shadow: "Distancia",    color: "text-cyan-300" },
+    "Piscis":      { element: "Agua",   modality: "Mutable",  ruler: "Neptuno",  traits: ["Empatía", "Creatividad", "Espiritualidad"], shadow: "Evasión", color: "text-teal-300" },
+  };
+  const ELEMENT_EMOJI: Record<string, string> = { Fuego: "🔥", Tierra: "🌿", Aire: "💨", Agua: "🌊" };
+  const LIFE_PATH_MEANING: Record<number, { title: string; desc: string }> = {
+    1:  { title: "El Líder",       desc: "Independencia, pionero, fuerza individual" },
+    2:  { title: "El Mediador",    desc: "Cooperación, sensibilidad, equilibrio" },
+    3:  { title: "El Creativo",    desc: "Expresión, optimismo, comunicación" },
+    4:  { title: "El Constructor", desc: "Estabilidad, trabajo, orden práctico" },
+    5:  { title: "El Aventurero",  desc: "Libertad, cambio, experiencias" },
+    6:  { title: "El Cuidador",    desc: "Responsabilidad, armonía, familia" },
+    7:  { title: "El Buscador",    desc: "Introspección, sabiduría, espiritualidad" },
+    8:  { title: "El Poder",       desc: "Éxito material, autoridad, ambición" },
+    9:  { title: "El Sabio",       desc: "Compasión universal, finalización, servicio" },
+    11: { title: "El Iluminado",   desc: "Intuición maestra, inspiración, visión" },
+    22: { title: "El Maestro Constructor", desc: "Visión práctica a gran escala" },
+    33: { title: "El Maestro Sanador", desc: "Compasión universal, enseñanza" },
+  };
+
+  const sunData  = ap ? SIGN_DATA[ap.sunSign  ?? ""] : null;
+  const moonData = ap ? SIGN_DATA[ap.moonSign ?? ""] : null;
+  const ascData  = ap ? SIGN_DATA[ap.ascendant ?? ""] : null;
+
+  // Calcular elemento dominante entre sol, luna y ascendente
+  const elementCount = ap ? [ap.sunSign, ap.moonSign, ap.ascendant]
+    .map(s => SIGN_DATA[s ?? ""]?.element)
+    .filter(Boolean)
+    .reduce((acc: Record<string, number>, el) => { acc[el!] = (acc[el!] ?? 0) + 1; return acc; }, {}) : {};
+  const dominantElement = Object.entries(elementCount).sort((a, b) => b[1] - a[1])[0]?.[0];
+
+  const lpData = ap?.lifePathNumber ? LIFE_PATH_MEANING[ap.lifePathNumber] : null;
+
   const planets = ap
     ? [
         { label: "Signo solar",    value: ap.sunSign ?? "–",             emoji: "☀️", color: "border-yellow-400/30 bg-yellow-500/5" },
@@ -3032,23 +3091,93 @@ function CartaNatalUI({ section }: { section: DashboardSection }) {
             </div>
           </div>
 
+          {/* ── 6 pilares básicos ── */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {planets.map(({ label, value, emoji, color }) => (
-              <div
-                key={label}
-                className={`rounded-md border ${color} p-4 transition hover:-translate-y-0.5`}
-              >
+              <div key={label} className={`rounded-md border ${color} p-4 transition hover:-translate-y-0.5`}>
                 <p className="text-xs uppercase tracking-widest text-white/40">{label}</p>
                 <p className="mt-2 text-lg font-black">
-                  <span className="mr-1.5">{emoji}</span>
-                  {value}
+                  <span className="mr-1.5">{emoji}</span>{value}
                 </p>
               </div>
             ))}
           </div>
 
+          {/* ── Elemento dominante ── */}
+          {dominantElement && (
+            <div className="rounded-md border border-white/10 bg-black/30 p-4">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 mb-1">Elemento dominante en tu carta</p>
+              <p className="text-xl font-black">
+                {ELEMENT_EMOJI[dominantElement]} {dominantElement}
+                <span className="ml-2 text-sm font-normal text-white/50">
+                  — {dominantElement === "Fuego" && "energía, pasión e impulso creador"}
+                  {dominantElement === "Tierra" && "estabilidad, practicidad y trabajo concreto"}
+                  {dominantElement === "Aire"   && "intelecto, comunicación y pensamiento abstracto"}
+                  {dominantElement === "Agua"   && "emoción profunda, intuición y sensibilidad"}
+                </span>
+              </p>
+            </div>
+          )}
+
+          {/* ── Sol, Luna, Ascendente expandidos ── */}
+          <div className="grid gap-3">
+            {[
+              { key: "solar", label: "Signo Solar ☀️", sign: ap?.sunSign, data: sunData, desc: "Tu identidad central y cómo te expresas en el mundo. Es el núcleo de tu personalidad." },
+              { key: "lunar", label: "Signo Lunar 🌙", sign: ap?.moonSign, data: moonData, desc: "Tu mundo emocional interno, instintos y lo que necesitas para sentirte seguro." },
+              { key: "asc",   label: "Ascendente ⬆️", sign: ap?.ascendant, data: ascData, desc: "La máscara social, cómo te ven los demás y tu actitud al enfrentar el mundo." },
+            ].map(({ key, label, sign, data, desc }) => sign && data ? (
+              <div key={key} className="rounded-xl border border-white/10 bg-black/20 p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">{label}</p>
+                    <p className={`text-lg font-black ${data.color}`}>{sign}</p>
+                  </div>
+                  <div className="text-right text-xs text-white/35">
+                    <p>{data.element} {ELEMENT_EMOJI[data.element]}</p>
+                    <p>{data.modality}</p>
+                    <p>Rige: {data.ruler}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-white/55 mb-2 leading-relaxed">{desc}</p>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {data.traits.map(t => (
+                    <span key={t} className="rounded-full border border-white/15 bg-white/05 px-2.5 py-0.5 text-[10px] font-bold text-white/70">{t}</span>
+                  ))}
+                </div>
+                <p className="text-[10px] text-white/30">Sombra: <span className="text-orange-300/70">{data.shadow}</span></p>
+              </div>
+            ) : null)}
+          </div>
+
+          {/* ── Camino de vida ── */}
+          {ap?.lifePathNumber && lpData && (
+            <div className="rounded-xl border border-purple-400/25 bg-purple-500/05 p-4">
+              <p className="text-[10px] uppercase tracking-[0.28em] text-purple-300/60 mb-1">Número de camino de vida 🔢</p>
+              <p className="text-2xl font-black text-purple-300">{ap.lifePathNumber} — {lpData.title}</p>
+              <p className="mt-1 text-sm text-white/60">{lpData.desc}</p>
+            </div>
+          )}
+
+          {/* ── Zodiaco chino + Maya ── */}
+          <div className="grid grid-cols-2 gap-3">
+            {ap?.chineseZodiac && (
+              <div className="rounded-xl border border-red-400/20 bg-red-500/05 p-4">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-red-300/50 mb-1">Horóscopo chino 🐉</p>
+                <p className="text-lg font-black text-red-300">{ap.chineseZodiac}</p>
+                <p className="mt-1 text-xs text-white/45 leading-relaxed">Determina tu energía cíclica de 12 años y tu relación con el flujo universal.</p>
+              </div>
+            )}
+            {ap?.mayanSign && (
+              <div className="rounded-xl border border-teal-400/20 bg-teal-500/05 p-4">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-teal-300/50 mb-1">Sello maya 🌿</p>
+                <p className="text-lg font-black text-teal-300">{ap.mayanSign || "–"}</p>
+                <p className="mt-1 text-xs text-white/45 leading-relaxed">Tu arquetipo en el calendario Tzolkin de 260 días.</p>
+              </div>
+            )}
+          </div>
+
           {ap?.summary && (
-            <p className="mt-4 rounded-md border border-white/10 bg-black/30 p-3 text-sm leading-6 text-white/68 italic">
+            <p className="rounded-md border border-white/10 bg-black/30 p-3 text-sm leading-6 text-white/68 italic">
               {ap.summary}
             </p>
           )}
