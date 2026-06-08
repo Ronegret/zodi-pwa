@@ -350,17 +350,29 @@ export function AuthForm({ mode, compact = false }: { mode: "login" | "register"
       return;
     }
 
-    // Estrategia: popup en todos los dispositivos (iOS Safari lo abre como
-    // nueva pestaña, Android Chrome lo permite). Solo ir a redirect si el
-    // popup falla o está en modo PWA standalone (donde no hay UI de ventana).
+    // Estrategia de auth:
+    // - iOS Safari: abre popup como nueva pestaña (no ventana), el postMessage
+    //   de vuelta es poco confiable → usar redirect directamente.
+    // - PWA standalone: no hay UI de ventana → redirect.
+    // - Desktop / Android: popup normal (más rápido, sin navegación de página).
     const isPwaStandalone =
       typeof window !== "undefined" &&
       (window.matchMedia("(display-mode: standalone)").matches ||
         (navigator as any).standalone === true);
+    const isIosSafari =
+      typeof window !== "undefined" &&
+      /iP(hone|ad|od)/i.test(navigator.userAgent) &&
+      /WebKit/i.test(navigator.userAgent) &&
+      !/CriOS|FxiOS|OPiOS/i.test(navigator.userAgent);
 
-    if (!isPwaStandalone) {
+    if (!isPwaStandalone && !isIosSafari) {
       try {
-        const result = await signInWithPopup(auth, googleProvider);
+        // Timeout de 30s: si el popup no responde (bloqueado o tab cerrada sin postMessage)
+        // fallback a redirect en lugar de colgar indefinidamente.
+        const popupTimeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject({ code: "auth/popup-closed-by-user" }), 30000)
+        );
+        const result = await Promise.race([signInWithPopup(auth, googleProvider), popupTimeout]);
         if (result.user) {
           setGoogleLoading(false);
           const isNew = getAdditionalUserInfo(result)?.isNewUser ?? false;
@@ -425,14 +437,19 @@ export function AuthForm({ mode, compact = false }: { mode: "login" | "register"
 
       if (auth) {
         try {
+          // Timeout de 15s: Firebase puede colgarse en redes lentas o cuando
+          // los servidores tardan en responder. Sin esto el botón queda en "Entrando..." para siempre.
+          const authTimeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(Object.assign(new Error("Tiempo de espera agotado"), { code: "zodi/timeout" })), 15000)
+          );
           if (mode === "register") {
             setLocalSession({ isAuthenticated: false, onboardingCompleted: false, astralProfile: undefined, onboardingData: undefined });
             if (refCode) localStorage.setItem("zodi_ref_code", refCode);
-            const cred = await createUserWithEmailAndPassword(auth, email, password);
+            const cred = await Promise.race([createUserWithEmailAndPassword(auth, email, password), authTimeout]);
             await applyFirebaseUser(cred.user, true);
             return;
           } else {
-            const cred = await signInWithEmailAndPassword(auth, email, password);
+            const cred = await Promise.race([signInWithEmailAndPassword(auth, email, password), authTimeout]);
             await applyFirebaseUser(cred.user, false);
             return;
           }
@@ -516,7 +533,9 @@ export function AuthForm({ mode, compact = false }: { mode: "login" | "register"
     } catch (err: any) {
       authHandledRef.current = false; // Permitir reintento en error
       const code = (err as { code?: string }).code ?? "";
-      if (code === "auth/email-already-in-use") {
+      if (code === "zodi/timeout") {
+        setMessage("La autenticación tardó demasiado. Comprueba tu conexión e inténtalo de nuevo."); setMsgType("error");
+      } else if (code === "auth/email-already-in-use") {
         setMessage("Ese correo ya tiene portal. Te llevamos al login..."); setMsgType("info");
         setTimeout(() => router.push("/auth/login"), 2000);
       } else if (code === "auth/account-exists-with-different-credential" || code === "auth/credential-already-in-use") {
