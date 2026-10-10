@@ -1,0 +1,122 @@
+---
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import { AUTH_UNAVAILABLE, authErrorMessage } from '@/lib/auth/errors';
+import { registerSchema } from '@/lib/validation/auth';
+import { fieldErrors, formToObject } from '@/lib/validation/common';
+
+let errors: Record<string, string> = {};
+let values = { name: '', email: '' };
+let checkEmail = false;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  values = {
+    name: String(form.get('name') ?? '').slice(0, 60),
+    email: String(form.get('email') ?? '').slice(0, 254),
+  };
+  const parsed = registerSchema.safeParse(formToObject(form));
+  if (!parsed.success) {
+    errors = fieldErrors(parsed.error);
+    Astro.response.status = 422;
+  } else if (!Astro.locals.supabase) {
+    errors = { _form: AUTH_UNAVAILABLE };
+    Astro.response.status = 503;
+  } else {
+    const { data, error } = await Astro.locals.supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: {
+        emailRedirectTo: `${Astro.url.origin}/auth/callback?next=/app/onboarding`,
+        data: { full_name: parsed.data.name },
+      },
+    });
+    if (error) {
+      errors = { _form: authErrorMessage(error) };
+      Astro.response.status = error.status === 429 ? 429 : 400;
+    } else if (data.session) {
+      return Astro.redirect('/app/onboarding', 303);
+    } else {
+      // Con confirmación por correo activa Supabase no crea sesión todavía.
+      checkEmail = true;
+    }
+  }
+}
+---
+
+<AuthLayout
+  title={checkEmail ? 'Mira tu correo' : 'Crea tu cuenta'}
+  intro={checkEmail ? undefined : 'Tu carta natal, calculada de verdad. Sin horóscopos de revista.'}
+>
+  {checkEmail ? (
+    <p class="notice" role="status">
+      Si el correo es correcto, te acabamos de enviar un enlace para activar la cuenta. Ábrelo en
+      este mismo navegador. Si no aparece, revisa spam: a veces los astros se esconden ahí.
+    </p>
+  ) : (
+    <>
+      <ErrorSummary errors={errors} />
+      <form method="post" novalidate class="stack">
+        <Field
+          name="name"
+          label="Nombre"
+          autocomplete="given-name"
+          value={values.name}
+          required
+          error={errors.name}
+        />
+        <Field
+          name="email"
+          label="Correo electrónico"
+          type="email"
+          autocomplete="email"
+          inputmode="email"
+          spellcheck="false"
+          value={values.email}
+          required
+          error={errors.email}
+        />
+        <Field
+          name="password"
+          label="Contraseña"
+          type="password"
+          autocomplete="new-password"
+          hint="Mínimo 10 caracteres, con al menos una letra y un número."
+          required
+          error={errors.password}
+        />
+        <Field
+          name="confirm"
+          label="Repite la contraseña"
+          type="password"
+          autocomplete="new-password"
+          required
+          error={errors.confirm}
+        />
+        <button class="btn btn-block" type="submit">
+          Crear cuenta
+        </button>
+      </form>
+      <p class="divider">o</p>
+      <form method="post" action="/auth/google?next=/app/onboarding">
+        <button class="btn btn-secondary btn-block" type="submit">
+          Registrarme con Google
+        </button>
+      </form>
+    </>
+  )}
+  <p class="alt">
+    ¿Ya tienes cuenta? <a href="/auth/login">Entra</a>
+  </p>
+</AuthLayout>
+
+<style>
+  .alt {
+    margin: 0;
+  }
+  .alt a {
+    display: inline-block;
+    padding-block: 0.6rem;
+  }
+</style>

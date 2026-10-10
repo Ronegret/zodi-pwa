@@ -5,12 +5,17 @@
   --bg: #f6f1ea;
   --surface: #fffdf9;
   --line: #e6ddd0;
+  /* Bordes de controles: contraste >= 3:1 (WCAG 1.4.11) */
+  --line-strong: #8a8399;
   --ink: #1d1a2b;
   --ink-soft: #5a5470;
   /* Marca (contraste >= 4.5:1 sobre --surface) */
   --brand: #4b3bb5;
   --brand-ink: #ffffff;
   --accent: #c2410c;
+  /* Estados (>= 4.5:1 sobre --surface y --bg) */
+  --danger: #b42318;
+  --success: #1f6f43;
   --radius: 20px;
   --radius-sm: 12px;
   --shadow: 0 1px 2px rgb(29 26 43 / 6%), 0 12px 32px -12px rgb(29 26 43 / 14%);
@@ -25,11 +30,14 @@
     --bg: #14112a;
     --surface: #1d1938;
     --line: #2f2a52;
+    --line-strong: #8b84b3;
     --ink: #f3effa;
     --ink-soft: #b8b0d6;
     --brand: #a99bff;
     --brand-ink: #14112a;
     --accent: #fb923c;
+    --danger: #ff9b8f;
+    --success: #7ee2a8;
   }
 }
 

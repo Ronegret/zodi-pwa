@@ -21,21 +21,28 @@ const nav = [
       <p class="brand">ZODI</p>
       <nav aria-label="Principal">
         <ul>
-          {
-            nav.map((n) => (
-              <li>
-                <a href={n.href} aria-current={n.id === current ? 'page' : undefined}>
-                  {n.label}
-                </a>
-              </li>
-            ))
-          }
+          {nav.map((n) => (
+            <li>
+              <a href={n.href} aria-current={n.id === current ? 'page' : undefined}>
+                {n.label}
+              </a>
+            </li>
+          ))}
         </ul>
       </nav>
     </aside>
     <div class="content">
-      <header class="topbar"><h1>{title}</h1></header>
-      <main id="main" class="grid"><slot /></main>
+      <header class="topbar">
+        <h1>{title}</h1>
+        <form method="post" action="/auth/salir">
+          <button class="btn btn-secondary" type="submit">
+            Cerrar sesión
+          </button>
+        </form>
+      </header>
+      <main id="main" class="grid">
+        <slot />
+      </main>
     </div>
   </div>
 </Base>
@@ -85,6 +92,11 @@ const nav = [
   .topbar {
     padding: 1.5rem 2rem;
     border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
   }
   .topbar h1 {
     font-size: clamp(1.75rem, 3vw, 2.5rem);

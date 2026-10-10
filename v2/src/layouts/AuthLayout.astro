@@ -1,0 +1,62 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  intro?: string | undefined;
+  wide?: boolean;
+}
+const { title, intro, wide = false } = Astro.props;
+---
+
+<Base title={title}>
+  <main id="main" class="auth">
+    <a class="brand" href="/">
+      ZODI<span class="visually-hidden">, ir al inicio</span>
+    </a>
+    <section class:list={['panel', { wide }]} aria-labelledby="auth-title">
+      <h1 id="auth-title">{title}</h1>
+      {intro && <p class="intro">{intro}</p>}
+      <slot />
+    </section>
+    <slot name="after" />
+  </main>
+</Base>
+
+<style>
+  .auth {
+    min-height: 100dvh;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 1.5rem;
+    padding: 2rem 1rem;
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 0.3em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .panel {
+    width: min(100%, 28rem);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: clamp(1.25rem, 4vw, 2rem);
+    display: grid;
+    gap: 1.25rem;
+  }
+  .panel.wide {
+    width: min(100%, 40rem);
+  }
+  h1 {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+  }
+  .intro {
+    margin: -0.5rem 0 0;
+    color: var(--ink-soft);
+  }
+</style>

@@ -1,0 +1,224 @@
+---
+/**
+ * Onboarding mínimo de la Fase 2: guarda datos de nacimiento y calcula la
+ * carta. La Fase 3 lo rehace por pasos y con buscador de ciudades
+ * (geocodificación); hasta entonces coordenadas y zona van a mano.
+ */
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import { completeOnboarding, getOwnProfile, UsernameTakenError } from '@/lib/server/profile';
+import { READING_TONES } from '@/lib/supabase/enums';
+import { fieldErrors, formToObject } from '@/lib/validation/common';
+import { onboardingSchema } from '@/lib/validation/profile';
+
+const { supabase, user } = Astro.locals;
+if (!supabase || !user) return Astro.redirect('/auth/login', 303);
+
+const profile = await getOwnProfile(supabase, user.id);
+let errors: Record<string, string> = {};
+let values: Record<string, string> = {
+  display_name: profile?.display_name ?? '',
+  username: profile?.username ?? '',
+  birth_date: profile?.birth_date ?? '',
+  birth_time: profile?.birth_time?.slice(0, 5) ?? '',
+  birth_place: profile?.birth_place ?? '',
+  birth_lat: profile?.birth_lat?.toString() ?? '',
+  birth_lon: profile?.birth_lon?.toString() ?? '',
+  time_zone: profile?.time_zone ?? 'Europe/Madrid',
+  reading_tone: profile?.reading_tone ?? 'directo',
+};
+let timeUnknown = false;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const raw = formToObject(form);
+  values = Object.fromEntries(
+    Object.keys(values).map((k) => [k, String(raw[k] ?? '').slice(0, 120)]),
+  );
+  timeUnknown = raw.birth_time_unknown === 'on';
+  const parsed = onboardingSchema.safeParse(raw);
+  if (!parsed.success) {
+    errors = fieldErrors(parsed.error);
+    Astro.response.status = 422;
+  } else {
+    try {
+      await completeOnboarding(supabase, user.id, parsed.data);
+      return Astro.redirect('/app', 303);
+    } catch (error) {
+      if (error instanceof UsernameTakenError) {
+        errors = { username: 'Ese usuario ya tiene dueño. Prueba otro.' };
+        Astro.response.status = 409;
+      } else {
+        console.error('[onboarding]', error);
+        errors = { _form: 'No hemos podido guardar tus datos. Inténtalo de nuevo.' };
+        Astro.response.status = 500;
+      }
+    }
+  }
+}
+
+const toneLabels: Record<(typeof READING_TONES)[number], string> = {
+  suave: 'Suave: con cariño',
+  directo: 'Directo: sin rodeos',
+  brutal: 'Brutal: sin anestesia',
+  sarcastico: 'Sarcástico: con retranca',
+};
+---
+
+<AuthLayout
+  title="Cuéntanos cuándo llegaste"
+  intro="Con esto calculamos tu carta natal real, planeta a planeta."
+  wide
+>
+  <ErrorSummary errors={errors} />
+  <form method="post" novalidate class="stack">
+    <fieldset>
+      <legend>Tú</legend>
+      <Field
+        name="display_name"
+        label="Nombre"
+        autocomplete="given-name"
+        value={values.display_name}
+        required
+        error={errors.display_name}
+      />
+      <Field
+        name="username"
+        label="Nombre de usuario"
+        autocomplete="username"
+        spellcheck="false"
+        hint="De 3 a 24 caracteres: letras sin tildes, números o guion bajo."
+        value={values.username}
+        required
+        error={errors.username}
+      />
+    </fieldset>
+
+    <fieldset>
+      <legend>Nacimiento</legend>
+      <Field
+        name="birth_date"
+        label="Fecha"
+        type="date"
+        min="1900-01-01"
+        value={values.birth_date}
+        required
+        error={errors.birth_date}
+      />
+      <Field
+        name="birth_time"
+        label="Hora"
+        type="time"
+        hint="Hora local del lugar de nacimiento. Sin ella no hay ascendente ni casas fiables."
+        value={values.birth_time}
+        error={errors.birth_time}
+      />
+      <div class="check">
+        <input
+          id="f-birth_time_unknown"
+          name="birth_time_unknown"
+          type="checkbox"
+          checked={timeUnknown}
+        />
+        <label for="f-birth_time_unknown">No sé la hora</label>
+      </div>
+      <Field
+        name="birth_place"
+        label="Lugar"
+        autocomplete="off"
+        value={values.birth_place}
+        required
+        error={errors.birth_place}
+      />
+      <div class="row">
+        <Field
+          name="birth_lat"
+          label="Latitud"
+          inputmode="decimal"
+          hint="Ej.: 40.4168"
+          value={values.birth_lat}
+          required
+          error={errors.birth_lat}
+        />
+        <Field
+          name="birth_lon"
+          label="Longitud"
+          inputmode="decimal"
+          hint="Ej.: -3.7038"
+          value={values.birth_lon}
+          required
+          error={errors.birth_lon}
+        />
+      </div>
+      <Field
+        name="time_zone"
+        label="Zona horaria"
+        spellcheck="false"
+        hint="Formato IANA, ej.: Europe/Madrid o America/Santiago."
+        value={values.time_zone}
+        required
+        error={errors.time_zone}
+      />
+    </fieldset>
+
+    <fieldset>
+      <legend>¿Cómo quieres que te hable Zodi?</legend>
+      <div class="tones">
+        {READING_TONES.map((tone) => (
+          <div class="check">
+            <input
+              id={`f-tone-${tone}`}
+              name="reading_tone"
+              type="radio"
+              value={tone}
+              checked={values.reading_tone === tone}
+            />
+            <label for={`f-tone-${tone}`}>{toneLabels[tone]}</label>
+          </div>
+        ))}
+      </div>
+    </fieldset>
+
+    <button class="btn btn-block" type="submit">
+      Calcular mi carta
+    </button>
+  </form>
+</AuthLayout>
+
+<style>
+  fieldset {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+  }
+  legend {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    padding: 0 0.4rem;
+  }
+  .row {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+  }
+  .check input {
+    width: 1.35rem;
+    height: 1.35rem;
+    accent-color: var(--brand);
+  }
+  .tones {
+    display: grid;
+    gap: 0.25rem;
+  }
+</style>

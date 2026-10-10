@@ -1,0 +1,86 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'input'>, 'id' | 'name'> {
+  name: string;
+  label: string;
+  hint?: string | undefined;
+  error?: string | undefined;
+}
+const { name, label, hint, error, required, ...attrs } = Astro.props;
+const id = `f-${name}`;
+const hintId = hint ? `${id}-hint` : undefined;
+const errorId = error ? `${id}-error` : undefined;
+const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
+---
+
+<div class="field" data-invalid={error ? '' : undefined}>
+  <label for={id}>
+    {label}
+    {required && <span class="req"> (obligatorio)</span>}
+  </label>
+  {hint && (
+    <p id={hintId} class="hint">
+      {hint}
+    </p>
+  )}
+  {error && (
+    <p id={errorId} class="error">
+      <span class="visually-hidden">Error: </span>
+      {error}
+    </p>
+  )}
+  <input
+    id={id}
+    name={name}
+    required={required}
+    aria-invalid={error ? 'true' : undefined}
+    aria-describedby={describedBy}
+    {...attrs}
+  />
+</div>
+
+<style>
+  .field {
+    display: grid;
+    gap: 0.35rem;
+  }
+  label {
+    font-weight: 600;
+  }
+  .req,
+  .hint {
+    color: var(--ink-soft);
+    font-weight: 400;
+    font-size: 0.875rem;
+  }
+  .hint {
+    margin: 0;
+  }
+  .error {
+    margin: 0;
+    color: var(--danger);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  input {
+    font: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    border: 2px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.85rem;
+    min-height: 48px;
+    width: 100%;
+  }
+  input:hover {
+    border-color: var(--ink-soft);
+  }
+  input:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 1px;
+  }
+  [data-invalid] input {
+    border-color: var(--danger);
+  }
+</style>

@@ -1,6 +1,15 @@
 ---
 import AppShell from '@/layouts/AppShell.astro';
 import Card from '@/components/ui/Card.astro';
+import { getLatestSelfChart } from '@/lib/server/charts';
+
+const { supabase } = Astro.locals;
+const stored = supabase ? await getLatestSelfChart(supabase) : null;
+const chart = stored?.chart;
+const sun = chart?.planets.find((p) => p.id === 'sun');
+const moon = chart?.planets.find((p) => p.id === 'moon');
+const fmt = (p: { sign: string; degree: number; minute: number }) =>
+  `${p.sign} ${p.degree}°${String(p.minute).padStart(2, '0')}′`;
 ---
 
 <AppShell title="Inicio" current="inicio">
@@ -8,7 +17,48 @@ import Card from '@/components/ui/Card.astro';
     <p>Tu lectura diaria aparecerá aquí.</p>
   </Card>
   <Card title="Carta natal" action={{ label: 'Abrir', href: '/app/carta' }}>
-    <p>Se calculará con efemérides reales (Fase 1).</p>
+    {chart && sun && moon ? (
+      <dl class="big3">
+        <div>
+          <dt>Sol</dt>
+          <dd>{fmt(sun)}</dd>
+        </div>
+        <div>
+          <dt>Luna</dt>
+          <dd>{fmt(moon)}</dd>
+        </div>
+        <div>
+          <dt>Ascendente</dt>
+          <dd>{stored.input.timeKnown ? fmt(chart.ascendant) : 'Sin hora de nacimiento'}</dd>
+        </div>
+      </dl>
+    ) : (
+      <p>
+        Aún no hay carta. <a href="/app/onboarding">Completa tus datos de nacimiento</a>.
+      </p>
+    )}
   </Card>
-  <Card title="Compatibilidad"><p>Compara dos cartas.</p></Card>
+  <Card title="Compatibilidad">
+    <p>Compara dos cartas.</p>
+  </Card>
 </AppShell>
+
+<style>
+  .big3 {
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .big3 div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  dt {
+    color: var(--ink-soft);
+  }
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+</style>
