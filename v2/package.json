@@ -20,15 +20,19 @@
     "@astrojs/check": "^0.9.10",
     "@astrojs/react": "^7.0.1",
     "@astrojs/vercel": "^11.0.13",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
     "astro": "^7.3.8",
     "astronomy-engine": "^2.1.19",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "three": "^0.186.1",
-    "typescript": "~5.9"
+    "typescript": "~5.9",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.64.0",
     "@types/react": "^19.3.0",
@@ -37,6 +41,7 @@
     "eslint": "^9.39.5",
     "eslint-plugin-astro": "^1.7.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
+    "globals": "^16.5.0",
     "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.1",
     "typescript-eslint": "^8.71.1",
