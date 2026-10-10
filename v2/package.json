@@ -21,6 +21,7 @@
     "@astrojs/react": "^7.0.1",
     "@astrojs/vercel": "^11.0.13",
     "astro": "^7.3.8",
+    "astronomy-engine": "^2.1.19",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "three": "^0.186.1",
