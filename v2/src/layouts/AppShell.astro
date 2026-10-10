@@ -1,0 +1,130 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  current?: string;
+}
+const { title, current = 'inicio' } = Astro.props;
+const nav = [
+  { id: 'inicio', label: 'Inicio', href: '/app' },
+  { id: 'carta', label: 'Carta natal', href: '/app/carta' },
+  { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo' },
+  { id: 'compat', label: 'Compatibilidad', href: '/app/compatibilidad' },
+  { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes' },
+];
+---
+
+<Base title={title}>
+  <div class="shell">
+    <aside class="sidebar">
+      <p class="brand">ZODI</p>
+      <nav aria-label="Principal">
+        <ul>
+          {
+            nav.map((n) => (
+              <li>
+                <a href={n.href} aria-current={n.id === current ? 'page' : undefined}>
+                  {n.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </aside>
+    <div class="content">
+      <header class="topbar"><h1>{title}</h1></header>
+      <main id="main" class="grid"><slot /></main>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    min-height: 100dvh;
+  }
+  .sidebar {
+    padding: 1.5rem 1rem;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: 0.3em;
+    margin: 0 0 2rem 0.75rem;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.25rem;
+  }
+  a {
+    display: block;
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    text-decoration: none;
+    min-height: 44px;
+  }
+  a:hover {
+    background: var(--bg);
+  }
+  a[aria-current='page'] {
+    background: var(--brand);
+    color: var(--brand-ink);
+  }
+  .topbar {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar h1 {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+  }
+  .grid {
+    padding: 2rem;
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    align-items: start;
+  }
+  @media (max-width: 800px) {
+    .shell {
+      grid-template-columns: 1fr;
+      padding-bottom: 72px;
+    }
+    .sidebar {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: auto;
+      z-index: 10;
+      border: 0;
+      border-top: 1px solid var(--line);
+      padding: 0.25rem;
+    }
+    .brand {
+      display: none;
+    }
+    ul {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+    }
+    a {
+      text-align: center;
+      font-size: 0.75rem;
+      padding: 0.6rem 0.2rem;
+    }
+    .grid,
+    .topbar {
+      padding: 1rem;
+    }
+  }
+</style>

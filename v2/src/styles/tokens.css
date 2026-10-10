@@ -1,0 +1,40 @@
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: system-ui, 'Segoe UI', sans-serif;
+  /* Superficies */
+  --bg: #f6f1ea;
+  --surface: #fffdf9;
+  --line: #e6ddd0;
+  --ink: #1d1a2b;
+  --ink-soft: #5a5470;
+  /* Marca (contraste >= 4.5:1 sobre --surface) */
+  --brand: #4b3bb5;
+  --brand-ink: #ffffff;
+  --accent: #c2410c;
+  --radius: 20px;
+  --radius-sm: 12px;
+  --shadow: 0 1px 2px rgb(29 26 43 / 6%), 0 12px 32px -12px rgb(29 26 43 / 14%);
+  --sidebar-w: 264px;
+  /* Movimiento */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 320ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14112a;
+    --surface: #1d1938;
+    --line: #2f2a52;
+    --ink: #f3effa;
+    --ink-soft: #b8b0d6;
+    --brand: #a99bff;
+    --brand-ink: #14112a;
+    --accent: #fb923c;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0.01ms;
+  }
+}

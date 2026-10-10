@@ -1,0 +1,40 @@
+---
+interface Props {
+  title: string;
+  action?: { label: string; href: string };
+}
+const { title, action } = Astro.props;
+const id = `c-${title.toLowerCase().replace(/\W+/g, '-')}`;
+---
+
+<section class="card" aria-labelledby={id}>
+  <header>
+    <h2 id={id}>{title}</h2>
+    {action && <a href={action.href}>{action.label}</a>}
+  </header>
+  <slot />
+</section>
+
+<style>
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: 1.35rem;
+  }
+  a {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brand);
+  }
+</style>

@@ -1,0 +1,14 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import Card from '@/components/ui/Card.astro';
+---
+
+<AppShell title="Inicio" current="inicio">
+  <Card title="Hoy" action={{ label: 'Ver horóscopo', href: '/app/horoscopo' }}>
+    <p>Tu lectura diaria aparecerá aquí.</p>
+  </Card>
+  <Card title="Carta natal" action={{ label: 'Abrir', href: '/app/carta' }}>
+    <p>Se calculará con efemérides reales (Fase 1).</p>
+  </Card>
+  <Card title="Compatibilidad"><p>Compara dos cartas.</p></Card>
+</AppShell>
