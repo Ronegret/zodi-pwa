@@ -36,6 +36,13 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 - `localToUtc` usa solo `Intl` (maneja DST; no conoce hora solar local previa a ~1970).
 - 22 tests en `v2/tests/unit/`. Contrastado con J2000 y con la carta de Einstein (Sol 23°30' Piscis, Luna 14°31' Sagitario, ASC 11°38' Cáncer).
 
+**Fase 2 — datos y auth (Supabase)** (`a3d55f2`, `8000890`, `0494d89`, `b995dda`). Hecha **sin credenciales**; detalle y checklist de conexión en `v2/docs/FASE-2-informe.md`:
+- `supabase/migrations/` (6 ficheros idempotentes): profiles (trigger al registrarse), natal_charts, readings, usage_limits/usage_events, community_posts, comments, friendships, subscriptions, gem_transactions, stripe_events. RLS en todas; plan/gemas/xp y lecturas solo con service role (permisos por columna). Funciones `consume_ai_quota` (cuota diaria atómica por plan: free 5, premium 40, vip 150), `ai_quota_status`, `apply_gem_transaction` (idempotente), `profile_cards`.
+- `src/lib/supabase/`: clientes `browser`/`server` (@supabase/ssr, cookies HttpOnly)/`admin` (service role vía `astro:env/server`), `database.types.ts` escrito a mano (regenerar con `supabase gen types`), `enums.ts`.
+- `src/middleware.ts`: `getUser()` en rutas privadas, `/api` privada por defecto (salvo `/api/salud`), CSRF por origen, redirección a onboarding, cabeceras de seguridad. CSP con hashes vía `security.csp` de Astro (no actúa en dev).
+- Acceso en `/auth/*` (login, registro, recuperar, nueva-clave, Google PKCE, callback con `code` o `token_hash`, salir por POST). Zod en `src/lib/validation/`. API: `/api/perfil`, `/api/carta`, `/api/uso`, `/api/salud`. Onboarding mínimo en `/app/onboarding` (lat/lon/zona a mano hasta Fase 3) que guarda la carta real; `/app` muestra Sol/Luna/ASC.
+- Tests: 30 de RLS contra Postgres real en PGlite (`tests/db/`, roles de Supabase simulados), 55 unitarios nuevos, e2e con Supabase simulado (`tests/e2e/support/mock-supabase.mjs`). Verificado: check 0 errores, lint limpio, 107/107 unitarios, build OK, 54/54 e2e en móvil/tablet/escritorio con axe sin violaciones.
+
 ## 5. Hallazgos de la app actual (a resolver en v2)
 - `lib/astral.ts`: Luna y Ascendente salen de `signs[(seed + birthCity.length) % 12]` (falso). Solo el signo solar es correcto. El horóscopo chino usa el año natural, no el Año Nuevo Lunar.
 - `middleware.ts` solo comprueba que exista la cookie `zodi_auth` sin validarla; la API acepta el token literal `"local_session"` y se salta la verificación.
@@ -45,12 +52,14 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 ## 6. Limitaciones conocidas / pendientes
 - Cúspides Placidus **no contrastadas** con software de referencia (solo invariantes); compararlas con Astro.com antes de mostrarlas al público.
 - Falta el paso ciudad → coordenadas + zona IANA (planeado en Fase 3 con geocodificación; Open-Meteo devuelve también la zona).
-- Tests e2e de tablet sin ejecutar.
+- Tablet en e2e corre en Chromium con viewport de iPad: WebKit no arranca en Windows (falta `icutu77.dll`). Probar Safari en CI Linux.
+- Supabase real sin conectar: faltan `v2/.env.local`, aplicar migraciones, configurar Auth/Google y regenerar tipos (checklist en `FASE-2-informe.md`). La RLS solo se ha probado en PGlite.
+- `npm audit`: 8 altas heredadas de Fase 0 (`@astrojs/vercel` → `path-to-regexp`; `eslint-plugin-astro` → `braces`); `audit fix --force` es rompedor, revisar en Fase 8.
 
 ## 7. Plan restante
 | Fase | Contenido |
 |---|---|
-| **2. Datos y auth (Supabase)** | Esquema SQL + migraciones en `v2/supabase/migrations/`, RLS por usuario, cliente tipado servidor/navegador (`src/lib/supabase/`), auth Google + email, middleware que valide la sesión de verdad, API protegida, límite de uso para la IA. Variables en `v2/.env.local` (ver `.env.example`): `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. |
+| **2. Datos y auth (Supabase)** | Hecha en código y tests. Pendiente: conectar el proyecto `mdtgjgfeoudiyotgcxsy` (variables en `v2/.env.local`: `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`), `supabase db push`, Auth/Google, `gen types`. |
 | **3. Diseño y layout** | Tokens y componentes base, shell estilo AEM completo, geocodificación de lugar de nacimiento, onboarding, WCAG AA desde el principio. |
 | **4. Motion** | View Transitions, scroll (Lenis o GSAP ScrollTrigger), microinteracciones, tiempo de movimiento unificado, modo reducido. |
 | **5. Escenas 3D** | `src/scenes/`: hero zodiacal, rueda de carta natal, tarot, signo del día. Toon + outline + RoundedBox, carga perezosa, presupuesto de rendimiento. |
@@ -64,8 +73,8 @@ npm run dev          # astro dev
 npm run build        # astro build
 npm run check        # astro check
 npm run lint         # eslint .
-npm test             # vitest run
-npm run test:e2e     # playwright test (levanta el dev server en :4321)
+npm test             # vitest run (unitarios + RLS en PGlite)
+npm run test:e2e     # playwright: mock de Supabase en :54329 + dev server en :4329
 ```
 
 ## 9. Reglas de trabajo y trampas
@@ -75,7 +84,11 @@ npm run test:e2e     # playwright test (levanta el dev server en :4321)
 - Antes de afirmar que algo funciona, ejecútalo (check, lint, tests, build, axe). Reporta fallos con su salida.
 - Nunca pegues claves en el chat ni las versiones; van en `v2/.env.local` (ignorado por git).
 - Idioma de UI y copy: español.
+- Prettier: formatea solo los ficheros que toques (`npx prettier --write <ficheros>`); hay ficheros de Fase 0 sin formatear y no conviene mezclarlos en otros commits.
+- Los e2e nunca usan el Supabase real: Playwright pasa `PUBLIC_SUPABASE_URL` del mock al servidor (process.env manda sobre `.env.local`). Si un e2e necesita un endpoint nuevo de Supabase, añádelo al mock.
+- Cambios de esquema: nueva migración en `supabase/migrations/`, idempotente, y su test en `tests/db/rls.test.ts` (reaplica todas las migraciones dos veces).
 - Acciones destructivas o que publican (borrar archivos del repo raíz, reescribir historial, push, deploy) requieren mi confirmación.
 
 ## 10. Primer paso que quiero ahora
-Empieza la **Fase 2**: esquema SQL y migraciones de Supabase (profiles, readings, natal_charts, usage_limits, etc. con RLS), cliente tipado, auth y middleware de sesión real. Si aún no hay credenciales en `v2/.env.local`, avanza solo con el esquema y las migraciones sin conectar.
+1. Si ya existe `v2/.env.local` con credenciales: conecta Supabase siguiendo la checklist de `v2/docs/FASE-2-informe.md` (migraciones, Auth, Google, `gen types`, Advisors) y verifica registro → onboarding → carta contra el proyecto real.
+2. Después, **Fase 3**: sistema de diseño, dashboard estilo AEM, onboarding por pasos con geocodificación (Open-Meteo) y página `/app/carta`.
