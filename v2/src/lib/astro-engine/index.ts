@@ -6,6 +6,9 @@ import { localToUtc } from './time';
 import type { BirthInput, NatalChart, PlanetId } from './types';
 
 export * from './types';
+
+/** Se guarda con cada carta: si cambia el cálculo, se sabe qué cartas recalcular. */
+export const ENGINE_VERSION = '1.0.0';
 export { localToUtc } from './time';
 
 const ORDER: PlanetId[] = [

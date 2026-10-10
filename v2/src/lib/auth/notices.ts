@@ -1,0 +1,19 @@
+/** Avisos por ?aviso= en /auth/login. Solo claves conocidas: nada de texto libre en la URL. */
+const NOTICES = {
+  salida: { tone: 'info', text: 'Has cerrado sesión. El universo seguirá aquí cuando vuelvas.' },
+  'enlace-invalido': {
+    tone: 'error',
+    text: 'El enlace no es válido o ha caducado. Pide uno nuevo.',
+  },
+  'google-error': {
+    tone: 'error',
+    text: 'No hemos podido conectar con Google. Inténtalo otra vez.',
+  },
+  'no-disponible': { tone: 'error', text: 'El acceso está en mantenimiento. Vuelve en un rato.' },
+} as const;
+
+export type Notice = (typeof NOTICES)[keyof typeof NOTICES];
+
+export function noticeFor(key: string | null): Notice | null {
+  return key && Object.hasOwn(NOTICES, key) ? NOTICES[key as keyof typeof NOTICES] : null;
+}
