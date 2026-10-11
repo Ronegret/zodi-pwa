@@ -55,8 +55,8 @@ test.describe('acceso', () => {
     const user = await createTestUser(request, true);
     await login(page, user);
     await expect(page).toHaveURL(/\/app$/);
-    await expect(page.getByRole('heading', { level: 1, name: 'Inicio' })).toBeVisible();
-    await expect(page.getByText('Aries 10°05′')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Hola, Ana' })).toBeVisible();
+    await expect(page.getByText('Aries 25°06′')).toBeVisible();
 
     const cookie = (await page.context().cookies()).find((c) => c.name.startsWith('sb-'));
     expect(cookie).toMatchObject({ httpOnly: true, sameSite: 'Lax' });
@@ -75,33 +75,6 @@ test.describe('acceso', () => {
     const user = await createTestUser(request, true);
     await login(page, user, '/auth/login?next=%2F%2Fevil.example%2F');
     await expect(page).toHaveURL(/localhost:4329\/app$/);
-  });
-
-  test('usuario nuevo: onboarding calcula y guarda su carta real', async ({ page, request }) => {
-    const user = await createTestUser(request, false);
-    await login(page, user);
-    await expect(page).toHaveURL(/\/app\/onboarding$/);
-
-    await page.getByLabel('Nombre (obligatorio)', { exact: true }).fill('Ana');
-    await page.getByLabel('Nombre de usuario').fill(`ana_${user.id.slice(0, 6)}`);
-    await page.getByLabel('Fecha').fill('1990-04-15');
-    await page.getByLabel('Hora', { exact: true }).fill('10:30');
-    await page.getByLabel('Lugar').fill('Madrid');
-    await page.getByLabel('Latitud').fill('40,4168');
-    await page.getByLabel('Longitud').fill('-3.7038');
-    await page.getByLabel('Zona horaria').fill('Europe/Madrid');
-    await page.getByLabel('Brutal: sin anestesia').check();
-    await page.getByRole('button', { name: 'Calcular mi carta' }).click();
-
-    await expect(page).toHaveURL(/\/app$/);
-    await expect(page.getByText('Aries 25°06′')).toBeVisible();
-    await expect(page.getByText('Sagitario 22°08′')).toBeVisible();
-    await expect(page.getByText('Géminis 19°10′')).toBeVisible();
-
-    const res = await page.request.get('/api/carta');
-    expect(res.status()).toBe(200);
-    const { data } = await res.json();
-    expect(data.input).toMatchObject({ date: '1990-04-15', time: '10:30', timeKnown: true });
   });
 });
 

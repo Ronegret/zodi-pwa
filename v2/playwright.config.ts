@@ -18,7 +18,11 @@ export default defineConfig({
       url: APP_URL,
       reuseExistingServer: !process.env.CI,
       // process.env tiene prioridad sobre .env.local: los e2e nunca tocan el Supabase real.
-      env: { PUBLIC_SUPABASE_URL: MOCK_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY: 'e2e-anon-key' },
+      env: {
+        PUBLIC_SUPABASE_URL: MOCK_SUPABASE_URL,
+        PUBLIC_SUPABASE_ANON_KEY: 'e2e-anon-key',
+        GEOCODING_API_URL: MOCK_SUPABASE_URL,
+      },
     },
   ],
   use: { baseURL: APP_URL },

@@ -1,0 +1,296 @@
+{
+  "input": {
+    "date": "1990-04-15",
+    "time": "10:30",
+    "timeZone": "Europe/Madrid",
+    "latitude": 40.4168,
+    "longitude": -3.7038,
+    "timeKnown": true
+  },
+  "chart": {
+    "utc": "1990-04-15T08:30:00.000Z",
+    "latitude": 40.4168,
+    "longitude": -3.7038,
+    "houseSystem": "placidus",
+    "planets": [
+      {
+        "id": "sun",
+        "lon": 25.11374809877941,
+        "sign": "Aries",
+        "degree": 25,
+        "minute": 6,
+        "retrograde": false,
+        "house": 11
+      },
+      {
+        "id": "moon",
+        "lon": 262.14053722258836,
+        "sign": "Sagitario",
+        "degree": 22,
+        "minute": 8,
+        "retrograde": false,
+        "house": 7
+      },
+      {
+        "id": "mercury",
+        "lon": 44.380278245312184,
+        "sign": "Tauro",
+        "degree": 14,
+        "minute": 22,
+        "retrograde": false,
+        "house": 12
+      },
+      {
+        "id": "venus",
+        "lon": 339.3940353291581,
+        "sign": "Piscis",
+        "degree": 9,
+        "minute": 23,
+        "retrograde": false,
+        "house": 10
+      },
+      {
+        "id": "mars",
+        "lon": 325.8351170415551,
+        "sign": "Acuario",
+        "degree": 25,
+        "minute": 50,
+        "retrograde": false,
+        "house": 10
+      },
+      {
+        "id": "jupiter",
+        "lon": 94.52631122656868,
+        "sign": "Cáncer",
+        "degree": 4,
+        "minute": 31,
+        "retrograde": false,
+        "house": 1
+      },
+      {
+        "id": "saturn",
+        "lon": 295.0246417388397,
+        "sign": "Capricornio",
+        "degree": 25,
+        "minute": 1,
+        "retrograde": false,
+        "house": 8
+      },
+      {
+        "id": "uranus",
+        "lon": 279.58707895403734,
+        "sign": "Capricornio",
+        "degree": 9,
+        "minute": 35,
+        "retrograde": true,
+        "house": 7
+      },
+      {
+        "id": "neptune",
+        "lon": 284.573758372744,
+        "sign": "Capricornio",
+        "degree": 14,
+        "minute": 34,
+        "retrograde": false,
+        "house": 8
+      },
+      {
+        "id": "pluto",
+        "lon": 226.99464253744952,
+        "sign": "Escorpio",
+        "degree": 16,
+        "minute": 59,
+        "retrograde": true,
+        "house": 6
+      },
+      {
+        "id": "northNode",
+        "lon": 312.93225031239035,
+        "sign": "Acuario",
+        "degree": 12,
+        "minute": 55,
+        "retrograde": true,
+        "house": 9
+      }
+    ],
+    "ascendant": {
+      "lon": 79.17861407128919,
+      "sign": "Géminis",
+      "degree": 19,
+      "minute": 10
+    },
+    "midheaven": {
+      "lon": 324.74839016545457,
+      "sign": "Acuario",
+      "degree": 24,
+      "minute": 44
+    },
+    "houses": [
+      {
+        "lon": 79.17861407128919,
+        "sign": "Géminis",
+        "degree": 19,
+        "minute": 10
+      },
+      {
+        "lon": 100.29361473493543,
+        "sign": "Cáncer",
+        "degree": 10,
+        "minute": 17
+      },
+      {
+        "lon": 120.83402422128495,
+        "sign": "Leo",
+        "degree": 0,
+        "minute": 50
+      },
+      {
+        "lon": 144.7483901654545,
+        "sign": "Leo",
+        "degree": 24,
+        "minute": 44
+      },
+      {
+        "lon": 176.3208960883187,
+        "sign": "Virgo",
+        "degree": 26,
+        "minute": 19
+      },
+      {
+        "lon": 217.59773019315412,
+        "sign": "Escorpio",
+        "degree": 7,
+        "minute": 35
+      },
+      {
+        "lon": 259.1786140712892,
+        "sign": "Sagitario",
+        "degree": 19,
+        "minute": 10
+      },
+      {
+        "lon": 280.29361473493543,
+        "sign": "Capricornio",
+        "degree": 10,
+        "minute": 17
+      },
+      {
+        "lon": 300.83402422128495,
+        "sign": "Acuario",
+        "degree": 0,
+        "minute": 50
+      },
+      {
+        "lon": 324.74839016545457,
+        "sign": "Acuario",
+        "degree": 24,
+        "minute": 44
+      },
+      {
+        "lon": 356.3208960883187,
+        "sign": "Piscis",
+        "degree": 26,
+        "minute": 19
+      },
+      {
+        "lon": 37.597730193154064,
+        "sign": "Tauro",
+        "degree": 7,
+        "minute": 35
+      }
+    ],
+    "aspects": [
+      {
+        "a": "sun",
+        "b": "saturn",
+        "type": "square",
+        "orb": 0.09
+      },
+      {
+        "a": "mercury",
+        "b": "neptune",
+        "type": "trine",
+        "orb": 0.19
+      },
+      {
+        "a": "venus",
+        "b": "uranus",
+        "type": "sextile",
+        "orb": 0.19
+      },
+      {
+        "a": "sun",
+        "b": "mars",
+        "type": "sextile",
+        "orb": 0.72
+      },
+      {
+        "a": "mercury",
+        "b": "northNode",
+        "type": "square",
+        "orb": 1.45
+      },
+      {
+        "a": "neptune",
+        "b": "pluto",
+        "type": "sextile",
+        "orb": 2.42
+      },
+      {
+        "a": "mercury",
+        "b": "pluto",
+        "type": "opposition",
+        "orb": 2.61
+      },
+      {
+        "a": "sun",
+        "b": "moon",
+        "type": "trine",
+        "orb": 2.97
+      },
+      {
+        "a": "moon",
+        "b": "mars",
+        "type": "sextile",
+        "orb": 3.69
+      },
+      {
+        "a": "pluto",
+        "b": "northNode",
+        "type": "square",
+        "orb": 4.06
+      },
+      {
+        "a": "mercury",
+        "b": "uranus",
+        "type": "trine",
+        "orb": 4.79
+      },
+      {
+        "a": "venus",
+        "b": "jupiter",
+        "type": "trine",
+        "orb": 4.87
+      },
+      {
+        "a": "mercury",
+        "b": "venus",
+        "type": "sextile",
+        "orb": 4.99
+      },
+      {
+        "a": "uranus",
+        "b": "neptune",
+        "type": "conjunction",
+        "orb": 4.99
+      },
+      {
+        "a": "jupiter",
+        "b": "uranus",
+        "type": "opposition",
+        "orb": 5.06
+      }
+    ]
+  },
+  "engine_version": "1.0.0"
+}

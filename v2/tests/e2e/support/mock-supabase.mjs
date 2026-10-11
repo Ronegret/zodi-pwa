@@ -5,6 +5,7 @@
  * de Playwright (móvil, tablet, escritorio) no se pisan entre sí.
  */
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 
 const PORT = Number(process.env.MOCK_SUPABASE_PORT ?? 54329);
@@ -20,17 +21,45 @@ const charts = new Map();
 const accessTokens = new Map();
 const refreshTokens = new Map();
 
-const SEED_CHART = {
-  utc: '1990-04-15T08:30:00.000Z',
-  planets: [
-    { id: 'sun', lon: 10.08, sign: 'Aries', degree: 10, minute: 5, retrograde: false, house: 10 },
-    { id: 'moon', lon: 32, sign: 'Tauro', degree: 2, minute: 0, retrograde: false, house: 11 },
-  ],
-  ascendant: { lon: 140.5, sign: 'Leo', degree: 20, minute: 30 },
-  midheaven: { lon: 20, sign: 'Aries', degree: 20, minute: 0 },
-  houses: [],
-  aspects: [],
-};
+// Carta real (generada por el motor, ver tests/unit/e2e-fixture.test.ts).
+const FIXTURE = JSON.parse(readFileSync(new URL('./fixture-chart.json', import.meta.url), 'utf8'));
+
+/** Fila de perfil con las mismas columnas que la tabla real. */
+function blankProfile(id, now) {
+  return {
+    id,
+    display_name: 'E2E',
+    username: null,
+    avatar_url: null,
+    birth_date: null,
+    birth_time: null,
+    birth_time_known: null,
+    birth_place: null,
+    birth_lat: null,
+    birth_lon: null,
+    time_zone: null,
+    language: 'es',
+    reading_tone: 'directo',
+    favorite_topics: [],
+    notification_prefs: [],
+    relationship_status: null,
+    partner_name: null,
+    has_kids: null,
+    kids_count: null,
+    personal_bio: null,
+    plan: 'free',
+    gems: 0,
+    xp: 0,
+    level: 1,
+    streak: 0,
+    last_active_on: null,
+    referral_code: id.slice(0, 10),
+    referred_by: null,
+    onboarding_completed_at: null,
+    created_at: now,
+    updated_at: now,
+  };
+}
 
 function createUser({ onboarded }) {
   const id = randomUUID();
@@ -38,16 +67,25 @@ function createUser({ onboarded }) {
   users.set(id, { id, email, password: PASSWORD });
   const now = new Date().toISOString();
   profiles.set(id, {
-    id,
-    display_name: 'E2E',
-    username: null,
-    plan: 'free',
-    gems: 0,
-    time_zone: null,
-    reading_tone: 'directo',
-    onboarding_completed_at: onboarded ? now : null,
-    created_at: now,
-    updated_at: now,
+    ...blankProfile(id, now),
+    ...(onboarded
+      ? {
+          display_name: 'Ana Estrella',
+          username: `ana_${id.slice(0, 6)}`,
+          birth_date: '1990-04-15',
+          birth_time: '10:30:00',
+          birth_time_known: true,
+          birth_place: 'Madrid, Comunidad de Madrid, España',
+          birth_lat: 40.4168,
+          birth_lon: -3.7038,
+          time_zone: 'Europe/Madrid',
+          xp: 340,
+          level: 3,
+          streak: 5,
+          gems: 12,
+          onboarding_completed_at: now,
+        }
+      : {}),
   });
   charts.set(
     id,
@@ -58,15 +96,62 @@ function createUser({ onboarded }) {
             user_id: id,
             label: 'Yo',
             is_self: true,
-            input: { date: '1990-04-15', time: '10:30', timeKnown: true },
-            chart: SEED_CHART,
-            engine_version: '1.0.0',
+            input: FIXTURE.input,
+            chart: FIXTURE.chart,
+            engine_version: FIXTURE.engine_version,
             created_at: now,
           },
         ]
       : [],
   );
   return { id, email, password: PASSWORD };
+}
+
+/** Open-Meteo Geocoding simulado: unas pocas ciudades conocidas. */
+const CITIES = [
+  {
+    id: 3117735,
+    name: 'Madrid',
+    latitude: 40.4165,
+    longitude: -3.70256,
+    timezone: 'Europe/Madrid',
+    country: 'España',
+    admin1: 'Comunidad de Madrid',
+  },
+  {
+    id: 3871336,
+    name: 'Santiago',
+    latitude: -33.45694,
+    longitude: -70.64827,
+    timezone: 'America/Santiago',
+    country: 'Chile',
+    admin1: 'Región Metropolitana',
+  },
+  {
+    id: 3109642,
+    name: 'Santiago de Compostela',
+    latitude: 42.88052,
+    longitude: -8.54569,
+    timezone: 'Europe/Madrid',
+    country: 'España',
+    admin1: 'Galicia',
+  },
+  {
+    id: 3128760,
+    name: 'Barcelona',
+    latitude: 41.38879,
+    longitude: 2.15899,
+    timezone: 'Europe/Madrid',
+    country: 'España',
+    admin1: 'Cataluña',
+  },
+];
+const fold = (s) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
+function handleGeocoding(res, url) {
+  const q = fold(url.searchParams.get('name') ?? '');
+  const results = CITIES.filter((c) => fold(c.name).startsWith(q));
+  return send(res, 200, results.length ? { results } : { generationtime_ms: 0.1 });
 }
 
 const b64url = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
@@ -265,6 +350,7 @@ createServer(async (req, res) => {
     if (url.pathname === '/__test/users' && req.method === 'POST') {
       return send(res, 201, createUser(await readBody(req)));
     }
+    if (url.pathname === '/v1/search') return handleGeocoding(res, url);
     if (url.pathname.startsWith('/auth/v1/')) return await handleAuth(req, res, url);
     if (url.pathname.startsWith('/rest/v1/')) return await handleRest(req, res, url);
     return send(res, 404, { message: 'mock: ruta desconocida' });
