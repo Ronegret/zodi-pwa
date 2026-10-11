@@ -1,48 +1,109 @@
+/*
+ * Tokens de Zodi v2: el sistema visual de la app actual (app/globals.css,
+ * "ZODI Design System v2.0") portado tal cual: negro neón, ácido lima,
+ * violeta, rosa, cian y oro; Syne + Plus Jakarta Sans + JetBrains Mono.
+ * Ajustes solo para WCAG AA: texto secundario sólido (6.8:1), violeta claro
+ * para texto (7.4:1) y bordes de control >= 3:1. Medido sobre --surface.
+ */
 :root {
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: system-ui, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+
+  /* Marca */
+  --acid: #b8ff17;
+  --acid-soft: #d4ff6a;
+  --violet: #9b4dff;
+  --violet-text: #b98aff;
+  --hot: #ff2bd6;
+  --cyan: #33f7ff;
+  --gold: #f5c842;
+
   /* Superficies */
-  --bg: #f6f1ea;
-  --surface: #fffdf9;
-  --line: #e6ddd0;
-  /* Bordes de controles: contraste >= 3:1 (WCAG 1.4.11) */
-  --line-strong: #8a8399;
-  --ink: #1d1a2b;
-  --ink-soft: #5a5470;
-  /* Marca (contraste >= 4.5:1 sobre --surface) */
-  --brand: #4b3bb5;
-  --brand-ink: #ffffff;
-  --accent: #c2410c;
-  /* Estados (>= 4.5:1 sobre --surface y --bg) */
-  --danger: #b42318;
-  --success: #1f6f43;
-  --radius: 20px;
-  --radius-sm: 12px;
-  --shadow: 0 1px 2px rgb(29 26 43 / 6%), 0 12px 32px -12px rgb(29 26 43 / 14%);
+  --bg: #060608;
+  --surface: #0e0e14;
+  --surface-2: #161620;
+  --surface-3: #1e1e2c;
+  --panel: linear-gradient(145deg, rgb(22 22 32 / 97%), rgb(14 14 20 / 97%));
+
+  /* Texto */
+  --ink: #f0f0eb;
+  --ink-soft: #9a9a99;
+  /* Solo decorativo (2.9:1): nunca para texto que haya que leer */
+  --ink-muted: #5d5d5f;
+
+  /* Bordes */
+  --line: rgb(255 255 255 / 7%);
+  --line-acid: rgb(184 255 23 / 22%);
+  --line-violet: rgb(155 77 255 / 22%);
+  /* Bordes de controles: >= 3:1 (WCAG 1.4.11) */
+  --line-strong: #6e6e85;
+
+  /* Semántica */
+  --brand: var(--acid);
+  --brand-ink: #060608;
+  --kicker: #7dab16;
+  --danger: #ff6b81;
+  --success: var(--acid);
+
+  /* Gráficos (>= 3:1 sobre --surface) */
+  --chart-1: var(--acid);
+  --chart-2: var(--violet-text);
+  --chart-3: var(--hot);
+  --chart-4: var(--cyan);
+  --chart-5: var(--gold);
+
+  /* Tipografía */
+  --font-display: 'Syne Variable', 'Syne', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Escala fluida */
+  --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.9rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.4vw, 1.35rem);
+  --step-2: clamp(1.44rem, 1.3rem + 0.7vw, 1.75rem);
+  --step-3: clamp(1.73rem, 1.5rem + 1.1vw, 2.25rem);
+  --step-4: clamp(1.75rem, 1.35rem + 2vw, 3rem);
+  --step-5: clamp(2rem, 1.35rem + 3.2vw, 3.75rem);
+
+  /* Espaciado */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Forma (radios de la app actual) */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+  --shadow: 0 1px 0 0 rgb(255 255 255 / 4%) inset, 0 12px 32px -16px rgb(0 0 0 / 70%);
+  --shadow-lg: 0 24px 60px -20px rgb(0 0 0 / 80%);
+  --glow-acid: 0 0 0 1px rgb(184 255 23 / 12%), 0 8px 32px rgb(184 255 23 / 8%);
+  --glow-violet: 0 0 0 1px rgb(155 77 255 / 18%), 0 8px 32px rgb(155 77 255 / 12%);
+
+  /* Layout */
   --sidebar-w: 264px;
-  /* Movimiento */
+  --rail-w: 92px;
+  --nav-h: 64px;
+  --sab: env(safe-area-inset-bottom, 0px);
+  --z-nav: 20;
+  --z-fab: 30;
+  --z-toast: 50;
+
+  /* Movimiento (la Fase 4 lo amplía en src/lib/motion) */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --dur: 320ms;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14112a;
-    --surface: #1d1938;
-    --line: #2f2a52;
-    --line-strong: #8b84b3;
-    --ink: #f3effa;
-    --ink-soft: #b8b0d6;
-    --brand: #a99bff;
-    --brand-ink: #14112a;
-    --accent: #fb923c;
-    --danger: #ff9b8f;
-    --success: #7ee2a8;
-  }
+  --dur-fast: 160ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur: 0.01ms;
+    --dur-fast: 0.01ms;
   }
 }

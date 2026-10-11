@@ -5,19 +5,24 @@ interface Props {
   title: string;
   description?: string;
 }
-const { title, description = 'Zodi — astrología personal con IA' } = Astro.props;
+const { title, description = 'Zodi — astrología personal con IA, sin filtro.' } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#060608" />
+    <link rel="icon" type="image/webp" href="/brand/isotipo-96.webp" />
     <title>{title} · Zodi</title>
   </head>
   <body>
-    <a class="skip-link" href="#main">Saltar al contenido</a>
+    <a class="skip-link" href="#main">
+      Saltar al contenido
+    </a>
     <slot />
   </body>
 </html>
