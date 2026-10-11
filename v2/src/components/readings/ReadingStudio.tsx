@@ -300,7 +300,13 @@ export function ReadingStudio({
         {cards && <TarotSpread cards={cards} />}
         {phase === 'loading' && (
           <div className="studio-loading">
-            <span className="studio-orb" aria-hidden="true" />
+            <img
+              className="studio-zodi"
+              src="/art/zodi-bola-640.webp"
+              alt=""
+              width="640"
+              height="640"
+            />
             <p>{LOADING_LINES[Math.floor(Date.now() / 1000) % LOADING_LINES.length]}</p>
           </div>
         )}
@@ -330,9 +336,20 @@ export function ReadingStudio({
           </div>
         )}
         {phase === 'idle' && (
-          <p className="studio-empty muted">
-            Tu lectura aparecerá aquí, escrita en directo para ti.
-          </p>
+          <figure className="studio-empty">
+            <img
+              src="/art/zodi-bola-640.webp"
+              alt="ZODI con su bola de cristal, esperando tu pregunta"
+              width="640"
+              height="640"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption>
+              ZODI ya tiene la bola de cristal encendida. Tu lectura aparecerá aquí, escrita en
+              directo para ti.
+            </figcaption>
+          </figure>
         )}
       </section>
       <p className="visually-hidden" role="status">

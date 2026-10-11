@@ -43,6 +43,17 @@ const card = dailyCard(profile.id, d.today);
       class="span-hoy"
       action={{ label: 'Lectura completa', href: '/app/horoscopo' }}
     >
+      <img
+        class="zodi-banner"
+        src="/art/zodi-senalando-1024.webp"
+        srcset="/art/zodi-senalando-640.webp 640w, /art/zodi-senalando-1024.webp 1024w"
+        sizes="(min-width: 1280px) 50vw, 100vw"
+        alt="ZODI te señala: hoy va contigo"
+        width="1024"
+        height="683"
+        loading="eager"
+        decoding="async"
+      />
       <p class="moon">
         <Icon name="moon" />
         <span>
@@ -223,6 +234,15 @@ const card = dailyCard(profile.id, d.today);
     .bento > :global(.span-rituales) {
       grid-column: span 4;
     }
+  }
+  .zodi-banner {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 21 / 9;
+    object-fit: cover;
+    object-position: center 35%;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
   }
   .moon {
     display: flex;

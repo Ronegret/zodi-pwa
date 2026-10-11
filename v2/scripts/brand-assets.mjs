@@ -15,7 +15,36 @@ const jobs = [
   ['zodi-art/brand/isotipo.webp', 'brand/isotipo-192.webp', { width: 192 }],
   ['zodi-art/brand/isotipo.webp', 'brand/isotipo-96.webp', { width: 96 }],
   ['zodi-art/brand/zodi-sin-fondo.webp', 'brand/zodi-480.webp', { width: 480 }],
+  ['zodi-art/brand/zodi-sin-fondo.webp', 'brand/zodi-720.webp', { width: 720 }],
 ];
+
+// El personaje ZODI es el protagonista: arte de cada sección y poses, en
+// dos tamaños (tarjetas y cabeceras). Origen: ../public/zodi-art/nuevas.
+const ART = {
+  'horoscopo-diario': '3-Secciones-principales-de-la-web/Horoscopo-diario',
+  prediccion: '3-Secciones-principales-de-la-web/Prediccion-del-dia',
+  destino: '3-Secciones-principales-de-la-web/Tu-destino-hoy',
+  'carta-astral': '3-Secciones-principales-de-la-web/Carta-astral',
+  consejo: '3-Secciones-principales-de-la-web/Consejo-cosmico-sin-filtro',
+  tarot: '3-Secciones-principales-de-la-web/Tarot-acido',
+  compatibilidad: '3-Secciones-principales-de-la-web/Compatibilidad',
+  rituales: '3-Secciones-principales-de-la-web/Rituales-energeticos',
+  numerologia: '3-Secciones-principales-de-la-web/Numerologia',
+  energia: '3-Secciones-principales-de-la-web/Tu-energia-actual',
+  chino: '3-Secciones-principales-de-la-web/Horoscopo-chino',
+  'frase-venenosa': '3-Secciones-principales-de-la-web/Frase-venenosa-del-dia',
+  'zodi-bola': '4-Poses-del-personaje-ZODI/ZODI-con-bola-de-cristal',
+  'zodi-movil': '4-Poses-del-personaje-ZODI/ZODI-mirando-movil',
+  'zodi-riendose': '4-Poses-del-personaje-ZODI/ZODI-riendose',
+  'zodi-carta': '4-Poses-del-personaje-ZODI/ZODI-sujetando-carta',
+  'zodi-senalando': '2-Portada--Home/ZODI-senalando-al-usuario',
+  'zodi-leyendo': '2-Portada--Home/ZODI-leyendo-el-destino',
+};
+for (const [slug, file] of Object.entries(ART)) {
+  for (const width of [640, 1024]) {
+    jobs.push([`zodi-art/nuevas/${file}.webp`, `art/${slug}-${width}.webp`, { width }]);
+  }
+}
 
 const SIGNS = {
   aries: 'aries',

@@ -128,6 +128,17 @@ export function AssistantChat({ firstName, remaining: initialRemaining }: Props)
 
   return (
     <div className="chat">
+      {turns.length === 0 && (
+        <img
+          className="chat-hero"
+          src="/art/zodi-movil-1024.webp"
+          srcSet="/art/zodi-movil-640.webp 640w, /art/zodi-movil-1024.webp 1024w"
+          sizes="(min-width: 900px) 52rem, 100vw"
+          alt="ZODI mirando el móvil, listo para contestarte"
+          width="1024"
+          height="1024"
+        />
+      )}
       <ol ref={logRef} className="chat-log" aria-label="Conversación con Zodi">
         <li className="chat-msg chat-zodi">
           <img src="/brand/isotipo-96.webp" alt="" width="36" height="36" className="chat-avatar" />

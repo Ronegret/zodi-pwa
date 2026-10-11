@@ -978,36 +978,49 @@ fieldset.group > legend {
   scroll-margin-top: var(--space-4);
 }
 .studio-empty {
+  margin: 0;
   display: grid;
-  place-items: center;
-  min-height: 12rem;
-  border: 1px dashed var(--line-strong);
+  overflow: hidden;
   border-radius: var(--radius-xl);
-  padding: var(--space-5);
-  text-align: center;
+  border: 1px solid var(--line-acid);
+  background: var(--panel);
+}
+.studio-empty img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  max-height: 32rem;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+.studio-empty figcaption {
+  padding: var(--space-4) var(--space-5);
+  color: var(--ink-soft);
 }
 .studio-loading {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--space-4);
   border-radius: var(--radius-xl);
   border: 1px solid var(--line-acid);
   background: rgb(184 255 23 / 5%);
   color: var(--ink-soft);
 }
-.studio-orb {
+.studio-zodi {
   flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, var(--acid), var(--violet) 70%);
-  box-shadow: 0 0 24px rgb(184 255 23 / 40%);
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  border: 2px solid var(--acid);
+  box-shadow: 0 0 24px rgb(184 255 23 / 35%);
   animation: orb-pulse 1.6s var(--ease) infinite alternate;
 }
 @keyframes orb-pulse {
   to {
-    transform: scale(0.82);
+    transform: scale(0.94);
     box-shadow: 0 0 40px rgb(155 77 255 / 55%);
   }
 }
@@ -1129,7 +1142,7 @@ fieldset.group > legend {
   font-size: var(--step--1);
 }
 @media (prefers-reduced-motion: reduce) {
-  .studio-orb,
+  .studio-zodi,
   .tarot-card,
   .reading-paper[data-streaming] .rich-text > :last-child::after {
     animation: none;
@@ -1141,6 +1154,17 @@ fieldset.group > legend {
   display: grid;
   gap: var(--space-4);
   max-width: 52rem;
+}
+.chat-hero {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-height: 20rem;
+  object-fit: cover;
+  object-position: center 28%;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line-acid);
+  box-shadow: var(--shadow-lg);
 }
 .chat-log {
   list-style: none;
