@@ -21,6 +21,10 @@ export default defineConfig({
       env: {
         PUBLIC_SUPABASE_URL: MOCK_SUPABASE_URL,
         PUBLIC_SUPABASE_ANON_KEY: 'e2e-anon-key',
+        SUPABASE_SERVICE_ROLE_KEY: 'e2e-service-role-key',
+        // La IA también es falsa: el mock responde en /v1/messages como Anthropic.
+        ANTHROPIC_API_KEY: 'e2e-anthropic-key',
+        ANTHROPIC_BASE_URL: MOCK_SUPABASE_URL,
       },
     },
   ],

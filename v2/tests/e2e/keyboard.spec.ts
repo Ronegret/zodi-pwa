@@ -28,10 +28,11 @@ test('dashboard: salto al contenido y toda la navegación con Tab', async ({ pag
     if (label) reached.add(label);
   }
   for (const name of [
+    // Los que están en todas las pantallas (Horóscopo y Match no van en la barra del móvil).
     'Inicio',
+    'Lecturas',
+    'Comunidad',
     'Carta',
-    'Horóscopo',
-    'Match',
     'Ajustes',
     'Ver carta',
     'Hablar con Zodi, tu asistente',

@@ -20,6 +20,18 @@ const charts = new Map();
 /** access/refresh token → user id */
 const accessTokens = new Map();
 const refreshTokens = new Map();
+/** Lecturas guardadas (todas; la "RLS" filtra por usuario). */
+const readings = [];
+/** Cuota de IA usada hoy por usuario, y eventos (id → user id). */
+const quotaUsed = new Map();
+const quotaEvents = new Map();
+let nextEventId = 1;
+const DAILY_LIMIT = 5;
+/** Clave de service role que Playwright pasa al servidor de la app. */
+export const SERVICE_KEY = 'e2e-service-role-key';
+/** Última petición a la IA falsa (para que los tests miren el prompt). */
+/** Peticiones a la IA falsa (cada test busca la suya por un texto único). */
+const aiRequests = [];
 
 // Carta real (generada por el motor, ver tests/unit/e2e-fixture.test.ts).
 const FIXTURE = JSON.parse(readFileSync(new URL('./fixture-chart.json', import.meta.url), 'utf8'));
@@ -225,13 +237,19 @@ function currentUser(req) {
   return id ? users.get(id) : undefined;
 }
 
+const isServiceRole = (req) =>
+  (req.headers.authorization ?? '').replace(/^Bearer /, '') === SERVICE_KEY;
+
 /** Filtros `col=eq.valor` de PostgREST. */
 function applyFilters(rows, params) {
   let out = rows;
   for (const [key, value] of params) {
-    if (['select', 'order', 'limit'].includes(key) || !value.startsWith('eq.')) continue;
-    const expected = value.slice(3);
-    out = out.filter((r) => String(r[key]) === expected);
+    if (['select', 'order', 'limit'].includes(key)) continue;
+    const [op, ...rest] = value.split('.');
+    const expected = rest.join('.');
+    if (op === 'eq') out = out.filter((r) => String(r[key]) === expected);
+    if (op === 'neq') out = out.filter((r) => String(r[key]) !== expected);
+    if (op === 'gte') out = out.filter((r) => String(r[key]) >= expected);
   }
   const order = params.get('order');
   if (order) {
@@ -312,7 +330,46 @@ async function handleRest(req, res, url) {
     return send(res, 200, searchPlaces(await readBody(req)));
   }
   if (resource === 'rpc' && fn === 'ai_quota_status') {
-    return send(res, 200, u ? [{ used: 0, daily_limit: 5 }] : []);
+    return send(res, 200, u ? [{ used: quotaUsed.get(u.id) ?? 0, daily_limit: DAILY_LIMIT }] : []);
+  }
+  if (resource === 'rpc' && fn === 'consume_ai_quota') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const used = quotaUsed.get(u.id) ?? 0;
+    if (used >= DAILY_LIMIT) {
+      return send(res, 200, [{ allowed: false, used, daily_limit: DAILY_LIMIT, event_id: null }]);
+    }
+    const id = nextEventId++;
+    quotaUsed.set(u.id, used + 1);
+    quotaEvents.set(id, u.id);
+    return send(res, 200, [
+      { allowed: true, used: used + 1, daily_limit: DAILY_LIMIT, event_id: id },
+    ]);
+  }
+  if (resource === 'usage_events' && req.method === 'DELETE' && isServiceRole(req)) {
+    const id = Number((url.searchParams.get('id') ?? '').replace('eq.', ''));
+    const owner = quotaEvents.get(id);
+    if (owner) {
+      quotaEvents.delete(id);
+      quotaUsed.set(owner, Math.max(0, (quotaUsed.get(owner) ?? 1) - 1));
+    }
+    return send(res, 204);
+  }
+  if (resource === 'readings') {
+    if (req.method === 'POST') {
+      if (!isServiceRole(req))
+        return send(res, 401, { code: '42501', message: 'permission denied' });
+      const row = {
+        id: randomUUID(),
+        created_at: new Date().toISOString(),
+        ...(await readBody(req)),
+      };
+      readings.push(row);
+      return respondRows(req, res, [row], 201);
+    }
+    if (req.method === 'GET') {
+      const own = u ? readings.filter((r) => r.user_id === u.id) : [];
+      return respondRows(req, res, applyFilters(own, url.searchParams));
+    }
   }
   if (resource === 'profiles') {
     const visible = u ? [profiles.get(u.id)] : [];
@@ -355,6 +412,61 @@ async function handleRest(req, res, url) {
   return send(res, 404, { message: `mock: ${req.method} ${url.pathname} no implementado` });
 }
 
+/**
+ * API de Anthropic falsa: responde en streaming SSE como la real. Repite el
+ * nombre y, en el tarot, las cartas que recibe, para que los tests
+ * comprueben que el prompt lleva los datos de la persona.
+ */
+async function handleAi(req, res) {
+  const body = await readBody(req);
+  aiRequests.push(body);
+  const prompt = [...body.system.map((b) => b.text), ...body.messages.map((m) => m.content)].join(
+    '\n',
+  );
+  const name = /Nombre: ([^ (\n]+)/.exec(prompt)?.[1] ?? 'tú';
+  const cards = [...prompt.matchAll(/- (Pasado|Presente|Futuro): [^·]+· ([^\n(]+)/g)].map((m) =>
+    m[2].trim(),
+  );
+  const isChat = body.system.some((b) => b.text.includes('MODO CHAT'));
+  const text = isChat
+    ? `Oye **${name}**, respira. Cuéntame qué te pesa y lo miramos con tu carta.`
+    : [
+        `Mira, **${name}**: tu Sol en Aries llega con ganas de lío hoy.`,
+        cards.length ? `Tus cartas: ${cards.join(', ')}.` : 'La Luna te pide calma.',
+        '- **Amor:** di lo que piensas antes de las ocho.',
+        '- **Trabajo:** termina lo pendiente.',
+        '',
+        '**Hoy haz esto:** escribe tres cosas que quieres soltar.',
+      ].join('\n');
+  res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
+  const event = (type, data) =>
+    res.write(`event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`);
+  event('message_start', {
+    message: {
+      id: 'msg_e2e',
+      type: 'message',
+      role: 'assistant',
+      model: body.model,
+      content: [],
+      stop_reason: null,
+      stop_sequence: null,
+      usage: { input_tokens: 120, output_tokens: 1 },
+    },
+  });
+  event('content_block_start', { index: 0, content_block: { type: 'text', text: '' } });
+  for (const chunk of text.match(/[\s\S]{1,24}/g)) {
+    event('content_block_delta', { index: 0, delta: { type: 'text_delta', text: chunk } });
+    await new Promise((r) => setTimeout(r, 15));
+  }
+  event('content_block_stop', { index: 0 });
+  event('message_delta', {
+    delta: { stop_reason: 'end_turn', stop_sequence: null },
+    usage: { output_tokens: 42 },
+  });
+  event('message_stop', {});
+  res.end();
+}
+
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? '/', `http://127.0.0.1:${PORT}`);
@@ -362,6 +474,20 @@ createServer(async (req, res) => {
     if (url.pathname === '/__test/users' && req.method === 'POST') {
       return send(res, 201, createUser(await readBody(req)));
     }
+    if (url.pathname === '/__test/ai') {
+      // Última petición cuyo system + mensajes contengan `contains`.
+      const needle = url.searchParams.get('contains') ?? '';
+      const found = aiRequests.findLast((r) =>
+        JSON.stringify([r.system, r.messages]).includes(needle),
+      );
+      return send(res, found ? 200 : 404, found ?? { message: 'sin coincidencias' });
+    }
+    if (url.pathname === '/__test/quota' && req.method === 'POST') {
+      const { userId, used } = await readBody(req);
+      quotaUsed.set(userId, used);
+      return send(res, 200, { ok: true });
+    }
+    if (url.pathname === '/v1/messages' && req.method === 'POST') return await handleAi(req, res);
     if (url.pathname.startsWith('/auth/v1/')) return await handleAuth(req, res, url);
     if (url.pathname.startsWith('/rest/v1/')) return await handleRest(req, res, url);
     return send(res, 404, { message: 'mock: ruta desconocida' });
