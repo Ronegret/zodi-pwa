@@ -147,6 +147,10 @@ node scripts/places/import.mjs            # (re)carga GeoNames en places/place_a
   - Nada de `style=""`.
   - Los controles interactivos se renderizan en el servidor, no solo al hidratar, para no perder el foco ni mover el diseño.
   - Cualquier `import` nuevo de `three/addons/...` va también en `vite.optimizeDeps.include` de `astro.config.mjs`. Si no, Vite recarga la página en dev.
+- Vercel (proyecto `zodi-v2`):
+  - `v2/vercel.json` fija `framework: astro`. Sin él, el proyecto construía como Next.
+  - `astro.config.mjs` descarta `import "rolldown"` y `import "@vercel/routing-utils"` de la función: es un fallo de `@astrojs/vercel` 11.0.13 que daba 500 en todas las rutas.
+  - Para comprobar la función, cópiala fuera del repo (`.vercel/output/functions/_render.func`) y ejecútala ahí. Dentro de `v2/`, Node resuelve los módulos que faltan desde `v2/node_modules` y oculta este tipo de fallos.
 - E2e:
   - Tras `login()` o `goto()` a páginas con islas, espera a `load` antes de recorrer con Tab: el HTML llega por streaming.
   - Espera a que la isla pierda el atributo `ssr` antes de pulsar sus controles.

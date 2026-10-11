@@ -95,6 +95,12 @@ Qué cubren los e2e (`tests/e2e/scenes.spec.ts`):
   - Root Directory `v2`.
   - Framework Astro.
   - Rama de producción `astro-v2` (dominio `zodi-v2.vercel.app`).
+- **Primer despliegue: dos fallos corregidos.**
+  1. El build se hacía como Next.js ("No Next.js version detected"). Ahora `v2/vercel.json` fija `framework: astro`.
+  2. Todas las rutas daban 500 (`FUNCTION_INVOCATION_FAILED`). Es un fallo de `@astrojs/vercel` 11.0.13 (la última versión): su entrypoint deja `import "rolldown"` e `import "@vercel/routing-utils"` en la función, y en Vercel no está el binario nativo de rolldown.
+     - Arreglo: en `astro.config.mjs` (`vite.build.rolldownOptions.treeshake.moduleSideEffects`) se marcan sin efectos secundarios y el bundler los descarta.
+     - Verificado ejecutando la función compilada copiada fuera del repo, sin variables de entorno.
+     - Cuando salga una versión del adaptador que lo corrija, quitar la regla.
 - **Pendiente (Rodrigo):** pegar en Vercel → zodi-v2 → Settings → Environment Variables:
   - `PUBLIC_SUPABASE_URL`
   - `PUBLIC_SUPABASE_ANON_KEY`

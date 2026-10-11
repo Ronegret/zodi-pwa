@@ -14,6 +14,10 @@ export default defineConfig({
   // Sin resaltado de código: Shiki usa estilos en línea, incompatibles con la CSP.
   markdown: { syntaxHighlight: false },
   vite: {
+    // astronomy-engine publica ESM en .js sin "type": "module". Node 24 lo
+    // detecta en local, pero el cargador de Vercel lo trata como CommonJS
+    // (SyntaxError: Unexpected token 'export'). Se empaqueta en el bundle.
+    ssr: { noExternal: ['astronomy-engine'] },
     // three se importa de forma dinámica: sin esto, en dev Vite lo descubre al
     // montar la primera escena y recarga la página (rompe e2e y CLS).
     optimizeDeps: {
