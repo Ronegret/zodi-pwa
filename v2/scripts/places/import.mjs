@@ -17,6 +17,12 @@ import { inflateRawSync } from 'node:zlib';
 const DUMP = 'https://download.geonames.org/export/dump/';
 const DATASET = 'cities500';
 const ALIAS_MIN_POPULATION = 50_000;
+/**
+ * Cuántos nombres alternativos (escritura latina) guardar según el tamaño:
+ * en GeoNames las formas en español ("Londres", "Nueva York", "Pekín")
+ * aparecen hacia la posición 25–45, así que las ciudades grandes van completas.
+ */
+const aliasCap = (population) => (population >= 100_000 ? 80 : 15);
 const BATCH = 1000;
 const dryRun = process.argv.includes('--dry-run');
 
@@ -115,7 +121,7 @@ function parse(citiesTsv, admin1Tsv) {
         if (norm.length < 2 || norm.length > 40 || seen.has(norm) || !LATIN.test(alt)) continue;
         seen.add(norm);
         aliases.push({ place_id: Number(id), alias_norm: norm });
-        if (seen.size > 12) break;
+        if (seen.size > aliasCap(population)) break;
       }
     }
   }
