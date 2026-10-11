@@ -219,9 +219,11 @@ function issueSession(u) {
   };
 }
 
+/** Responde y devuelve true (para saber que la petición ya está atendida). */
 function send(res, status, body, headers = {}) {
   res.writeHead(status, { 'content-type': 'application/json', ...headers });
   res.end(body === undefined ? '' : JSON.stringify(body));
+  return true;
 }
 
 async function readBody(req) {
@@ -409,7 +411,159 @@ async function handleRest(req, res, url) {
       return respondRows(req, res, [row], 201);
     }
   }
+  const community = await handleCommunity(req, res, url, u, resource, fn);
+  if (community !== undefined) return community;
   return send(res, 404, { message: `mock: ${req.method} ${url.pathname} no implementado` });
+}
+
+// ---------- Comunidad (misma lógica que la RLS y las funciones reales) ----------
+const posts = [];
+const comments = [];
+const reactions = [];
+const reports = [];
+
+function authorCard(userId) {
+  const p = profiles.get(userId) ?? {};
+  return {
+    author_id: userId,
+    author_name: p.display_name ?? 'Alguien',
+    author_username: p.username ?? null,
+    author_avatar: p.avatar_url ?? null,
+    author_level: p.level ?? 1,
+    author_sign: (charts.get(userId) ?? []).length ? 'Aries' : null,
+  };
+}
+
+function feedRow(p, viewerId) {
+  const counts = {};
+  for (const r of reactions.filter((x) => x.post_id === p.id)) {
+    counts[r.kind] = (counts[r.kind] ?? 0) + 1;
+  }
+  return {
+    id: p.id,
+    body: p.body,
+    topic: p.topic,
+    created_at: p.created_at,
+    ...authorCard(p.author_id),
+    comment_count: comments.filter((c) => c.post_id === p.id && c.status === 'published').length,
+    reactions: counts,
+    my_reactions: reactions
+      .filter((x) => x.post_id === p.id && x.user_id === viewerId)
+      .map((x) => x.kind)
+      .sort(),
+  };
+}
+
+const conflict = (res) =>
+  send(res, 409, { code: '23505', message: 'duplicate key value', details: null, hint: null });
+
+async function handleCommunity(req, res, url, u, resource, fn) {
+  const id = (key) => (url.searchParams.get(key) ?? '').replace('eq.', '');
+  if (resource === 'rpc' && fn === 'community_feed') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const { p_topic, p_before, p_limit } = await readBody(req);
+    const rows = posts
+      .filter((p) => p.status === 'published')
+      .filter((p) => !p_topic || p.topic === p_topic)
+      .filter((p) => !p_before || p.created_at < p_before)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(0, Math.min(Math.max(p_limit ?? 20, 1), 50));
+    return send(
+      res,
+      200,
+      rows.map((p) => feedRow(p, u.id)),
+    );
+  }
+  if (resource === 'rpc' && fn === 'post_comments') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const { p_post } = await readBody(req);
+    return send(
+      res,
+      200,
+      comments
+        .filter((c) => c.post_id === p_post && c.status === 'published')
+        .map((c) => ({
+          id: c.id,
+          body: c.body,
+          created_at: c.created_at,
+          ...authorCard(c.author_id),
+        })),
+    );
+  }
+  if (
+    !u &&
+    ['community_posts', 'comments', 'post_reactions', 'content_reports'].includes(resource)
+  ) {
+    return send(res, 401, { code: '42501', message: 'permission denied' });
+  }
+  if (resource === 'community_posts' && req.method === 'POST') {
+    const body = await readBody(req);
+    const row = {
+      id: randomUUID(),
+      author_id: u.id,
+      body: body.body,
+      topic: body.topic ?? 'general',
+      status: 'published',
+      created_at: new Date().toISOString(),
+    };
+    posts.push(row);
+    return respondRows(req, res, [{ id: row.id }], 201);
+  }
+  if (resource === 'community_posts' && req.method === 'DELETE') {
+    const i = posts.findIndex((p) => p.id === id('id') && p.author_id === u.id);
+    return send(res, 200, i >= 0 ? posts.splice(i, 1).map((p) => ({ id: p.id })) : []);
+  }
+  if (resource === 'comments' && req.method === 'POST') {
+    const body = await readBody(req);
+    const post = posts.find((p) => p.id === body.post_id && p.status === 'published');
+    if (!post) return send(res, 403, { code: '42501', message: 'row-level security' });
+    const row = {
+      id: randomUUID(),
+      post_id: body.post_id,
+      author_id: u.id,
+      body: body.body,
+      status: 'published',
+      created_at: new Date().toISOString(),
+    };
+    comments.push(row);
+    return respondRows(req, res, [{ id: row.id }], 201);
+  }
+  if (resource === 'comments' && req.method === 'DELETE') {
+    const i = comments.findIndex(
+      (c) =>
+        c.id === id('id') &&
+        (c.author_id === u.id || posts.find((p) => p.id === c.post_id)?.author_id === u.id),
+    );
+    return send(res, 200, i >= 0 ? comments.splice(i, 1).map((c) => ({ id: c.id })) : []);
+  }
+  if (resource === 'post_reactions' && req.method === 'POST') {
+    const { post_id, kind } = await readBody(req);
+    if (reactions.some((r) => r.post_id === post_id && r.user_id === u.id && r.kind === kind)) {
+      return conflict(res);
+    }
+    reactions.push({ post_id, user_id: u.id, kind });
+    return send(res, 201);
+  }
+  if (resource === 'post_reactions' && req.method === 'DELETE') {
+    const keep = reactions.filter(
+      (r) => !(r.post_id === id('post_id') && r.user_id === u.id && r.kind === id('kind')),
+    );
+    reactions.splice(0, reactions.length, ...keep);
+    return send(res, 204);
+  }
+  if (resource === 'content_reports' && req.method === 'POST') {
+    const body = await readBody(req);
+    const target = body.post_id ?? body.comment_id;
+    if (reports.some((r) => r.reporter === u.id && r.target === target)) return conflict(res);
+    reports.push({ reporter: u.id, target });
+    const reporters = new Set(reports.filter((r) => r.target === target).map((r) => r.reporter));
+    if (reporters.size >= 3) {
+      const post = posts.find((p) => p.id === target);
+      if (post) post.status = 'hidden';
+    }
+    return send(res, 201);
+  }
+  return undefined;
 }
 
 /**

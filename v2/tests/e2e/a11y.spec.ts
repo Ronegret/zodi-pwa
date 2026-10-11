@@ -24,6 +24,9 @@ const PUBLIC = [
 ];
 const PRIVATE = [
   '/app',
+  '/app/lecturas',
+  '/app/lecturas/tarot',
+  '/app/comunidad',
   '/app/carta',
   '/app/ajustes',
   '/app/horoscopo',
