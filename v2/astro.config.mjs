@@ -78,6 +78,18 @@ export default defineConfig({
         optional: true,
       }),
       ANTHROPIC_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      ANTHROPIC_MODEL: envField.string({
+        context: 'server',
+        access: 'public',
+        default: 'claude-sonnet-5-5',
+      }),
+      // Solo para los e2e (servidor simulado); en producción no se define.
+      ANTHROPIC_BASE_URL: envField.string({
+        context: 'server',
+        access: 'public',
+        optional: true,
+        url: true,
+      }),
     },
   },
 });
