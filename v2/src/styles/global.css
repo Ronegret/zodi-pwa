@@ -3,6 +3,7 @@
 @import '@fontsource-variable/jetbrains-mono';
 @import './tokens.css';
 @import './components.css';
+@import './motion.css';
 
 *,
 *::before,
@@ -109,9 +110,6 @@ a {
 }
 .skip-link:focus {
   top: 1rem;
-}
-@view-transition {
-  navigation: auto;
 }
 
 /* Utilidades */

@@ -1,5 +1,9 @@
 ---
 import '@/styles/global.css';
+// Precarga de las fuentes del primer render: sin ella el cambio de fuente
+// desplaza el contenido (CLS).
+import jakartaUrl from '@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2?url';
+import syneUrl from '@fontsource-variable/syne/files/syne-latin-wght-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -17,6 +21,8 @@ const { title, description = 'Zodi — astrología personal con IA, sin filtro.'
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#060608" />
     <link rel="icon" type="image/webp" href="/brand/isotipo-96.webp" />
+    <link rel="preload" href={syneUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={jakartaUrl} as="font" type="font/woff2" crossorigin />
     <title>{title} · Zodi</title>
   </head>
   <body>
@@ -24,5 +30,10 @@ const { title, description = 'Zodi — astrología personal con IA, sin filtro.'
       Saltar al contenido
     </a>
     <slot />
+    <script>
+      import { initMotion } from '@/lib/motion/client';
+
+      initMotion();
+    </script>
   </body>
 </html>

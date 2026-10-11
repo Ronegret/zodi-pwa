@@ -95,15 +95,29 @@
   --z-fab: 30;
   --z-toast: 50;
 
-  /* Movimiento (la Fase 4 lo amplía en src/lib/motion) */
+  /* Movimiento: mismos valores que src/lib/motion/tokens.ts */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --dur: 320ms;
+  --ease-in: cubic-bezier(0.64, 0, 0.78, 0);
+  --ease-spring: linear(
+    0,
+    0.18 7%,
+    0.6 18%,
+    0.94 30%,
+    1.06 40%,
+    1.08 46%,
+    1.03 58%,
+    0.99 70%,
+    1 100%
+  );
   --dur-fast: 160ms;
+  --dur: 320ms;
+  --dur-slow: 640ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur: 0.01ms;
     --dur-fast: 0.01ms;
+    --dur-slow: 0.01ms;
   }
 }
