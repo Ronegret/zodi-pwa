@@ -1,0 +1,19 @@
+---
+/** Secciones que llegan en la Fase 7 (lecturas de IA, sinastría, asistente). */
+import Button from '@/components/ui/Button.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<EmptyState title={title} headingLevel={2}>
+  <p>
+    <slot />
+  </p>
+  <Button href="/app" variant="secondary" icon="chevronLeft">
+    Volver al inicio
+  </Button>
+</EmptyState>

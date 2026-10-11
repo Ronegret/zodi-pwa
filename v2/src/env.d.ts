@@ -6,5 +6,7 @@ declare namespace App {
     supabase: import('@/lib/supabase/server').ZodiSupabaseClient | null;
     /** Usuario validado con supabase.auth.getUser() en el middleware. */
     user: import('@supabase/supabase-js').User | null;
+    /** Perfil propio, cargado en /app/** (incluido el onboarding). */
+    profile: import('@/lib/server/profile').Profile | null;
   }
 }

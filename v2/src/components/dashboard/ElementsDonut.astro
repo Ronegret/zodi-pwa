@@ -1,0 +1,149 @@
+---
+/** Donut del reparto de planetas por elemento, con leyenda y tabla accesible. */
+import type { ElementCount } from '@/lib/astro-engine/labels';
+import { donutSegments } from '@/lib/chart/wheel';
+
+interface Props {
+  balance: ElementCount[];
+}
+const { balance } = Astro.props;
+const CLASS = { Fuego: 'el-fire', Tierra: 'el-earth', Aire: 'el-air', Agua: 'el-water' } as const;
+const segments = donutSegments(
+  balance.map((b) => b.share),
+  100,
+  100,
+  64,
+  92,
+);
+const dominant = [...balance].sort((a, b) => b.count - a.count)[0]!;
+const pct = (s: number) => `${Math.round(s * 100)} %`;
+const summary = balance.map((b) => `${b.element} ${b.count}`).join(', ');
+---
+
+<div class="donut-wrap">
+  <div class="donut">
+    <svg viewBox="0 0 200 200" role="img" aria-labelledby="donut-title donut-desc">
+      <title id="donut-title">Elementos de tu carta</title>
+      <desc id="donut-desc">
+        Planetas por elemento: {summary}. Domina {dominant.element}.
+      </desc>
+      {segments.map((d, i) => d && <path d={d} class:list={['seg', CLASS[balance[i]!.element]]} />)}
+      <text x="100" y="94" class="center-big">
+        {dominant.element}
+      </text>
+      <text x="100" y="118" class="center-small">
+        DOMINA
+      </text>
+    </svg>
+
+    <table class="legend">
+      <caption class="visually-hidden">Planetas por elemento</caption>
+      <thead class="visually-hidden">
+        <tr>
+          <th scope="col">Elemento</th>
+          <th scope="col">Planetas</th>
+          <th scope="col">Porcentaje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {balance.map((b) => (
+          <tr>
+            <th scope="row">
+              <span class:list={['swatch', CLASS[b.element]]} aria-hidden="true" />
+              {b.element}
+            </th>
+            <td class="mono">{b.count}</td>
+            <td class="mono pct">{pct(b.share)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .donut-wrap {
+    container-type: inline-size;
+  }
+  .donut {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  @container (min-width: 380px) {
+    .donut {
+      grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
+      justify-items: stretch;
+      gap: var(--space-5);
+    }
+  }
+  svg {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+  }
+  .seg {
+    stroke: var(--surface);
+    stroke-width: 1;
+  }
+  .el-fire {
+    fill: var(--hot);
+    background: var(--hot);
+  }
+  .el-earth {
+    fill: var(--acid);
+    background: var(--acid);
+  }
+  .el-air {
+    fill: var(--cyan);
+    background: var(--cyan);
+  }
+  .el-water {
+    fill: var(--violet-text);
+    background: var(--violet-text);
+  }
+  text {
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: var(--ink);
+  }
+  .center-big {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+  }
+  .center-small {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    fill: var(--ink-soft);
+  }
+  .legend {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .legend th,
+  .legend td {
+    padding: 0.45rem 0;
+    text-align: left;
+    font-weight: 600;
+  }
+  .legend td {
+    text-align: right;
+    color: var(--ink-soft);
+  }
+  .legend .pct {
+    color: var(--ink);
+    font-weight: 700;
+    padding-left: var(--space-3);
+  }
+  .swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: var(--space-2);
+    vertical-align: middle;
+  }
+</style>

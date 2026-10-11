@@ -1,10 +1,110 @@
 ---
+/** Portada provisional con el estilo Zodi (la Fase 5 añade la escena 3D). */
 import Base from '@/layouts/Base.astro';
+import Button from '@/components/ui/Button.astro';
 ---
 
-<Base title="Inicio">
-  <main id="main">
-    <h1>Zodi v2</h1>
-    <p>Esqueleto Astro en construcción. <a href="/app">Entrar al dashboard</a></p>
+<Base title="El universo tiene mensajes para ti">
+  <header class="top">
+    <img src="/brand/logo-240.webp" alt="ZODI" width="240" height="160" class="logo" />
+    <nav aria-label="Cuenta" class="top-actions">
+      <Button href="/auth/login" variant="ghost" size="sm">
+        Entrar
+      </Button>
+      <Button href="/auth/registro" size="sm">
+        Crear cuenta
+      </Button>
+    </nav>
+  </header>
+  <main id="main" class="hero">
+    <p class="kicker">Ecosistema astrológico cyberpunk</p>
+    <h1>
+      El universo tiene mensajes <span class="graffiti">para ti.</span>
+    </h1>
+    <p class="lead">
+      Zodi reúne carta natal real, horóscopo, tarot, numerología, compatibilidad y comunidad. Sin
+      humo: efemérides de verdad y una IA que no se muerde la lengua.
+    </p>
+    <div class="cta">
+      <Button href="/auth/registro" icon="sparkles">
+        Empezar gratis
+      </Button>
+      <Button href="/auth/login" variant="secondary">
+        Ya tengo cuenta
+      </Button>
+    </div>
+    <img class="character" src="/brand/zodi-480.webp" alt="" width="480" height="720" />
   </main>
 </Base>
+
+<style>
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) clamp(1rem, 4vw, 3rem);
+  }
+  .logo {
+    width: 110px;
+    height: auto;
+    filter: drop-shadow(0 0 16px rgb(184 255 23 / 25%));
+  }
+  .top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  @media (max-width: 380px) {
+    .logo {
+      width: 84px;
+    }
+  }
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: clamp(2rem, 8vw, 6rem) clamp(1rem, 4vw, 3rem) var(--space-8);
+  }
+  h1 {
+    font-size: clamp(2.6rem, 1.6rem + 5vw, 5.5rem);
+    max-width: 12ch;
+    position: relative;
+    z-index: 1;
+  }
+  .lead {
+    max-width: 52ch;
+    color: var(--ink-soft);
+    font-size: var(--step-1);
+    position: relative;
+    z-index: 1;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    position: relative;
+    z-index: 1;
+  }
+  .character {
+    position: absolute;
+    right: clamp(-2rem, -2vw, 0rem);
+    bottom: 0;
+    width: min(38vw, 420px);
+    height: auto;
+    opacity: 0.9;
+    pointer-events: none;
+    filter: drop-shadow(0 0 40px rgb(155 77 255 / 35%));
+  }
+  @media (max-width: 900px) {
+    .character {
+      position: static;
+      justify-self: center;
+      width: min(70vw, 320px);
+    }
+  }
+</style>

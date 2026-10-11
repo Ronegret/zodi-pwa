@@ -27,6 +27,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const supabase = createSupabaseServerClient(context);
   context.locals.supabase = supabase?.client ?? null;
   context.locals.user = null;
+  context.locals.profile = null;
 
   let response: Response;
   if (kind === 'public' || kind === 'api-public' || !supabase) {
@@ -40,15 +41,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
       response = user ? context.redirect('/app', 303) : await next();
     } else if (!user) {
       response = deny(kind, url);
-    } else if (kind === 'app') {
+    } else if (kind === 'app' || kind === 'onboarding') {
+      // Una sola lectura del perfil por petición: la usan layout y páginas.
       const { data: profile } = await supabase.client
         .from('profiles')
-        .select('onboarding_completed_at')
+        .select('*')
         .eq('id', user.id)
         .maybeSingle();
-      response = profile?.onboarding_completed_at
-        ? await next()
-        : context.redirect('/app/onboarding', 303);
+      context.locals.profile = profile;
+      response =
+        kind === 'app' && !profile?.onboarding_completed_at
+          ? context.redirect('/app/onboarding', 303)
+          : await next();
     } else {
       response = await next();
     }

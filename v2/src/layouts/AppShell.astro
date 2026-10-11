@@ -1,49 +1,128 @@
 ---
+/**
+ * Shell de la app. Estructura inspirada en AEM Planner (sidebar 264 px,
+ * título grande, rejilla bento, botón flotante); estilo 100 % Zodi.
+ * Escritorio ≥ 1100 px: sidebar · tablet: rail con iconos y etiqueta ·
+ * móvil < 720 px: barra inferior.
+ */
 import Base from './Base.astro';
+import Avatar from '@/components/ui/Avatar.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+import type { IconName } from '@/components/ui/icons';
+import { ToastRegion } from '@/components/ui/ToastRegion';
+import type { ToastDetail } from '@/components/ui/toast';
+
+export type NavId = 'inicio' | 'carta' | 'horoscopo' | 'match' | 'ajustes' | 'asistente';
 
 interface Props {
   title: string;
-  current?: string;
+  current?: NavId;
+  kicker?: string | undefined;
+  intro?: string | undefined;
+  toast?: ToastDetail | undefined;
 }
-const { title, current = 'inicio' } = Astro.props;
-const nav = [
-  { id: 'inicio', label: 'Inicio', href: '/app' },
-  { id: 'carta', label: 'Carta natal', href: '/app/carta' },
-  { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo' },
-  { id: 'compat', label: 'Compatibilidad', href: '/app/compatibilidad' },
-  { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes' },
+const { title, current = 'inicio', kicker, intro, toast } = Astro.props;
+const profile = Astro.locals.profile;
+const name = profile?.display_name?.trim() || 'Viajera cósmica';
+const planLabel = { free: 'Free', premium: 'Premium', vip: 'VIP' }[profile?.plan ?? 'free'];
+
+const nav: { id: NavId; label: string; href: string; icon: IconName }[] = [
+  { id: 'inicio', label: 'Inicio', href: '/app', icon: 'home' },
+  { id: 'carta', label: 'Carta', href: '/app/carta', icon: 'wheel' },
+  { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo', icon: 'sun' },
+  { id: 'match', label: 'Match', href: '/app/compatibilidad', icon: 'heart' },
+  { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes', icon: 'sliders' },
 ];
+
+const today = new Intl.DateTimeFormat('es-ES', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  timeZone: profile?.time_zone ?? 'Europe/Madrid',
+}).format(new Date());
 ---
 
 <Base title={title}>
   <div class="shell">
     <aside class="sidebar">
-      <p class="brand">ZODI</p>
+      <a class="logo" href="/app">
+        <img
+          class="logo-full"
+          src="/brand/logo-240.webp"
+          alt="ZODI, ir al inicio"
+          width="240"
+          height="160"
+        />
+        <img
+          class="logo-mark"
+          src="/brand/isotipo-96.webp"
+          alt="ZODI, ir al inicio"
+          width="48"
+          height="48"
+        />
+      </a>
       <nav aria-label="Principal">
-        <ul>
-          {nav.map((n) => (
+        <ul class="nav">
+          {nav.map((item) => (
             <li>
-              <a href={n.href} aria-current={n.id === current ? 'page' : undefined}>
-                {n.label}
+              <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>
+                <span class="nav-icon">
+                  <Icon name={item.icon} size={20} />
+                </span>
+                <span class="nav-label">{item.label}</span>
               </a>
             </li>
           ))}
         </ul>
       </nav>
+      <div class="me">
+        <div class="me-row">
+          <Avatar name={name} src={profile?.avatar_url} decorative />
+          <div class="me-text">
+            <p class="me-name">{name}</p>
+            <p class="me-badges">
+              <Badge tone="acid">{planLabel}</Badge>
+              <Badge tone="gems">
+                <span aria-hidden="true">◆</span> {profile?.gems ?? 0}
+                <span class="visually-hidden"> gemas</span>
+              </Badge>
+            </p>
+          </div>
+        </div>
+        <form method="post" action="/auth/salir">
+          <button class="btn btn-secondary btn-sm btn-block" type="submit">
+            <Icon name="logout" size={18} />
+            <span class="btn-label">Cerrar sesión</span>
+          </button>
+        </form>
+      </div>
     </aside>
+
     <div class="content">
       <header class="topbar">
-        <h1>{title}</h1>
-        <form method="post" action="/auth/salir">
-          <button class="btn btn-secondary" type="submit">
-            Cerrar sesión
+        <div class="topbar-text">
+          <p class="kicker">{kicker ?? today}</p>
+          <h1>{title}</h1>
+          {intro && <p class="intro">{intro}</p>}
+        </div>
+        <form class="topbar-logout" method="post" action="/auth/salir">
+          <button class="btn btn-ghost btn-icon" type="submit" aria-label="Cerrar sesión">
+            <Icon name="logout" />
           </button>
         </form>
       </header>
-      <main id="main" class="grid">
+      <main id="main" class="main" tabindex="-1">
         <slot />
       </main>
     </div>
+
+    {current !== 'asistente' && (
+      <a class="fab" href="/app/asistente" aria-label="Hablar con Zodi, tu asistente">
+        <img src="/brand/isotipo-96.webp" alt="" width="64" height="64" />
+      </a>
+    )}
+    <ToastRegion client:idle initial={toast} />
   </div>
 </Base>
 
@@ -53,90 +132,253 @@ const nav = [
     grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
     min-height: 100dvh;
   }
+
+  /* ---- Sidebar (escritorio) ---- */
   .sidebar {
-    padding: 1.5rem 1rem;
-    border-right: 1px solid var(--line);
-    background: var(--surface);
     position: sticky;
     top: 0;
     height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-4);
+    background: linear-gradient(180deg, rgb(12 12 20) 0%, rgb(8 8 16) 100%);
+    border-right: 1px solid var(--line);
+    z-index: var(--z-nav);
   }
-  .brand {
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    letter-spacing: 0.3em;
-    margin: 0 0 2rem 0.75rem;
+  .logo {
+    display: block;
+    border-radius: var(--radius-md);
   }
-  ul {
+  .logo-full {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin-inline: auto;
+    filter: drop-shadow(0 0 16px rgb(184 255 23 / 22%));
+  }
+  .logo-mark {
+    display: none;
+  }
+  .nav {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.25rem;
+    gap: var(--space-1);
+    align-content: start;
   }
-  a {
-    display: block;
-    padding: 0.7rem 0.9rem;
-    border-radius: var(--radius-sm);
+  .nav a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 48px;
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid transparent;
     color: var(--ink);
+    font-weight: 600;
     text-decoration: none;
-    min-height: 44px;
+    transition:
+      background-color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
   }
-  a:hover {
-    background: var(--bg);
+  .nav-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: rgb(255 255 255 / 5%);
+    color: var(--ink-soft);
+    flex: none;
+    transition:
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
   }
-  a[aria-current='page'] {
-    background: var(--brand);
+  .nav a:hover {
+    background: rgb(255 255 255 / 4%);
+  }
+  .nav a:hover .nav-icon {
+    color: var(--acid);
+  }
+  .nav a[aria-current='page'] {
+    border-color: var(--line-acid);
+    background: rgb(184 255 23 / 8%);
+    color: var(--acid-soft);
+    box-shadow: var(--glow-acid);
+  }
+  .nav a[aria-current='page'] .nav-icon {
+    background: var(--acid);
     color: var(--brand-ink);
   }
-  .topbar {
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--line);
+  .me {
+    display: grid;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+  }
+  .me-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+  .me-text {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+  .me-name {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .me-badges {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    gap: var(--space-1);
+  }
+
+  /* ---- Contenido ---- */
+  .content {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+  .topbar {
+    display: flex;
     justify-content: space-between;
-    gap: 1rem;
+    align-items: start;
+    gap: var(--space-4);
+    padding: var(--space-6) clamp(1rem, 3vw, 2.5rem) var(--space-5);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-text {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
   }
   .topbar h1 {
-    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-size: var(--step-5);
   }
-  .grid {
-    padding: 2rem;
-    display: grid;
-    gap: 1.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-    align-items: start;
+  .intro {
+    color: var(--ink-soft);
+    max-width: 60ch;
   }
-  @media (max-width: 800px) {
+  .topbar-logout {
+    display: none;
+  }
+  .main {
+    /* Hueco final para que el botón flotante no tape la última tarjeta. */
+    padding: var(--space-5) clamp(1rem, 3vw, 2.5rem) 7rem;
+    min-width: 0;
+  }
+  .main:focus {
+    outline: none;
+  }
+
+  /* ---- Botón flotante del asistente ---- */
+  .fab {
+    position: fixed;
+    right: clamp(1rem, 3vw, 2rem);
+    bottom: calc(clamp(1rem, 3vw, 2rem) + var(--sab));
+    z-index: var(--z-fab);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--acid);
+    box-shadow:
+      0 0 0 4px rgb(184 255 23 / 12%),
+      0 12px 32px rgb(184 255 23 / 25%);
+    transition: transform var(--dur) var(--ease);
+  }
+  .fab img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .fab:hover {
+    transform: scale(1.06) rotate(-4deg);
+  }
+  .fab:active {
+    transform: scale(0.96);
+  }
+
+  /* ---- Tablet: rail ---- */
+  @media (max-width: 1099px) {
     .shell {
-      grid-template-columns: 1fr;
-      padding-bottom: 72px;
+      grid-template-columns: var(--rail-w) minmax(0, 1fr);
+    }
+    .sidebar {
+      padding: var(--space-4) var(--space-2);
+      grid-template-rows: auto 1fr;
+    }
+    .logo-full,
+    .me {
+      display: none;
+    }
+    .logo-mark {
+      display: block;
+      margin-inline: auto;
+      border-radius: 50%;
+    }
+    .nav a {
+      flex-direction: column;
+      gap: var(--space-1);
+      padding: var(--space-2) var(--space-1);
+      font-size: 0.75rem;
+      text-align: center;
+    }
+    .topbar-logout {
+      display: block;
+    }
+  }
+
+  /* ---- Móvil: barra inferior ---- */
+  @media (max-width: 719px) {
+    .shell {
+      grid-template-columns: minmax(0, 1fr);
+      padding-bottom: calc(var(--nav-h) + var(--sab));
     }
     .sidebar {
       position: fixed;
       inset: auto 0 0 0;
+      top: auto;
       height: auto;
-      z-index: 10;
-      border: 0;
+      display: block;
+      padding: var(--space-1) var(--space-1) calc(var(--space-1) + var(--sab));
+      background: rgb(8 8 14 / 96%);
+      border-right: 0;
       border-top: 1px solid var(--line);
-      padding: 0.25rem;
     }
-    .brand {
+    .logo {
       display: none;
     }
-    ul {
+    .nav {
       grid-auto-flow: column;
       grid-auto-columns: 1fr;
     }
-    a {
-      text-align: center;
-      font-size: 0.75rem;
-      padding: 0.6rem 0.2rem;
+    .nav a {
+      min-height: 56px;
+      border-radius: var(--radius-md);
     }
-    .grid,
+    .nav-icon {
+      width: 32px;
+      height: 28px;
+    }
     .topbar {
-      padding: 1rem;
+      padding: var(--space-5) var(--space-4) var(--space-4);
+    }
+    .main {
+      padding: var(--space-4) var(--space-4) 6rem;
+    }
+    .fab {
+      width: 56px;
+      height: 56px;
+      bottom: calc(var(--nav-h) + var(--space-3) + var(--sab));
     }
   }
 </style>

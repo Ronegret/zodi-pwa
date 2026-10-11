@@ -1,0 +1,280 @@
+---
+/**
+ * Rueda natal estática en SVG (la versión 3D animada llega en la Fase 5).
+ * Ascendente a la izquierda; sin hora de nacimiento no hay casas ni ejes.
+ * Es role="img" con resumen: el detalle completo está en las tablas.
+ */
+import type { AspectType, NatalChart } from '@/lib/astro-engine';
+import { elementOf, formatPosition, PLANET_GLYPHS, SIGN_GLYPHS } from '@/lib/astro-engine/labels';
+import { SIGNS } from '@/lib/astro-engine/types';
+import { lonToAngle, polar, ringSector, spreadAngles } from '@/lib/chart/wheel';
+
+interface Props {
+  chart: NatalChart;
+  timeKnown: boolean;
+  id?: string;
+}
+const { chart, timeKnown, id = 'wheel' } = Astro.props;
+
+const C = 300;
+const R = { outer: 292, signIn: 248, planet: 212, degree: 186, house: 110, aspect: 104 };
+const asc = timeKnown ? chart.ascendant.lon : 0;
+const angleOf = (lon: number) => lonToAngle(lon, asc);
+
+const ELEMENT_CLASS = {
+  Fuego: 'el-fire',
+  Tierra: 'el-earth',
+  Aire: 'el-air',
+  Agua: 'el-water',
+} as const;
+
+const signs = SIGNS.map((sign, i) => {
+  const a0 = angleOf(i * 30);
+  const a1 = angleOf(i * 30 + 30);
+  const mid = polar(C, C, (R.outer + R.signIn) / 2, angleOf(i * 30 + 15));
+  return {
+    sign,
+    path: ringSector(C, C, R.signIn, R.outer, a0, a1),
+    mid,
+    cls: ELEMENT_CLASS[elementOf(sign)],
+  };
+});
+
+const ticks = Array.from({ length: 72 }, (_, i) => {
+  const a = angleOf(i * 5);
+  return { from: polar(C, C, R.signIn, a), to: polar(C, C, R.signIn - (i % 6 === 0 ? 10 : 5), a) };
+});
+
+const bodies = chart.planets;
+const spread = spreadAngles(
+  bodies.map((p) => angleOf(p.lon)),
+  9,
+);
+const planets = bodies.map((p, i) => {
+  const a = angleOf(p.lon);
+  return {
+    ...p,
+    glyph: polar(C, C, R.planet, spread[i]!),
+    label: polar(C, C, R.degree, spread[i]!),
+    tickFrom: polar(C, C, R.signIn - 2, a),
+    tickTo: polar(C, C, R.signIn - 14, a),
+    anchor: polar(C, C, R.aspect, a),
+  };
+});
+
+const houses = timeKnown
+  ? chart.houses.map((h, i) => {
+      const a = angleOf(h.lon);
+      const next = chart.houses[(i + 1) % 12]!.lon;
+      const span = (next - h.lon + 360) % 360;
+      const isAxis = i === 0 || i === 3 || i === 6 || i === 9;
+      return {
+        n: i + 1,
+        from: polar(C, C, R.house, a),
+        to: polar(C, C, R.signIn, a),
+        num: polar(C, C, R.house + 16, angleOf(h.lon + span / 2)),
+        isAxis,
+      };
+    })
+  : [];
+
+const ASPECT_CLASS: Record<AspectType, string> = {
+  conjunction: '',
+  trine: 'asp-soft',
+  sextile: 'asp-soft asp-dash',
+  square: 'asp-hard asp-dash',
+  opposition: 'asp-hard',
+};
+const byId = new Map(planets.map((p) => [p.id, p]));
+const aspects = chart.aspects
+  .filter((a) => a.type !== 'conjunction')
+  .map((a) => ({
+    ...a,
+    p: byId.get(a.a)!.anchor,
+    q: byId.get(a.b)!.anchor,
+    cls: ASPECT_CLASS[a.type],
+  }));
+
+const sun = bodies.find((p) => p.id === 'sun')!;
+const moon = bodies.find((p) => p.id === 'moon')!;
+const summary = [
+  `Sol en ${formatPosition(sun)}`,
+  `Luna en ${formatPosition(moon)}`,
+  timeKnown ? `Ascendente en ${formatPosition(chart.ascendant)}` : 'sin Ascendente (falta la hora)',
+].join(', ');
+---
+
+<svg class="wheel" viewBox="0 0 600 600" role="img" aria-labelledby={`${id}-title ${id}-desc`}>
+  <title id={`${id}-title`}>Rueda de tu carta natal</title>
+  <desc id={`${id}-desc`}>{summary}. El detalle completo está en las tablas.</desc>
+
+  <circle cx={C} cy={C} r={R.outer} class="disc" />
+  {signs.map((s) => (
+    <path d={s.path} class:list={['sign', s.cls]} />
+  ))}
+  {signs.map((s) => (
+    <text x={s.mid.x} y={s.mid.y} class:list={['glyph', 'sign-glyph', s.cls]} aria-hidden="true">
+      {SIGN_GLYPHS[s.sign]}
+    </text>
+  ))}
+  {ticks.map((t) => (
+    <line x1={t.from.x} y1={t.from.y} x2={t.to.x} y2={t.to.y} class="tick" />
+  ))}
+  <circle cx={C} cy={C} r={R.signIn} class="ring" />
+  <circle cx={C} cy={C} r={R.house} class="ring" />
+
+  {houses.map((h) => (
+    <>
+      <line
+        x1={h.from.x}
+        y1={h.from.y}
+        x2={h.to.x}
+        y2={h.to.y}
+        class:list={['house', { axis: h.isAxis }]}
+      />
+      <text x={h.num.x} y={h.num.y} class="house-num" aria-hidden="true">
+        {h.n}
+      </text>
+    </>
+  ))}
+
+  {aspects.map((a) => (
+    <line x1={a.p.x} y1={a.p.y} x2={a.q.x} y2={a.q.y} class:list={['aspect', a.cls]} />
+  ))}
+
+  {planets.map((p) => (
+    <>
+      <line
+        x1={p.tickFrom.x}
+        y1={p.tickFrom.y}
+        x2={p.tickTo.x}
+        y2={p.tickTo.y}
+        class="planet-tick"
+      />
+      <text x={p.glyph.x} y={p.glyph.y} class="glyph planet" aria-hidden="true">
+        {PLANET_GLYPHS[p.id]}
+      </text>
+      <text x={p.label.x} y={p.label.y} class="degree" aria-hidden="true">
+        {p.degree}°{p.retrograde && p.id !== 'northNode' ? '℞' : ''}
+      </text>
+    </>
+  ))}
+
+  {timeKnown && (
+    <>
+      <text x={polar(C, C, R.house - 18, 180).x} y={C} class="axis-label" aria-hidden="true">
+        ASC
+      </text>
+      <text
+        x={polar(C, C, R.house - 18, angleOf(chart.midheaven.lon)).x}
+        y={polar(C, C, R.house - 18, angleOf(chart.midheaven.lon)).y}
+        class="axis-label"
+        aria-hidden="true"
+      >
+        MC
+      </text>
+    </>
+  )}
+  <circle cx={C} cy={C} r="6" class="core" />
+</svg>
+
+<style>
+  .wheel {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+  .disc {
+    fill: var(--surface);
+    stroke: var(--line-acid);
+    stroke-width: 1.5;
+  }
+  .sign {
+    stroke: rgb(255 255 255 / 10%);
+    stroke-width: 1;
+    fill-opacity: 0.1;
+  }
+  .el-fire {
+    fill: var(--hot);
+  }
+  .el-earth {
+    fill: var(--acid);
+  }
+  .el-air {
+    fill: var(--cyan);
+  }
+  .el-water {
+    fill: var(--violet-text);
+  }
+  text {
+    text-anchor: middle;
+    dominant-baseline: central;
+    font-family: var(--font-body);
+  }
+  .glyph {
+    font-family:
+      'Segoe UI Symbol', 'Apple Symbols', 'Noto Sans Symbols 2', 'DejaVu Sans', sans-serif;
+  }
+  .sign-glyph {
+    font-size: 22px;
+    fill-opacity: 1;
+  }
+  .tick {
+    stroke: var(--ink-soft);
+    stroke-width: 1;
+  }
+  .ring {
+    fill: none;
+    stroke: rgb(255 255 255 / 14%);
+    stroke-width: 1;
+  }
+  .house {
+    stroke: rgb(255 255 255 / 22%);
+    stroke-width: 1;
+  }
+  .house.axis {
+    stroke: var(--acid);
+    stroke-width: 2;
+  }
+  .house-num {
+    font-size: 12px;
+    fill: var(--ink-soft);
+    font-family: var(--font-mono);
+  }
+  .aspect {
+    stroke-width: 1.4;
+    stroke-opacity: 0.85;
+  }
+  .asp-soft {
+    stroke: var(--cyan);
+  }
+  .asp-hard {
+    stroke: var(--hot);
+  }
+  .asp-dash {
+    stroke-dasharray: 6 4;
+  }
+  .planet {
+    font-size: 24px;
+    fill: var(--ink);
+  }
+  .planet-tick {
+    stroke: var(--acid);
+    stroke-width: 2;
+  }
+  .degree {
+    font-size: 11px;
+    fill: var(--ink-soft);
+    font-family: var(--font-mono);
+  }
+  .axis-label {
+    font-size: 12px;
+    font-weight: 800;
+    fill: var(--acid);
+    letter-spacing: 0.1em;
+  }
+  .core {
+    fill: var(--acid);
+  }
+</style>

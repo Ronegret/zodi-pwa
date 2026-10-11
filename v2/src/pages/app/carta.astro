@@ -1,0 +1,229 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import NatalWheel from '@/components/chart/NatalWheel.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import {
+  ASPECT_NAMES,
+  formatPosition,
+  PLANET_GLYPHS,
+  PLANET_NAMES,
+  SIGN_GLYPHS,
+} from '@/lib/astro-engine/labels';
+import { getLatestSelfChart } from '@/lib/server/charts';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const stored = await getLatestSelfChart(supabase);
+const chart = stored?.chart;
+const timeKnown = stored?.input.timeKnown ?? false;
+const place = profile.birth_place ?? '';
+const birth = stored
+  ? new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: 'UTC' }).format(
+      new Date(`${stored.input.date}T12:00:00Z`),
+    )
+  : '';
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+const systemLabel = chart?.houseSystem === 'placidus' ? 'Placidus' : 'Signos enteros';
+---
+
+<AppShell
+  title="Tu carta natal"
+  current="carta"
+  kicker="Calculada con efemérides reales"
+  intro={
+    stored
+      ? `${birth}${timeKnown ? `, ${stored.input.time}` : ', hora desconocida'} · ${place}`
+      : undefined
+  }
+>
+  {!chart || !stored ? (
+    <EmptyState title="Todavía no hay carta" headingLevel={2}>
+      <p>Danos tu fecha, hora y lugar de nacimiento y la calculamos al minuto.</p>
+      <Button href="/app/onboarding">Completar mis datos</Button>
+    </EmptyState>
+  ) : (
+    <div class="layout">
+      <Card
+        title="La rueda"
+        kicker={timeKnown ? `Casas ${systemLabel}` : 'Sin casas'}
+        class="wheel-card"
+      >
+        <NatalWheel chart={chart} timeKnown={timeKnown} />
+        <ul class="key" aria-label="Leyenda de aspectos">
+          <li>
+            <span class="k k-soft" aria-hidden="true" /> Armónico (trígono, sextil)
+          </li>
+          <li>
+            <span class="k k-hard" aria-hidden="true" /> Tenso (cuadratura, oposición)
+          </li>
+        </ul>
+        {!timeKnown && (
+          <p class="notice">
+            Sin hora de nacimiento no hay Ascendente ni casas fiables: calculamos los planetas a
+            mediodía. Si encuentras la hora, <a href="/app/onboarding?paso=nacimiento">añádela</a>.
+          </p>
+        )}
+        {chart.houseSystemNote && <p class="notice">{chart.houseSystemNote}</p>}
+      </Card>
+
+      <div class="tables">
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Tabla: Planetas">
+          <table class="table">
+            <caption>Planetas</caption>
+            <thead>
+              <tr>
+                <th scope="col">Planeta</th>
+                <th scope="col">Posición</th>
+                {timeKnown && <th scope="col">Casa</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {chart.planets.map((p) => (
+                <tr>
+                  <th scope="row">
+                    <span class="glyph" aria-hidden="true">
+                      {PLANET_GLYPHS[p.id]}
+                    </span>
+                    {PLANET_NAMES[p.id]}
+                  </th>
+                  <td>
+                    <span class="glyph" aria-hidden="true">
+                      {SIGN_GLYPHS[p.sign]}
+                    </span>
+                    {formatPosition(p)}
+                    {p.retrograde && p.id !== 'northNode' && (
+                      <Badge tone="hot">
+                        <span aria-hidden="true">℞</span>
+                        <span class="visually-hidden">retrógrado</span>
+                      </Badge>
+                    )}
+                  </td>
+                  {timeKnown && <td class="num">{ROMAN[p.house - 1]}</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {timeKnown && (
+          <div class="table-wrap" tabindex="0" role="region" aria-label="Tabla: Casas">
+            <table class="table">
+              <caption>Casas ({systemLabel})</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Casa</th>
+                  <th scope="col">Cúspide</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chart.houses.map((h, i) => (
+                  <tr>
+                    <th scope="row">
+                      {ROMAN[i]}
+                      {i === 0 ? ' · Ascendente' : i === 9 ? ' · Medio Cielo' : ''}
+                    </th>
+                    <td>{formatPosition(h)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Tabla: Aspectos principales">
+          <table class="table">
+            <caption>Aspectos principales</caption>
+            <thead>
+              <tr>
+                <th scope="col">Entre</th>
+                <th scope="col">Aspecto</th>
+                <th scope="col">Orbe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chart.aspects.map((a) => (
+                <tr>
+                  <th scope="row">
+                    {PLANET_NAMES[a.a]} y {PLANET_NAMES[a.b]}
+                  </th>
+                  <td>{ASPECT_NAMES[a.type]}</td>
+                  <td class="num">{a.orb.toFixed(2)}°</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="muted small">
+          Motor v{stored.engineVersion} · cúspides contrastadas con Swiss Ephemeris (±2′).
+        </p>
+      </div>
+    </div>
+  )}
+</AppShell>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (max-width: 1099px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .layout > :global(.wheel-card) {
+    position: sticky;
+    top: var(--space-4);
+  }
+  @media (max-width: 1099px) {
+    .layout > :global(.wheel-card) {
+      position: static;
+    }
+  }
+  .tables {
+    display: grid;
+    gap: var(--space-5);
+    min-width: 0;
+  }
+  .glyph {
+    font-family: 'Segoe UI Symbol', 'Apple Symbols', 'Noto Sans Symbols 2', sans-serif;
+    color: var(--acid);
+    margin-right: var(--space-2);
+  }
+  .key {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .key li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .k {
+    display: inline-block;
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+  }
+  .k-soft {
+    background: var(--cyan);
+  }
+  .k-hard {
+    background: var(--hot);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+</style>

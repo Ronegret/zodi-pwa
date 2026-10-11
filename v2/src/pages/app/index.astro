@@ -1,64 +1,312 @@
 ---
 import AppShell from '@/layouts/AppShell.astro';
+import ElementsDonut from '@/components/dashboard/ElementsDonut.astro';
+import EnergyChart from '@/components/dashboard/EnergyChart.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
 import Card from '@/components/ui/Card.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Icon from '@/components/ui/Icon.astro';
+import ProgressBar from '@/components/ui/ProgressBar.astro';
+import { formatPosition } from '@/lib/astro-engine/labels';
+import { buildDashboard } from '@/lib/dashboard/build';
+import { describeTransit } from '@/lib/daily/today';
 import { getLatestSelfChart } from '@/lib/server/charts';
 
-const { supabase } = Astro.locals;
-const stored = supabase ? await getLatestSelfChart(supabase) : null;
-const chart = stored?.chart;
-const sun = chart?.planets.find((p) => p.id === 'sun');
-const moon = chart?.planets.find((p) => p.id === 'moon');
-const fmt = (p: { sign: string; degree: number; minute: number }) =>
-  `${p.sign} ${p.degree}°${String(p.minute).padStart(2, '0')}′`;
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const stored = await getLatestSelfChart(supabase);
+const welcome = Astro.url.searchParams.get('bienvenida') === '1';
+const d = buildDashboard(
+  profile,
+  stored ? { chart: stored.chart, timeKnown: stored.input.timeKnown } : null,
+  new Date(),
+);
 ---
 
-<AppShell title="Inicio" current="inicio">
-  <Card title="Hoy" action={{ label: 'Ver horóscopo', href: '/app/horoscopo' }}>
-    <p>Tu lectura diaria aparecerá aquí.</p>
-  </Card>
-  <Card title="Carta natal" action={{ label: 'Abrir', href: '/app/carta' }}>
-    {chart && sun && moon ? (
-      <dl class="big3">
-        <div>
-          <dt>Sol</dt>
-          <dd>{fmt(sun)}</dd>
-        </div>
-        <div>
-          <dt>Luna</dt>
-          <dd>{fmt(moon)}</dd>
-        </div>
-        <div>
-          <dt>Ascendente</dt>
-          <dd>{stored.input.timeKnown ? fmt(chart.ascendant) : 'Sin hora de nacimiento'}</dd>
-        </div>
-      </dl>
-    ) : (
-      <p>
-        Aún no hay carta. <a href="/app/onboarding">Completa tus datos de nacimiento</a>.
+<AppShell
+  title={`Hola, ${d.firstName}`}
+  current="inicio"
+  intro={d.headline}
+  toast={welcome ? { message: 'Carta calculada. Bienvenida al lado oscuro del cielo.' } : undefined}
+>
+  <div class="bento">
+    <Card
+      title="Lo que dice el cielo"
+      kicker={`Hoy · ${d.moon.name}`}
+      class="span-hoy"
+      action={{ label: 'Lectura completa', href: '/app/horoscopo' }}
+    >
+      <p class="moon">
+        <Icon name="moon" />
+        <span>
+          Luna en <strong>{d.moon.sign}</strong> · {Math.round(d.moon.illumination * 100)} %
+          iluminada
+        </span>
       </p>
-    )}
-  </Card>
-  <Card title="Compatibilidad">
-    <p>Compara dos cartas.</p>
-  </Card>
+      {d.transits.length ? (
+        <ul class="transits">
+          {d.transits.map((t) => (
+            <li>
+              <span>{describeTransit(t)}</span>
+              <Badge tone={t.type === 'square' || t.type === 'opposition' ? 'hot' : 'acid'}>
+                orbe {t.orb.toFixed(1)}°
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="muted">Hoy ningún planeta toca tu carta de cerca. Disfruta la calma, no dura.</p>
+      )}
+    </Card>
+
+    <Card
+      title="Tu carta"
+      kicker="Big three"
+      class="span-carta"
+      action={{ label: 'Ver carta', href: '/app/carta' }}
+    >
+      {d.chart ? (
+        <>
+          <img
+            class="sign-art"
+            src={d.chart.sunImage}
+            alt=""
+            width="640"
+            height="366"
+            loading="eager"
+            decoding="async"
+          />
+          <dl class="big3">
+            <div>
+              <dt>
+                <Icon name="sun" size={18} /> Sol
+              </dt>
+              <dd>{formatPosition(d.chart.sun)}</dd>
+            </div>
+            <div>
+              <dt>
+                <Icon name="moon" size={18} /> Luna
+              </dt>
+              <dd>{formatPosition(d.chart.moon)}</dd>
+            </div>
+            <div>
+              <dt>
+                <Icon name="star" size={18} /> Ascendente
+              </dt>
+              <dd>
+                {d.chart.ascendant ? formatPosition(d.chart.ascendant) : 'Sin hora de nacimiento'}
+              </dd>
+            </div>
+          </dl>
+        </>
+      ) : (
+        <EmptyState title="Aún no hay carta" image={false}>
+          <Button href="/app/onboarding">Completar mis datos</Button>
+        </EmptyState>
+      )}
+    </Card>
+
+    <Card title="Tu energía" kicker="Biorritmo" class="span-energia">
+      {d.energy ? (
+        <EnergyChart series={d.energy.series} todayIndex={d.energy.todayIndex} />
+      ) : (
+        <p class="muted">Necesitamos tu fecha de nacimiento para calcularlo.</p>
+      )}
+    </Card>
+
+    <Card title="Match" kicker="Compatibilidad" class="span-match">
+      <p class="muted">
+        ¿Encajas o chocas? Compara tu carta con la de quien te quita el sueño (o la paciencia).
+      </p>
+      <Button href="/app/compatibilidad" variant="violet" icon="heart">
+        Comparar cartas
+      </Button>
+    </Card>
+
+    <Card title="Tus elementos" kicker="Reparto de planetas" class="span-elementos">
+      {d.chart ? (
+        <ElementsDonut balance={d.chart.elements} />
+      ) : (
+        <p class="muted">Sin carta todavía.</p>
+      )}
+    </Card>
+
+    <Card title="Racha y XP" kicker={d.progress.rank} class="span-racha">
+      <div class="streak">
+        <span class="streak-icon">
+          <Icon name="flame" size={28} />
+        </span>
+        <p>
+          <span class="streak-num mono">{d.streak}</span>
+          <span class="muted">{d.streak === 1 ? 'día seguido' : 'días seguidos'}</span>
+        </p>
+      </div>
+      <ProgressBar
+        label={`Nivel ${d.progress.level}`}
+        value={d.progress.current}
+        max={d.progress.needed}
+        valueText={`${d.progress.current} de ${d.progress.needed} XP`}
+      />
+      <p class="muted small">
+        <Badge tone="gems">
+          <span aria-hidden="true">◆</span> {d.gems}
+          <span class="visually-hidden"> gemas</span>
+        </Badge>
+        Vuelve mañana: la racha no se mantiene sola.
+      </p>
+    </Card>
+
+    <Card title="Rituales" kicker={d.moon.name} class="span-rituales">
+      <ul class="rituals">
+        {d.rituals.map((r) => (
+          <li>
+            <Icon name="sparkles" size={18} />
+            <span>{r}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  </div>
 </AppShell>
 
 <style>
+  /* Mobile first: 1 columna · tablet: 2 · escritorio ancho: 12. */
+  .bento {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+  @media (min-width: 720px) {
+    .bento {
+      gap: var(--space-5);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .bento > :global(.span-hoy),
+    .bento > :global(.span-energia) {
+      grid-column: span 2;
+    }
+  }
+  @media (min-width: 1280px) {
+    .bento {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    .bento > :global(.span-hoy),
+    .bento > :global(.span-energia) {
+      grid-column: span 7;
+    }
+    .bento > :global(.span-carta),
+    .bento > :global(.span-match) {
+      grid-column: span 5;
+    }
+    .bento > :global(.span-elementos),
+    .bento > :global(.span-racha),
+    .bento > :global(.span-rituales) {
+      grid-column: span 4;
+    }
+  }
+  .moon {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink-soft);
+  }
+  .moon strong {
+    color: var(--ink);
+  }
+  .transits,
+  .rituals {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .transits li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 3%);
+    border: 1px solid var(--line);
+    font-weight: 600;
+  }
+  .sign-art {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 640 / 366;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+  }
   .big3 {
     margin: 0;
     display: grid;
-    gap: 0.75rem;
+    gap: var(--space-2);
   }
   .big3 div {
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 3%);
+    border: 1px solid var(--line);
   }
-  dt {
+  .big3 dt {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     color: var(--ink-soft);
   }
-  dd {
+  .big3 dd {
     margin: 0;
-    font-weight: 600;
+    font-weight: 800;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .streak {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .streak-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-lg);
+    background: rgb(255 43 214 / 12%);
+    color: var(--hot);
+  }
+  .streak p {
+    display: grid;
+  }
+  .streak-num {
+    font-size: var(--step-4);
+    font-weight: 800;
+    line-height: 1;
+  }
+  .small {
+    font-size: var(--step--1);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .rituals li {
+    display: flex;
+    gap: var(--space-2);
+    align-items: start;
+  }
+  .rituals li :global(svg) {
+    color: var(--acid);
+    flex: none;
+    margin-top: 0.2em;
   }
 </style>
