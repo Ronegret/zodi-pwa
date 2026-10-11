@@ -7,13 +7,14 @@ import { SceneFrame } from './SceneFrame';
 import { useScene } from './useScene';
 
 /**
- * Anillo zodiacal 3D de la portada. Los 12 botones son el equivalente de
- * teclado del clic en 3D y funcionan también sin 3D (muestran la ficha).
+ * Portada: el personaje ZODI delante (siempre visible, es el protagonista) y
+ * el anillo zodiacal 3D flotando sobre su cabeza como una corona. Los 12
+ * botones son el equivalente de teclado del clic en 3D y funcionan sin 3D.
  */
 export function HeroZodiac({ children }: { children?: ReactNode }) {
   const [selected, setSelected] = useState<Sign | null>(null);
   const s = useScene<HeroScene>('hero', () =>
-    import('@/scenes/hero').then((m) => m.createHeroScene()),
+    import('@/scenes/hero').then((m) => m.createHeroScene({ crown: true })),
   );
 
   const choose = (sign: Sign) => {
@@ -24,7 +25,7 @@ export function HeroZodiac({ children }: { children?: ReactNode }) {
   return (
     <div className="scene-block">
       <SceneFrame
-        label="Anillo en 3D con los doce signos del zodiaco girando alrededor de un núcleo violeta"
+        label="Corona en 3D con los doce signos del zodiaco girando sobre la cabeza de ZODI"
         state={s.state}
         paused={s.paused}
         onTogglePause={s.togglePause}
@@ -35,7 +36,8 @@ export function HeroZodiac({ children }: { children?: ReactNode }) {
           const sign = s.pick(e);
           if (sign) setSelected(sign as Sign);
         }}
-        fallback={children}
+        overlay={children}
+        shape="portrait"
       />
       <div className="chip-group scene-controls js-only" role="group" aria-label="Elige un signo">
         {SIGNS.map((sign) => (

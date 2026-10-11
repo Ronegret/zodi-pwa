@@ -19,6 +19,11 @@ interface Props {
   fallback?: ReactNode;
   /** Acciones que solo tienen sentido con el 3D pintando (sobre el canvas: sin saltos). */
   actions?: ReactNode;
+  /**
+   * Capa delantera siempre visible (el personaje ZODI): va encima del canvas
+   * y deja pasar el puntero, así la escena 3D queda detrás de él.
+   */
+  overlay?: ReactNode;
   shape?: 'square' | 'portrait' | 'wide';
 }
 
@@ -38,6 +43,7 @@ export function SceneFrame({
   onPick,
   fallback,
   actions,
+  overlay,
   shape = 'square',
 }: Props) {
   return (
@@ -68,6 +74,7 @@ export function SceneFrame({
           <span className="btn-label">Pausar animación</span>
         </button>
       )}
+      {overlay && <div className="scene-overlay">{overlay}</div>}
       {state === 'ready' && actions && <div className="scene-actions">{actions}</div>}
     </div>
   );

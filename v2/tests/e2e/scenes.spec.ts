@@ -44,7 +44,7 @@ test.describe('escenas 3D', () => {
   test('portada: anillo listo, en presupuesto, pausa y signos por teclado', async ({ page }) => {
     await page.goto('/');
     await expectReady(page, 'hero');
-    const hero = frame(page, /Anillo en 3D/);
+    const hero = frame(page, /Corona en 3D/);
     await expect(hero).toHaveAttribute('data-state', 'ready');
     // La alternativa queda oculta cuando el 3D pinta.
     await expect(hero.locator('.scene-fallback')).toBeHidden();
@@ -146,7 +146,7 @@ test.describe('sin WebGL', () => {
     await expect(page.getByRole('button', { name: 'Leo' })).toBeVisible();
     await expect(hero).toHaveAttribute('data-state', 'static');
     await expect(hero.locator('canvas')).toHaveCount(0);
-    await expect(hero.getByRole('img', { name: /Zodi, la mascota/ })).toBeVisible();
+    await expect(hero.getByRole('img', { name: /ZODI, con su capucha/ })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Pausar animación' })).toHaveCount(0);
     // Los chips vienen del servidor; responden en cuanto la isla hidrata.
     await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
@@ -185,7 +185,7 @@ test.describe('sin JavaScript', () => {
 
   test('sin botones muertos: la portada enseña la imagen y no los signos', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('img', { name: /Zodi, la mascota/ })).toBeVisible();
+    await expect(page.getByRole('img', { name: /ZODI, con su capucha/ })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Leo' })).toBeHidden();
   });
 
