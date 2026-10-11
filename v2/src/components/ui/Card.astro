@@ -1,40 +1,36 @@
 ---
+/** Panel de cristal Zodi. El título es un h2 enlazado a la región. */
 interface Props {
   title: string;
-  action?: { label: string; href: string };
+  kicker?: string | undefined;
+  action?: { label: string; href: string } | undefined;
+  class?: string;
+  id?: string;
 }
-const { title, action } = Astro.props;
-const id = `c-${title.toLowerCase().replace(/\W+/g, '-')}`;
+const { title, kicker, action, class: className, id } = Astro.props;
+const headingId = `${
+  id ??
+  'c-' +
+    title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[^\w]+/g, '-')
+}-title`;
 ---
 
-<section class="card" aria-labelledby={id}>
-  <header>
-    <h2 id={id}>{title}</h2>
-    {action && <a href={action.href}>{action.label}</a>}
+<section class:list={['card', className]} aria-labelledby={headingId} id={id}>
+  <header class="card-header">
+    <div class="card-heading">
+      {kicker && <p class="kicker">{kicker}</p>}
+      <h2 id={headingId} class="card-title">
+        {title}
+      </h2>
+    </div>
+    {action && (
+      <a class="card-action" href={action.href}>
+        {action.label}
+      </a>
+    )}
   </header>
   <slot />
 </section>
-
-<style>
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
-  }
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 1rem;
-  }
-  h2 {
-    font-size: 1.35rem;
-  }
-  a {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--brand);
-  }
-</style>

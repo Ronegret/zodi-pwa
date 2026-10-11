@@ -1,7 +1,8 @@
 ---
 /**
- * Resumen de errores (patrón GOV.UK): recibe el foco al cargar para que el
- * lector de pantalla lo anuncie, y cada error enlaza a su campo.
+ * Resumen de errores (patrón GOV.UK): recibe el foco para que el lector de
+ * pantalla lo anuncie y cada error enlaza a su campo. El contenedor raíz
+ * existe siempre para que la validación en cliente pinte el mismo marcado.
  */
 interface Props {
   errors: Record<string, string>;
@@ -12,55 +13,35 @@ const fieldEntries = Object.entries(fields);
 const count = fieldEntries.length;
 ---
 
-{(formError || count > 0) && (
-  <div class="summary" tabindex="-1" aria-labelledby="error-summary-title" data-error-summary>
-    <h2 id="error-summary-title">
-      {count > 0
-        ? count === 1
-          ? 'Hay 1 cosa que corregir'
-          : `Hay ${count} cosas que corregir`
-        : 'No ha funcionado'}
-    </h2>
-    {formError && <p>{formError}</p>}
-    {count > 0 && (
-      <ul>
-        {fieldEntries.map(([name, message]) => (
-          <li>
-            <a href={`#f-${name}`}>{message}</a>
-          </li>
-        ))}
-      </ul>
-    )}
-  </div>
-)}
+<div data-error-summary-root>
+  {(formError || count > 0) && (
+    <div
+      class="error-summary"
+      tabindex="-1"
+      aria-labelledby="error-summary-title"
+      data-error-summary
+    >
+      <h2 id="error-summary-title">
+        {count > 0
+          ? count === 1
+            ? 'Hay 1 cosa que corregir'
+            : `Hay ${count} cosas que corregir`
+          : 'No ha funcionado'}
+      </h2>
+      {formError && <p>{formError}</p>}
+      {count > 0 && (
+        <ul>
+          {fieldEntries.map(([name, message]) => (
+            <li>
+              <a href={`#f-${name}`}>{message}</a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )}
+</div>
 
 <script>
   document.querySelector<HTMLElement>('[data-error-summary]')?.focus();
 </script>
-
-<style>
-  .summary {
-    border: 3px solid var(--danger);
-    border-radius: var(--radius-sm);
-    padding: 1rem 1.25rem;
-    background: var(--surface);
-  }
-  .summary:focus-visible {
-    outline: 3px solid var(--brand);
-    outline-offset: 3px;
-  }
-  h2 {
-    font-size: 1.15rem;
-  }
-  p {
-    margin: 0.5rem 0 0;
-  }
-  ul {
-    margin: 0.5rem 0 0;
-    padding-left: 1.2rem;
-  }
-  a {
-    color: var(--danger);
-    font-weight: 600;
-  }
-</style>

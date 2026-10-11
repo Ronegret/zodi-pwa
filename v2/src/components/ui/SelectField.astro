@@ -1,0 +1,53 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'select'>, 'id' | 'name' | 'class'> {
+  name: string;
+  label: string;
+  options: readonly { value: string; label: string }[];
+  value?: string | undefined;
+  hint?: string | undefined;
+  error?: string | undefined;
+}
+const { name, label, options, value, hint, error, required, ...attrs } = Astro.props;
+const id = `f-${name}`;
+const hintId = hint ? `${id}-hint` : undefined;
+const errorId = `${id}-error`;
+const describedBy = [hintId, error ? errorId : undefined].filter(Boolean).join(' ') || undefined;
+---
+
+<div class="field">
+  <label class="field-label" for={id}>
+    {label}
+    {required && <span class="field-req"> (obligatorio)</span>}
+  </label>
+  {hint && (
+    <p id={hintId} class="field-hint">
+      {hint}
+    </p>
+  )}
+  <p id={errorId} class="field-error" data-error-for={name} hidden={!error}>
+    {error && (
+      <>
+        <span class="visually-hidden">Error: </span>
+        {error}
+      </>
+    )}
+  </p>
+  <select
+    id={id}
+    name={name}
+    class="select"
+    required={required}
+    aria-invalid={error ? 'true' : undefined}
+    aria-describedby={describedBy}
+    data-hint-id={hintId}
+    {...attrs}
+  >
+    {options.map((o) => (
+      <option value={o.value} selected={o.value === value}>
+        {o.label}
+      </option>
+    ))}
+  </select>
+</div>

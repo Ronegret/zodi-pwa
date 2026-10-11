@@ -1,0 +1,44 @@
+---
+/**
+ * Barra de progreso: <progress> nativo (rol progressbar implícito). Sin
+ * atributos style: la CSP de producción no permite estilos en línea.
+ */
+interface Props {
+  label: string;
+  value: number;
+  max?: number;
+  valueText?: string;
+  tone?: 'acid' | 'hot';
+  showLabel?: boolean;
+  id?: string;
+}
+const { label, value, max = 100, valueText, tone = 'acid', showLabel = true, id } = Astro.props;
+const clamped = Math.min(Math.max(value, 0), max);
+const text = valueText ?? `${Math.round((max > 0 ? clamped / max : 0) * 100)} %`;
+const labelId = `${
+  id ??
+  'p-' +
+    label
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[^\w]+/g, '-')
+}-label`;
+---
+
+<div class="progress">
+  <div class:list={['progress-meta', !showLabel && 'visually-hidden']}>
+    <span id={labelId}>{label}</span>
+    <span class="mono" aria-hidden="true">
+      {text}
+    </span>
+  </div>
+  <progress
+    class:list={['progress-native', tone === 'hot' && 'progress-hot']}
+    max={max}
+    value={clamped}
+    aria-labelledby={labelId}
+    aria-valuetext={text}
+  >
+    {text}
+  </progress>
+</div>

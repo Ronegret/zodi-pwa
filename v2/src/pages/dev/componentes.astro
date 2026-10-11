@@ -1,0 +1,116 @@
+---
+/** Galería del sistema de diseño. Solo en desarrollo (e2e de axe y teclado). */
+import Base from '@/layouts/Base.astro';
+import { InteractiveDemos } from '@/components/dev/InteractiveDemos';
+import Avatar from '@/components/ui/Avatar.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Field from '@/components/ui/Field.astro';
+import ProgressBar from '@/components/ui/ProgressBar.astro';
+import SelectField from '@/components/ui/SelectField.astro';
+import Skeleton from '@/components/ui/Skeleton.astro';
+import { ToastRegion } from '@/components/ui/ToastRegion';
+
+if (!import.meta.env.DEV) return new Response(null, { status: 404 });
+---
+
+<Base title="Componentes">
+  <main id="main" class="gallery">
+    <p class="kicker">Sistema de diseño</p>
+    <h1>Componentes Zodi</h1>
+
+    <Card title="Botones" kicker="Button">
+      <div class="row">
+        <Button>Primario</Button>
+        <Button variant="secondary">Secundario</Button>
+        <Button variant="ghost">Fantasma</Button>
+        <Button variant="violet" icon="heart">
+          Violeta
+        </Button>
+        <Button variant="danger">Peligro</Button>
+        <Button disabled>Desactivado</Button>
+        <Button loading>Cargando</Button>
+        <Button size="sm">Pequeño</Button>
+      </div>
+    </Card>
+
+    <Card title="Chips y badges" kicker="Badge · Chip">
+      <div class="row">
+        <Badge>Neutro</Badge>
+        <Badge tone="acid">Ácido</Badge>
+        <Badge tone="violet">Violeta</Badge>
+        <Badge tone="hot">Rosa</Badge>
+        <Badge tone="danger">Error</Badge>
+        <Badge tone="gems">◆ 120</Badge>
+      </div>
+      <fieldset class="group">
+        <legend>Temas</legend>
+        <div class="chip-group">
+          <label class="chip">
+            <input type="checkbox" name="demo" checked /> Amor
+          </label>
+          <label class="chip">
+            <input type="checkbox" name="demo" /> Dinero
+          </label>
+          <label class="chip">
+            <input type="checkbox" name="demo" disabled /> Trabajo
+          </label>
+        </div>
+      </fieldset>
+    </Card>
+
+    <Card title="Formulario" kicker="Field · Select">
+      <form class="stack" novalidate>
+        <Field name="demo_name" label="Nombre" hint="Como quieres que te llamemos." required />
+        <Field name="demo_date" label="Fecha" type="date" />
+        <Field name="demo_time" label="Hora" type="time" />
+        <Field name="demo_error" label="Con error" value="xx" error="Esto no cuela." />
+        <SelectField
+          name="demo_tone"
+          label="Tono"
+          options={[
+            { value: 'suave', label: 'Suave' },
+            { value: 'brutal', label: 'Brutal' },
+          ]}
+        />
+      </form>
+    </Card>
+
+    <Card title="Progreso, avatar, esqueleto" kicker="Estados">
+      <ProgressBar label="Nivel 3" value={40} max={300} valueText="40 de 300 XP" />
+      <div class="row">
+        <Avatar name="Ana Estrella" />
+        <Avatar name="Zodi" src="/brand/isotipo-96.webp" size="lg" />
+      </div>
+      <Skeleton lines={3} />
+    </Card>
+
+    <Card title="Interactivos" kicker="Tabs · Dialog · Tooltip · Toast">
+      <InteractiveDemos client:load />
+    </Card>
+
+    <EmptyState title="Nada por aquí" headingLevel={2}>
+      <p>Estado vacío con el personaje de Zodi.</p>
+    </EmptyState>
+    <ToastRegion client:load />
+  </main>
+</Base>
+
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4) var(--space-8);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+  }
+</style>
