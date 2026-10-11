@@ -5,12 +5,14 @@ import Field from '@/components/ui/Field.astro';
 import { AUTH_UNAVAILABLE, authErrorMessage } from '@/lib/auth/errors';
 import { noticeFor } from '@/lib/auth/notices';
 import { safeNext } from '@/lib/auth/routes';
+import { isGoogleEnabled } from '@/lib/server/auth-settings';
 import { loginSchema } from '@/lib/validation/auth';
 import { fieldErrors, formToObject } from '@/lib/validation/common';
 
 const next = safeNext(Astro.url.searchParams.get('next'));
 const nextQuery = next === '/app' ? '' : `?next=${encodeURIComponent(next)}`;
 const notice = noticeFor(Astro.url.searchParams.get('aviso'));
+const google = await isGoogleEnabled();
 let errors: Record<string, string> = {};
 let email = '';
 
@@ -69,13 +71,22 @@ if (Astro.request.method === 'POST') {
     </button>
   </form>
 
-  <p class="divider">o</p>
+  {google && (
+    <>
+      <p class="divider">o</p>
+      <form method="post" action={`/auth/google${nextQuery}`}>
+        <button class="btn btn-secondary btn-block" type="submit">
+          Continuar con Google
+        </button>
+      </form>
+    </>
+  )}
 
-  <form method="post" action={`/auth/google${nextQuery}`}>
-    <button class="btn btn-secondary btn-block" type="submit">
-      Continuar con Google
-    </button>
-  </form>
+  <p class="notice moved">
+    <strong>¿Tenías cuenta en la Zodi de antes?</strong> Nos hemos mudado de casa y las cuentas no
+    se han traído: <a href="/auth/registro">crea la tuya de nuevo</a> (con el mismo correo, si
+    quieres). Dos minutos y vuelves a tener tu carta.
+  </p>
 
   <p class="links">
     <a href="/auth/recuperar">¿Olvidaste la contraseña?</a>

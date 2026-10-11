@@ -303,6 +303,10 @@ async function handleAuth(req, res, url) {
       });
     return send(res, 200, issueSession(u));
   }
+  // Ajustes públicos de Auth: la app solo enseña "Continuar con Google" si está activado.
+  if (path === '/settings' && req.method === 'GET') {
+    return send(res, 200, { external: { google: true, email: true }, disable_signup: false });
+  }
   if (path === '/user' && req.method === 'GET') {
     const u = currentUser(req);
     if (!u) return send(res, 403, { code: 'bad_jwt', error_code: 'bad_jwt', msg: 'invalid JWT' });
