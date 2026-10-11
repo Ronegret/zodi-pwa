@@ -3,12 +3,14 @@ import AuthLayout from '@/layouts/AuthLayout.astro';
 import ErrorSummary from '@/components/ui/ErrorSummary.astro';
 import Field from '@/components/ui/Field.astro';
 import { AUTH_UNAVAILABLE, authErrorMessage } from '@/lib/auth/errors';
+import { isGoogleEnabled } from '@/lib/server/auth-settings';
 import { registerSchema } from '@/lib/validation/auth';
 import { fieldErrors, formToObject } from '@/lib/validation/common';
 
 let errors: Record<string, string> = {};
 let values = { name: '', email: '' };
 let checkEmail = false;
+const google = await isGoogleEnabled();
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
@@ -98,12 +100,16 @@ if (Astro.request.method === 'POST') {
           Crear cuenta
         </button>
       </form>
-      <p class="divider">o</p>
-      <form method="post" action="/auth/google?next=/app/onboarding">
-        <button class="btn btn-secondary btn-block" type="submit">
-          Registrarme con Google
-        </button>
-      </form>
+      {google && (
+        <>
+          <p class="divider">o</p>
+          <form method="post" action="/auth/google?next=/app/onboarding">
+            <button class="btn btn-secondary btn-block" type="submit">
+              Registrarme con Google
+            </button>
+          </form>
+        </>
+      )}
     </>
   )}
   <p class="alt">

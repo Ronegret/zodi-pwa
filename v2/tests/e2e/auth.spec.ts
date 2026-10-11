@@ -78,6 +78,29 @@ test.describe('acceso', () => {
   });
 });
 
+test.describe('acceso con Google y cuentas antiguas', () => {
+  test('con Google activado se ofrece en login y registro', async ({ page }) => {
+    await page.goto('/auth/login');
+    await expect(page.getByRole('button', { name: 'Continuar con Google' })).toBeVisible();
+    await page.goto('/auth/registro');
+    await expect(page.getByRole('button', { name: 'Registrarme con Google' })).toBeVisible();
+  });
+
+  test('el login explica que las cuentas de la Zodi anterior se crean de nuevo', async ({
+    page,
+  }) => {
+    await page.goto('/auth/login');
+    await expect(page.getByText('¿Tenías cuenta en la Zodi de antes?')).toBeVisible();
+    await page.getByRole('link', { name: 'crea la tuya de nuevo' }).click();
+    await expect(page).toHaveURL(/\/auth\/registro$/);
+  });
+
+  test('el aviso de Google no disponible se muestra si llega', async ({ page }) => {
+    await page.goto('/auth/login?aviso=google-no-disponible');
+    await expect(page.getByRole('status')).toContainText('El acceso con Google está a punto');
+  });
+});
+
 test.describe('API', () => {
   test('sin sesión responde 401 JSON; salud es pública', async ({ request }) => {
     const res = await request.get('/api/perfil');

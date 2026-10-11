@@ -10,6 +10,10 @@ const NOTICES = {
     text: 'No hemos podido conectar con Google. Inténtalo otra vez.',
   },
   'no-disponible': { tone: 'error', text: 'El acceso está en mantenimiento. Vuelve en un rato.' },
+  'google-no-disponible': {
+    tone: 'info',
+    text: 'El acceso con Google está a punto de llegar. Mientras, entra o regístrate con tu correo.',
+  },
 } as const;
 
 export type Notice = (typeof NOTICES)[keyof typeof NOTICES];
