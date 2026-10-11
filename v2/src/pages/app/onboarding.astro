@@ -1,224 +1,406 @@
 ---
 /**
- * Onboarding mínimo de la Fase 2: guarda datos de nacimiento y calcula la
- * carta. La Fase 3 lo rehace por pasos y con buscador de ciudades
- * (geocodificación); hasta entonces coordenadas y zona van a mano.
+ * Onboarding en 5 pasos con guardado parcial: cada paso valida (Zod en
+ * cliente y servidor), guarda en el perfil y pasa al siguiente. El último
+ * calcula la carta con astro-engine. Funciona sin JS: el buscador de ciudad
+ * cae a una búsqueda en servidor con la lista como radios.
  */
 import AuthLayout from '@/layouts/AuthLayout.astro';
+import { CityCombobox } from '@/components/onboarding/CityCombobox';
+import Button from '@/components/ui/Button.astro';
 import ErrorSummary from '@/components/ui/ErrorSummary.astro';
 import Field from '@/components/ui/Field.astro';
-import { completeOnboarding, getOwnProfile, UsernameTakenError } from '@/lib/server/profile';
+import ProgressBar from '@/components/ui/ProgressBar.astro';
+import { placeSchema, type Place } from '@/lib/geo/places';
+import {
+  ARRAY_FIELDS,
+  NOTIFICATIONS,
+  STEPS,
+  TONES,
+  TOPICS,
+  nextStep,
+  resolveStep,
+  stepIndex,
+  stepSchemas,
+  type StepId,
+} from '@/lib/onboarding/steps';
+import { geocode } from '@/lib/server/geocoding';
+import { finishOnboarding, UsernameTakenError, updateOwnProfile } from '@/lib/server/profile';
 import { READING_TONES } from '@/lib/supabase/enums';
 import { fieldErrors, formToObject } from '@/lib/validation/common';
-import { onboardingSchema } from '@/lib/validation/profile';
 
 const { supabase, user } = Astro.locals;
-if (!supabase || !user) return Astro.redirect('/auth/login', 303);
+let profile = Astro.locals.profile;
+if (!supabase || !user || !profile) return Astro.redirect('/auth/login', 303);
 
-const profile = await getOwnProfile(supabase, user.id);
+const requested = Astro.url.searchParams.get('paso');
+const step: StepId = resolveStep(requested, profile);
+if (requested && requested !== step) return Astro.redirect(`/app/onboarding?paso=${step}`, 303);
+
 let errors: Record<string, string> = {};
-let values: Record<string, string> = {
-  display_name: profile?.display_name ?? '',
-  username: profile?.username ?? '',
-  birth_date: profile?.birth_date ?? '',
-  birth_time: profile?.birth_time?.slice(0, 5) ?? '',
-  birth_place: profile?.birth_place ?? '',
-  birth_lat: profile?.birth_lat?.toString() ?? '',
-  birth_lon: profile?.birth_lon?.toString() ?? '',
-  time_zone: profile?.time_zone ?? 'Europe/Madrid',
-  reading_tone: profile?.reading_tone ?? 'directo',
-};
-let timeUnknown = false;
+let raw: Record<string, unknown> = {};
+let choices: Place[] = [];
+
+/** Lugar desde el formulario: combobox (ocultos), radio elegido o búsqueda sin JS. */
+async function placeFromForm(): Promise<Record<string, unknown> | null> {
+  const query = String(raw.city_query ?? '').trim();
+  if (typeof raw.city_choice === 'string') {
+    try {
+      const c = JSON.parse(raw.city_choice) as Place;
+      return {
+        birth_place: c.label,
+        birth_lat: c.latitude,
+        birth_lon: c.longitude,
+        time_zone: c.timeZone,
+      };
+    } catch {
+      return {};
+    }
+  }
+  const hidden = placeSchema.safeParse(raw);
+  if (hidden.success && (!query || query === hidden.data.birth_place)) return raw;
+  if (query.length < 2) return {};
+  try {
+    choices = await geocode(query);
+  } catch {
+    errors = { city_query: 'El buscador de ciudades no responde. Inténtalo en un momento.' };
+    return null;
+  }
+  if (!choices.length) {
+    errors = {
+      city_query: `Ni rastro de «${query.slice(0, 60)}». Prueba a escribirlo de otra forma.`,
+    };
+  }
+  return null;
+}
 
 if (Astro.request.method === 'POST') {
-  const form = await Astro.request.formData();
-  const raw = formToObject(form);
-  values = Object.fromEntries(
-    Object.keys(values).map((k) => [k, String(raw[k] ?? '').slice(0, 120)]),
-  );
-  timeUnknown = raw.birth_time_unknown === 'on';
-  const parsed = onboardingSchema.safeParse(raw);
-  if (!parsed.success) {
-    errors = fieldErrors(parsed.error);
-    Astro.response.status = 422;
-  } else {
-    try {
-      await completeOnboarding(supabase, user.id, parsed.data);
-      return Astro.redirect('/app', 303);
-    } catch (error) {
-      if (error instanceof UsernameTakenError) {
-        errors = { username: 'Ese usuario ya tiene dueño. Prueba otro.' };
-        Astro.response.status = 409;
-      } else {
-        console.error('[onboarding]', error);
-        errors = { _form: 'No hemos podido guardar tus datos. Inténtalo de nuevo.' };
-        Astro.response.status = 500;
+  raw = formToObject(await Astro.request.formData(), ARRAY_FIELDS);
+  const input = step === 'lugar' ? await placeFromForm() : raw;
+  if (input && !Object.keys(errors).length) {
+    const parsed = stepSchemas[step].safeParse(input);
+    if (!parsed.success) {
+      const fe = fieldErrors(parsed.error);
+      errors = step === 'lugar' ? { city_query: Object.values(fe)[0]! } : fe;
+    } else {
+      try {
+        profile = await updateOwnProfile(supabase, user.id, parsed.data);
+        const next = nextStep(step);
+        if (next) return Astro.redirect(`/app/onboarding?paso=${next}`, 303);
+        await finishOnboarding(supabase, profile);
+        return Astro.redirect('/app?bienvenida=1', 303);
+      } catch (error) {
+        if (error instanceof UsernameTakenError) {
+          errors = { username: 'Ese usuario ya tiene dueño. Prueba otro.' };
+        } else {
+          console.error('[onboarding]', error);
+          errors = { _form: 'No hemos podido guardar. Inténtalo de nuevo.' };
+        }
       }
     }
   }
+  if (Object.keys(errors).length) Astro.response.status = 422;
 }
 
-const toneLabels: Record<(typeof READING_TONES)[number], string> = {
-  suave: 'Suave: con cariño',
-  directo: 'Directo: sin rodeos',
-  brutal: 'Brutal: sin anestesia',
-  sarcastico: 'Sarcástico: con retranca',
-};
+// Valores a mostrar: lo enviado (si hubo error) o lo guardado.
+const v = (key: string, saved: unknown) => String(raw[key] ?? saved ?? '');
+const savedPlace: Place | null =
+  profile.birth_place &&
+  profile.birth_lat !== null &&
+  profile.birth_lon !== null &&
+  profile.time_zone
+    ? {
+        id: 'saved',
+        name: profile.birth_place,
+        label: profile.birth_place,
+        latitude: profile.birth_lat,
+        longitude: profile.birth_lon,
+        timeZone: profile.time_zone,
+      }
+    : null;
+const topics = (raw.favorite_topics as string[] | undefined) ?? profile.favorite_topics;
+const notifs = (raw.notification_prefs as string[] | undefined) ?? profile.notification_prefs;
+const tone = String(raw.reading_tone ?? profile.reading_tone);
+const timeUnknown =
+  raw.birth_time_unknown === 'on' || (!raw.birth_date && profile.birth_time_known === false);
+
+const index = stepIndex(step);
+const current = STEPS[index]!;
+const prev = STEPS[index - 1];
+const isLast = index === STEPS.length - 1;
 ---
 
 <AuthLayout
-  title="Cuéntanos cuándo llegaste"
-  intro="Con esto calculamos tu carta natal real, planeta a planeta."
+  title="Construye tu perfil astral."
+  kicker={`Paso ${index + 1} de ${STEPS.length} · ${current.label}`}
   wide
 >
+  <ProgressBar
+    label="Progreso"
+    value={index + 1}
+    max={STEPS.length}
+    valueText={`Paso ${index + 1} de ${STEPS.length}`}
+    tone="hot"
+  />
+
+  <nav aria-label="Pasos del onboarding">
+    <ol class="steps">
+      {STEPS.map((s, i) => (
+        <li class:list={{ done: i < index, now: i === index }}>
+          {i < index ? (
+            <a href={`/app/onboarding?paso=${s.id}`}>
+              <span class="visually-hidden">Hecho: </span>
+              {s.label}
+            </a>
+          ) : (
+            <span aria-current={i === index ? 'step' : undefined}>{s.label}</span>
+          )}
+        </li>
+      ))}
+    </ol>
+  </nav>
+
   <ErrorSummary errors={errors} />
-  <form method="post" novalidate class="stack">
-    <fieldset>
-      <legend>Tú</legend>
-      <Field
-        name="display_name"
-        label="Nombre"
-        autocomplete="given-name"
-        value={values.display_name}
-        required
-        error={errors.display_name}
-      />
-      <Field
-        name="username"
-        label="Nombre de usuario"
-        autocomplete="username"
-        spellcheck="false"
-        hint="De 3 a 24 caracteres: letras sin tildes, números o guion bajo."
-        value={values.username}
-        required
-        error={errors.username}
-      />
-    </fieldset>
 
-    <fieldset>
-      <legend>Nacimiento</legend>
-      <Field
-        name="birth_date"
-        label="Fecha"
-        type="date"
-        min="1900-01-01"
-        value={values.birth_date}
-        required
-        error={errors.birth_date}
-      />
-      <Field
-        name="birth_time"
-        label="Hora"
-        type="time"
-        hint="Hora local del lugar de nacimiento. Sin ella no hay ascendente ni casas fiables."
-        value={values.birth_time}
-        error={errors.birth_time}
-      />
-      <div class="check">
-        <input
-          id="f-birth_time_unknown"
-          name="birth_time_unknown"
-          type="checkbox"
-          checked={timeUnknown}
-        />
-        <label for="f-birth_time_unknown">No sé la hora</label>
-      </div>
-      <Field
-        name="birth_place"
-        label="Lugar"
-        autocomplete="off"
-        value={values.birth_place}
-        required
-        error={errors.birth_place}
-      />
-      <div class="row">
+  <form method="post" class="stack step-form" data-step={step} novalidate>
+    <h2>{current.heading}</h2>
+
+    {step === 'perfil' && (
+      <>
         <Field
-          name="birth_lat"
-          label="Latitud"
-          inputmode="decimal"
-          hint="Ej.: 40.4168"
-          value={values.birth_lat}
+          name="display_name"
+          label="Nombre visible"
+          autocomplete="given-name"
+          value={v('display_name', profile.display_name)}
           required
-          error={errors.birth_lat}
+          error={errors.display_name}
         />
         <Field
-          name="birth_lon"
-          label="Longitud"
-          inputmode="decimal"
-          hint="Ej.: -3.7038"
-          value={values.birth_lon}
+          name="username"
+          label="Nombre de usuario"
+          autocomplete="username"
+          spellcheck="false"
+          hint="De 3 a 24 caracteres: letras sin tildes, números o guion bajo."
+          value={v('username', profile.username)}
           required
-          error={errors.birth_lon}
+          error={errors.username}
         />
-      </div>
-      <Field
-        name="time_zone"
-        label="Zona horaria"
-        spellcheck="false"
-        hint="Formato IANA, ej.: Europe/Madrid o America/Santiago."
-        value={values.time_zone}
-        required
-        error={errors.time_zone}
-      />
-    </fieldset>
+      </>
+    )}
 
-    <fieldset>
-      <legend>¿Cómo quieres que te hable Zodi?</legend>
-      <div class="tones">
-        {READING_TONES.map((tone) => (
-          <div class="check">
-            <input
-              id={`f-tone-${tone}`}
-              name="reading_tone"
-              type="radio"
-              value={tone}
-              checked={values.reading_tone === tone}
-            />
-            <label for={`f-tone-${tone}`}>{toneLabels[tone]}</label>
+    {step === 'nacimiento' && (
+      <>
+        <Field
+          name="birth_date"
+          label="Fecha de nacimiento"
+          type="date"
+          min="1900-01-01"
+          value={v('birth_date', profile.birth_date)}
+          required
+          error={errors.birth_date}
+        />
+        <Field
+          name="birth_time"
+          label="Hora"
+          type="time"
+          hint="Hora local del sitio donde naciste. Sin ella no hay Ascendente ni casas."
+          value={v('birth_time', profile.birth_time?.slice(0, 5))}
+          error={errors.birth_time}
+        />
+        <div class="check">
+          <input
+            id="f-birth_time_unknown"
+            name="birth_time_unknown"
+            type="checkbox"
+            checked={timeUnknown}
+          />
+          <label for="f-birth_time_unknown">No sé la hora (ya la buscaré)</label>
+        </div>
+      </>
+    )}
+
+    {step === 'lugar' && (
+      <>
+        <CityCombobox
+          client:load
+          initial={savedPlace}
+          initialQuery={String(raw.city_query ?? '')}
+          error={errors.city_query}
+        />
+        {choices.length > 0 && (
+          <fieldset class="group">
+            <legend>¿Cuál de estos?</legend>
+            <div class="choice-grid">
+              {choices.map((c, i) => (
+                <label class="choice">
+                  <input
+                    type="radio"
+                    name="city_choice"
+                    value={JSON.stringify(c)}
+                    checked={i === 0}
+                    id={i === 0 ? 'f-city_choice' : undefined}
+                  />
+                  <span class="choice-title">{c.name}</span>
+                  <small>
+                    {c.label} · {c.timeZone}
+                  </small>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+      </>
+    )}
+
+    {step === 'estilo' && (
+      <>
+        <fieldset class="group">
+          <legend>Tono de tus lecturas</legend>
+          <div class="choice-grid">
+            {READING_TONES.map((t, i) => (
+              <label class="choice">
+                <input
+                  type="radio"
+                  name="reading_tone"
+                  value={t}
+                  checked={tone === t}
+                  id={i === 0 ? 'f-reading_tone' : undefined}
+                />
+                <span class="choice-title">{TONES[t].title}</span>
+                <small>{TONES[t].hint}</small>
+              </label>
+            ))}
           </div>
-        ))}
-      </div>
-    </fieldset>
+          <p
+            id="f-reading_tone-error"
+            class="field-error"
+            data-error-for="reading_tone"
+            hidden={!errors.reading_tone}
+          >
+            {errors.reading_tone}
+          </p>
+        </fieldset>
+        <fieldset class="group">
+          <legend>Temas que te importan (hasta 4)</legend>
+          <div class="chip-group">
+            {TOPICS.map((t, i) => (
+              <label class="chip">
+                <input
+                  type="checkbox"
+                  name="favorite_topics"
+                  value={t.value}
+                  checked={topics.includes(t.value)}
+                  id={i === 0 ? 'f-favorite_topics' : undefined}
+                />
+                {t.label}
+              </label>
+            ))}
+          </div>
+          <p
+            id="f-favorite_topics-error"
+            class="field-error"
+            data-error-for="favorite_topics"
+            hidden={!errors.favorite_topics}
+          >
+            {errors.favorite_topics}
+          </p>
+        </fieldset>
+      </>
+    )}
 
-    <button class="btn btn-block" type="submit">
-      Calcular mi carta
-    </button>
+    {step === 'avisos' && (
+      <fieldset class="group">
+        <legend>Avisos que quieres recibir</legend>
+        <div class="choice-grid">
+          {NOTIFICATIONS.map((n, i) => (
+            <label class="choice">
+              <input
+                type="checkbox"
+                name="notification_prefs"
+                value={n.value}
+                checked={notifs.includes(n.value)}
+                id={i === 0 ? 'f-notification_prefs' : undefined}
+              />
+              <span class="choice-title">{n.label}</span>
+              <small>{n.hint}</small>
+            </label>
+          ))}
+        </div>
+        <p class="field-hint">Puedes cambiarlo cuando quieras en Ajustes.</p>
+      </fieldset>
+    )}
+
+    <div class="actions">
+      {prev && (
+        <Button href={`/app/onboarding?paso=${prev.id}`} variant="ghost" icon="chevronLeft">
+          Atrás
+        </Button>
+      )}
+      <Button type="submit" class="next">
+        {isLast ? 'Calcular mi carta' : 'Siguiente'}
+      </Button>
+    </div>
   </form>
 </AuthLayout>
 
+<script>
+  import { enhanceForm } from '@/lib/forms/enhance';
+  import { ARRAY_FIELDS, isStepId, stepSchemas } from '@/lib/onboarding/steps';
+
+  const form = document.querySelector<HTMLFormElement>('form[data-step]');
+  const step = form?.dataset.step ?? null;
+  // En "lugar" valida el servidor: sin JS busca la ciudad escrita.
+  if (form && isStepId(step) && step !== 'lugar') {
+    enhanceForm(form, stepSchemas[step], { arrays: ARRAY_FIELDS });
+  }
+</script>
+
 <style>
-  fieldset {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 1rem;
+  .steps {
+    list-style: none;
     margin: 0;
-    display: grid;
-    gap: 1rem;
-    min-width: 0;
-  }
-  legend {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    padding: 0 0.4rem;
-  }
-  .row {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-  }
-  .check {
+    padding: 0;
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    font-size: var(--step--1);
+    font-weight: 700;
+  }
+  .steps li {
+    display: flex;
+  }
+  .steps li > * {
+    display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
+    min-height: 32px;
+    padding: 0.2rem 0.75rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+  }
+  .steps li.done > a {
     min-height: 44px;
+    color: var(--acid-soft);
+    border-color: var(--line-acid);
+    text-decoration: none;
   }
-  .check input {
-    width: 1.35rem;
-    height: 1.35rem;
-    accent-color: var(--brand);
+  .steps li.now > span {
+    color: var(--brand-ink);
+    background: var(--acid);
+    border-color: var(--acid);
   }
-  .tones {
-    display: grid;
-    gap: 0.25rem;
+  .step-form h2 {
+    font-size: var(--step-3);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+  }
+  .actions :global(.next) {
+    margin-left: auto;
+    min-width: 12rem;
   }
 </style>

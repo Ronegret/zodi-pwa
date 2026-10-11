@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { loginSchema, newPasswordSchema, registerSchema } from '@/lib/validation/auth';
 import { chartRequestSchema } from '@/lib/validation/chart';
 import { fieldErrors, formToObject } from '@/lib/validation/common';
-import { onboardingSchema, profileUpdateSchema } from '@/lib/validation/profile';
+import { profileUpdateSchema } from '@/lib/validation/profile';
+import {
+  ARRAY_FIELDS,
+  firstIncompleteStep,
+  resolveStep,
+  stepSchemas,
+} from '@/lib/onboarding/steps';
 
 const errorsOf = (result: { success: boolean; error?: unknown }) =>
   result.success ? {} : fieldErrors(result.error as Parameters<typeof fieldErrors>[0]);
@@ -74,54 +80,87 @@ describe('perfil', () => {
     });
   });
 
-  it('onboarding desde formulario: coma decimal, hora desconocida y fechas imposibles', () => {
+  it('paso nacimiento: hora desconocida y fechas imposibles', () => {
     const form = new FormData();
-    for (const [k, v] of Object.entries({
-      display_name: 'Ana',
-      username: 'ana',
+    form.set('birth_date', '1990-04-15');
+    form.set('birth_time', '');
+    form.set('birth_time_unknown', 'on');
+    expect(stepSchemas.nacimiento.parse(formToObject(form))).toEqual({
       birth_date: '1990-04-15',
-      birth_time: '',
-      birth_time_unknown: 'on',
-      birth_place: 'Madrid',
-      birth_lat: '40,4168',
-      birth_lon: '-3.7038',
-      time_zone: 'Europe/Madrid',
-    })) {
-      form.set(k, v);
-    }
-    const parsed = onboardingSchema.parse(formToObject(form));
-    expect(parsed).toMatchObject({
-      birth_lat: 40.4168,
-      birth_time_unknown: true,
-      reading_tone: 'directo',
+      birth_time: null,
+      birth_time_known: false,
     });
-    expect(parsed.birth_time).toBeUndefined();
-
     form.delete('birth_time_unknown');
-    expect(errorsOf(onboardingSchema.safeParse(formToObject(form))).birth_time).toMatch(
+    expect(errorsOf(stepSchemas.nacimiento.safeParse(formToObject(form))).birth_time).toMatch(
       /no la sabes/,
     );
-
+    form.set('birth_time', '10:30');
+    expect(stepSchemas.nacimiento.parse(formToObject(form)).birth_time_known).toBe(true);
     form.set('birth_date', '1990-02-30');
-    expect(errorsOf(onboardingSchema.safeParse(formToObject(form))).birth_date).toMatch(
+    expect(errorsOf(stepSchemas.nacimiento.safeParse(formToObject(form))).birth_date).toMatch(
       /no existe/,
     );
     form.set('birth_date', '2999-01-01');
-    expect(errorsOf(onboardingSchema.safeParse(formToObject(form))).birth_date).toMatch(/futuro/);
+    expect(errorsOf(stepSchemas.nacimiento.safeParse(formToObject(form))).birth_date).toMatch(
+      /futuro/,
+    );
   });
 
-  it('una latitud vacía no se convierte en 0', () => {
-    const result = onboardingSchema.safeParse({
-      display_name: 'Ana',
-      username: 'ana',
-      birth_date: '1990-04-15',
-      birth_time: '10:30',
-      birth_place: 'Madrid',
-      birth_lat: '',
-      birth_lon: '-3.7',
+  it('paso lugar: coma decimal y campos ocultos vacíos no valen 0', () => {
+    const ok = stepSchemas.lugar.parse({
+      birth_place: 'Madrid, España',
+      birth_lat: '40,4168',
+      birth_lon: '-3.7038',
       time_zone: 'Europe/Madrid',
     });
-    expect(errorsOf(result).birth_lat).toBeDefined();
+    expect(ok.birth_lat).toBe(40.4168);
+    const empty = stepSchemas.lugar.safeParse({
+      birth_place: '',
+      birth_lat: '',
+      birth_lon: '',
+      time_zone: '',
+    });
+    expect(errorsOf(empty).birth_lat).toBe('Elige tu ciudad de la lista.');
+  });
+
+  it('paso estilo: varios temas desde el formulario, máximo 4', () => {
+    const form = new FormData();
+    form.set('reading_tone', 'brutal');
+    for (const t of ['amor', 'dinero']) form.append('favorite_topics', t);
+    expect(stepSchemas.estilo.parse(formToObject(form, ARRAY_FIELDS))).toEqual({
+      reading_tone: 'brutal',
+      favorite_topics: ['amor', 'dinero'],
+    });
+    for (const t of ['trabajo', 'futuro', 'energia']) form.append('favorite_topics', t);
+    expect(
+      errorsOf(stepSchemas.estilo.safeParse(formToObject(form, ARRAY_FIELDS))).favorite_topics,
+    ).toMatch(/4 temas/);
+    expect(stepSchemas.estilo.safeParse({ reading_tone: 'cruel' }).success).toBe(false);
+  });
+
+  it('no deja saltarse pasos obligatorios', () => {
+    const blank = {
+      display_name: 'Ana',
+      username: null,
+      birth_date: null,
+      birth_time_known: null,
+      birth_lat: null,
+      time_zone: null,
+    };
+    expect(firstIncompleteStep(blank)).toBe('perfil');
+    expect(resolveStep('avisos', blank)).toBe('perfil');
+    const partial = {
+      ...blank,
+      username: 'ana',
+      birth_date: '1990-04-15',
+      birth_time_known: false,
+    };
+    expect(resolveStep('nacimiento', partial)).toBe('nacimiento');
+    expect(resolveStep('estilo', partial)).toBe('lugar');
+    const done = { ...partial, birth_lat: 40, time_zone: 'Europe/Madrid' };
+    expect(firstIncompleteStep(done)).toBeNull();
+    expect(resolveStep('avisos', done)).toBe('avisos');
+    expect(resolveStep(null, done)).toBe('estilo');
   });
 });
 

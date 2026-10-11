@@ -57,7 +57,7 @@ if (Astro.request.method === 'POST') {
   ) : (
     <>
       <ErrorSummary errors={errors} />
-      <form method="post" novalidate class="stack">
+      <form method="post" novalidate class="stack" data-validate>
         <Field
           name="name"
           label="Nombre"
@@ -110,6 +110,13 @@ if (Astro.request.method === 'POST') {
     ¿Ya tienes cuenta? <a href="/auth/login">Entra</a>
   </p>
 </AuthLayout>
+
+<script>
+  import { enhanceForm } from '@/lib/forms/enhance';
+  import { registerSchema } from '@/lib/validation/auth';
+
+  enhanceForm(document.querySelector<HTMLFormElement>('form[data-validate]'), registerSchema);
+</script>
 
 <style>
   .alt {

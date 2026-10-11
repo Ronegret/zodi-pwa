@@ -22,6 +22,7 @@ export type Database = {
           avatar_url: string | null;
           birth_date: string | null;
           birth_time: string | null;
+          birth_time_known: boolean | null;
           birth_place: string | null;
           birth_lat: number | null;
           birth_lon: number | null;
@@ -52,6 +53,7 @@ export type Database = {
           avatar_url?: string | null;
           birth_date?: string | null;
           birth_time?: string | null;
+          birth_time_known?: boolean | null;
           birth_place?: string | null;
           birth_lat?: number | null;
           birth_lon?: number | null;

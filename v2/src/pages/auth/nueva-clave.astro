@@ -34,7 +34,7 @@ if (Astro.request.method === 'POST') {
   intro="Elige una que no sea tu fecha de nacimiento. Ya la sabemos."
 >
   <ErrorSummary errors={errors} />
-  <form method="post" novalidate class="stack">
+  <form method="post" novalidate class="stack" data-validate>
     <Field
       name="password"
       label="Nueva contraseña"
@@ -57,3 +57,10 @@ if (Astro.request.method === 'POST') {
     </button>
   </form>
 </AuthLayout>
+
+<script>
+  import { enhanceForm } from '@/lib/forms/enhance';
+  import { newPasswordSchema } from '@/lib/validation/auth';
+
+  enhanceForm(document.querySelector<HTMLFormElement>('form[data-validate]'), newPasswordSchema);
+</script>

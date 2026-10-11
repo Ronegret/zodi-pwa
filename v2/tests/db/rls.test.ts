@@ -156,6 +156,15 @@ describe('profiles', () => {
     );
     await denied('anon', 'select * from public.profile_cards($1)', [[B.uid]]);
   });
+
+  it('puede guardar si conoce o no su hora de nacimiento', async () => {
+    const rows = await q(
+      A,
+      'update public.profiles set birth_time_known = false where id = $1 returning birth_time_known',
+      [A.uid],
+    );
+    expect(rows).toEqual([{ birth_time_known: false }]);
+  });
 });
 
 describe('natal_charts', () => {

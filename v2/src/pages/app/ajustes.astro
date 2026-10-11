@@ -1,0 +1,239 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import { formatPosition } from '@/lib/astro-engine/labels';
+import { NOTIFICATIONS, TONES, TOPICS } from '@/lib/onboarding/steps';
+import { getLatestSelfChart } from '@/lib/server/charts';
+import { UsernameTakenError, updateOwnProfile } from '@/lib/server/profile';
+import { READING_TONES } from '@/lib/supabase/enums';
+import { fieldErrors, formToObject } from '@/lib/validation/common';
+import { settingsSchema, SETTINGS_ARRAYS } from '@/lib/validation/settings';
+
+const { supabase, user } = Astro.locals;
+let profile = Astro.locals.profile;
+if (!supabase || !user || !profile) return Astro.redirect('/auth/login', 303);
+
+let errors: Record<string, string> = {};
+let raw: Record<string, unknown> = {};
+
+if (Astro.request.method === 'POST') {
+  raw = formToObject(await Astro.request.formData(), SETTINGS_ARRAYS);
+  const parsed = settingsSchema.safeParse(raw);
+  if (!parsed.success) {
+    errors = fieldErrors(parsed.error);
+  } else {
+    try {
+      profile = await updateOwnProfile(supabase, user.id, parsed.data);
+      return Astro.redirect('/app/ajustes?guardado=1', 303);
+    } catch (error) {
+      if (error instanceof UsernameTakenError)
+        errors = { username: 'Ese usuario ya tiene dueño. Prueba otro.' };
+      else {
+        console.error('[ajustes]', error);
+        errors = { _form: 'No hemos podido guardar. Inténtalo de nuevo.' };
+      }
+    }
+  }
+  Astro.response.status = 422;
+}
+
+const stored = await getLatestSelfChart(supabase);
+const v = (key: string, saved: unknown) => String(raw[key] ?? saved ?? '');
+const topics = (raw.favorite_topics as string[] | undefined) ?? profile.favorite_topics;
+const notifs = (raw.notification_prefs as string[] | undefined) ?? profile.notification_prefs;
+const tone = String(raw.reading_tone ?? profile.reading_tone);
+const saved = Astro.url.searchParams.get('guardado') === '1';
+---
+
+<AppShell
+  title="Ajustes"
+  current="ajustes"
+  kicker="Tu cuenta"
+  intro="Cambia cómo te llamamos, cómo te hablamos y cuándo te molestamos."
+  toast={saved ? { message: 'Guardado. Zodi toma nota.' } : undefined}
+>
+  <div class="layout">
+    <form method="post" class="stack" novalidate data-settings>
+      <ErrorSummary errors={errors} />
+      <Card title="Tú" kicker="Perfil">
+        <Field
+          name="display_name"
+          label="Nombre visible"
+          autocomplete="given-name"
+          value={v('display_name', profile.display_name)}
+          required
+          error={errors.display_name}
+        />
+        <Field
+          name="username"
+          label="Nombre de usuario"
+          autocomplete="username"
+          spellcheck="false"
+          hint="De 3 a 24 caracteres: letras sin tildes, números o guion bajo."
+          value={v('username', profile.username)}
+          required
+          error={errors.username}
+        />
+      </Card>
+
+      <Card title="Tu Zodi" kicker="Lecturas">
+        <fieldset class="group">
+          <legend>Tono</legend>
+          <div class="choice-grid">
+            {READING_TONES.map((t, i) => (
+              <label class="choice">
+                <input
+                  type="radio"
+                  name="reading_tone"
+                  value={t}
+                  checked={tone === t}
+                  id={i === 0 ? 'f-reading_tone' : undefined}
+                />
+                <span class="choice-title">{TONES[t].title}</span>
+                <small>{TONES[t].hint}</small>
+              </label>
+            ))}
+          </div>
+          <p
+            id="f-reading_tone-error"
+            class="field-error"
+            data-error-for="reading_tone"
+            hidden={!errors.reading_tone}
+          >
+            {errors.reading_tone}
+          </p>
+        </fieldset>
+        <fieldset class="group">
+          <legend>Temas (hasta 4)</legend>
+          <div class="chip-group">
+            {TOPICS.map((t, i) => (
+              <label class="chip">
+                <input
+                  type="checkbox"
+                  name="favorite_topics"
+                  value={t.value}
+                  checked={topics.includes(t.value)}
+                  id={i === 0 ? 'f-favorite_topics' : undefined}
+                />
+                {t.label}
+              </label>
+            ))}
+          </div>
+          <p
+            id="f-favorite_topics-error"
+            class="field-error"
+            data-error-for="favorite_topics"
+            hidden={!errors.favorite_topics}
+          >
+            {errors.favorite_topics}
+          </p>
+        </fieldset>
+      </Card>
+
+      <Card title="Avisos" kicker="Notificaciones">
+        <div class="choice-grid">
+          {NOTIFICATIONS.map((n, i) => (
+            <label class="choice">
+              <input
+                type="checkbox"
+                name="notification_prefs"
+                value={n.value}
+                checked={notifs.includes(n.value)}
+                id={i === 0 ? 'f-notification_prefs' : undefined}
+              />
+              <span class="choice-title">{n.label}</span>
+              <small>{n.hint}</small>
+            </label>
+          ))}
+        </div>
+      </Card>
+
+      <div class="save">
+        <Button type="submit" icon="check">
+          Guardar cambios
+        </Button>
+      </div>
+    </form>
+
+    <Card title="Nacimiento" kicker="Datos de tu carta" class="birth">
+      <dl class="facts">
+        <div>
+          <dt>Fecha</dt>
+          <dd>{profile.birth_date ?? '—'}</dd>
+        </div>
+        <div>
+          <dt>Hora</dt>
+          <dd>{profile.birth_time_known ? profile.birth_time?.slice(0, 5) : 'Desconocida'}</dd>
+        </div>
+        <div>
+          <dt>Lugar</dt>
+          <dd>{profile.birth_place ?? '—'}</dd>
+        </div>
+        <div>
+          <dt>Zona</dt>
+          <dd class="mono">{profile.time_zone ?? '—'}</dd>
+        </div>
+        {stored && (
+          <div>
+            <dt>Sol</dt>
+            <dd>{formatPosition(stored.chart.planets[0]!)}</dd>
+          </div>
+        )}
+      </dl>
+      <p class="muted">Si cambias estos datos recalculamos tu carta desde cero.</p>
+      <Button href="/app/onboarding?paso=nacimiento" variant="secondary">
+        Cambiar datos de nacimiento
+      </Button>
+    </Card>
+  </div>
+</AppShell>
+
+<script>
+  import { enhanceForm } from '@/lib/forms/enhance';
+  import { SETTINGS_ARRAYS, settingsSchema } from '@/lib/validation/settings';
+
+  enhanceForm(document.querySelector<HTMLFormElement>('form[data-settings]'), settingsSchema, {
+    arrays: SETTINGS_ARRAYS,
+  });
+</script>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (max-width: 1099px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .save {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .facts {
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .facts div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .facts dt {
+    color: var(--ink-soft);
+  }
+  .facts dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: right;
+  }
+</style>

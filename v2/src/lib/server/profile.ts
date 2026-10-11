@@ -1,6 +1,6 @@
 import type { Tables, TablesUpdate } from '@/lib/supabase/database.types';
 import type { ZodiSupabaseClient } from '@/lib/supabase/server';
-import type { OnboardingInput, ProfileUpdate } from '@/lib/validation/profile';
+import type { ProfileUpdate } from '@/lib/validation/profile';
 import { saveSelfChart } from './charts';
 
 export type Profile = Tables<'profiles'>;
@@ -45,30 +45,38 @@ export async function updateOwnProfile(
   return data;
 }
 
-/** Guarda los datos de nacimiento, calcula la carta y marca el onboarding como hecho. */
-export async function completeOnboarding(
-  supabase: ZodiSupabaseClient,
-  userId: string,
-  input: OnboardingInput,
-) {
-  const time = input.birth_time_unknown ? null : (input.birth_time ?? null);
-  await updateOwnProfile(supabase, userId, {
-    display_name: input.display_name,
-    username: input.username,
-    birth_date: input.birth_date,
-    birth_time: time,
-    birth_place: input.birth_place,
-    birth_lat: input.birth_lat,
-    birth_lon: input.birth_lon,
-    time_zone: input.time_zone,
-    reading_tone: input.reading_tone,
+export class MissingBirthDataError extends Error {
+  constructor() {
+    super('missing_birth_data');
+  }
+}
+
+/** Carta a partir de los datos de nacimiento del perfil. */
+export async function saveChartFromProfile(supabase: ZodiSupabaseClient, profile: Profile) {
+  const { birth_date, birth_time, birth_time_known, birth_lat, birth_lon, time_zone } = profile;
+  if (
+    !birth_date ||
+    birth_lat === null ||
+    birth_lon === null ||
+    !time_zone ||
+    birth_time_known === null
+  ) {
+    throw new MissingBirthDataError();
+  }
+  return saveSelfChart(supabase, {
+    date: birth_date,
+    // Postgres devuelve "HH:MM:SS"; el motor quiere "HH:mm".
+    time: birth_time_known && birth_time ? birth_time.slice(0, 5) : null,
+    timeZone: time_zone,
+    latitude: birth_lat,
+    longitude: birth_lon,
   });
-  await saveSelfChart(supabase, {
-    date: input.birth_date,
-    time,
-    timeZone: input.time_zone,
-    latitude: input.birth_lat,
-    longitude: input.birth_lon,
+}
+
+/** Último paso del onboarding: calcula y guarda la carta y lo marca como hecho. */
+export async function finishOnboarding(supabase: ZodiSupabaseClient, profile: Profile) {
+  await saveChartFromProfile(supabase, profile);
+  return updateOwnProfile(supabase, profile.id, {
+    onboarding_completed_at: new Date().toISOString(),
   });
-  return updateOwnProfile(supabase, userId, { onboarding_completed_at: new Date().toISOString() });
 }

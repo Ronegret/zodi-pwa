@@ -93,31 +93,3 @@ export const profileUpdateSchema = z
   });
 
 export type ProfileUpdate = z.infer<typeof profileUpdateSchema>;
-
-/**
- * Onboarding mínimo (Fase 2). La Fase 3 añade geocodificación: entonces
- * lat/lon/zona llegarán del buscador de ciudades, no a mano.
- */
-export const onboardingSchema = z
-  .object({
-    display_name: displayNameSchema,
-    username: usernameSchema,
-    birth_date: birthDateSchema,
-    birth_time: z.preprocess(emptyToUndefined, birthTimeSchema.optional()),
-    birth_time_unknown: z.preprocess((v) => v === 'on' || v === true, z.boolean()),
-    birth_place: z
-      .string({ error: 'Indica dónde naciste.' })
-      .trim()
-      .min(1, 'Indica dónde naciste.')
-      .max(120, 'Máximo 120 caracteres.'),
-    birth_lat: latitudeSchema,
-    birth_lon: longitudeSchema,
-    time_zone: timeZoneSchema,
-    reading_tone: z.enum(READING_TONES, 'Elige un tono de la lista.').default('directo'),
-  })
-  .refine((d) => d.birth_time_unknown || d.birth_time !== undefined, {
-    path: ['birth_time'],
-    error: 'Indica la hora o marca que no la sabes.',
-  });
-
-export type OnboardingInput = z.infer<typeof onboardingSchema>;

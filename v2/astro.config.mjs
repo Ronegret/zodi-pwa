@@ -9,6 +9,8 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [react()],
   prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
+  // La barra de dev tapa la parte baja de la pantalla (avisos, botón flotante) en los e2e.
+  devToolbar: { enabled: false },
   security: {
     // Rechaza envíos de formularios desde otros orígenes (CSRF).
     checkOrigin: true,
@@ -35,6 +37,13 @@ export default defineConfig({
         optional: true,
       }),
       ANTHROPIC_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Open-Meteo Geocoding por defecto; los e2e lo apuntan al mock.
+      GEOCODING_API_URL: envField.string({
+        context: 'server',
+        access: 'public',
+        optional: true,
+        url: true,
+      }),
     },
   },
 });

@@ -1,22 +1,27 @@
 ---
+/** Pantallas de acceso y onboarding: logo Zodi, panel de cristal centrado. */
 import Base from './Base.astro';
 
 interface Props {
   title: string;
+  kicker?: string | undefined;
   intro?: string | undefined;
   wide?: boolean;
 }
-const { title, intro, wide = false } = Astro.props;
+const { title, kicker, intro, wide = false } = Astro.props;
 ---
 
 <Base title={title}>
   <main id="main" class="auth">
     <a class="brand" href="/">
-      ZODI<span class="visually-hidden">, ir al inicio</span>
+      <img src="/brand/logo-240.webp" alt="ZODI, ir al inicio" width="240" height="160" />
     </a>
     <section class:list={['panel', { wide }]} aria-labelledby="auth-title">
-      <h1 id="auth-title">{title}</h1>
-      {intro && <p class="intro">{intro}</p>}
+      <div class="head">
+        {kicker && <p class="kicker">{kicker}</p>}
+        <h1 id="auth-title">{title}</h1>
+        {intro && <p class="intro">{intro}</p>}
+      </div>
       <slot />
     </section>
     <slot name="after" />
@@ -27,36 +32,40 @@ const { title, intro, wide = false } = Astro.props;
   .auth {
     min-height: 100dvh;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-content: center;
     justify-items: center;
-    gap: 1.5rem;
-    padding: 2rem 1rem;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-4) var(--space-7);
   }
-  .brand {
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    letter-spacing: 0.3em;
-    color: var(--ink);
-    text-decoration: none;
+  .brand img {
+    width: 160px;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 18px rgb(184 255 23 / 25%));
   }
   .panel {
-    width: min(100%, 28rem);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: clamp(1.25rem, 4vw, 2rem);
+    width: min(100%, 30rem);
+    background: var(--panel);
+    border: 1px solid var(--line-acid);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg), var(--glow-acid);
+    padding: clamp(1.25rem, 4vw, 2.25rem);
     display: grid;
-    gap: 1.25rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
   }
   .panel.wide {
-    width: min(100%, 40rem);
+    width: min(100%, 44rem);
+  }
+  .head {
+    display: grid;
+    gap: var(--space-2);
   }
   h1 {
-    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-size: var(--step-4);
   }
   .intro {
-    margin: -0.5rem 0 0;
     color: var(--ink-soft);
   }
 </style>
