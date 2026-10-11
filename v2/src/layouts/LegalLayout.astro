@@ -1,0 +1,43 @@
+---
+/** Páginas legales: el panel ancho de acceso con tipografía de lectura. */
+import AuthLayout from './AuthLayout.astro';
+
+interface Props {
+  title: string;
+  updated: string;
+}
+const { title, updated } = Astro.props;
+---
+
+<AuthLayout title={title} kicker="Legal" intro={`Última actualización: ${updated}`} wide>
+  <article class="legal">
+    <slot />
+  </article>
+</AuthLayout>
+
+<style>
+  .legal {
+    display: grid;
+    gap: var(--space-3);
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+  .legal :global(h2) {
+    font-size: var(--step-1);
+    color: var(--ink);
+    margin-top: var(--space-4);
+  }
+  .legal :global(ul) {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .legal :global(strong) {
+    color: var(--ink);
+  }
+  .legal :global(.warning) {
+    color: var(--gold);
+    font-weight: 800;
+  }
+</style>

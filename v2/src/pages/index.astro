@@ -2,6 +2,7 @@
 /** Portada con el estilo Zodi y el anillo zodiacal 3D (la imagen es su alternativa). */
 import Base from '@/layouts/Base.astro';
 import Button from '@/components/ui/Button.astro';
+import LegalLinks from '@/components/LegalLinks.astro';
 import { HeroZodiac } from '@/components/scenes/HeroZodiac';
 ---
 
@@ -48,6 +49,9 @@ import { HeroZodiac } from '@/components/scenes/HeroZodiac';
       </HeroZodiac>
     </section>
   </main>
+  <footer class="foot">
+    <LegalLinks />
+  </footer>
 </Base>
 
 <style>
@@ -116,6 +120,9 @@ import { HeroZodiac } from '@/components/scenes/HeroZodiac';
   .stage {
     width: min(100%, 34rem);
     justify-self: center;
+  }
+  .foot {
+    padding: 0 var(--space-4) var(--space-6);
   }
   .character {
     filter: drop-shadow(0 0 40px rgb(155 77 255 / 35%));

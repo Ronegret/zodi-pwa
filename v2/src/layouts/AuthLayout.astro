@@ -1,6 +1,7 @@
 ---
 /** Pantallas de acceso y onboarding: logo Zodi, panel de cristal centrado. */
 import Base from './Base.astro';
+import LegalLinks from '@/components/LegalLinks.astro';
 
 interface Props {
   title: string;
@@ -27,6 +28,7 @@ const { title, kicker, intro, wide = false } = Astro.props;
       <slot />
     </section>
     <slot name="after" />
+    <LegalLinks />
   </main>
 </Base>
 

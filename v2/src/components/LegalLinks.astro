@@ -1,0 +1,29 @@
+---
+/** Enlaces a las páginas legales (portada y pantallas de acceso). */
+---
+
+<nav class="legal-links" aria-label="Información legal">
+  <a href="/legal/privacidad">Privacidad</a>
+  <span aria-hidden="true">·</span>
+  <a href="/legal/terminos">Términos</a>
+</nav>
+
+<style>
+  .legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  a {
+    color: var(--ink-soft);
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+  }
+  a:hover {
+    color: var(--acid);
+  }
+</style>
