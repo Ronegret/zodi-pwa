@@ -158,41 +158,84 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
       </div>
     </form>
 
-    <Card title="Nacimiento" kicker="Datos de tu carta" class="birth">
-      <dl class="facts">
-        <div>
-          <dt>Fecha</dt>
-          <dd>{profile.birth_date ?? '—'}</dd>
-        </div>
-        <div>
-          <dt>Hora</dt>
-          <dd>{profile.birth_time_known ? profile.birth_time?.slice(0, 5) : 'Desconocida'}</dd>
-        </div>
-        <div>
-          <dt>Lugar</dt>
-          <dd>{profile.birth_place ?? '—'}</dd>
-        </div>
-        <div>
-          <dt>Zona</dt>
-          <dd class="mono">{profile.time_zone ?? '—'}</dd>
-        </div>
-        {stored && (
+    <div class="side">
+      <Card title="Nacimiento" kicker="Datos de tu carta" class="birth">
+        <dl class="facts">
           <div>
-            <dt>Sol</dt>
-            <dd>{formatPosition(stored.chart.planets[0]!)}</dd>
+            <dt>Fecha</dt>
+            <dd>{profile.birth_date ?? '—'}</dd>
           </div>
-        )}
-      </dl>
-      <p class="muted">Si cambias estos datos recalculamos tu carta desde cero.</p>
-      <Button href="/app/onboarding?paso=nacimiento" variant="secondary">
-        Cambiar datos de nacimiento
-      </Button>
-    </Card>
+          <div>
+            <dt>Hora</dt>
+            <dd>{profile.birth_time_known ? profile.birth_time?.slice(0, 5) : 'Desconocida'}</dd>
+          </div>
+          <div>
+            <dt>Lugar</dt>
+            <dd>{profile.birth_place ?? '—'}</dd>
+          </div>
+          <div>
+            <dt>Zona</dt>
+            <dd class="mono">{profile.time_zone ?? '—'}</dd>
+          </div>
+          {stored && (
+            <div>
+              <dt>Sol</dt>
+              <dd>{formatPosition(stored.chart.planets[0]!)}</dd>
+            </div>
+          )}
+        </dl>
+        <p class="muted">Si cambias estos datos recalculamos tu carta desde cero.</p>
+        <Button href="/app/onboarding?paso=nacimiento" variant="secondary">
+          Cambiar datos de nacimiento
+        </Button>
+      </Card>
+
+      <div data-motion-card hidden>
+        <Card title="Movimiento" kicker="Accesibilidad">
+          <div class="check">
+            <input
+              id="motion-switch"
+              class="switch"
+              type="checkbox"
+              role="switch"
+              aria-describedby="motion-hint"
+            />
+            <label for="motion-switch">Reducir animaciones</label>
+          </div>
+          <p id="motion-hint" class="field-hint">
+            Quita transiciones, scroll suave, confeti y efectos del ratón en este dispositivo.
+          </p>
+        </Card>
+      </div>
+    </div>
   </div>
 </AppShell>
 
 <script>
+  import { toast } from '@/components/ui/toast';
+  import { setPreference, storedPreference } from '@/lib/motion';
+  import { stopSmoothScroll } from '@/lib/motion/client';
   import { enhanceForm } from '@/lib/forms/enhance';
+
+  // Preferencia local de movimiento. Sin JS no sirve, por eso la tarjeta sale oculta.
+  const card = document.querySelector<HTMLElement>('[data-motion-card]');
+  const sw = document.querySelector<HTMLInputElement>('#motion-switch');
+  if (card && sw) {
+    card.hidden = false;
+    const hint = document.querySelector<HTMLElement>('#motion-hint');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      sw.checked = true;
+      sw.disabled = true;
+      if (hint) hint.textContent = 'Tu sistema ya pide menos movimiento: Zodi lo respeta siempre.';
+    } else {
+      sw.checked = storedPreference() === 'reduce';
+      sw.addEventListener('change', () => {
+        setPreference(sw.checked ? 'reduce' : 'full');
+        if (sw.checked) stopSmoothScroll();
+        toast(sw.checked ? 'Animaciones reducidas.' : 'Animaciones activadas.');
+      });
+    }
+  }
   import { SETTINGS_ARRAYS, settingsSchema } from '@/lib/validation/settings';
 
   enhanceForm(document.querySelector<HTMLFormElement>('form[data-settings]'), settingsSchema, {
@@ -211,6 +254,12 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
     .layout {
       grid-template-columns: minmax(0, 1fr);
     }
+  }
+  .side {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+    min-width: 0;
   }
   .save {
     display: flex;

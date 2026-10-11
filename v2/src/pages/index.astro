@@ -16,7 +16,7 @@ import Button from '@/components/ui/Button.astro';
       </Button>
     </nav>
   </header>
-  <main id="main" class="hero">
+  <main id="main" class="hero" data-cursor-glow>
     <p class="kicker">Ecosistema astrológico cyberpunk</p>
     <h1>
       El universo tiene mensajes <span class="graffiti">para ti.</span>
@@ -26,14 +26,20 @@ import Button from '@/components/ui/Button.astro';
       humo: efemérides de verdad y una IA que no se muerde la lengua.
     </p>
     <div class="cta">
-      <Button href="/auth/registro" icon="sparkles">
+      <Button href="/auth/registro" icon="sparkles" magnetic>
         Empezar gratis
       </Button>
-      <Button href="/auth/login" variant="secondary">
+      <Button href="/auth/login" variant="secondary" magnetic>
         Ya tengo cuenta
       </Button>
     </div>
-    <img class="character" src="/brand/zodi-480.webp" alt="" width="480" height="720" />
+    <img
+      class="character parallax-slow"
+      src="/brand/zodi-480.webp"
+      alt=""
+      width="480"
+      height="720"
+    />
   </main>
 </Base>
 

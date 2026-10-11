@@ -31,8 +31,10 @@ const d = buildDashboard(
   intro={d.headline}
   toast={welcome ? { message: 'Carta calculada. Bienvenida al lado oscuro del cielo.' } : undefined}
 >
-  <div class="bento">
+  <div class="bento" data-celebrate={welcome ? '' : undefined}>
     <Card
+      reveal
+      tilt
       title="Lo que dice el cielo"
       kicker={`Hoy · ${d.moon.name}`}
       class="span-hoy"
@@ -62,6 +64,8 @@ const d = buildDashboard(
     </Card>
 
     <Card
+      reveal
+      tilt
       title="Tu carta"
       kicker="Big three"
       class="span-carta"
@@ -70,7 +74,7 @@ const d = buildDashboard(
       {d.chart ? (
         <>
           <img
-            class="sign-art"
+            class="sign-art vt-sign-art"
             src={d.chart.sunImage}
             alt=""
             width="640"
@@ -108,7 +112,7 @@ const d = buildDashboard(
       )}
     </Card>
 
-    <Card title="Tu energía" kicker="Biorritmo" class="span-energia">
+    <Card reveal tilt title="Tu energía" kicker="Biorritmo" class="span-energia">
       {d.energy ? (
         <EnergyChart series={d.energy.series} todayIndex={d.energy.todayIndex} />
       ) : (
@@ -116,16 +120,16 @@ const d = buildDashboard(
       )}
     </Card>
 
-    <Card title="Match" kicker="Compatibilidad" class="span-match">
+    <Card reveal tilt title="Match" kicker="Compatibilidad" class="span-match">
       <p class="muted">
         ¿Encajas o chocas? Compara tu carta con la de quien te quita el sueño (o la paciencia).
       </p>
-      <Button href="/app/compatibilidad" variant="violet" icon="heart">
+      <Button href="/app/compatibilidad" variant="violet" icon="heart" magnetic>
         Comparar cartas
       </Button>
     </Card>
 
-    <Card title="Tus elementos" kicker="Reparto de planetas" class="span-elementos">
+    <Card reveal tilt title="Tus elementos" kicker="Reparto de planetas" class="span-elementos">
       {d.chart ? (
         <ElementsDonut balance={d.chart.elements} />
       ) : (
@@ -133,13 +137,16 @@ const d = buildDashboard(
       )}
     </Card>
 
-    <Card title="Racha y XP" kicker={d.progress.rank} class="span-racha">
+    <Card reveal tilt title="Racha y XP" kicker={d.progress.rank} class="span-racha">
       <div class="streak">
         <span class="streak-icon">
           <Icon name="flame" size={28} />
         </span>
         <p>
-          <span class="streak-num mono">{d.streak}</span>
+          <span class="streak-num mono" data-countup={d.streak} aria-hidden="true">
+            {d.streak}
+          </span>
+          <span class="visually-hidden">{d.streak}</span>
           <span class="muted">{d.streak === 1 ? 'día seguido' : 'días seguidos'}</span>
         </p>
       </div>
@@ -158,7 +165,7 @@ const d = buildDashboard(
       </p>
     </Card>
 
-    <Card title="Rituales" kicker={d.moon.name} class="span-rituales">
+    <Card reveal tilt title="Rituales" kicker={d.moon.name} class="span-rituales">
       <ul class="rituals">
         {d.rituals.map((r) => (
           <li>

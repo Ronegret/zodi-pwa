@@ -103,7 +103,7 @@ const today = new Intl.DateTimeFormat('es-ES', {
       <header class="topbar">
         <div class="topbar-text">
           <p class="kicker">{kicker ?? today}</p>
-          <h1>{title}</h1>
+          <h1 class="vt-title">{title}</h1>
           {intro && <p class="intro">{intro}</p>}
         </div>
         <form class="topbar-logout" method="post" action="/auth/salir">

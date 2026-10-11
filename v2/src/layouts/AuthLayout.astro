@@ -19,7 +19,9 @@ const { title, kicker, intro, wide = false } = Astro.props;
     <section class:list={['panel', { wide }]} aria-labelledby="auth-title">
       <div class="head">
         {kicker && <p class="kicker">{kicker}</p>}
-        <h1 id="auth-title">{title}</h1>
+        <h1 id="auth-title" class="vt-title">
+          {title}
+        </h1>
         {intro && <p class="intro">{intro}</p>}
       </div>
       <slot />

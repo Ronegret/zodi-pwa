@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from './Icon';
-import { TOAST_EVENT, type ToastDetail } from './toast';
+import { DURATION, reducedMotion } from '@/lib/motion';
+import { drainToastQueue, TOAST_EVENT, type ToastDetail } from './toast';
 
 interface Item extends ToastDetail {
   id: number;
+  leaving?: boolean;
 }
 
-const DURATION = 6000;
+const TOAST_MS = 6000;
 
 /**
  * Región de avisos. Existe desde el HTML inicial (aria-live necesita estar
@@ -18,17 +20,22 @@ export function ToastRegion({ initial }: { initial?: ToastDetail | undefined }) 
   const timers = useRef(new Map<number, number>());
   const nextId = useRef(1);
 
+  // Sale con animación (zodi-toast-out) y luego se retira del DOM.
   const dismiss = useCallback((id: number) => {
     window.clearTimeout(timers.current.get(id));
     timers.current.delete(id);
-    setItems((list) => list.filter((t) => t.id !== id));
+    setItems((list) => list.map((t) => (t.id === id ? { ...t, leaving: true } : t)));
+    window.setTimeout(
+      () => setItems((list) => list.filter((t) => t.id !== id)),
+      reducedMotion() ? 0 : DURATION.fast,
+    );
   }, []);
 
   const schedule = useCallback(
     (id: number) => {
       timers.current.set(
         id,
-        window.setTimeout(() => dismiss(id), DURATION),
+        window.setTimeout(() => dismiss(id), TOAST_MS),
       );
     },
     [dismiss],
@@ -48,6 +55,7 @@ export function ToastRegion({ initial }: { initial?: ToastDetail | undefined }) 
     window.addEventListener(TOAST_EVENT, onToast);
     // Aviso que llega del servidor (p. ej. tras guardar un formulario).
     if (initial) push(initial);
+    drainToastQueue().forEach(push);
     const map = timers.current;
     return () => {
       window.removeEventListener(TOAST_EVENT, onToast);
@@ -60,7 +68,13 @@ export function ToastRegion({ initial }: { initial?: ToastDetail | undefined }) 
       {items.map((item) => (
         <div
           key={item.id}
-          className={item.tone === 'error' ? 'toast toast-error' : 'toast'}
+          className={[
+            'toast',
+            item.tone === 'error' && 'toast-error',
+            item.leaving && 'toast-leaving',
+          ]
+            .filter(Boolean)
+            .join(' ')}
           onMouseEnter={() => window.clearTimeout(timers.current.get(item.id))}
           onMouseLeave={() => schedule(item.id)}
           onFocus={() => window.clearTimeout(timers.current.get(item.id))}
