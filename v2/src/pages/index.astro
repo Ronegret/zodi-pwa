@@ -1,7 +1,8 @@
 ---
-/** Portada provisional con el estilo Zodi (la Fase 5 añade la escena 3D). */
+/** Portada con el estilo Zodi y el anillo zodiacal 3D (la imagen es su alternativa). */
 import Base from '@/layouts/Base.astro';
 import Button from '@/components/ui/Button.astro';
+import { HeroZodiac } from '@/components/scenes/HeroZodiac';
 ---
 
 <Base title="El universo tiene mensajes para ti">
@@ -17,29 +18,35 @@ import Button from '@/components/ui/Button.astro';
     </nav>
   </header>
   <main id="main" class="hero" data-cursor-glow>
-    <p class="kicker">Ecosistema astrológico cyberpunk</p>
-    <h1>
-      El universo tiene mensajes <span class="graffiti">para ti.</span>
-    </h1>
-    <p class="lead">
-      Zodi reúne carta natal real, horóscopo, tarot, numerología, compatibilidad y comunidad. Sin
-      humo: efemérides de verdad y una IA que no se muerde la lengua.
-    </p>
-    <div class="cta">
-      <Button href="/auth/registro" icon="sparkles" magnetic>
-        Empezar gratis
-      </Button>
-      <Button href="/auth/login" variant="secondary" magnetic>
-        Ya tengo cuenta
-      </Button>
+    <div class="copy">
+      <p class="kicker">Ecosistema astrológico cyberpunk</p>
+      <h1>
+        El universo tiene mensajes <span class="graffiti">para ti.</span>
+      </h1>
+      <p class="lead">
+        Zodi reúne carta natal real, horóscopo, tarot, numerología, compatibilidad y comunidad. Sin
+        humo: efemérides de verdad y una IA que no se muerde la lengua.
+      </p>
+      <div class="cta">
+        <Button href="/auth/registro" icon="sparkles" magnetic>
+          Empezar gratis
+        </Button>
+        <Button href="/auth/login" variant="secondary" magnetic>
+          Ya tengo cuenta
+        </Button>
+      </div>
     </div>
-    <img
-      class="character parallax-slow"
-      src="/brand/zodi-480.webp"
-      alt=""
-      width="480"
-      height="720"
-    />
+    <section class="stage" aria-label="Los doce signos">
+      <HeroZodiac client:load>
+        <img
+          class="character"
+          src="/brand/zodi-480.webp"
+          alt="Zodi, la mascota, rodeada de luces de neón"
+          width="480"
+          height="720"
+        />
+      </HeroZodiac>
+    </section>
   </main>
 </Base>
 
@@ -68,49 +75,49 @@ import Button from '@/components/ui/Button.astro';
     }
   }
   .hero {
-    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-5);
-    max-width: 72rem;
+    gap: var(--space-7);
+    align-items: center;
+    max-width: 76rem;
     margin: 0 auto;
-    padding: clamp(2rem, 8vw, 6rem) clamp(1rem, 4vw, 3rem) var(--space-8);
+    padding: clamp(2rem, 6vw, 5rem) clamp(1rem, 4vw, 3rem) var(--space-8);
   }
+  @media (min-width: 960px) {
+    .hero {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    }
+  }
+  .copy {
+    display: grid;
+    gap: var(--space-5);
+  }
+  /* Sin guiones: "universo" y "mensajes" caben enteras en la columna. */
   h1 {
-    font-size: clamp(2.6rem, 1.6rem + 5vw, 5.5rem);
+    font-size: clamp(2.3rem, 1.1rem + 4.4vw, 5rem);
     max-width: 12ch;
-    position: relative;
-    z-index: 1;
+    hyphens: manual;
+  }
+  @media (min-width: 960px) {
+    h1 {
+      font-size: clamp(3rem, 0.6rem + 3.9vw, 4.75rem);
+    }
   }
   .lead {
     max-width: 52ch;
     color: var(--ink-soft);
     font-size: var(--step-1);
-    position: relative;
-    z-index: 1;
   }
   .cta {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
-    position: relative;
-    z-index: 1;
+  }
+  .stage {
+    width: min(100%, 34rem);
+    justify-self: center;
   }
   .character {
-    position: absolute;
-    right: clamp(-2rem, -2vw, 0rem);
-    bottom: 0;
-    width: min(38vw, 420px);
-    height: auto;
-    opacity: 0.9;
-    pointer-events: none;
     filter: drop-shadow(0 0 40px rgb(155 77 255 / 35%));
-  }
-  @media (max-width: 900px) {
-    .character {
-      position: static;
-      justify-self: center;
-      width: min(70vw, 320px);
-    }
   }
 </style>

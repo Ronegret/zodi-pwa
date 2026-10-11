@@ -8,10 +8,12 @@ import Card from '@/components/ui/Card.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
 import Icon from '@/components/ui/Icon.astro';
 import ProgressBar from '@/components/ui/ProgressBar.astro';
+import { TarotOfDay } from '@/components/scenes/TarotOfDay';
 import { formatPosition } from '@/lib/astro-engine/labels';
 import { buildDashboard } from '@/lib/dashboard/build';
 import { describeTransit } from '@/lib/daily/today';
 import { getLatestSelfChart } from '@/lib/server/charts';
+import { dailyCard } from '@/lib/tarot/daily';
 
 const { supabase, profile } = Astro.locals;
 if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
@@ -23,6 +25,7 @@ const d = buildDashboard(
   stored ? { chart: stored.chart, timeKnown: stored.input.timeKnown } : null,
   new Date(),
 );
+const card = dailyCard(profile.id, d.today);
 ---
 
 <AppShell
@@ -120,13 +123,8 @@ const d = buildDashboard(
       )}
     </Card>
 
-    <Card reveal tilt title="Match" kicker="Compatibilidad" class="span-match">
-      <p class="muted">
-        ¿Encajas o chocas? Compara tu carta con la de quien te quita el sueño (o la paciencia).
-      </p>
-      <Button href="/app/compatibilidad" variant="violet" icon="heart" magnetic>
-        Comparar cartas
-      </Button>
+    <Card reveal title="Carta del día" kicker="Tarot · arcano mayor" class="span-tarot">
+      <TarotOfDay client:visible card={card} />
     </Card>
 
     <Card reveal tilt title="Tus elementos" kicker="Reparto de planetas" class="span-elementos">
@@ -175,11 +173,20 @@ const d = buildDashboard(
         ))}
       </ul>
     </Card>
+
+    <Card reveal tilt title="Match" kicker="Compatibilidad" class="span-match">
+      <p class="muted">
+        ¿Encajas o chocas? Compara tu carta con la de quien te quita el sueño (o la paciencia).
+      </p>
+      <Button href="/app/compatibilidad" variant="violet" icon="heart" magnetic>
+        Comparar cartas
+      </Button>
+    </Card>
   </div>
 </AppShell>
 
 <style>
-  /* Mobile first: 1 columna · tablet: 2 · escritorio ancho: 12. */
+  /* Mobile first: 1 columna · tablet: 2 (sin huecos) · escritorio ancho: 12. */
   .bento {
     display: grid;
     gap: var(--space-4);
@@ -192,7 +199,7 @@ const d = buildDashboard(
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .bento > :global(.span-hoy),
-    .bento > :global(.span-energia) {
+    .bento > :global(.span-match) {
       grid-column: span 2;
     }
   }
@@ -205,8 +212,11 @@ const d = buildDashboard(
       grid-column: span 7;
     }
     .bento > :global(.span-carta),
-    .bento > :global(.span-match) {
+    .bento > :global(.span-tarot) {
       grid-column: span 5;
+    }
+    .bento > :global(.span-match) {
+      grid-column: span 12;
     }
     .bento > :global(.span-elementos),
     .bento > :global(.span-racha),

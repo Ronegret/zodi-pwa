@@ -1,11 +1,50 @@
 ---
 import AppShell from '@/layouts/AppShell.astro';
 import ComingSoon from '@/components/ComingSoon.astro';
+import Card from '@/components/ui/Card.astro';
+import { SignOfDay3D } from '@/components/scenes/SignOfDay3D';
+import { elementOf, formatPosition, signSlug } from '@/lib/astro-engine/labels';
+import { skyAt } from '@/lib/astro-engine/sky';
+import { SIGN_INFO } from '@/lib/zodiac/signs';
+
+// Signo de la temporada: donde está el Sol ahora mismo.
+const sun = skyAt(new Date()).find((p) => p.id === 'sun')!;
+const info = SIGN_INFO[sun.sign];
 ---
 
 <AppShell title="Horóscopo" current="horoscopo" kicker="Diario · semanal · mensual">
-  <ComingSoon title="Zodi está afilando la lengua">
-    Tu horóscopo escrito con tu carta real llega muy pronto. Mientras, en Inicio tienes los
-    tránsitos de hoy.
-  </ComingSoon>
+  <div class="layout">
+    <Card title={`Temporada de ${sun.sign}`} kicker="El signo del día" class="sign-card">
+      <SignOfDay3D client:visible sign={sun.sign}>
+        <img
+          src={`/zodiac/${signSlug(sun.sign)}-640.webp`}
+          alt={`Ilustración neón de ${sun.sign}`}
+          width="640"
+          height="366"
+        />
+      </SignOfDay3D>
+      <p class="muted">
+        Sol en {formatPosition(sun)} · {info.dates} · {elementOf(sun.sign).toLowerCase()}.
+        {info.blurb}
+      </p>
+    </Card>
+    <ComingSoon title="Zodi está afilando la lengua">
+      Tu horóscopo escrito con tu carta real llega muy pronto. Mientras, en Inicio tienes los
+      tránsitos de hoy.
+    </ComingSoon>
+  </div>
 </AppShell>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (min-width: 1100px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+</style>

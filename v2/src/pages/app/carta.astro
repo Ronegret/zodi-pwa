@@ -5,6 +5,7 @@ import Badge from '@/components/ui/Badge.astro';
 import Button from '@/components/ui/Button.astro';
 import Card from '@/components/ui/Card.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
+import { NatalWheel3D, type WheelPlanetDetail } from '@/components/scenes/NatalWheel3D';
 import {
   ASPECT_NAMES,
   formatPosition,
@@ -31,6 +32,17 @@ const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'
 const systemLabel = chart?.houseSystem === 'placidus' ? 'Placidus' : 'Signos enteros';
 const sun = chart?.planets.find((p) => p.id === 'sun');
 const sunImage = sun ? `/zodiac/${signSlug(sun.sign)}-640.webp` : null;
+// Solo lo que necesita la isla 3D (las props viajan serializadas al cliente).
+const wheelPlanets: WheelPlanetDetail[] = (chart?.planets ?? []).map((p) => ({
+  id: p.id,
+  lon: p.lon,
+  sign: p.sign,
+  degree: p.degree,
+  minute: p.minute,
+  house: timeKnown ? p.house : null,
+  retrograde: p.retrograde,
+}));
+const wheelAspects = (chart?.aspects ?? []).map(({ a, b, type }) => ({ a, b, type }));
 ---
 
 <AppShell
@@ -58,7 +70,14 @@ const sunImage = sun ? `/zodiac/${signSlug(sun.sign)}-640.webp` : null;
         {sunImage && (
           <img class="sign-banner vt-sign-art" src={sunImage} alt="" width="640" height="366" />
         )}
-        <NatalWheel chart={chart} timeKnown={timeKnown} />
+        <NatalWheel3D
+          client:visible
+          planets={wheelPlanets}
+          ascendant={timeKnown ? chart.ascendant.lon : null}
+          aspects={wheelAspects}
+        >
+          <NatalWheel chart={chart} timeKnown={timeKnown} />
+        </NatalWheel3D>
         <ul class="key" aria-label="Leyenda de aspectos">
           <li>
             <span class="k k-soft" aria-hidden="true" /> Armónico (trígono, sextil)
