@@ -23,6 +23,19 @@ export default defineConfig({
         'three/addons/geometries/RoundedBoxGeometry.js',
       ],
     },
+    build: {
+      rolldownOptions: {
+        treeshake: {
+          // @astrojs/vercel 11.0.13: su entrypoint importa constantes de la
+          // integración y deja `import "rolldown"` y `import "@vercel/routing-utils"`
+          // en la función. En Vercel falta el binario nativo de rolldown y la
+          // función cae al arrancar (FUNCTION_INVOCATION_FAILED). Son código de
+          // compilación sin efectos en runtime: se descartan.
+          moduleSideEffects: (id) =>
+            /^(rolldown|@vercel\/routing-utils)(\/|$)/.test(id) ? false : undefined,
+        },
+      },
+    },
   },
   security: {
     // Rechaza envíos de formularios desde otros orígenes (CSRF).
