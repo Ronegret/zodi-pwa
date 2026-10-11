@@ -10,6 +10,7 @@ export default [
   ...astro.configs.recommended,
   ...astro.configs['jsx-a11y-strict'],
   { files: ['**/*.mjs'], languageOptions: { globals: globals.node } },
+  { files: ['public/*sw.js'], languageOptions: { globals: globals.serviceworker } },
   // Las regiones con scroll (tablas anchas) deben ser enfocables (axe: scrollable-region-focusable).
   {
     files: ['**/*.astro'],

@@ -9,6 +9,17 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [react()],
   prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
+  // Rutas de la app anterior (Next) para que no rompan enlaces ni marcadores.
+  // Los horóscopos públicos por signo vuelven en la Fase 7: hasta entonces, 302.
+  redirects: {
+    '/auth/register': '/auth/registro',
+    '/onboarding': '/app/onboarding',
+    '/dashboard': '/app',
+    '/dashboard/[section]': '/app',
+    '/reset': '/',
+    '/horoscopo/[signo]': { status: 302, destination: '/' },
+    '/horoscopo-diario/[sign]': { status: 302, destination: '/' },
+  },
   // La barra de dev tapa la parte baja de la pantalla (avisos, botón flotante) en los e2e.
   devToolbar: { enabled: false },
   // Sin resaltado de código: Shiki usa estilos en línea, incompatibles con la CSP.

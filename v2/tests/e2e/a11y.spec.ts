@@ -13,7 +13,15 @@ async function noHorizontalScroll(page: Page) {
   return page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 }
 
-const PUBLIC = ['/', '/auth/login', '/auth/registro', '/auth/recuperar', '/dev/componentes'];
+const PUBLIC = [
+  '/',
+  '/auth/login',
+  '/auth/registro',
+  '/auth/recuperar',
+  '/legal/privacidad',
+  '/legal/terminos',
+  '/dev/componentes',
+];
 const PRIVATE = [
   '/app',
   '/app/carta',
