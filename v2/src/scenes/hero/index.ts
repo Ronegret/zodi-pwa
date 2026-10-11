@@ -24,7 +24,13 @@ import { glyphTexture, hex, roundedBox } from '../geometry/shapes';
 import { toonMaterial } from '../materials/toon';
 import { nearestTurn, ringPositions, rotationToFront } from '../math';
 
-const RADIUS = 3.2;
+export interface HeroOptions {
+  /**
+   * Modo corona: el anillo flota por encima de la cabeza del personaje ZODI
+   * (que va delante, en otra capa), más pequeño y sin núcleo.
+   */
+  crown?: boolean;
+}
 
 export class HeroScene extends BaseScene {
   readonly camera = new PerspectiveCamera(40, 1, 0.1, 100);
@@ -36,9 +42,18 @@ export class HeroScene extends BaseScene {
   private hovered: Mesh | null = null;
   private pointerNdc: Vector2 | null = null;
   private idleSpin = true;
+  private readonly baseTilt: number;
+
+  constructor(private readonly opts: HeroOptions = {}) {
+    super();
+    this.baseTilt = opts.crown ? 0.42 : 0.28;
+  }
 
   protected build() {
-    // Encuadre: el anillo entero cabe también en un marco cuadrado estrecho.
+    const crown = this.opts.crown === true;
+    const radius = crown ? 1.85 : 3.2;
+    const size = crown ? 0.48 : 0.9;
+    // Encuadre: el anillo entero cabe también en un marco estrecho.
     this.camera.position.set(0, 2.4, 11.5);
     this.camera.lookAt(0, 0, 0);
     const colors: Record<(typeof ELEMENTS)[number], number> = {
@@ -53,10 +68,10 @@ export class HeroScene extends BaseScene {
         toonMaterial(colors[e], { gradientMap: this.gradient, outline: 0.008 }),
       ]),
     ) as Record<(typeof ELEMENTS)[number], ReturnType<typeof toonMaterial>>;
-    const box = roundedBox(0.9, 0.9, 0.9, 0.16);
-    const plate = new PlaneGeometry(0.62, 0.62);
+    const box = roundedBox(size, size, size, size * 0.18);
+    const plate = new PlaneGeometry(size * 0.69, size * 0.69);
 
-    ringPositions(12, RADIUS).forEach((pos, i) => {
+    ringPositions(12, radius).forEach((pos, i) => {
       const sign = SIGNS[i]!;
       const mesh = new Mesh(box, materials[elementOf(sign)]);
       mesh.position.set(pos.x, 0, pos.z);
@@ -70,19 +85,23 @@ export class HeroScene extends BaseScene {
         }),
       );
       (glyph.material as MeshBasicMaterial).userData.outlineParameters = { visible: false };
-      glyph.position.z = 0.46;
+      glyph.position.z = size / 2 + 0.01;
       mesh.add(glyph);
       this.boxes.push(mesh);
       this.ring.add(mesh);
     });
 
-    this.core = new Mesh(
-      new IcosahedronGeometry(0.9, 1),
-      toonMaterial(this.palette.violet, { gradientMap: this.gradient, outline: 0.01 }),
-    );
-    this.ring.add(this.core);
+    if (!crown) {
+      this.core = new Mesh(
+        new IcosahedronGeometry(0.9, 1),
+        toonMaterial(this.palette.violet, { gradientMap: this.gradient, outline: 0.01 }),
+      );
+      this.ring.add(this.core);
+    }
 
-    this.tilt.rotation.x = 0.28;
+    // En modo corona el anillo sube hasta la parte alta del marco (sobre la capucha).
+    if (crown) this.tilt.position.y = 2.35;
+    this.tilt.rotation.x = this.baseTilt;
     this.tilt.add(this.ring);
     this.scene.add(this.tilt, this.stars(260));
   }
@@ -116,7 +135,7 @@ export class HeroScene extends BaseScene {
     // Parallax: el anillo se inclina hacia el puntero.
     const px = this.pointerNdc?.x ?? 0;
     const py = this.pointerNdc?.y ?? 0;
-    this.tilt.rotation.x = damp(this.tilt.rotation.x, 0.28 - py * 0.12, 3, dt);
+    this.tilt.rotation.x = damp(this.tilt.rotation.x, this.baseTilt - py * 0.12, 3, dt);
     this.tilt.rotation.z = damp(this.tilt.rotation.z, -px * 0.08, 3, dt);
     this.boxes.forEach((b, i) => {
       b.position.y = Math.sin(this.elapsed * 1.4 + i) * 0.12;
@@ -152,6 +171,6 @@ export class HeroScene extends BaseScene {
   }
 }
 
-export function createHeroScene() {
-  return new HeroScene();
+export function createHeroScene(opts: HeroOptions = {}) {
+  return new HeroScene(opts);
 }

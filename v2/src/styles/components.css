@@ -824,6 +824,25 @@ fieldset.group > legend {
   height: 100%;
   object-fit: contain;
 }
+/* Personaje delante del 3D: no captura el puntero (los clics llegan al canvas). */
+.scene-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: end center;
+  pointer-events: none;
+}
+.scene-overlay > astro-slot {
+  display: contents;
+}
+.scene-overlay img {
+  height: 86%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  filter: drop-shadow(0 0 32px rgb(155 77 255 / 35%));
+}
 .scene-pause {
   position: absolute;
   top: var(--space-3);

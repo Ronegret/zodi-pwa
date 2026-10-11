@@ -41,10 +41,13 @@ import { HeroZodiac } from '@/components/scenes/HeroZodiac';
       <HeroZodiac client:load>
         <img
           class="character"
-          src="/brand/zodi-480.webp"
-          alt="Zodi, la mascota, rodeada de luces de neón"
-          width="480"
-          height="720"
+          src="/brand/zodi-720.webp"
+          srcset="/brand/zodi-480.webp 480w, /brand/zodi-720.webp 720w"
+          sizes="(min-width: 960px) 34rem, 90vw"
+          alt="ZODI, con su capucha, su máscara de neón y su corona"
+          width="720"
+          height="1080"
+          fetchpriority="high"
         />
       </HeroZodiac>
     </section>
