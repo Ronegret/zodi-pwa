@@ -128,7 +128,7 @@ Funciones:
 - **Enlaces a páginas inexistentes**: los de la navegación (`/app/carta`, `/app/horoscopo`…) dan 404 hasta la Fase 3.
 - **Sigue pendiente de antes**: contrastar las cúspides Placidus con Astro.com (Fase 3).
 
-## Conexión con el proyecto real (12/10/2026)
+## Conexión con el proyecto real (11/10/2026)
 Hecho en `mdtgjgfeoudiyotgcxsy` (West EU, Postgres 17.11):
 - **Base de datos.** Contraseña regenerada desde el panel (generada por Supabase). `SUPABASE_DB_URL` (pooler de sesión `aws-0-eu-west-1`) está en `v2/.env.local`.
 - **Migraciones.** 9 aplicadas con `node scripts/db/migrate.mjs`, que las registra en `supabase_migrations.schema_migrations`, el mismo historial que usa la CLI.
