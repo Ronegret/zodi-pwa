@@ -88,6 +88,18 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 - Vercel, proyecto `zodi-pwa`: app Next desde `main`, ya sin el dominio. Para volver atrás, devolverle `zodi.aibueno.es` (Settings → Domains → Add Existing → Move).
 - Cambio de dominio adelantado por decisión de Rodrigo. Faltan las funciones de la Fase 7 y los usuarios de Firebase no se migran. Detalle y pendientes (Resend, Google, confirmación por correo desactivada) en `FASE-5-informe.md`, sección "Cambio de dominio a la v2".
 
+**Fase 7, en curso en la rama `fase-7`** (preview de Vercel en `zodi-v2-git-fase-7-ronegret.vercel.app`, protegido con el login de Vercel; detalle en `FASE-7-informe.md`):
+- **Lecturas con IA** (`src/lib/ai/`, `src/lib/server/readings.ts`):
+  - contexto astral real por persona y voz de Zodi con system prompt cacheado;
+  - 12 tipos; tarot tirado en el servidor; sinastría real;
+  - `claude-sonnet-5-5` en streaming NDJSON (`/api/lecturas`, `/api/asistente`), cuota por plan e historial.
+  - Páginas: `/app/lecturas`, `/app/horoscopo` (el de hoy se queda) y `/app/asistente` (chat).
+- **Comunidad** (`/app/comunidad`):
+  - migración `community_v2` aplicada al Supabase real: temas, reacciones, signo del autor, denuncias con autoocultación, `community_feed()` y `post_comments()`;
+  - publicar, filtrar, reaccionar, comentar, borrar lo propio y denunciar.
+- Falta `ANTHROPIC_API_KEY` en Vercel (Production y Preview) y en `v2/.env.local`: la pega Rodrigo.
+- Se fusiona en `astro-v2` (producción) cuando Rodrigo lo apruebe.
+
 ## 5. Hallazgos de la app actual (a resolver en v2)
 - `lib/astral.ts`: Luna y Ascendente salen de `signs[(seed + birthCity.length) % 12]` (falso). Solo el signo solar es correcto. El horóscopo chino usa el año natural, no el Año Nuevo Lunar.
 - `middleware.ts` solo comprueba que exista la cookie `zodi_auth` sin validarla; la API acepta el token literal `"local_session"` y se salta la verificación.
@@ -118,7 +130,7 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 | **4. Motion** | Hecha (ver informe). Lighthouse pendiente para Fase 8. |
 | **5. Escenas 3D** | Hecha (ver informe). Medir fps en móvil real en Fase 8. |
 | **6. PDF editorial** | Plantilla por signo, rueda natal en SVG, secciones según datos, tipografía cuidada, exportación desde el dashboard. |
-| **7. Portar funcionalidades** | Lecturas IA, horóscopos y SEO por signo, comunidad, Stripe y gemas, push y emails. |
+| **7. Portar funcionalidades** | En curso (rama `fase-7`). Hechas lecturas IA, chat y comunidad. Faltan Stripe y gemas, push y emails, horóscopos SEO por signo y moderación. |
 | **8. QA y corte** | Lighthouse, axe en 3 tamaños, redirects, pruebas de carga en `zodi.aibueno.es`, retirada de Next. |
 
 ## 8. Comandos (desde `v2/`)
@@ -134,7 +146,7 @@ node scripts/places/import.mjs            # (re)carga GeoNames en places/place_a
 ```
 
 ## 9. Reglas de trabajo y trampas
-- Trabaja en la rama `astro-v2`; commits pequeños por fase; no hagas push ni cambies producción sin pedírmelo.
+- `astro-v2` es **producción** (`zodi.aibueno.es`). Las funcionalidades nuevas van en una rama (ahora `fase-7`), que da un preview en Vercel; se fusionan cuando Rodrigo las aprueba. Commits pequeños por tarea.
 - Fija versiones compatibles: TypeScript `~5.9` y ESLint `^9` (TS 7 y ESLint 10 rompen `typescript-eslint` y `jsx-a11y`). No registres `jsx-a11y` dos veces en ESLint (ya lo trae `astro.configs['jsx-a11y-strict']`).
 - Windows: en Git Bash los heredocs largos con comillas fallan; crea archivos con la herramienta de escritura de ficheros, no con `cat <<EOF`.
 - Antes de afirmar que algo funciona, ejecútalo (check, lint, tests, build, axe). Reporta fallos con su salida.
@@ -153,16 +165,16 @@ node scripts/places/import.mjs            # (re)carga GeoNames en places/place_a
   - `astro.config.mjs` descarta `import "rolldown"` y `import "@vercel/routing-utils"` de la función: es un fallo de `@astrojs/vercel` 11.0.13 que daba 500 en todas las rutas.
   - `astronomy-engine` va en `vite.ssr.noExternal`: publica ESM en `.js` sin `"type": "module"` y el cargador de Vercel no lo entiende. Una dependencia nueva con el mismo patrón necesita lo mismo.
   - Para comprobar la función, ejecútala con `node --no-experimental-detect-module` (así se comporta Vercel) y cópiala fuera del repo (`.vercel/output/functions/_render.func`) y ejecútala ahí. Dentro de `v2/`, Node resuelve los módulos que faltan desde `v2/node_modules` y oculta este tipo de fallos.
+- IA:
+  - Nunca se llama a la IA real en tests.
+  - El mock de `tests/e2e/support/mock-supabase.mjs` responde en `/v1/messages` como Anthropic (SSE). Cada test busca su petición con `/__test/ai?contains=<texto único>`, porque los 3 dispositivos comparten el mock.
+  - `readings.ts` recibe el generador inyectado: no puede importar `astro:env` para que siga siendo testeable.
 - E2e:
   - Tras `login()` o `goto()` a páginas con islas, espera a `load` antes de recorrer con Tab: el HTML llega por streaming.
   - Espera a que la isla pierda el atributo `ssr` antes de pulsar sus controles.
 - Acciones destructivas o que publican (borrar archivos del repo raíz, reescribir historial, push, deploy) requieren mi confirmación.
 
 ## 10. Primer paso que quiero ahora
-1. Si ya están las variables de entorno en Vercel `zodi-v2`, comprueba el despliegue de `astro-v2`:
-   - CSP y cabeceras en el preview.
-   - Registro → onboarding → carta contra el Supabase real.
-2. Sigue con la **Fase 6 (PDF editorial)**:
-   - Perfil astrológico en PDF generado en servidor desde una plantilla HTML/CSS, con texto real y accesible.
-   - Rueda natal en SVG y estilo Zodi.
-   - Exportación desde el dashboard.
+1. Con `ANTHROPIC_API_KEY` en Vercel, prueba en el preview de `fase-7`: registro → onboarding → lecturas → chat → comunidad. Ajusta lo que Rodrigo pida.
+2. Fusiona `fase-7` en `astro-v2` cuando lo apruebe.
+3. Sigue con la Fase 7: Stripe y gemas, push y emails, horóscopos SEO por signo y moderación.
