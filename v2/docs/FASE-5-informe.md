@@ -105,9 +105,39 @@ Qué cubren los e2e (`tests/e2e/scenes.spec.ts`):
      - Causa: `astronomy-engine` publica ESM en `.js` sin `"type": "module"`. Node 24 lo detecta en local, pero el cargador de Vercel lo trata como CommonJS.
      - Arreglo: `vite.ssr.noExternal: ['astronomy-engine']`, que lo mete en el bundle.
      - Reproducido y verificado con `node --no-experimental-detect-module` sobre la función compilada aislada.
-- **Pendiente (Rodrigo):** pegar en Vercel → zodi-v2 → Settings → Environment Variables:
-  - `PUBLIC_SUPABASE_URL`
-  - `PUBLIC_SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY`
+- **Variables de entorno en `zodi-v2`:** `PUBLIC_SUPABASE_URL` (la puse yo) y las dos claves (las pegó Rodrigo). Están las tres.
 
-  Después, añadir `https://zodi-v2.vercel.app/**` a las Redirect URLs de Supabase Auth.
+## Cambio de dominio a la v2 (decisión de Rodrigo, 11/10/2026)
+Rodrigo decidió servir ya la v2 en `zodi.aibueno.es`, antes de la Fase 8, sabiendo que:
+- faltan las lecturas con IA, Stripe y gemas, la comunidad y los emails (Fase 7);
+- los usuarios de Firebase no se migran.
+
+**Preparado en el código:**
+- Páginas legales `/legal/privacidad` y `/legal/terminos`, con el mismo texto que la app actual y enlazadas desde la portada y las pantallas de acceso.
+- Redirecciones desde las rutas antiguas:
+  - `/auth/register` → `/auth/registro`
+  - `/onboarding` → `/app/onboarding`
+  - `/dashboard` y `/dashboard/*` → `/app`
+  - `/reset` → `/`
+  - `/horoscopo/*` y `/horoscopo-diario/*` → `/` (302 hasta la Fase 7)
+- `public/sw.js` y `public/firebase-messaging-sw.js` de retirada. Quien tenga instalada la PWA anterior recibe estos workers: borran sus cachés, se desinstalan y recargan la página.
+
+**Supabase Auth:**
+- Site URL: `https://zodi.aibueno.es`.
+- Redirect URLs: `localhost:4321`, `zodi.aibueno.es` y `zodi-v2.vercel.app`.
+- **Confirmación por correo desactivada** de forma temporal. Sin SMTP propio, Supabase solo envía 2 correos por hora y solo a miembros del equipo. **Volver a activarla** cuando Resend esté verificado.
+
+**El cambio:** el dominio pasa del proyecto `zodi-pwa` al `zodi-v2` dentro de Vercel. El DNS de Hostinger no cambia (`zodi` sigue siendo CNAME a `cname.vercel-dns.com`). Para deshacerlo, se devuelve el dominio a `zodi-pwa`.
+
+**Pendiente tras el cambio:**
+- Los webhooks de Stripe apuntan a la API de la app anterior: habrá que revisarlos en la Fase 7.
+- **Resend:** el dominio `zodi.aibueno.es` está creado en la región de Irlanda. Faltan sus 3 registros DNS en Hostinger, que no se pudieron añadir desde el navegador con la ventana oculta:
+  - CNAME `send.zodi` → `send.forge.rmta.net`
+  - CNAME `rsend.zodi` → `rsend-euw1.forge.rmta.net`
+  - TXT `resend._domainkey.zodi` → la clave DKIM que muestra Resend
+
+  Después: verificar el dominio, conectar Resend con Supabase desde la integración de Resend y volver a activar la confirmación por correo.
+- **Google OAuth:**
+  - En `zodi-2`, añadir el dominio autorizado `mdtgjgfeoudiyotgcxsy.supabase.co` y el email de contacto del desarrollador.
+  - Crear el cliente web con el callback `https://mdtgjgfeoudiyotgcxsy.supabase.co/auth/v1/callback`.
+  - Rodrigo pega el ID y el secreto en Supabase.
