@@ -13,7 +13,8 @@ import type { IconName } from '@/components/ui/icons';
 import { ToastRegion } from '@/components/ui/ToastRegion';
 import type { ToastDetail } from '@/components/ui/toast';
 
-export type NavId = 'inicio' | 'carta' | 'horoscopo' | 'match' | 'ajustes' | 'asistente';
+export type NavId =
+  'inicio' | 'lecturas' | 'comunidad' | 'carta' | 'horoscopo' | 'match' | 'ajustes' | 'asistente';
 
 interface Props {
   title: string;
@@ -27,12 +28,15 @@ const profile = Astro.locals.profile;
 const name = profile?.display_name?.trim() || 'Viajera cósmica';
 const planLabel = { free: 'Free', premium: 'Premium', vip: 'VIP' }[profile?.plan ?? 'free'];
 
-const nav: { id: NavId; label: string; href: string; icon: IconName }[] = [
-  { id: 'inicio', label: 'Inicio', href: '/app', icon: 'home' },
-  { id: 'carta', label: 'Carta', href: '/app/carta', icon: 'wheel' },
-  { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo', icon: 'sun' },
-  { id: 'match', label: 'Match', href: '/app/compatibilidad', icon: 'heart' },
-  { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes', icon: 'sliders' },
+// `mobile: false`: fuera de la barra inferior del móvil (5 huecos); se llega desde Lecturas.
+const nav: { id: NavId; label: string; href: string; icon: IconName; mobile: boolean }[] = [
+  { id: 'inicio', label: 'Inicio', href: '/app', icon: 'home', mobile: true },
+  { id: 'lecturas', label: 'Lecturas', href: '/app/lecturas', icon: 'sparkles', mobile: true },
+  { id: 'comunidad', label: 'Comunidad', href: '/app/comunidad', icon: 'users', mobile: true },
+  { id: 'carta', label: 'Carta', href: '/app/carta', icon: 'wheel', mobile: true },
+  { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo', icon: 'sun', mobile: false },
+  { id: 'match', label: 'Match', href: '/app/compatibilidad', icon: 'heart', mobile: false },
+  { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes', icon: 'sliders', mobile: true },
 ];
 
 const today = new Intl.DateTimeFormat('es-ES', {
@@ -65,7 +69,7 @@ const today = new Intl.DateTimeFormat('es-ES', {
       <nav aria-label="Principal">
         <ul class="nav">
           {nav.map((item) => (
-            <li>
+            <li class:list={{ 'desktop-only': !item.mobile }}>
               <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>
                 <span class="nav-icon">
                   <Icon name={item.icon} size={20} />
@@ -364,6 +368,9 @@ const today = new Intl.DateTimeFormat('es-ES', {
     .nav a {
       min-height: 56px;
       border-radius: var(--radius-md);
+    }
+    .nav .desktop-only {
+      display: none;
     }
     .nav-icon {
       width: 32px;

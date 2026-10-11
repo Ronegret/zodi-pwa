@@ -1,10 +1,4 @@
 ---
-import AppShell from '@/layouts/AppShell.astro';
-import ComingSoon from '@/components/ComingSoon.astro';
+// "Match" del menú: el estudio de compatibilidad, con su URL corta.
+return Astro.rewrite('/app/lecturas/compatibilidad');
 ---
-
-<AppShell title="Match" current="match" kicker="Compatibilidad">
-  <ComingSoon title="Las cartas aún no se hablan">
-    Pronto podrás comparar tu carta con la de otra persona, planeta a planeta. Ve pensando a quién.
-  </ComingSoon>
-</AppShell>

@@ -1,11 +1,26 @@
 ---
 import AppShell from '@/layouts/AppShell.astro';
-import ComingSoon from '@/components/ComingSoon.astro';
+import { AssistantChat } from '@/components/readings/AssistantChat';
+import { aiAvailable } from '@/lib/ai/client';
+import { getQuotaStatus } from '@/lib/server/quota';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const quota = await getQuotaStatus(supabase);
+const remaining = quota ? Math.max(0, quota.limit - quota.used) : null;
+const firstName = profile.display_name.trim().split(/\s+/)[0] || 'tú';
 ---
 
-<AppShell title="Asistente" current="asistente" kicker="Habla con Zodi">
-  <ComingSoon title="Zodi está en el camerino">
-    El asistente que conoce tu carta y no se calla nada está casi listo. Prepara tus preguntas
-    incómodas.
-  </ComingSoon>
+<AppShell
+  title="Habla con Zodi"
+  current="asistente"
+  kicker="Asistente"
+  intro="Conoce tu carta y tu cielo de hoy. No te va a dar la razón por darte la razón."
+>
+  {aiAvailable() ? (
+    <AssistantChat client:load firstName={firstName} remaining={remaining} />
+  ) : (
+    <p class="notice">Zodi está afilando la lengua. Vuelve en un rato.</p>
+  )}
 </AppShell>

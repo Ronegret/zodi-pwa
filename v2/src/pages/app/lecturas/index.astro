@@ -1,0 +1,277 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { KINDS, KIND_BY_KIND } from '@/lib/ai/kinds';
+import { getQuotaStatus } from '@/lib/server/quota';
+import { listReadings } from '@/lib/server/readings';
+import { excerpt, readingDate } from '@/lib/readings/format';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const [quota, recent] = await Promise.all([getQuotaStatus(supabase), listReadings(supabase, 6)]);
+const remaining = quota ? Math.max(0, quota.limit - quota.used) : null;
+const [featured, ...rest] = KINDS;
+const tz = profile.time_zone ?? 'Europe/Madrid';
+---
+
+<AppShell
+  title="Lecturas"
+  current="lecturas"
+  kicker="Oráculo personal"
+  intro="Cada lectura usa tu carta real y el cielo de hoy. Nada de horóscopos de sala de espera."
+>
+  <div class="hub">
+    <p class="quota">
+      <Icon name="bolt" size={18} />
+      {remaining === null ? (
+        'Lecturas del día'
+      ) : (
+        <span>
+          Te quedan <strong>{remaining}</strong> de {quota!.limit} lecturas hoy
+        </span>
+      )}
+      <Badge tone="acid">
+        {({ free: 'Free', premium: 'Premium', vip: 'VIP' } as const)[profile.plan]}
+      </Badge>
+    </p>
+
+    <a class="featured reveal" href={`/app/lecturas/${featured!.slug}`}>
+      <img src={featured!.art} alt="" width="640" height="366" loading="eager" />
+      <div class="featured-text">
+        <p class="kicker">{featured!.kicker}</p>
+        <h2>{featured!.title}</h2>
+        <p>{featured!.blurb}</p>
+        <span class="btn btn-primary">
+          <Icon name="sparkles" />
+          <span class="btn-label">{featured!.cta}</span>
+        </span>
+      </div>
+    </a>
+
+    <h2 class="section-title">Elige tu lectura</h2>
+    <ul class="kinds">
+      {rest.map((k) => (
+        <li>
+          <a class="kind reveal" href={`/app/lecturas/${k.slug}`}>
+            <img src={k.art} alt="" width="640" height="366" loading="lazy" decoding="async" />
+            <span class="kind-text">
+              <span class="kicker">{k.kicker}</span>
+              <span class="kind-title">{k.title}</span>
+              <span class="kind-blurb">{k.blurb}</span>
+            </span>
+            <span class="kind-go" aria-hidden="true">
+              <Icon name="chevronRight" />
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <section class="recent" aria-labelledby="recent-title">
+      <h2 id="recent-title" class="section-title">
+        <Icon name="history" /> Tus últimas lecturas
+      </h2>
+      {recent.length ? (
+        <ul class="recent-list">
+          {recent.map((r) => (
+            <li>
+              <a href={`/app/lecturas/guardadas/${r.id}`}>
+                <span class="recent-head">
+                  <strong>{KIND_BY_KIND.get(r.kind)?.title ?? 'Lectura'}</strong>
+                  <span class="muted small">{readingDate(r.created_at, tz)}</span>
+                </span>
+                <span class="muted">{excerpt(r.content, 140)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="muted">
+          Aún no tienes lecturas. El universo está esperando a que preguntes algo.
+        </p>
+      )}
+    </section>
+  </div>
+</AppShell>
+
+<style>
+  .hub {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .quota {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    justify-self: start;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line-acid);
+    background: rgb(184 255 23 / 6%);
+    color: var(--ink-soft);
+  }
+  .quota :global(svg) {
+    color: var(--acid);
+  }
+  .quota strong {
+    color: var(--acid);
+  }
+  .featured {
+    position: relative;
+    display: grid;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    border: 1px solid var(--line-acid);
+    box-shadow: var(--shadow-lg), var(--glow-acid);
+    color: var(--ink);
+    text-decoration: none;
+    min-height: clamp(16rem, 40vw, 22rem);
+  }
+  .featured img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease);
+  }
+  .featured::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgb(6 6 8 / 92%) 0%,
+      rgb(6 6 8 / 70%) 45%,
+      rgb(6 6 8 / 10%) 100%
+    );
+  }
+  .featured:hover img {
+    transform: scale(1.04);
+  }
+  .featured-text {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: var(--space-3);
+    align-content: center;
+    justify-items: start;
+    max-width: 34rem;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+  }
+  .featured h2 {
+    font-size: var(--step-4);
+    hyphens: manual;
+  }
+  .featured p:not(.kicker) {
+    color: var(--ink-soft);
+    font-size: var(--step-1);
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--step-2);
+  }
+  .kinds {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+  .kind {
+    position: relative;
+    display: grid;
+    grid-template-rows: 9rem auto;
+    height: 100%;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color var(--dur) var(--ease),
+      transform var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+  .kind img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .kind:hover {
+    border-color: var(--acid);
+    box-shadow: var(--glow-acid);
+    transform: translateY(-2px);
+  }
+  .kind-text {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-5) var(--space-5);
+  }
+  /* Sin guiones y con tamaño que cabe ("Compatibilidad" en una tarjeta estrecha). */
+  .kind-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.15rem;
+    line-height: 1.15;
+    hyphens: manual;
+  }
+  .kind-blurb {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .kind-go {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgb(6 6 8 / 70%);
+    color: var(--acid);
+  }
+  .recent-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .recent-list a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .recent-list a:hover {
+    border-color: var(--acid);
+  }
+  .recent-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .featured:hover img,
+    .kind:hover {
+      transform: none;
+    }
+  }
+</style>

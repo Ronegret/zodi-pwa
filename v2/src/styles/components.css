@@ -892,3 +892,335 @@ fieldset.group > legend {
   display: flex;
   align-items: center;
 }
+
+/* ---------- Lecturas ---------- */
+.studio {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@media (min-width: 1100px) {
+  .studio:not(.studio-compact) {
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  }
+  .studio:not(.studio-compact) .studio-form {
+    position: sticky;
+    top: var(--space-4);
+  }
+}
+.studio-form {
+  display: grid;
+  gap: var(--space-4);
+}
+.studio-form fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.studio-partner {
+  gap: var(--space-3) !important;
+}
+.studio-row {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+}
+.studio-options {
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-3);
+}
+.studio-options[open] {
+  display: grid;
+  gap: var(--space-4);
+}
+.studio-options summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--acid);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.studio-submit {
+  display: grid;
+  gap: var(--space-2);
+}
+.studio-result {
+  display: grid;
+  gap: var(--space-4);
+  min-height: 12rem;
+  scroll-margin-top: var(--space-4);
+}
+.studio-empty {
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  text-align: center;
+}
+.studio-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line-acid);
+  background: rgb(184 255 23 / 5%);
+  color: var(--ink-soft);
+}
+.studio-orb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--acid), var(--violet) 70%);
+  box-shadow: 0 0 24px rgb(184 255 23 / 40%);
+  animation: orb-pulse 1.6s var(--ease) infinite alternate;
+}
+@keyframes orb-pulse {
+  to {
+    transform: scale(0.82);
+    box-shadow: 0 0 40px rgb(155 77 255 / 55%);
+  }
+}
+.studio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Papel de la lectura: lo que la IA escribe, con lectura cómoda. */
+.reading-paper {
+  position: relative;
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line-acid);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(155 77 255 / 14%), transparent 55%), var(--panel);
+  box-shadow: var(--shadow-lg);
+}
+.reading-paper[data-streaming] .rich-text > :last-child::after {
+  content: '▍';
+  margin-left: 2px;
+  color: var(--acid);
+  animation: caret 0.9s steps(2) infinite;
+}
+@keyframes caret {
+  to {
+    opacity: 0;
+  }
+}
+.rich-text {
+  display: grid;
+  gap: var(--space-3);
+  font-size: var(--step-1);
+  line-height: 1.7;
+  color: var(--ink);
+  max-width: 68ch;
+}
+.rich-text p,
+.rich-text ul {
+  margin: 0;
+}
+.rich-text ul {
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--space-2);
+}
+.rich-text li::marker {
+  color: var(--acid);
+}
+.rich-text strong {
+  color: var(--acid-soft);
+}
+.rich-text em {
+  color: var(--violet-text);
+}
+
+/* Tirada de tarot */
+.tarot-spread {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.tarot-slot {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: center;
+  text-align: center;
+}
+.tarot-card {
+  width: min(100%, 9rem);
+  aspect-ratio: 5 / 8;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  place-items: center;
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--acid);
+  background:
+    radial-gradient(circle at 50% 45%, rgb(155 77 255 / 35%), transparent 60%), var(--surface-2);
+  box-shadow: var(--glow-acid);
+  font-family: var(--font-display);
+  font-weight: 800;
+  animation: card-in var(--dur-slow) var(--ease-spring) both;
+}
+.tarot-slot:nth-child(2) .tarot-card {
+  animation-delay: 120ms;
+}
+.tarot-slot:nth-child(3) .tarot-card {
+  animation-delay: 240ms;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) rotateY(80deg);
+  }
+}
+.tarot-card[data-reversed] {
+  rotate: 180deg;
+  border-color: var(--hot);
+}
+.tarot-card-numeral {
+  color: var(--acid);
+  font-size: var(--step-1);
+}
+.tarot-card-sigil {
+  font-size: var(--step-3);
+  color: var(--violet-text);
+}
+.tarot-card-name {
+  font-size: var(--step--1);
+  line-height: 1.2;
+}
+.tarot-slot-name {
+  font-weight: 700;
+  font-size: var(--step--1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-orb,
+  .tarot-card,
+  .reading-paper[data-streaming] .rich-text > :last-child::after {
+    animation: none;
+  }
+}
+
+/* ---------- Chat con Zodi ---------- */
+.chat {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 52rem;
+}
+.chat-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+.chat-msg {
+  display: flex;
+  align-items: end;
+  gap: var(--space-3);
+}
+.chat-me {
+  justify-content: end;
+}
+.chat-avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--acid);
+}
+.chat-bubble {
+  max-width: min(100%, 36rem);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.chat-zodi .chat-bubble {
+  border-bottom-left-radius: var(--radius-sm);
+  border-color: var(--line-acid);
+}
+.chat-me .chat-bubble {
+  border-bottom-right-radius: var(--radius-sm);
+  background: rgb(155 77 255 / 16%);
+  border-color: rgb(155 77 255 / 40%);
+}
+.chat-bubble .rich-text {
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+.chat-typing {
+  display: inline-flex;
+  gap: 5px;
+  padding: var(--space-2) 0;
+}
+.chat-typing span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--acid);
+  animation: typing 1s var(--ease) infinite alternate;
+}
+.chat-typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.chat-typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes typing {
+  to {
+    opacity: 0.25;
+    transform: translateY(-3px);
+  }
+}
+.chat-suggestions .chip {
+  font-weight: 600;
+}
+.chat-form {
+  position: sticky;
+  bottom: var(--space-3);
+  display: flex;
+  align-items: end;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line-acid);
+  background: rgb(10 10 16 / 92%);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-lg);
+}
+.chat-input {
+  resize: none;
+  border: 0;
+  background: transparent;
+  min-height: 48px;
+}
+.chat-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+@media (max-width: 719px) {
+  .chat-form {
+    bottom: calc(var(--nav-h) + var(--space-2) + var(--sab));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-typing span {
+    animation: none;
+  }
+}

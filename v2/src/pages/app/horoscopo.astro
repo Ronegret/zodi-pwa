@@ -1,37 +1,114 @@
 ---
 import AppShell from '@/layouts/AppShell.astro';
-import ComingSoon from '@/components/ComingSoon.astro';
 import Card from '@/components/ui/Card.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { ReadingStudio } from '@/components/readings/ReadingStudio';
+import { RichText } from '@/components/readings/RichText';
 import { SignOfDay3D } from '@/components/scenes/SignOfDay3D';
+import { localToUtc } from '@/lib/astro-engine';
 import { elementOf, formatPosition, signSlug } from '@/lib/astro-engine/labels';
 import { skyAt } from '@/lib/astro-engine/sky';
+import { aiAvailable } from '@/lib/ai/client';
+import { todayFor } from '@/lib/ai/context';
+import { KIND_BY_SLUG } from '@/lib/ai/kinds';
+import { getLatestSelfChart } from '@/lib/server/charts';
+import { getQuotaStatus } from '@/lib/server/quota';
+import { latestReadingSince } from '@/lib/server/readings';
 import { SIGN_INFO } from '@/lib/zodiac/signs';
 
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const now = new Date();
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const dayStart = localToUtc(todayFor(now, tz), '00:00', tz).toISOString();
+const [todays, quota, stored] = await Promise.all([
+  latestReadingSince(supabase, 'daily-horoscope', dayStart),
+  getQuotaStatus(supabase),
+  getLatestSelfChart(supabase),
+]);
+const remaining = quota ? Math.max(0, quota.limit - quota.used) : null;
+const daily = KIND_BY_SLUG.get('horoscopo-diario')!;
+const more = ['horoscopo-semanal', 'horoscopo-mensual', 'horoscopo-chino'].map((s) =>
+  KIND_BY_SLUG.get(s)!,
+);
+
 // Signo de la temporada: donde está el Sol ahora mismo.
-const sun = skyAt(new Date()).find((p) => p.id === 'sun')!;
+const sun = skyAt(now).find((p) => p.id === 'sun')!;
 const info = SIGN_INFO[sun.sign];
+const generatedAt = todays
+  ? new Intl.DateTimeFormat('es-ES', { timeStyle: 'short', timeZone: tz }).format(
+      new Date(todays.created_at),
+    )
+  : null;
 ---
 
-<AppShell title="Horóscopo" current="horoscopo" kicker="Diario · semanal · mensual">
+<AppShell
+  title="Horóscopo"
+  current="horoscopo"
+  kicker="Diario · semanal · mensual"
+  intro="Escrito para ti con tus tránsitos de hoy, no para los mil millones que comparten tu signo."
+>
   <div class="layout">
-    <Card title={`Temporada de ${sun.sign}`} kicker="El signo del día" class="sign-card">
-      <SignOfDay3D client:visible sign={sun.sign}>
-        <img
-          src={`/zodiac/${signSlug(sun.sign)}-640.webp`}
-          alt={`Ilustración neón de ${sun.sign}`}
-          width="640"
-          height="366"
+    <section class="today" aria-labelledby="today-title">
+      <h2 id="today-title" class="section-title">
+        <Icon name="sun" /> Tu día
+      </h2>
+      {todays ? (
+        <>
+          <article class="reading-paper">
+            <RichText text={todays.content} />
+          </article>
+          <p class="muted small">
+            Escrito hoy a las {generatedAt}. Mañana, otro. Si quieres más detalle, pide tu semana o
+            tu mes.
+          </p>
+        </>
+      ) : !stored ? (
+        <p class="notice">
+          Sin tus datos de nacimiento solo tengo horóscopos de sala de espera.{' '}
+          <a href="/app/onboarding?paso=nacimiento">Complétalos en dos minutos</a>.
+        </p>
+      ) : !aiAvailable() ? (
+        <p class="notice">Zodi está afilando la lengua. Vuelve en un rato.</p>
+      ) : (
+        <ReadingStudio
+          client:load
+          compact
+          def={{ slug: daily.slug, title: daily.title, input: daily.input, cta: daily.cta }}
+          defaultTone={profile.reading_tone}
+          remaining={remaining}
         />
-      </SignOfDay3D>
-      <p class="muted">
-        Sol en {formatPosition(sun)} · {info.dates} · {elementOf(sun.sign).toLowerCase()}.
-        {info.blurb}
-      </p>
-    </Card>
-    <ComingSoon title="Zodi está afilando la lengua">
-      Tu horóscopo escrito con tu carta real llega muy pronto. Mientras, en Inicio tienes los
-      tránsitos de hoy.
-    </ComingSoon>
+      )}
+    </section>
+
+    <aside class="side">
+      <Card title={`Temporada de ${sun.sign}`} kicker="El signo del día" class="sign-card">
+        <SignOfDay3D client:visible sign={sun.sign}>
+          <img
+            src={`/zodiac/${signSlug(sun.sign)}-640.webp`}
+            alt={`Ilustración neón de ${sun.sign}`}
+            width="640"
+            height="366"
+          />
+        </SignOfDay3D>
+        <p class="muted">
+          Sol en {formatPosition(sun)} · {info.dates} · {elementOf(sun.sign).toLowerCase()}.
+          {info.blurb}
+        </p>
+      </Card>
+      <nav class="more" aria-label="Más horóscopos">
+        {more.map((k) => (
+          <a href={`/app/lecturas/${k.slug}`}>
+            <span>
+              <span class="kicker">{k.kicker}</span>
+              <strong>{k.title}</strong>
+            </span>
+            <Icon name="chevronRight" />
+          </a>
+        ))}
+      </nav>
+    </aside>
   </div>
 </AppShell>
 
@@ -39,12 +116,53 @@ const info = SIGN_INFO[sun.sign];
   .layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-5);
+    gap: var(--space-6);
     align-items: start;
   }
   @media (min-width: 1100px) {
     .layout {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
     }
+  }
+  .today,
+  .side {
+    display: grid;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--step-2);
+  }
+  .more {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .more a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .more a > span {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .more a:hover {
+    border-color: var(--acid);
+  }
+  .more :global(svg) {
+    color: var(--acid);
+  }
+  .small {
+    font-size: var(--step--1);
   }
 </style>
