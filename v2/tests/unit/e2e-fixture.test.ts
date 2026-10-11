@@ -20,5 +20,6 @@ it('la carta de prueba de los e2e coincide con el motor actual', () => {
   });
   const json = `${JSON.stringify(record, null, 2)}\n`;
   if (process.env.UPDATE_FIXTURES) writeFileSync(file, json);
-  expect(readFileSync(file, 'utf8')).toBe(json);
+  // Se compara el JSON, no el texto: Git en Windows puede pasar los saltos a CRLF.
+  expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual(JSON.parse(json));
 });
