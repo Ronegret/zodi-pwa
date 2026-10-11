@@ -150,7 +150,8 @@ node scripts/places/import.mjs            # (re)carga GeoNames en places/place_a
 - Vercel (proyecto `zodi-v2`):
   - `v2/vercel.json` fija `framework: astro`. Sin él, el proyecto construía como Next.
   - `astro.config.mjs` descarta `import "rolldown"` y `import "@vercel/routing-utils"` de la función: es un fallo de `@astrojs/vercel` 11.0.13 que daba 500 en todas las rutas.
-  - Para comprobar la función, cópiala fuera del repo (`.vercel/output/functions/_render.func`) y ejecútala ahí. Dentro de `v2/`, Node resuelve los módulos que faltan desde `v2/node_modules` y oculta este tipo de fallos.
+  - `astronomy-engine` va en `vite.ssr.noExternal`: publica ESM en `.js` sin `"type": "module"` y el cargador de Vercel no lo entiende. Una dependencia nueva con el mismo patrón necesita lo mismo.
+  - Para comprobar la función, ejecútala con `node --no-experimental-detect-module` (así se comporta Vercel) y cópiala fuera del repo (`.vercel/output/functions/_render.func`) y ejecútala ahí. Dentro de `v2/`, Node resuelve los módulos que faltan desde `v2/node_modules` y oculta este tipo de fallos.
 - E2e:
   - Tras `login()` o `goto()` a páginas con islas, espera a `load` antes de recorrer con Tab: el HTML llega por streaming.
   - Espera a que la isla pierda el atributo `ssr` antes de pulsar sus controles.

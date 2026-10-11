@@ -101,6 +101,10 @@ Qué cubren los e2e (`tests/e2e/scenes.spec.ts`):
      - Arreglo: en `astro.config.mjs` (`vite.build.rolldownOptions.treeshake.moduleSideEffects`) se marcan sin efectos secundarios y el bundler los descarta.
      - Verificado ejecutando la función compilada copiada fuera del repo, sin variables de entorno.
      - Cuando salga una versión del adaptador que lo corrija, quitar la regla.
+  3. Las páginas que usan el motor (`/app`, `/app/carta`, `/api/perfil`) daban 500 con `SyntaxError: Unexpected token 'export'`.
+     - Causa: `astronomy-engine` publica ESM en `.js` sin `"type": "module"`. Node 24 lo detecta en local, pero el cargador de Vercel lo trata como CommonJS.
+     - Arreglo: `vite.ssr.noExternal: ['astronomy-engine']`, que lo mete en el bundle.
+     - Reproducido y verificado con `node --no-experimental-detect-module` sobre la función compilada aislada.
 - **Pendiente (Rodrigo):** pegar en Vercel → zodi-v2 → Settings → Environment Variables:
   - `PUBLIC_SUPABASE_URL`
   - `PUBLIC_SUPABASE_ANON_KEY`
