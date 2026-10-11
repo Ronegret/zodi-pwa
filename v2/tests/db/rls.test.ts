@@ -313,6 +313,93 @@ describe('comunidad', () => {
   });
 });
 
+describe('comunidad v2: temas, reacciones, signo, denuncias y feed', () => {
+  let post: string;
+
+  it('el signo solar del perfil sale de la carta propia', async () => {
+    await q(
+      A,
+      `insert into public.natal_charts (input, chart, engine_version)
+       values ('{}', '{"planets":[{"id":"moon","sign":"Libra"},{"id":"sun","sign":"Aries"}]}', '1')`,
+    );
+    expect(await q(A, 'select sun_sign from public.profiles where id = $1', [A.uid])).toEqual([
+      { sun_sign: 'Aries' },
+    ]);
+    await denied(A, `update public.profiles set sun_sign = 'Leo' where id = $1`, [A.uid]);
+  });
+
+  it('posts con tema; el tema se valida', async () => {
+    const [p] = await q<{ id: string }>(
+      A,
+      `insert into public.community_posts (body, topic) values ('¿Alguien más con Saturno encima?', 'pregunta') returning id`,
+    );
+    post = p!.id;
+    await expect(
+      q(A, `insert into public.community_posts (body, topic) values ('x', 'spam')`),
+    ).rejects.toThrow(/community_posts_topic_chk/);
+  });
+
+  it('reacciones: una por tipo y persona, solo las propias', async () => {
+    await q(B, `insert into public.post_reactions (post_id, kind) values ($1, 'fuego')`, [post]);
+    await q(C, `insert into public.post_reactions (post_id, kind) values ($1, 'fuego')`, [post]);
+    await q(C, `insert into public.post_reactions (post_id, kind) values ($1, 'magia')`, [post]);
+    await expect(
+      q(B, `insert into public.post_reactions (post_id, kind) values ($1, 'fuego')`, [post]),
+    ).rejects.toThrow(/duplicate key/);
+    await denied(
+      B,
+      `insert into public.post_reactions (post_id, user_id, kind) values ($1, $2, 'amor')`,
+      [post, C.uid],
+    );
+    expect(await q(B, 'select kind from public.post_reactions')).toEqual([{ kind: 'fuego' }]);
+    expect(
+      await q(B, `delete from public.post_reactions where user_id = $1 returning kind`, [C.uid]),
+    ).toEqual([]);
+  });
+
+  it('el feed da tarjeta pública del autor, recuentos y mis reacciones', async () => {
+    await q(B, `insert into public.comments (post_id, body) values ($1, 'Presente')`, [post]);
+    const [row] = await q<Record<string, unknown>>(
+      B,
+      `select * from public.community_feed('pregunta', null, 10)`,
+    );
+    expect(row).toMatchObject({
+      id: post,
+      topic: 'pregunta',
+      author_name: expect.stringMatching(/^Ana/),
+      author_sign: 'Aries',
+      comment_count: 1,
+      reactions: { fuego: 2, magia: 1 },
+      my_reactions: ['fuego'],
+    });
+    expect(Object.keys(row!)).not.toContain('birth_date');
+    expect(await q(B, `select * from public.community_feed('amor', null, 10)`)).toEqual([]);
+    const comments = await q<{ body: string; author_name: string }>(
+      C,
+      'select body, author_name from public.post_comments($1)',
+      [post],
+    );
+    expect(comments).toEqual([{ body: 'Presente', author_name: 'Bruno' }]);
+    await denied('anon', `select * from public.community_feed(null, null, 10)`);
+  });
+
+  it('denuncias: nadie las lee y con tres personas el post se oculta', async () => {
+    const report = `insert into public.content_reports (post_id, reason) values ($1, 'spam')`;
+    await q(B, report, [post]);
+    await expect(q(B, report, [post])).rejects.toThrow(/duplicate key/);
+    await denied(B, 'select * from public.content_reports');
+    await q(C, report, [post]);
+    expect(
+      await q(B, `select id from public.community_feed(null, null, 50) where id = $1`, [post]),
+    ).toHaveLength(1);
+    const D = await newUser('dani@example.com');
+    await q(D, report, [post]);
+    expect(
+      await q(B, `select id from public.community_feed(null, null, 50) where id = $1`, [post]),
+    ).toEqual([]);
+  });
+});
+
 describe('amistades', () => {
   it('solo el destinatario acepta y terceros no ven nada', async () => {
     await q(A, 'insert into public.friendships (addressee_id) values ($1)', [B.uid]);

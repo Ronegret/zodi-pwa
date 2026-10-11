@@ -8,6 +8,18 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 type Timestamps = { created_at: string; updated_at: string };
 
+export type CommunityTopic = 'general' | 'amor' | 'trabajo' | 'dinero' | 'confesion' | 'pregunta';
+
+/** Tarjeta pública del autor que devuelven community_feed y post_comments. */
+type FeedAuthor = {
+  author_id: string;
+  author_name: string;
+  author_username: string | null;
+  author_avatar: string | null;
+  author_level: number;
+  author_sign: string | null;
+};
+
 export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '13';
@@ -36,6 +48,7 @@ export type Database = {
           has_kids: boolean | null;
           kids_count: number | null;
           personal_bio: string | null;
+          sun_sign: string | null;
           plan: Database['public']['Enums']['plan_tier'];
           gems: number;
           xp: number;
@@ -198,12 +211,14 @@ export type Database = {
           id: string;
           author_id: string;
           body: string;
+          topic: CommunityTopic;
           status: Database['public']['Enums']['content_status'];
         };
         Insert: {
           id?: string;
           author_id?: string;
           body: string;
+          topic?: CommunityTopic;
           status?: Database['public']['Enums']['content_status'];
           created_at?: string;
           updated_at?: string;
@@ -253,6 +268,40 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      post_reactions: {
+        Row: {
+          post_id: string;
+          user_id: string;
+          kind: Database['public']['Enums']['reaction_kind'];
+          created_at: string;
+        };
+        Insert: {
+          post_id: string;
+          user_id?: string;
+          kind: Database['public']['Enums']['reaction_kind'];
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['post_reactions']['Insert']>;
+        Relationships: [];
+      };
+      content_reports: {
+        Row: {
+          id: number;
+          reporter_id: string;
+          post_id: string | null;
+          comment_id: string | null;
+          reason: string;
+          created_at: string;
+        };
+        Insert: {
+          reporter_id?: string;
+          post_id?: string | null;
+          comment_id?: string | null;
+          reason: string;
+        };
+        Update: Partial<Database['public']['Tables']['content_reports']['Insert']>;
+        Relationships: [];
       };
       friendships: {
         Row: Timestamps & {
@@ -430,6 +479,22 @@ export type Database = {
           level: number;
         }[];
       };
+      community_feed: {
+        Args: { p_topic?: string | null; p_before?: string | null; p_limit?: number };
+        Returns: (FeedAuthor & {
+          id: string;
+          body: string;
+          topic: CommunityTopic;
+          created_at: string;
+          comment_count: number;
+          reactions: Partial<Record<Database['public']['Enums']['reaction_kind'], number>>;
+          my_reactions: Database['public']['Enums']['reaction_kind'][];
+        })[];
+      };
+      post_comments: {
+        Args: { p_post: string };
+        Returns: (FeedAuthor & { id: string; body: string; created_at: string })[];
+      };
       apply_gem_transaction: {
         Args: {
           p_user: string;
@@ -476,6 +541,7 @@ export type Database = {
         | 'unpaid'
         | 'paused';
       gem_reason: 'purchase' | 'reading' | 'reward' | 'referral' | 'refund' | 'adjustment';
+      reaction_kind: 'fuego' | 'magia' | 'calavera' | 'amor';
     };
     CompositeTypes: { [_ in never]: never };
   };
