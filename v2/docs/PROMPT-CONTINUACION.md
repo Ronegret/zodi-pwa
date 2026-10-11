@@ -50,6 +50,10 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 - Onboarding de 5 pasos con guardado parcial (`src/lib/onboarding/steps.ts`), ciudad con combobox ARIA + `/api/geocodificar` (Open-Meteo) y alternativa sin JS. Columna nueva `birth_time_known`.
 - Placidus contrastado con Swiss Ephemeris en 3 cartas (±2′). Verificado: check 0, lint limpio, 127/127 unitarios, build OK, 85/85 e2e (3 tamaños, axe en todas las páginas y estados).
 
+**Fase 4 — motion** (`e7b2d38`, `cc53103`, `1d42c73`). Detalle en `v2/docs/FASE-4-informe.md`:
+- `src/lib/motion/` (tokens CSS/TS sincronizados, presets, `reducedMotion()` = sistema o Ajustes, `client.ts` con Lenis, magnético, tilt, halo, contadores y confeti) y `src/styles/motion.css` (View Transitions con `.vt-title`/`.vt-sign-art`, revelados `.reveal` con `animation-timeline: view()` solo translate/scale, parallax, microinteracciones, `.switch`, red de seguridad de movimiento reducido). Hooks: `Card reveal tilt`, `Button magnetic`, `data-countup`, `data-celebrate`, `data-cursor-glow`.
+- Interruptor "Reducir animaciones" en Ajustes. Fuentes precargadas (CLS 0). Verificado: 134/134 unitarios, 106/106 e2e (con y sin reducedMotion, CLS 0, INP < 200 ms), axe 0.
+
 ## 5. Hallazgos de la app actual (a resolver en v2)
 - `lib/astral.ts`: Luna y Ascendente salen de `signs[(seed + birthCity.length) % 12]` (falso). Solo el signo solar es correcto. El horóscopo chino usa el año natural, no el Año Nuevo Lunar.
 - `middleware.ts` solo comprueba que exista la cookie `zodi_auth` sin validarla; la API acepta el token literal `"local_session"` y se salta la verificación.
@@ -67,7 +71,7 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 |---|---|
 | **2. Datos y auth (Supabase)** | Hecha en código y tests. Pendiente: conectar el proyecto `mdtgjgfeoudiyotgcxsy` (variables en `v2/.env.local`: `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`), `supabase db push`, Auth/Google, `gen types`. |
 | **3. Diseño y layout** | Hecha (ver informe). |
-| **4. Motion** | View Transitions, scroll (Lenis o GSAP ScrollTrigger), microinteracciones, tiempo de movimiento unificado, modo reducido. |
+| **4. Motion** | Hecha (ver informe). Lighthouse pendiente para Fase 8. |
 | **5. Escenas 3D** | `src/scenes/`: hero zodiacal, rueda de carta natal, tarot, signo del día. Toon + outline + RoundedBox, carga perezosa, presupuesto de rendimiento. |
 | **6. PDF editorial** | Plantilla por signo, rueda natal en SVG, secciones según datos, tipografía cuidada, exportación desde el dashboard. |
 | **7. Portar funcionalidades** | Lecturas IA, horóscopos y SEO por signo, comunidad, Stripe y gemas, push y emails. |
@@ -98,4 +102,4 @@ npm run test:e2e     # playwright: mock de Supabase en :54329 + dev server en :4
 
 ## 10. Primer paso que quiero ahora
 1. Si hay forma de aplicar migraciones (`SUPABASE_DB_URL` en `v2/.env.local`, MCP o SQL Editor): conecta Supabase siguiendo la checklist de `v2/docs/FASE-2-informe.md` y verifica registro → onboarding → carta contra el proyecto real.
-2. Sigue con la **Fase 4 (motion)** respetando el estilo Zodi y la CSP.
+2. Sigue con la **Fase 5 (escenas 3D)**: `three` ya está instalado; respeta el estilo Zodi (paleta neón), la CSP, `reducedMotion()` de `src/lib/motion` y la alternativa accesible.
