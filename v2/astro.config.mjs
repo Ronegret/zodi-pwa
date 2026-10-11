@@ -11,6 +11,8 @@ export default defineConfig({
   prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
   // La barra de dev tapa la parte baja de la pantalla (avisos, botón flotante) en los e2e.
   devToolbar: { enabled: false },
+  // Sin resaltado de código: Shiki usa estilos en línea, incompatibles con la CSP.
+  markdown: { syntaxHighlight: false },
   security: {
     // Rechaza envíos de formularios desde otros orígenes (CSRF).
     checkOrigin: true,

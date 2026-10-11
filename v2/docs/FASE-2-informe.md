@@ -127,3 +127,30 @@ Funciones:
 - **Sin rate limiting propio**: de momento solo están los límites de Supabase Auth y la cuota de IA. Fase 8.
 - **Enlaces a páginas inexistentes**: los de la navegación (`/app/carta`, `/app/horoscopo`…) dan 404 hasta la Fase 3.
 - **Sigue pendiente de antes**: contrastar las cúspides Placidus con Astro.com (Fase 3).
+
+## Conexión con el proyecto real (12/10/2026)
+Hecho en `mdtgjgfeoudiyotgcxsy` (West EU, Postgres 17.11):
+- **Base de datos.** Contraseña regenerada desde el panel (generada por Supabase). `SUPABASE_DB_URL` (pooler de sesión `aws-0-eu-west-1`) está en `v2/.env.local`.
+- **Migraciones.** 9 aplicadas con `node scripts/db/migrate.mjs`, que las registra en `supabase_migrations.schema_migrations`, el mismo historial que usa la CLI.
+- **Lugares.** 236.041 y 91.636 alias cargados con `node scripts/places/import.mjs`.
+- **Verificado en remoto:**
+  - Todas las tablas tienen RLS y ninguna función `security definer` es ejecutable por `anon`.
+  - Con la clave pública no se puede escribir en `places` ni leer `profiles` (401).
+  - El trigger de alta de perfil existe.
+  - `search_places` tarda 0–2 ms con nombres completos y ≤ 56 ms con prefijos de 2 letras.
+  - Los tipos manuales coinciden con 13 tablas, 103 columnas y 6 funciones.
+- **Auth.**
+  - Site URL: `http://localhost:4321`. Pasará a `https://zodi.aibueno.es` en la Fase 8: ese dominio todavía sirve la app Next con Firebase.
+  - Redirect URLs: `http://localhost:4321/**` y `https://zodi.aibueno.es/**`.
+  - Contraseña: mínimo 10 caracteres, con letras y dígitos (igual que la validación Zod).
+  - Confirmación por correo activada.
+- **Smoke test local contra el proyecto real.** Las páginas públicas responden 200, `/app/**` redirige al login con `next` y la API privada devuelve 401.
+
+Pendiente (requiere al usuario):
+1. **SMTP propio**: sin él, Supabase solo envía correos a miembros del equipo y 2 por hora, así que los usuarios reales no recibirían la confirmación. Además, sin SMTP las plantillas no se pueden editar.
+   - **Recomendado: Resend** (gratis 3.000/mes y 100/día). Servirá también para los emails de la Fase 7.
+   - Necesita crear la cuenta y verificar el dominio `aibueno.es` con registros DNS.
+   - Después, poner las plantillas `token_hash` (ver arriba) y subir el límite en Rate Limits.
+   - Hasta entonces, las plantillas por defecto funcionan con el flujo PKCE (`?code=`), siempre que el enlace se abra en el mismo navegador.
+2. **Google OAuth**: crear el cliente OAuth en Google Cloud con la redirect URI `https://mdtgjgfeoudiyotgcxsy.supabase.co/auth/v1/callback` y pegar el ID y el secreto en Supabase → Sign In / Providers → Google. El secreto debe pegarlo el usuario.
+3. **Rotar** la clave `sb_secret_…` (se pegó en el chat) y la contraseña de la base de datos (pasó por la conversación al guardarla). Después, actualizar `.env.local`.
