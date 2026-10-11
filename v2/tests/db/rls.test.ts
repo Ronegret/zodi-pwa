@@ -372,3 +372,60 @@ describe('pagos y gemas', () => {
     expect(await q(B, 'select id from public.gem_transactions')).toEqual([]);
   });
 });
+
+describe('lugares (buscador propio)', () => {
+  beforeAll(async () => {
+    await db.exec(`
+      insert into public.places (id, name, name_norm, country_code, admin1, latitude, longitude, time_zone, population) values
+        (3117735, 'Madrid', 'madrid', 'ES', 'Madrid', 40.4165, -3.70256, 'Europe/Madrid', 3255944),
+        (3675707, 'Madrid', 'madrid', 'CO', 'Cundinamarca', 4.73245, -74.26419, 'America/Bogota', 135000),
+        (3117732, 'Madridejos', 'madridejos', 'ES', 'Castille-La Mancha', 39.468, -3.532, 'Europe/Madrid', 10500),
+        (3871336, 'Santiago', 'santiago', 'CL', 'Santiago Metropolitan', -33.45694, -70.64827, 'America/Santiago', 4837295),
+        (3109642, 'Santiago de Compostela', 'santiago de compostela', 'ES', 'Galicia', 42.88, -8.54, 'Europe/Madrid', 95092),
+        (2643743, 'London', 'london', 'GB', 'England', 51.50853, -0.12574, 'Europe/London', 8961989),
+        (3117000, 'Ávila', 'avila', 'ES', 'Castille and León', 40.656, -4.681, 'Europe/Madrid', 52000);
+      insert into public.place_aliases (place_id, alias_norm) values (2643743, 'londres');
+    `);
+  });
+
+  const search = (who: Who, query: string, limit = 8) =>
+    q<{ id: number }>(who, 'select id from public.search_places($1, $2)', [query, limit]).then(
+      (r) => r.map((x) => x.id),
+    );
+
+  it('es público: anon y usuarios buscan, nadie escribe', async () => {
+    expect(await search('anon', 'madrid')).toEqual([3117735, 3675707, 3117732]);
+    expect(await search(A, 'madrid')).toEqual([3117735, 3675707, 3117732]);
+    await denied(
+      'anon',
+      `insert into public.places (id, name, name_norm, country_code, latitude, longitude, time_zone) values (1, 'x', 'x', 'ES', 0, 0, 'UTC')`,
+    );
+    await denied(A, `delete from public.places`);
+  });
+
+  it('prefijo, coincidencia exacta primero y después población', async () => {
+    expect(await search('anon', 'mad')).toEqual([3117735, 3675707, 3117732]);
+    expect(await search('anon', 'santiago')).toEqual([3871336, 3109642]);
+  });
+
+  it('acentos y mayúsculas no importan', async () => {
+    expect(await search('anon', 'ÁVILA')).toEqual([3117000]);
+    expect(await search('anon', 'Ávi')).toEqual([3117000]);
+  });
+
+  it('encuentra exónimos en español', async () => {
+    expect(await search('anon', 'londres')).toEqual([2643743]);
+    expect(await search('anon', 'lond')).toEqual([2643743]);
+  });
+
+  it('los comodines del usuario no amplían la búsqueda', async () => {
+    expect(await search('anon', '%%')).toEqual([]);
+    expect(await search('anon', '_adrid')).toEqual([]);
+    expect(await search('anon', 'm')).toEqual([]);
+  });
+
+  it('limita el número de resultados', async () => {
+    expect(await search('anon', 'ma', 1)).toEqual([3117735]);
+    expect(await search('anon', 'ma', 999)).toHaveLength(3);
+  });
+});

@@ -107,51 +107,60 @@ function createUser({ onboarded }) {
   return { id, email, password: PASSWORD };
 }
 
-/** Open-Meteo Geocoding simulado: unas pocas ciudades conocidas. */
-const CITIES = [
+/** Tabla places simulada (mismas columnas que search_places). */
+const PLACES = [
   {
     id: 3117735,
     name: 'Madrid',
+    country_code: 'ES',
+    admin1: 'Comunidad de Madrid',
     latitude: 40.4165,
     longitude: -3.70256,
-    timezone: 'Europe/Madrid',
-    country: 'España',
-    admin1: 'Comunidad de Madrid',
+    time_zone: 'Europe/Madrid',
+    population: 3255944,
   },
   {
     id: 3871336,
     name: 'Santiago',
+    country_code: 'CL',
+    admin1: 'Región Metropolitana',
     latitude: -33.45694,
     longitude: -70.64827,
-    timezone: 'America/Santiago',
-    country: 'Chile',
-    admin1: 'Región Metropolitana',
+    time_zone: 'America/Santiago',
+    population: 4837295,
   },
   {
     id: 3109642,
     name: 'Santiago de Compostela',
+    country_code: 'ES',
+    admin1: 'Galicia',
     latitude: 42.88052,
     longitude: -8.54569,
-    timezone: 'Europe/Madrid',
-    country: 'España',
-    admin1: 'Galicia',
+    time_zone: 'Europe/Madrid',
+    population: 95092,
   },
   {
     id: 3128760,
     name: 'Barcelona',
+    country_code: 'ES',
+    admin1: 'Cataluña',
     latitude: 41.38879,
     longitude: 2.15899,
-    timezone: 'Europe/Madrid',
-    country: 'España',
-    admin1: 'Cataluña',
+    time_zone: 'Europe/Madrid',
+    population: 1620343,
   },
 ];
 const fold = (s) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
-function handleGeocoding(res, url) {
-  const q = fold(url.searchParams.get('name') ?? '');
-  const results = CITIES.filter((c) => fold(c.name).startsWith(q));
-  return send(res, 200, results.length ? { results } : { generationtime_ms: 0.1 });
+function searchPlaces(body) {
+  const q = fold(String(body.p_query ?? ''));
+  if (q.length < 2) return [];
+  return PLACES.filter((p) => fold(p.name).startsWith(q))
+    .sort(
+      (x, y) =>
+        Number(fold(y.name) === q) - Number(fold(x.name) === q) || y.population - x.population,
+    )
+    .slice(0, body.p_limit ?? 8);
 }
 
 const b64url = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
@@ -299,6 +308,9 @@ async function handleAuth(req, res, url) {
 async function handleRest(req, res, url) {
   const u = currentUser(req);
   const [, , , resource, fn] = url.pathname.split('/');
+  if (resource === 'rpc' && fn === 'search_places') {
+    return send(res, 200, searchPlaces(await readBody(req)));
+  }
   if (resource === 'rpc' && fn === 'ai_quota_status') {
     return send(res, 200, u ? [{ used: 0, daily_limit: 5 }] : []);
   }
@@ -350,7 +362,6 @@ createServer(async (req, res) => {
     if (url.pathname === '/__test/users' && req.method === 'POST') {
       return send(res, 201, createUser(await readBody(req)));
     }
-    if (url.pathname === '/v1/search') return handleGeocoding(res, url);
     if (url.pathname.startsWith('/auth/v1/')) return await handleAuth(req, res, url);
     if (url.pathname.startsWith('/rest/v1/')) return await handleRest(req, res, url);
     return send(res, 404, { message: 'mock: ruta desconocida' });

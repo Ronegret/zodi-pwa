@@ -352,9 +352,66 @@ export type Database = {
         Update: { id?: string; type?: string; received_at?: string };
         Relationships: [];
       };
+      places: {
+        Row: {
+          id: number;
+          name: string;
+          name_norm: string;
+          country_code: string;
+          admin1: string | null;
+          latitude: number;
+          longitude: number;
+          time_zone: string;
+          population: number;
+        };
+        Insert: {
+          id: number;
+          name: string;
+          name_norm: string;
+          country_code: string;
+          admin1?: string | null;
+          latitude: number;
+          longitude: number;
+          time_zone: string;
+          population?: number;
+        };
+        Update: Partial<Database['public']['Tables']['places']['Insert']>;
+        Relationships: [];
+      };
+      place_aliases: {
+        Row: { place_id: number; alias_norm: string };
+        Insert: { place_id: number; alias_norm: string };
+        Update: { place_id?: number; alias_norm?: string };
+        Relationships: [
+          {
+            foreignKeyName: 'place_aliases_place_id_fkey';
+            columns: ['place_id'];
+            isOneToOne: false;
+            referencedRelation: 'places';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: { [_ in never]: never };
     Functions: {
+      search_places: {
+        Args: { p_query: string; p_limit?: number };
+        Returns: {
+          id: number;
+          name: string;
+          country_code: string;
+          admin1: string | null;
+          latitude: number;
+          longitude: number;
+          time_zone: string;
+          population: number;
+        }[];
+      };
+      normalize_place_query: {
+        Args: { p: string };
+        Returns: string;
+      };
       consume_ai_quota: {
         Args: { p_kind: Database['public']['Enums']['reading_kind'] };
         Returns: { allowed: boolean; used: number; daily_limit: number; event_id: number | null }[];

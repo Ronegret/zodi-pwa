@@ -61,7 +61,8 @@ async function placeFromForm(): Promise<Record<string, unknown> | null> {
   if (hidden.success && (!query || query === hidden.data.birth_place)) return raw;
   if (query.length < 2) return {};
   try {
-    choices = await geocode(query);
+    // supabase no es null: lo garantiza el return del principio.
+    choices = await geocode(supabase!, query);
   } catch {
     errors = { city_query: 'El buscador de ciudades no responde. Inténtalo en un momento.' };
     return null;

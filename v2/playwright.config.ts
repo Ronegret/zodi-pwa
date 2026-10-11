@@ -21,7 +21,6 @@ export default defineConfig({
       env: {
         PUBLIC_SUPABASE_URL: MOCK_SUPABASE_URL,
         PUBLIC_SUPABASE_ANON_KEY: 'e2e-anon-key',
-        GEOCODING_API_URL: MOCK_SUPABASE_URL,
       },
     },
   ],

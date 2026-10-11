@@ -182,6 +182,10 @@ export function CityCombobox({ initial = null, initialQuery = '', error }: Props
       <p id={ids.status} className="field-hint" role="status">
         {statusText}
       </p>
+      <p className="field-hint">
+        ¿Tu pueblo no aparece? Elige el más cercano: a pocos kilómetros la carta no cambia. Lugares:{' '}
+        <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0).
+      </p>
       <input type="hidden" name="birth_place" value={selected?.label ?? ''} />
       <input type="hidden" name="birth_lat" value={selected?.latitude ?? ''} />
       <input type="hidden" name="birth_lon" value={selected?.longitude ?? ''} />

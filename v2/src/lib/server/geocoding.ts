@@ -1,7 +1,12 @@
-import { GEOCODING_API_URL } from 'astro:env/server';
-import { DEFAULT_GEOCODING_URL, searchPlaces, type Place } from '@/lib/geo/places';
+import { normalizePlaceName, rowsToPlaces, type Place } from '@/lib/geo/places';
+import type { ZodiSupabaseClient } from '@/lib/supabase/server';
 
-/** Búsqueda de ciudades con la URL configurada (Open-Meteo o el mock de e2e). */
-export function geocode(query: string): Promise<Place[]> {
-  return searchPlaces(query, { baseUrl: GEOCODING_API_URL ?? DEFAULT_GEOCODING_URL });
+/** Busca ciudades en nuestra tabla `places` (lectura pública, sin service role). */
+export async function geocode(supabase: ZodiSupabaseClient, query: string): Promise<Place[]> {
+  const { data, error } = await supabase.rpc('search_places', {
+    p_query: normalizePlaceName(query),
+    p_limit: 8,
+  });
+  if (error) throw new Error(`search_places: ${error.message}`);
+  return rowsToPlaces(data);
 }

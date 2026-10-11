@@ -2,6 +2,13 @@ import { z } from 'zod';
 import { numberInRange } from '@/lib/validation/common';
 import { isValidTimeZone } from '@/lib/validation/profile';
 
+/**
+ * Lugares de nacimiento. Fuente propia: tabla `places` de Supabase con
+ * GeoNames cities500 (CC BY 4.0), cargada con scripts/places/import.mjs.
+ * Sin proveedor externo: sin límites, sin coste y sin caídas ajenas.
+ */
+export const PLACES_ATTRIBUTION = 'Lugares: GeoNames (CC BY 4.0)';
+
 /** Lugar de nacimiento normalizado (lo que guarda el perfil). */
 export interface Place {
   id: string;
@@ -13,63 +20,53 @@ export interface Place {
   timeZone: string;
 }
 
-// Respuesta de Open-Meteo Geocoding (solo los campos que usamos).
-const upstreamSchema = z.object({
-  results: z
-    .array(
-      z.object({
-        id: z.number(),
-        name: z.string(),
-        latitude: z.number().min(-90).max(90),
-        longitude: z.number().min(-180).max(180),
-        timezone: z.string().optional(),
-        country: z.string().optional(),
-        admin1: z.string().optional(),
-      }),
-    )
-    .optional(),
+/** Minúsculas y sin tildes: igual que name_norm en la base de datos. */
+export function normalizePlaceName(text: string): string {
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+const countryNames = new Intl.DisplayNames(['es'], { type: 'region' });
+export function countryName(code: string): string {
+  try {
+    return countryNames.of(code.toUpperCase()) ?? code;
+  } catch {
+    return code;
+  }
+}
+
+// Fila que devuelve la función search_places.
+const rowSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  country_code: z.string().length(2),
+  admin1: z.string().nullable(),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  time_zone: z.string(),
+  population: z.number(),
 });
 
 const round = (n: number) => Math.round(n * 10_000) / 10_000;
 
-export function toPlaces(json: unknown): Place[] {
-  const parsed = upstreamSchema.safeParse(json);
-  if (!parsed.success) throw new Error('geocoding: respuesta inesperada');
-  return (parsed.data.results ?? [])
-    .filter((r) => r.timezone && isValidTimeZone(r.timezone))
-    .map((r) => {
-      const label = [r.name, r.admin1 !== r.name ? r.admin1 : undefined, r.country]
+export function rowsToPlaces(rows: unknown): Place[] {
+  const parsed = z.array(rowSchema).safeParse(rows);
+  if (!parsed.success) throw new Error('places: respuesta inesperada');
+  return parsed.data
+    .filter((r) => isValidTimeZone(r.time_zone))
+    .map((r) => ({
+      id: String(r.id),
+      name: r.name,
+      label: [
+        r.name,
+        r.admin1 && r.admin1 !== r.name ? r.admin1 : undefined,
+        countryName(r.country_code),
+      ]
         .filter(Boolean)
-        .join(', ');
-      return {
-        id: String(r.id),
-        name: r.name,
-        label,
-        latitude: round(r.latitude),
-        longitude: round(r.longitude),
-        timeZone: r.timezone!,
-      };
-    });
-}
-
-export const DEFAULT_GEOCODING_URL = 'https://geocoding-api.open-meteo.com';
-
-/** Busca ciudades. Timeout de 4 s: la UI ofrece reintentar. */
-export async function searchPlaces(
-  query: string,
-  {
-    baseUrl = DEFAULT_GEOCODING_URL,
-    fetchImpl = fetch,
-  }: { baseUrl?: string; fetchImpl?: typeof fetch } = {},
-): Promise<Place[]> {
-  const url = new URL('/v1/search', baseUrl);
-  url.searchParams.set('name', query);
-  url.searchParams.set('count', '8');
-  url.searchParams.set('language', 'es');
-  url.searchParams.set('format', 'json');
-  const res = await fetchImpl(url, { signal: AbortSignal.timeout(4000) });
-  if (!res.ok) throw new Error(`geocoding: HTTP ${res.status}`);
-  return toPlaces(await res.json());
+        .join(', '),
+      latitude: round(r.latitude),
+      longitude: round(r.longitude),
+      timeZone: r.time_zone,
+    }));
 }
 
 /** Lugar elegido en el formulario (combobox o lista sin JS). */

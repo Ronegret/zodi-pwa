@@ -6,7 +6,7 @@ import { geocode } from '@/lib/server/geocoding';
 
 /** GET /api/geocodificar?q=Madrid → lugares con lat/lon y zona IANA. */
 export const GET: APIRoute = async ({ locals, url }) => {
-  if (!locals.user) return unauthorized();
+  if (!locals.user || !locals.supabase) return unauthorized();
   const parsed = geocodeQuerySchema.safeParse(url.searchParams.get('q') ?? '');
   if (!parsed.success) {
     return fail(422, 'validation_failed', 'Revisa la búsqueda.', {
@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
     });
   }
   try {
-    return ok(await geocode(parsed.data));
+    return ok(await geocode(locals.supabase, parsed.data));
   } catch (error) {
     console.error('[api] geocodificar', error);
     return fail(

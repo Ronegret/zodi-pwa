@@ -37,13 +37,6 @@ export default defineConfig({
         optional: true,
       }),
       ANTHROPIC_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
-      // Open-Meteo Geocoding por defecto; los e2e lo apuntan al mock.
-      GEOCODING_API_URL: envField.string({
-        context: 'server',
-        access: 'public',
-        optional: true,
-        url: true,
-      }),
     },
   },
 });
