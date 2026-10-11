@@ -13,6 +13,17 @@ export default defineConfig({
   devToolbar: { enabled: false },
   // Sin resaltado de código: Shiki usa estilos en línea, incompatibles con la CSP.
   markdown: { syntaxHighlight: false },
+  vite: {
+    // three se importa de forma dinámica: sin esto, en dev Vite lo descubre al
+    // montar la primera escena y recarga la página (rompe e2e y CLS).
+    optimizeDeps: {
+      include: [
+        'three',
+        'three/addons/effects/OutlineEffect.js',
+        'three/addons/geometries/RoundedBoxGeometry.js',
+      ],
+    },
+  },
   security: {
     // Rechaza envíos de formularios desde otros orígenes (CSRF).
     checkOrigin: true,

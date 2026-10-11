@@ -769,3 +769,126 @@ fieldset.group > legend {
   outline: 3px solid var(--acid);
   outline-offset: 2px;
 }
+
+/* ---------- Escenas 3D ---------- */
+.scene-block {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+/* Proporción fija: la alternativa y el canvas ocupan lo mismo (CLS 0). */
+.scene-frame {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 40%, rgb(155 77 255 / 18%), transparent 65%), var(--surface);
+  border: 1px solid var(--line);
+}
+.scene-square {
+  aspect-ratio: 1 / 1;
+}
+.scene-portrait {
+  aspect-ratio: 3 / 4;
+}
+.scene-wide {
+  aspect-ratio: 4 / 3;
+}
+.scene-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* El canvas no atrapa el scroll vertical en móvil. */
+  touch-action: pan-y;
+  cursor: pointer;
+}
+.scene-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.scene-fallback[hidden] {
+  display: none;
+}
+/* Astro envuelve los hijos de una isla en <astro-slot>. */
+.scene-fallback > astro-slot {
+  display: contents;
+}
+.scene-fallback > :is(img, svg),
+.scene-fallback > astro-slot > :is(img, svg) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.scene-pause {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  backdrop-filter: blur(6px);
+}
+.scene-pause[aria-pressed='true'] {
+  --btn-border: var(--acid);
+}
+.scene-actions {
+  position: absolute;
+  bottom: var(--space-3);
+  left: 50%;
+  translate: -50% 0;
+}
+.scene-controls {
+  justify-content: center;
+}
+/* Controles que necesitan JS: vienen del servidor (sin saltos al hidratar) y sin JS no se ven. */
+@media (scripting: none) {
+  .scene-block .js-only {
+    display: none;
+  }
+}
+.scene-status {
+  min-height: 1.5em;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.chip-button[aria-pressed='true'] {
+  border-color: var(--acid);
+  background: rgb(184 255 23 / 12%);
+  color: var(--acid-soft);
+  box-shadow: var(--glow-acid);
+}
+.tarot-flat {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-4);
+  width: 62%;
+  aspect-ratio: 5 / 8;
+  border-radius: var(--radius-lg);
+  border: 3px solid var(--violet);
+  background: var(--surface-2);
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-align: center;
+  padding: var(--space-4);
+}
+.tarot-flat[data-revealed] {
+  border-color: var(--acid);
+}
+.tarot-flat-numeral {
+  font-size: var(--step-4);
+  color: var(--acid);
+}
+.tarot-flat-name {
+  font-size: var(--step-1);
+}
+.tarot-details summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--acid);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}

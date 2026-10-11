@@ -34,6 +34,9 @@ export const ICONS = {
   bell: ['M6 16V11a6 6 0 0 1 12 0v5l2 2H4z', 'M10 21h4'],
   eye: ['M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z', circle(12, 12, 3)],
   info: [circle(12, 12, 9), 'M12 11v6M12 7.5v.5'],
+  pause: ['M8 5v14M16 5v14'],
+  play: ['M7 5l12 7-12 7z'],
+  rotate: ['M20 12a8 8 0 1 1-2.3-5.7', 'M20 4v4h-4'],
 } as const;
 
 export type IconName = keyof typeof ICONS;
