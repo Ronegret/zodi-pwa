@@ -8,7 +8,7 @@ Actúa como Arquitecto de Software y experto integral en UX/UI, Motion Design, i
 
 ## 1. Proyecto
 Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibueno.es/ (Vercel). Repo: `Ronegret/zodi-pwa`, local en `C:\Users\rodri\Desktop\Zodi_Ultimate`.
-- **Producción actual (raíz del repo):** Next.js 16 + React 19 + Firebase (Auth/Firestore/Storage) + Stripe + IA en paralelo (Claude/OpenAI/Gemini). PWA con Serwist y Capacitor (Android). NO tocar hasta el corte final. Build siempre con `npm run build` (usa `--webpack`).
+- **App anterior (raíz del repo, rama `main`):** Next.js 16 + Firebase + Stripe + IA multiproveedor. **Desde el 11/10/2026 ya no sirve `zodi.aibueno.es`**: el dominio se movió al proyecto Vercel `zodi-v2`. El código sigue en `main` y en el proyecto `zodi-pwa` (sin dominio) por si hay que volver atrás. Build con `npm run build` (usa `--webpack`).
 - **Nueva versión (carpeta `v2/`, rama `astro-v2`):** reescritura completa. Se desarrolla en paralelo, sin afectar producción.
 
 ## 2. Objetivo de v2
@@ -84,8 +84,9 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 
 **Despliegue:**
 - `astro-v2` está en GitHub.
-- Vercel, proyecto `zodi-pwa`: producción Next desde `main`, intacta.
-- Vercel, proyecto nuevo **`zodi-v2`**: Root Directory `v2`, Astro, rama de producción `astro-v2`, dominio `zodi-v2.vercel.app`. Faltan sus variables de entorno (las pega Rodrigo).
+- Vercel, proyecto **`zodi-v2`**: Root Directory `v2`, Astro, rama de producción `astro-v2`. Tiene las tres variables de Supabase. **Sirve `zodi.aibueno.es`** (y `zodi-v2.vercel.app`): cada push a `astro-v2` es producción.
+- Vercel, proyecto `zodi-pwa`: app Next desde `main`, ya sin el dominio. Para volver atrás, devolverle `zodi.aibueno.es` (Settings → Domains → Add Existing → Move).
+- Cambio de dominio adelantado por decisión de Rodrigo. Faltan las funciones de la Fase 7 y los usuarios de Firebase no se migran. Detalle y pendientes (Resend, Google, confirmación por correo desactivada) en `FASE-5-informe.md`, sección "Cambio de dominio a la v2".
 
 ## 5. Hallazgos de la app actual (a resolver en v2)
 - `lib/astral.ts`: Luna y Ascendente salen de `signs[(seed + birthCity.length) % 12]` (falso). Solo el signo solar es correcto. El horóscopo chino usa el año natural, no el Año Nuevo Lunar.
