@@ -4,6 +4,9 @@ import { createTestUser, login } from './support/auth';
 test('dashboard: salto al contenido y toda la navegación con Tab', async ({ page, request }) => {
   await login(page, await createTestUser(request, true));
   await expect(page).toHaveURL(/\/app$/);
+  // El HTML llega por partes (streaming): con el servidor de dev en frío las
+  // islas tardan en compilarse y el final de la página aún no está.
+  await page.waitForLoadState('load');
 
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Saltar al contenido' })).toBeFocused();
