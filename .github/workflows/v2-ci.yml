@@ -1,0 +1,64 @@
+# Zodi v2: comprobaciones automáticas en cada subida (lint, tipos, unitarias
+# con RLS en PGlite, compilación y e2e en móvil, tablet y escritorio).
+# Los e2e usan el Supabase y la IA simulados: nunca tocan datos reales.
+name: v2 · calidad
+
+on:
+  push:
+    branches: [fase-7, astro-v2]
+    paths: ['v2/**', '.github/workflows/v2-ci.yml']
+  pull_request:
+    paths: ['v2/**', '.github/workflows/v2-ci.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: v2-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: v2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: v2/package-lock.json
+
+      - name: Dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tipos (astro check)
+        run: npm run check
+
+      - name: Unitarias y RLS
+        run: npm test
+
+      - name: Compilación de producción
+        run: npm run build
+
+      - name: Navegador para los e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: E2e (móvil, tablet y escritorio, con axe)
+        run: npm run test:e2e
+
+      - name: Capturas y trazas si algo falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-resultados
+          path: v2/test-results
+          retention-days: 7
