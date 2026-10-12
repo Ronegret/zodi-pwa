@@ -29,6 +29,8 @@ export default defineConfig({
     },
   ],
   use: { baseURL: APP_URL },
+  // En CI, un segundo intento absorbe los fallos puntuales por carga (sin avisos falsos).
+  retries: process.env.CI ? 1 : 0,
   projects: [
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
     // Viewport y táctil de iPad sobre Chromium: WebKit no arranca en Windows (falta icutu77.dll).

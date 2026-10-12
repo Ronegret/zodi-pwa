@@ -4,17 +4,16 @@
 name: v2 · calidad
 
 on:
-  # Se sube primero a fase-7 y el mismo commit pasa a astro-v2 (producción):
-  # basta con probarlo una vez.
+  # Una sola ejecución por cambio: la de la rama que va a producción
+  # (astro-v2). Sin pull_request: los PR repetían la misma prueba dos veces.
   push:
-    branches: [fase-7]
-    paths: ['v2/**', '.github/workflows/v2-ci.yml']
-  pull_request:
+    branches: [astro-v2]
     paths: ['v2/**', '.github/workflows/v2-ci.yml']
   workflow_dispatch:
 
+# Si llega otra subida, la anterior se cancela: solo cuenta la última.
 concurrency:
-  group: v2-ci-${{ github.ref }}
+  group: v2-ci
   cancel-in-progress: true
 
 permissions:

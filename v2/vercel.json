@@ -7,8 +7,5 @@
     "deploymentEnabled": {
       "fase-7": false
     }
-  },
-  "github": {
-    "silent": true
   }
 }
