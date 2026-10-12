@@ -41,6 +41,14 @@ Rama `fase-7` · 12/10/2026 · Plan y comparación con la Zodi de antes en `FASE
 - **Móvil**: barra inferior Inicio · Lecturas · Tu gente · Carta · **Más** (hoja que sube desde abajo con el resto y "Cerrar sesión", `popover` nativo sin JS). Títulos sin partir palabras, índice deslizable, columna que no se ensancha a 320 px. Revisión con capturas en Pixel 7.
 - **Vercel y avisos**: `ANTHROPIC_API_KEY` estaba en el proyecto antiguo (`zodi-pwa`), no en `zodi-v2`; añadida (Production y Preview, sensible) y la IA responde en producción (`/api/salud` → `"ia": true`). Apagados los comentarios del bot en commits y PR de los dos proyectos. `zodi-v2` ya no despliega `fase-7` y `zodi-pwa` ignora las ramas v2. El CI corre una vez por cambio (solo al subir a `astro-v2`, cancela la anterior y reintenta una vez los e2e). PR #3 cerrado por duplicado del #2.
 
+### Efecto guau (12/10/2026, medianoche)
+- **El día que naciste** (`src/lib/chart/birth-day.ts`, `BirthSky.astro`, `BirthDayPanel.astro`): mapa del cielo sobre el lugar de nacimiento en ese minuto (cénit en el centro, planetas por altura y acimut, etiquetas que no se pisan), Luna de ese día con su significado, día o noche con amanecer y atardecer, estación según el hemisferio (Chile en abril = otoño), generación, vida en números y próximas citas: retorno solar exacto, de Júpiter y de Saturno. Comprobado con fechas reales (15/04/1990 fue domingo; primer retorno de Saturno en 2019-2020). Adelanto en el panel.
+- **Tu ficha cósmica**: lo esencial en una línea, enlazado a cada sección.
+- **Registro de nombres y apellidos**: `scripts/names/` genera con IA origen, significado y curiosidad comprobable (reanudable). Hay 739 nombres y 119 apellidos generados, más el diccionario propio y las reglas. Lo que falte lo investiga la IA al momento (`/api/nombre`, migración `name_meanings` con caché compartida y tope de 30 al día por persona) y queda para todos.
+- **Portada**: "Mira lo que ZODI sabe de ti" admite el nombre y cuenta qué significa y el día de la semana y la Luna del nacimiento.
+- **Hoja "Más"**: va antes que su botón en el HTML (en streaming, el botón podía no abrir nada; se veía en e2e bajo carga).
+- **Incidencia**: la cuenta de Anthropic se quedó **sin saldo** durante la generación del registro. Sin saldo, el oráculo y las lecturas fallan en producción. Al recargar: `node scripts/names/generate.mjs --lote 25 --paralelo 2` completa el registro (unos 700 apellidos y 150 nombres pendientes).
+
 ## Verificado (12/10/2026)
 - Noche: `astro check` 0 errores, lint limpio, 241 unitarias (incluye 56 de RLS), e2e completos en móvil, tablet y escritorio con axe (incluye Tu gente, el significado, la hoja Más y la compatibilidad pública).
 - `npm run check`: 0 errores. `npm run lint`: limpio.
