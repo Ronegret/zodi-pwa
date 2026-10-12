@@ -100,6 +100,11 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 - Falta `ANTHROPIC_API_KEY` en Vercel (Production y Preview) y en `v2/.env.local`: la pega Rodrigo.
 - Se fusiona en `astro-v2` (producción) cuando Rodrigo lo apruebe.
 
+**Fase 8, en la misma rama `fase-7`** (volver a tener todo lo de la Zodi de antes; plan en `FASE-8-plan.md`, estado en `FASE-8-informe.md`):
+- 8A hecha: Tarot ZODI vivo (22 arcanos + 9 Arcanos ZODI con arte, cartas que se reparten y voltean en 3D, tiradas de 1, 3 y cruz celta), runas, cristales, nombre, mano y horóscopo maya (18 lecturas en total); "¿Qué es esto?", temas y glosario en cada lectura (`src/lib/ai/guides.ts`); el asistente es ahora el **oráculo** (`/app/oraculo`, botón flotante).
+- 8B hecha: horóscopo público por signo sin IA (`/horoscopo`, `/horoscopo/[signo]`, casas solares en `src/lib/public/sign-day.ts`, caché de CDN hasta medianoche de Madrid); portada completa con vídeos (`public/video`), canción (`public/audio`), "Mira lo que ZODI sabe de ti", carrusel de Arcanos ZODI y FAQ; bienvenida con ZODI bailando; carta "La Identificación" en login y registro.
+- 8C y 8D pendientes: puntos, rachas, logros, favoritos, predicciones, ritual del día, amigos; Stripe y gemas, compartir como imagen, PDF, emails y push.
+
 ## 5. Hallazgos de la app actual (a resolver en v2)
 - `lib/astral.ts`: Luna y Ascendente salen de `signs[(seed + birthCity.length) % 12]` (falso). Solo el signo solar es correcto. El horóscopo chino usa el año natural, no el Año Nuevo Lunar.
 - `middleware.ts` solo comprueba que exista la cookie `zodi_auth` sin validarla; la API acepta el token literal `"local_session"` y se salta la verificación.
@@ -149,6 +154,8 @@ node scripts/places/import.mjs            # (re)carga GeoNames en places/place_a
 - `astro-v2` es **producción** (`zodi.aibueno.es`). Las funcionalidades nuevas van en una rama (ahora `fase-7`), que da un preview en Vercel; se fusionan cuando Rodrigo las aprueba. Commits pequeños por tarea.
 - Fija versiones compatibles: TypeScript `~5.9` y ESLint `^9` (TS 7 y ESLint 10 rompen `typescript-eslint` y `jsx-a11y`). No registres `jsx-a11y` dos veces en ESLint (ya lo trae `astro.configs['jsx-a11y-strict']`).
 - Windows: en Git Bash los heredocs largos con comillas fallan; crea archivos con la herramienta de escritura de ficheros, no con `cat <<EOF`.
+- Windows (desde el 12/10/2026): el **Control inteligente de aplicaciones** bloquea el compilador nativo de Astro (`@astrojs/compiler-binding-win32-x64-msvc` 0.5.1, "Una directiva de Control de aplicaciones bloqueó este archivo"). En local se usa el compilador WebAssembly oficial: está descomprimido a mano en `node_modules/@astrojs/compiler-binding-wasm32-wasi` (no está en `package.json`; un `npm ci` lo borra: volver a sacarlo con `npm pack @astrojs/compiler-binding-wasm32-wasi@0.5.1`) y todos los comandos de Astro van con `NAPI_RS_FORCE_WASI=1` (`check`, `build`, `dev`, `test:e2e`). Vercel (Linux) no se ve afectado.
+- Recursos: `node scripts/brand-assets.mjs [prefijos]` (imágenes) y `node scripts/media-assets.mjs` (vídeos, pósters y canción; necesita ffmpeg).
 - Antes de afirmar que algo funciona, ejecútalo (check, lint, tests, build, axe). Reporta fallos con su salida.
 - Nunca pegues claves en el chat ni las versiones; van en `v2/.env.local` (ignorado por git).
 - Idioma de UI y copy: español.
@@ -175,6 +182,6 @@ node scripts/places/import.mjs            # (re)carga GeoNames en places/place_a
 - Acciones destructivas o que publican (borrar archivos del repo raíz, reescribir historial, push, deploy) requieren mi confirmación.
 
 ## 10. Primer paso que quiero ahora
-1. Con `ANTHROPIC_API_KEY` en Vercel, prueba en el preview de `fase-7`: registro → onboarding → lecturas → chat → comunidad. Ajusta lo que Rodrigo pida.
-2. Fusiona `fase-7` en `astro-v2` cuando lo apruebe.
-3. Sigue con la Fase 7: Stripe y gemas, push y emails, horóscopos SEO por signo y moderación.
+1. Con permiso de Rodrigo: push de `fase-7` (preview) y, cuando lo apruebe, fusión en `astro-v2` (producción).
+2. Con `ANTHROPIC_API_KEY` en Vercel, prueba en el preview: registro → onboarding → lecturas (tarot, celta, runas, mano…) → oráculo → comunidad.
+3. Fase 8C: migración de actividad (racha, puntos, nivel, logros, favoritos) con su test en `tests/db/rls.test.ts`, panel de progreso y ritual del día. Después 8D (Stripe y gemas, compartir, PDF, emails).
