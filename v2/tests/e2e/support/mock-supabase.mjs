@@ -64,6 +64,7 @@ function blankProfile(id, now) {
     xp: 0,
     level: 1,
     streak: 0,
+    best_streak: 0,
     last_active_on: null,
     referral_code: id.slice(0, 10),
     referred_by: null,
@@ -94,6 +95,11 @@ function createUser({ onboarded }) {
           xp: 340,
           level: 3,
           streak: 5,
+          best_streak: 5,
+          // Ya entró hoy: visitar el panel no cambia la racha (los tests esperan 5).
+          last_active_on: new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(
+            new Date(),
+          ),
           gems: 12,
           onboarding_completed_at: now,
         }
@@ -252,6 +258,7 @@ function applyFilters(rows, params) {
     if (op === 'eq') out = out.filter((r) => String(r[key]) === expected);
     if (op === 'neq') out = out.filter((r) => String(r[key]) !== expected);
     if (op === 'gte') out = out.filter((r) => String(r[key]) >= expected);
+    if (op === 'lt') out = out.filter((r) => String(r[key]) < expected);
   }
   const order = params.get('order');
   if (order) {
@@ -351,6 +358,28 @@ async function handleRest(req, res, url) {
       { allowed: true, used: used + 1, daily_limit: DAILY_LIMIT, event_id: id },
     ]);
   }
+  if (resource === 'rpc' && fn === 'record_activity') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    return send(res, 200, [recordActivity(u.id, (await readBody(req)).p_action)]);
+  }
+  if (resource === 'rpc' && fn === 'toggle_favorite') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const { p_reading } = await readBody(req);
+    const row = readings.find((r) => r.id === p_reading && r.user_id === u.id);
+    if (!row) return send(res, 400, { code: 'P0002', message: 'reading_not_found' });
+    row.favorite = !row.favorite;
+    return send(res, 200, row.favorite);
+  }
+  if (resource === 'user_achievements' && req.method === 'GET') {
+    const own = u
+      ? [...(achievements.get(u.id) ?? new Map())].map(([achievement, unlocked_at]) => ({
+          user_id: u.id,
+          achievement,
+          unlocked_at,
+        }))
+      : [];
+    return respondRows(req, res, applyFilters(own, url.searchParams));
+  }
   if (resource === 'usage_events' && req.method === 'DELETE' && isServiceRole(req)) {
     const id = Number((url.searchParams.get('id') ?? '').replace('eq.', ''));
     const owner = quotaEvents.get(id);
@@ -367,6 +396,7 @@ async function handleRest(req, res, url) {
       const row = {
         id: randomUUID(),
         created_at: new Date().toISOString(),
+        favorite: false,
         ...(await readBody(req)),
       };
       readings.push(row);
@@ -418,6 +448,70 @@ async function handleRest(req, res, url) {
   const community = await handleCommunity(req, res, url, u, resource, fn);
   if (community !== undefined) return community;
   return send(res, 404, { message: `mock: ${req.method} ${url.pathname} no implementado` });
+}
+
+// ---------- Actividad (misma lógica que record_activity) ----------
+/** user id → (logro → fecha) */
+const achievements = new Map();
+const XP_BY_ACTION = { visit: 0, reading: 10, post: 8, comment: 3, favorite: 2 };
+const levelForXp = (xp) => Math.max(1, Math.floor((1 + Math.sqrt(1 + Math.max(xp, 0) / 12.5)) / 2));
+
+function recordActivity(userId, action) {
+  const p = profiles.get(userId);
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: p.time_zone ?? 'UTC' }).format(
+    new Date(),
+  );
+  const yesterday = new Date(Date.parse(`${today}T12:00:00Z`) - 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const newDay = !p.last_active_on || p.last_active_on < today;
+  if (newDay) {
+    p.streak = p.last_active_on === yesterday ? p.streak + 1 : 1;
+    p.best_streak = Math.max(p.best_streak ?? 0, p.streak);
+    p.xp += 5;
+    if (p.streak % 7 === 0) p.gems += 10;
+  }
+  p.xp += XP_BY_ACTION[action] ?? 0;
+  p.level = levelForXp(p.xp);
+  p.last_active_on = today;
+
+  const own = readings.filter((r) => r.user_id === userId);
+  const count = (kinds) => own.filter((r) => kinds.includes(r.kind)).length;
+  const total = own.filter((r) => r.kind !== 'assistant');
+  const candidates = [
+    total.length >= 1 && 'primera-senal',
+    total.length >= 10 && 'coleccionista',
+    new Set(total.map((r) => r.kind)).size >= 8 && 'explorador',
+    count(['tarot', 'celtic-tarot']) && 'primer-tarot',
+    count(['celtic-tarot']) && 'cruz-celta',
+    count(['runes']) && 'las-runas-hablan',
+    count(['natal-chart']) && 'mapa-descubierto',
+    count(['compatibility']) && 'quimica-detectada',
+    count(['dream']) && 'sonador',
+    count(['numerology', 'name-reading']) && 'los-numeros-no-mienten',
+    count(['roast']) && 'aguanto-el-roast',
+    count(['assistant']) && 'consulta-al-oraculo',
+    own.some((r) => r.favorite) && 'favorita',
+    p.streak >= 3 && 'racha-3',
+    p.streak >= 7 && 'racha-7',
+    p.streak >= 30 && 'racha-30',
+    p.level >= 5 && 'nivel-5',
+    p.level >= 10 && 'nivel-10',
+    posts.some((post) => post.author_id === userId) && 'voz-de-la-comunidad',
+  ].filter(Boolean);
+  const mine = achievements.get(userId) ?? new Map();
+  achievements.set(userId, mine);
+  const unlocked = candidates.filter((a) => !mine.has(a));
+  for (const a of unlocked) mine.set(a, new Date().toISOString());
+  p.gems += unlocked.length * 5;
+  return {
+    xp: p.xp,
+    level: p.level,
+    streak: p.streak,
+    best_streak: p.best_streak,
+    gems: p.gems,
+    unlocked,
+  };
 }
 
 // ---------- Comunidad (misma lógica que la RLS y las funciones reales) ----------
@@ -584,9 +678,7 @@ async function handleAi(req, res) {
   const name = /Nombre: ([^ (\n]+)/.exec(prompt)?.[1] ?? 'tú';
   // "1. Pasado: III · La Emperatriz (invertida) — Arcano ZODI: …"
   // Los Arcanos ZODI llevan "·" en el numeral (Z·II): se corta en " · ".
-  const cards = [...prompt.matchAll(/^\d+\. [^:\n]+: .+? · ([^\n(—]+)/gm)].map((m) =>
-    m[1].trim(),
-  );
+  const cards = [...prompt.matchAll(/^\d+\. [^:\n]+: .+? · ([^\n(—]+)/gm)].map((m) => m[1].trim());
   const isChat = body.system.some((b) => b.text.includes('MODO CHAT'));
   const text = isChat
     ? `Oye **${name}**, respira. Cuéntame qué te pesa y lo miramos con tu carta.`

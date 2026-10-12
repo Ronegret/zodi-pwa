@@ -54,6 +54,7 @@ export type Database = {
           xp: number;
           level: number;
           streak: number;
+          best_streak: number;
           last_active_on: string | null;
           referral_code: string;
           referred_by: string | null;
@@ -85,6 +86,7 @@ export type Database = {
           xp?: number;
           level?: number;
           streak?: number;
+          best_streak?: number;
           last_active_on?: string | null;
           referral_code?: string;
           referred_by?: string | null;
@@ -145,6 +147,7 @@ export type Database = {
           model: string;
           input_tokens: number | null;
           output_tokens: number | null;
+          favorite: boolean;
           created_at: string;
         };
         Insert: {
@@ -156,6 +159,7 @@ export type Database = {
           model: string;
           input_tokens?: number | null;
           output_tokens?: number | null;
+          favorite?: boolean;
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['readings']['Insert']>;
@@ -268,6 +272,20 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      user_achievements: {
+        Row: {
+          user_id: string;
+          achievement: string;
+          unlocked_at: string;
+        };
+        Insert: {
+          user_id: string;
+          achievement: string;
+          unlocked_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['user_achievements']['Insert']>;
+        Relationships: [];
       };
       post_reactions: {
         Row: {
@@ -444,6 +462,25 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      record_activity: {
+        Args: { p_action: 'visit' | 'reading' | 'post' | 'comment' | 'favorite' };
+        Returns: {
+          xp: number;
+          level: number;
+          streak: number;
+          best_streak: number;
+          gems: number;
+          unlocked: string[];
+        }[];
+      };
+      toggle_favorite: {
+        Args: { p_reading: string };
+        Returns: boolean;
+      };
+      level_for_xp: {
+        Args: { p_xp: number };
+        Returns: number;
+      };
       search_places: {
         Args: { p_query: string; p_limit?: number };
         Returns: {

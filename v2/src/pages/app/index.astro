@@ -12,16 +12,25 @@ import { TarotOfDay } from '@/components/scenes/TarotOfDay';
 import { formatPosition } from '@/lib/astro-engine/labels';
 import { buildDashboard } from '@/lib/dashboard/build';
 import { describeTransit } from '@/lib/daily/today';
+import { ACHIEVEMENT_BY_ID } from '@/lib/progress/achievements';
+import { recordActivity } from '@/lib/server/activity';
 import { getLatestSelfChart } from '@/lib/server/charts';
 import { dailyCard } from '@/lib/tarot/daily';
 
 const { supabase, profile } = Astro.locals;
 if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
 
-const stored = await getLatestSelfChart(supabase);
+// Entrar al panel cuenta para la racha (una vez al día).
+const [stored, activity] = await Promise.all([
+  getLatestSelfChart(supabase),
+  recordActivity(supabase, 'visit'),
+]);
 const welcome = Astro.url.searchParams.get('bienvenida') === '1';
+const unlocked = (activity?.unlocked ?? []).map((id) => ACHIEVEMENT_BY_ID.get(id)?.title ?? id);
 const d = buildDashboard(
-  profile,
+  activity
+    ? { ...profile, xp: activity.xp, streak: activity.streak, gems: activity.gems }
+    : profile,
   stored ? { chart: stored.chart, timeKnown: stored.input.timeKnown } : null,
   new Date(),
 );
@@ -32,7 +41,13 @@ const card = dailyCard(profile.id, d.today);
   title={`Hola, ${d.firstName}`}
   current="inicio"
   intro={d.headline}
-  toast={welcome ? { message: 'Carta calculada. Bienvenida al lado oscuro del cielo.' } : undefined}
+  toast={
+    welcome
+      ? { message: 'Carta calculada. Bienvenida al lado oscuro del cielo.' }
+      : unlocked.length
+        ? { message: `Logro desbloqueado: ${unlocked.join(', ')}. +${unlocked.length * 5} gemas.` }
+        : undefined
+  }
 >
   <div class="bento" data-celebrate={welcome ? '' : undefined}>
     <Card
@@ -146,7 +161,14 @@ const card = dailyCard(profile.id, d.today);
       )}
     </Card>
 
-    <Card reveal tilt title="Racha y XP" kicker={d.progress.rank} class="span-racha">
+    <Card
+      reveal
+      tilt
+      title="Racha y XP"
+      kicker={d.progress.rank}
+      class="span-racha"
+      action={{ label: 'Tu progreso', href: '/app/progreso' }}
+    >
       <div class="streak">
         <span class="streak-icon">
           <Icon name="flame" size={28} />

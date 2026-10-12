@@ -16,6 +16,9 @@ import { nameNumbers } from '@/lib/divination/name';
 import { PALM_FIELDS, PALM_FIELD_IDS } from '@/lib/divination/palm';
 import type { ReadingVisuals } from '@/lib/server/readings';
 import { SPREADS } from '@/lib/tarot/deck';
+import { toast } from '@/components/ui/toast';
+import { ACHIEVEMENT_BY_ID } from '@/lib/progress/achievements';
+import { FavoriteButton } from './FavoriteButton';
 import { RichText } from './RichText';
 import { CrystalCard, MayaCard, NameNumbersCard, RuneCast } from './ReadingVisuals';
 import { TarotSpread } from './TarotSpread';
@@ -148,6 +151,9 @@ export function ReadingStudio({
           setRemaining(event.remaining);
           setPhase('done');
           setStatus('Lectura lista. Guardada en tu historial.');
+          for (const a of event.unlocked ?? []) {
+            toast(`Logro desbloqueado: ${ACHIEVEMENT_BY_ID.get(a)?.title ?? a}. +5 gemas.`);
+          }
         }
         if (event.type === 'error') {
           setError(event.message);
@@ -533,6 +539,7 @@ export function ReadingStudio({
               <Icon name={copied ? 'check' : 'copy'} />
               <span className="btn-label">{copied ? 'Copiada' : 'Copiar'}</span>
             </button>
+            <FavoriteButton id={readingId} />
             <a className="btn btn-ghost" href={`/app/lecturas/guardadas/${readingId}`}>
               <Icon name="history" />
               <span className="btn-label">Ver guardada</span>

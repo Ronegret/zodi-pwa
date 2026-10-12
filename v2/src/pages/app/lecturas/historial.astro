@@ -1,0 +1,160 @@
+---
+/** Todas las lecturas guardadas, con filtro de favoritas y "ver más" (sin JS). */
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { KIND_BY_KIND } from '@/lib/ai/kinds';
+import { excerpt, readingDate } from '@/lib/readings/format';
+import { listReadings } from '@/lib/server/readings';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const PAGE = 20;
+const favorites = Astro.url.searchParams.get('favoritas') === '1';
+const rawBefore = Astro.url.searchParams.get('antes');
+const before = rawBefore && !Number.isNaN(Date.parse(rawBefore)) ? rawBefore : undefined;
+// Una de más para saber si hay otra página.
+const rows = await listReadings(supabase, { limit: PAGE + 1, favorites, before });
+const items = rows.slice(0, PAGE);
+const next = rows.length > PAGE ? items.at(-1)!.created_at : null;
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const base = favorites ? '/app/lecturas/historial?favoritas=1' : '/app/lecturas/historial';
+const nextHref = next ? `${base}${favorites ? '&' : '?'}antes=${encodeURIComponent(next)}` : null;
+---
+
+<AppShell
+  title="Tu historial"
+  current="lecturas"
+  kicker="Archivo místico"
+  intro="Todo lo que te ha dicho ZODI. Lo que no entendiste el lunes suele cobrar sentido el jueves."
+>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/app/lecturas">Lecturas</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Historial</span>
+  </nav>
+
+  <nav class="filters" aria-label="Filtrar lecturas">
+    <a class="chip" href="/app/lecturas/historial" aria-current={favorites ? undefined : 'page'}>
+      Todas
+    </a>
+    <a
+      class="chip"
+      href="/app/lecturas/historial?favoritas=1"
+      aria-current={favorites ? 'page' : undefined}
+    >
+      <Icon name="star" size={16} /> Favoritas
+    </a>
+  </nav>
+
+  {items.length ? (
+    <ul class="list">
+      {items.map((r) => (
+        <li>
+          <a href={`/app/lecturas/guardadas/${r.id}`}>
+            <span class="head">
+              <strong>
+                {r.favorite && (
+                  <span class="fav" aria-label="Favorita">
+                    ★
+                  </span>
+                )}{' '}
+                {KIND_BY_KIND.get(r.kind)?.title ?? 'Lectura'}
+              </strong>
+              <span class="muted small">{readingDate(r.created_at, tz)}</span>
+            </span>
+            <span class="muted">{excerpt(r.content, 160)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <EmptyState
+      title={favorites ? 'Aún no tienes favoritas' : 'Aún no tienes lecturas'}
+      headingLevel={2}
+    >
+      <p>
+        {favorites
+          ? 'Cuando una lectura te dé de lleno, guárdala con la estrella y vivirá aquí.'
+          : 'El universo está esperando a que preguntes algo.'}
+      </p>
+      <Button href="/app/lecturas" icon="sparkles">
+        Hacer una lectura
+      </Button>
+    </EmptyState>
+  )}
+
+  {nextHref && (
+    <div class="more">
+      <Button href={nextHref} variant="secondary">
+        Ver más antiguas
+      </Button>
+    </div>
+  )}
+</AppShell>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+  }
+  .filters a {
+    text-decoration: none;
+  }
+  .filters a[aria-current='page'] {
+    border-color: var(--acid);
+    background: rgb(184 255 23 / 12%);
+    color: var(--acid-soft);
+  }
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+    max-width: 52rem;
+  }
+  .list a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .list a:hover {
+    border-color: var(--acid);
+  }
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .fav {
+    color: var(--acid);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+  .more {
+    margin-top: var(--space-5);
+  }
+</style>

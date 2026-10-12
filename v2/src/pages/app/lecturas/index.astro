@@ -142,6 +142,10 @@ const tz = profile.time_zone ?? 'Europe/Madrid';
           Aún no tienes lecturas. El universo está esperando a que preguntes algo.
         </p>
       )}
+      <p class="all">
+        <a href="/app/lecturas/historial">Ver todo el historial</a> ·{' '}
+        <a href="/app/lecturas/historial?favoritas=1">Tus favoritas</a>
+      </p>
     </section>
   </div>
 </AppShell>
@@ -321,6 +325,12 @@ const tz = profile.time_zone ?? 'Europe/Madrid';
   }
   .small {
     font-size: var(--step--1);
+  }
+  .all {
+    margin-top: var(--space-3);
+  }
+  .all a {
+    color: var(--acid);
   }
   @media (prefers-reduced-motion: reduce) {
     .kind:hover {

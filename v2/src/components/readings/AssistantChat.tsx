@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { Icon } from '@/components/ui/Icon';
+import { toast } from '@/components/ui/toast';
 import { errorMessage, readEvents } from '@/lib/ai/stream-client';
+import { ACHIEVEMENT_BY_ID } from '@/lib/progress/achievements';
 import { RichText } from './RichText';
 
 interface Turn {
@@ -88,7 +90,12 @@ export function AssistantChat({ firstName, remaining: initialRemaining }: Props)
           full += event.text;
           setStreaming(full);
         }
-        if (event.type === 'done') setRemaining(event.remaining);
+        if (event.type === 'done') {
+          setRemaining(event.remaining);
+          for (const a of event.unlocked ?? []) {
+            toast(`Logro desbloqueado: ${ACHIEVEMENT_BY_ID.get(a)?.title ?? a}. +5 gemas.`);
+          }
+        }
         if (event.type === 'error') failed = event.message;
       });
       if (failed) {

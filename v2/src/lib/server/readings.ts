@@ -38,7 +38,7 @@ export interface ReadingVisuals {
 export type StreamEvent =
   | ({ type: 'meta' } & ReadingVisuals)
   | { type: 'text'; text: string }
-  | { type: 'done'; id: string; remaining: number }
+  | { type: 'done'; id: string; remaining: number; unlocked?: string[] }
   | { type: 'error'; message: string };
 
 export interface PreparedReading {
@@ -177,6 +177,8 @@ export interface RunOptions {
   saveReading: (row: SavedReadingRow) => Promise<string>;
   /** El generador de IA (inyectado: así el módulo no depende de astro:env). */
   generateFn: typeof generate;
+  /** Tras guardar: suma racha y XP y devuelve los logros nuevos. */
+  afterSave?: () => Promise<string[]>;
   signal?: AbortSignal;
 }
 
@@ -221,7 +223,13 @@ export function readingStream(opts: RunOptions): ReadableStream<Uint8Array> {
           input_tokens: result.inputTokens,
           output_tokens: result.outputTokens,
         });
-        send({ type: 'done', id, remaining: opts.remaining });
+        const unlocked = (await opts.afterSave?.().catch(() => [])) ?? [];
+        send({
+          type: 'done',
+          id,
+          remaining: opts.remaining,
+          ...(unlocked.length ? { unlocked } : {}),
+        });
       } catch (error) {
         console.error('[lecturas] generación fallida', error);
         await opts.quota.release(opts.eventId).catch(() => {});
@@ -251,19 +259,34 @@ export interface ReadingSummary {
   kind: ReadingKind;
   input: Json;
   content: string;
+  favorite: boolean;
   created_at: string;
 }
 
+const SUMMARY = 'id, kind, input, content, favorite, created_at';
+
+export interface ListOptions {
+  limit?: number;
+  /** Solo las favoritas. */
+  favorites?: boolean;
+  /** Paginación: las anteriores a esta fecha (created_at). */
+  before?: string | undefined;
+}
+
+/** Historial (sin las conversaciones con el oráculo), de la más nueva a la más vieja. */
 export async function listReadings(
   supabase: ZodiSupabaseClient,
-  limit = 20,
+  options: number | ListOptions = {},
 ): Promise<ReadingSummary[]> {
-  const { data, error } = await supabase
-    .from('readings')
-    .select('id, kind, input, content, created_at')
-    .neq('kind', 'assistant')
-    .order('created_at', { ascending: false })
-    .limit(limit);
+  const {
+    limit = 20,
+    favorites = false,
+    before,
+  } = typeof options === 'number' ? { limit: options } : options;
+  let query = supabase.from('readings').select(SUMMARY).neq('kind', 'assistant');
+  if (favorites) query = query.eq('favorite', true);
+  if (before) query = query.lt('created_at', before);
+  const { data, error } = await query.order('created_at', { ascending: false }).limit(limit);
   if (error) throw new Error(`readings.list: ${error.message}`);
   return data;
 }
@@ -274,7 +297,7 @@ export async function getReading(
 ): Promise<ReadingSummary | null> {
   const { data, error } = await supabase
     .from('readings')
-    .select('id, kind, input, content, created_at')
+    .select(SUMMARY)
     .eq('id', id)
     .maybeSingle();
   if (error) throw new Error(`readings.get: ${error.message}`);
@@ -289,7 +312,7 @@ export async function latestReadingSince(
 ): Promise<ReadingSummary | null> {
   const { data, error } = await supabase
     .from('readings')
-    .select('id, kind, input, content, created_at')
+    .select(SUMMARY)
     .eq('kind', kind)
     .gte('created_at', since)
     .order('created_at', { ascending: false })

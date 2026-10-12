@@ -9,6 +9,7 @@ import type { ReadingKind } from '@/lib/ai/kinds';
 import { fail, internal } from '@/lib/api/http';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import type { ZodiSupabaseClient } from '@/lib/supabase/server';
+import { recordActivity } from './activity';
 import { getLatestSelfChart } from './charts';
 import { getOwnProfile, type Profile } from './profile';
 import { supabaseQuotaStore } from './quota';
@@ -67,6 +68,7 @@ export async function runAiRequest(opts: AiRequestOptions): Promise<Response> {
       eventId,
       remaining: Math.max(0, limit - used),
       saveReading: (row) => insertReading(admin, row),
+      afterSave: async () => (await recordActivity(opts.supabase, 'reading'))?.unlocked ?? [],
       generateFn: generate,
       signal: opts.request.signal,
     });

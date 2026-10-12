@@ -2,6 +2,7 @@
 import AppShell from '@/layouts/AppShell.astro';
 import Button from '@/components/ui/Button.astro';
 import { RichText } from '@/components/readings/RichText';
+import { FavoriteButton } from '@/components/readings/FavoriteButton';
 import { RuneCast } from '@/components/readings/ReadingVisuals';
 import { TarotSpread } from '@/components/readings/TarotSpread';
 import type { DrawnCard } from '@/lib/ai/extras';
@@ -68,6 +69,7 @@ const date = readingDate(reading.created_at, profile.time_zone ?? 'Europe/Madrid
       profecía: las decisiones las tomas tú.
     </p>
     <div class="actions">
+      <FavoriteButton client:idle id={reading.id} initial={reading.favorite ?? false} />
       {def && (
         <Button href={`/app/lecturas/${def.slug}`} icon="sparkles">
           Otra lectura así

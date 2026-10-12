@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { fail, internal, ok, readJson, unauthorized } from '@/lib/api/http';
 import { fieldErrors } from '@/lib/validation/common';
+import { recordActivity } from '@/lib/server/activity';
 import { createPost, listFeed } from '@/lib/server/community';
 import { feedQuerySchema, postSchema } from '@/lib/validation/community';
 
@@ -26,6 +27,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!body.ok) return body.response;
   try {
     const id = await createPost(supabase, body.data);
+    await recordActivity(supabase, 'post');
     const [post] = (await listFeed(supabase, {})).filter((p) => p.id === id);
     return ok(post ?? { id }, 201);
   } catch (error) {
