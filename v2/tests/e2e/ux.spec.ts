@@ -164,6 +164,16 @@ test.describe('el significado de tu carta', () => {
     await page.getByRole('link', { name: 'Lee el significado completo' }).click();
     await expect(page).toHaveURL(/\/app\/carta\/significado$/);
     await expect(page.getByRole('heading', { level: 2, name: 'Tu Sol en Aries' })).toBeVisible();
+    // El día que naciste: el cielo sobre su ciudad, la Luna y sus citas con el cielo.
+    await expect(
+      page.getByRole('heading', { level: 2, name: /^Un domingo de primavera en / }),
+    ).toBeVisible();
+    await expect(page.getByRole('img', { name: /El cielo sobre .+ cuando naciste/ })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Tus próximas citas con el cielo' }),
+    ).toBeVisible();
+    await expect(page.getByText(/Tu retorno solar · en \d+ días/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Tu ficha cósmica' })).toBeVisible();
     for (const h of ['Tus números', 'Tus aspectos más fuertes']) {
       await expect(page.getByRole('heading', { level: 2, name: h })).toBeVisible();
     }
@@ -173,17 +183,23 @@ test.describe('el significado de tu carta', () => {
     await expect(
       page.getByRole('heading', { level: 2, name: 'Lo que significa «Ana Estrella»' }),
     ).toBeVisible();
-    await page.getByLabel(/Tu nombre completo/).fill('Ana Millapán Fernández');
+    await page.getByLabel(/Tu nombre completo/).fill('Ana Calfuleo Quispilema Zorblax');
     await page.getByRole('button', { name: 'Ver lo que significa' }).click();
-    await expect(page.getByText('Milla = oro · pan = puma.')).toBeVisible();
-    await expect(page.getByText('«hijo de Fernando».')).toBeVisible();
+    await expect(page.getByText('Calfu = azul · leo = río.')).toBeVisible();
+    // La investigación arranca al verse en pantalla.
+    await page.locator('.name-parts').scrollIntoViewIfNeeded();
+    // Lo que no está de serie lo investiga la IA (y lo inventado no se inventa).
+    await expect(page.getByText('Significado de prueba de Quispilema.')).toBeVisible();
+    await expect(page.getByText('✦ Investigado por ZODI')).toBeVisible();
+    await expect(page.getByText(/No encuentro su historia/)).toBeVisible();
     await expectNoViolations(page);
     // El PDF lleva todo, con el nombre completo que se escribió.
     await page.getByRole('button', { name: 'Descargar todo en PDF' }).click();
     await expect(page).toHaveURL(/\/app\/carta\/imprimir$/);
     await expect(
-      page.getByText('«Ana Millapán Fernández»: de dónde viene cada parte.'),
+      page.getByText('«Ana Calfuleo Quispilema Zorblax»: de dónde viene cada parte.'),
     ).toBeVisible();
+    await expect(page.getByText(/significado de prueba de Quispilema/i)).toBeVisible();
     await page.goto('/app/carta/significado');
     await page
       .getByRole('region', { name: 'Tu Sol en Aries' })

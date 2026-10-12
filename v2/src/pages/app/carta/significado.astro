@@ -8,10 +8,13 @@ import AppShell from '@/layouts/AppShell.astro';
 import Button from '@/components/ui/Button.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
 import Field from '@/components/ui/Field.astro';
+import BirthDayPanel from '@/components/chart/BirthDayPanel.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { todayFor } from '@/lib/ai/context';
+import { birthDay } from '@/lib/chart/birth-day';
 import { chartMeaning, numberImage } from '@/lib/chart/meaning';
-import { nameMeaning } from '@/lib/names/meaning';
+import { NameLookup } from '@/components/names/NameLookup';
+import { nameMeaning, REGISTRY_SIZE } from '@/lib/names/meaning';
 import { getLatestSelfChart } from '@/lib/server/charts';
 
 const { supabase, profile } = Astro.locals;
@@ -28,6 +31,7 @@ if (Astro.request.method === 'POST') {
 }
 const nameParts = nameMeaning(fullName);
 const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+const fmt = (x: number) => new Intl.NumberFormat('es-ES', { useGrouping: 'always' }).format(x);
 
 const stored = await getLatestSelfChart(supabase);
 const meaning = stored
@@ -56,13 +60,44 @@ const sections = meaning.flatMap((s) =>
     : [s],
 );
 const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
+
+// El día que naciste: el cielo sobre tu lugar, la Luna, tu vida en números…
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const now = new Date();
+const born = stored
+  ? birthDay({
+      chart: stored.chart,
+      birthDate: stored.input.date,
+      timeKnown: stored.input.timeKnown,
+      timeZone: stored.input.timeZone,
+      today: todayFor(now, tz),
+      now,
+    })
+  : null;
+const place = profile.birth_place ?? 'tu ciudad';
+const bornAsk = born
+  ? ask(
+      `Nací un ${born.weekday.day} de ${born.season.name}, en ${born.moon.name.toLowerCase()}${born.daylight ? (born.daylight.isDay ? ', de día' : ', de noche') : ''}. ¿Qué dice eso de mí?`,
+    )
+  : '';
+// Tu ficha cósmica: lo esencial en una línea, enlazado a cada sección.
+const FICHA = ['sol', 'moon', 'ascendente', 'numeros', 'chino', 'maya', 'tarot'];
+const ficha = sections
+  .filter((s) => FICHA.includes(s.id) && !(s.id === 'ascendente' && !stored?.input.timeKnown))
+  .map((s) => ({
+    id: s.id,
+    label:
+      s.id === 'numeros'
+        ? `Camino de vida ${s.numbers?.[0]?.n ?? ''}`
+        : s.title.replace(/^Tu /, ''),
+  }));
 ---
 
 <AppShell
   title="El significado de tu carta"
   current="carta"
   kicker="Todo lo que dice tu nacimiento"
-  intro="Tu carta natal, tus números, tu animal chino, tu sello maya y tu carta del tarot, explicados por ZODI. ¿Quieres saber más de algo? Pregúntale directamente."
+  intro="El cielo del día que naciste, tu carta, tus números, tu nombre, tu animal chino, tu sello maya y tu carta del tarot, explicados por ZODI. ¿Quieres saber más de algo? Pregúntale."
 >
   <nav class="crumbs" aria-label="Migas de pan">
     <a href="/app/carta">Tu carta</a>
@@ -77,6 +112,28 @@ const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
     </EmptyState>
   ) : (
     <>
+      {born && (
+        <BirthDayPanel
+          b={born}
+          place={place}
+          timeKnown={stored!.input.timeKnown}
+          timeZone={tz}
+          birthDate={stored!.input.date}
+          ask={bornAsk}
+        />
+      )}
+
+      <section class="ficha" aria-labelledby="ficha-t">
+        <h2 id="ficha-t">Tu ficha cósmica</h2>
+        <ul>
+          {ficha.map((f) => (
+            <li>
+              <a href={`#${f.id}`}>{f.label}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <nav class="toc" aria-label="Índice">
         {sections.map((s) => (
           <a href={`#${s.id}`} class="badge">
@@ -107,7 +164,9 @@ const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
                 <>
                   <p>
                     Los nombres y apellidos también cuentan una historia: de dónde venía tu familia,
-                    a qué se dedicaba o cómo la llamaban.
+                    a qué se dedicaba o cómo la llamaban. ZODI conoce {fmt(REGISTRY_SIZE.nombres)}{' '}
+                    nombres y {fmt(REGISTRY_SIZE.apellidos)} apellidos, y si el tuyo no está, lo
+                    investiga al momento.
                   </p>
                   <ul class="name-parts">
                     {nameParts.map((part) => (
@@ -120,12 +179,14 @@ const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
                             {part.entry && <> · {part.entry.origin}</>}
                           </span>
                         </p>
-                        <p>
-                          {part.entry
-                            ? cap(part.entry.meaning) + '.'
-                            : 'Todavía no está en mi libro. Pregúntamelo y lo investigo.'}
-                        </p>
-                        {part.entry?.note && <p class="muted">{part.entry.note}</p>}
+                        {part.entry ? (
+                          <>
+                            <p>{cap(part.entry.meaning)}.</p>
+                            {part.entry.note && <p class="muted">{part.entry.note}</p>}
+                          </>
+                        ) : (
+                          <NameLookup client:visible word={part.word} kind={part.kind} />
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -399,5 +460,57 @@ const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
   }
   .pdf-form {
     display: contents;
+  }
+  .ficha {
+    margin-bottom: var(--space-4);
+    max-width: 58rem;
+  }
+  .ficha h2 {
+    font-size: var(--step-1);
+    margin: 0 0 var(--space-2);
+  }
+  .ficha ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .ficha a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, rgb(155 77 255 / 30%), rgb(184 255 23 / 14%));
+    border: 1px solid var(--line-acid);
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .ficha a:hover {
+    color: var(--acid);
+  }
+  .name-parts :global(.name-loading) {
+    color: var(--acid);
+  }
+  .name-parts :global(.name-spark) {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .name-parts :global(.name-spark) {
+      animation: spin 1.6s linear infinite;
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .name-parts :global(.name-new) {
+    font-size: 0.75rem;
+    color: var(--acid);
+    letter-spacing: 0.04em;
   }
 </style>

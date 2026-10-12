@@ -81,3 +81,11 @@ test.describe('compatibilidad de signos', () => {
     await expect(page).toHaveURL(/\/compatibilidad\/aries-y-/);
   });
 });
+
+test('la portada cuenta qué significa tu nombre y el día que naciste', async ({ page }) => {
+  await page.goto('/?nacimiento=1990-04-15&nombre=rodrigo#sabe');
+  const grid = page.getByRole('list', { name: 'Lo que ZODI sabe de ti' });
+  await expect(grid.getByText('Rodrigo', { exact: true })).toBeVisible();
+  await expect(grid.getByText(/germánico/)).toBeVisible();
+  await expect(grid.getByText('Naciste un domingo')).toBeVisible();
+});

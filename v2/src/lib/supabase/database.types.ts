@@ -109,6 +109,28 @@ export type Database = {
           },
         ];
       };
+      name_meanings: {
+        Row: {
+          kind: string;
+          key: string;
+          word: string;
+          origin: string;
+          meaning: string;
+          note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          kind: string;
+          key: string;
+          word: string;
+          origin: string;
+          meaning: string;
+          note?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['name_meanings']['Insert']>;
+        Relationships: [];
+      };
       people: {
         Row: {
           id: string;
@@ -537,6 +559,10 @@ export type Database = {
       };
       toggle_favorite: {
         Args: { p_reading: string };
+        Returns: boolean;
+      };
+      claim_name_lookup: {
+        Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
       level_for_xp: {

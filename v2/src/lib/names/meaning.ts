@@ -1,8 +1,29 @@
 /**
- * Qué significa cada parte de un nombre: diccionario propio y, si no está,
- * reglas (patronímicos -ez, apellidos vascos y mapuches). Puro.
+ * Qué significa cada parte de un nombre. Por orden: el registro de serie
+ * (~1.800 nombres y apellidos, data/*.json), el diccionario propio y las
+ * reglas (patronímicos -ez, apellidos vascos y mapuches). Lo que no esté lo
+ * investiga la IA en /api/nombre. Puro.
  */
+import APELLIDOS from './data/apellidos.json';
+import NOMBRES from './data/nombres.json';
 import { FIRST_NAMES, MAPUCHE, PATRONYMIC, SURNAMES, type NameEntry } from './dictionary';
+
+type Generated = Record<string, { w: string; o: string; m: string; n?: string }>;
+const GEN: Record<'nombre' | 'apellido', Generated> = {
+  nombre: NOMBRES as Generated,
+  apellido: APELLIDOS as Generated,
+};
+const fromGen = (kind: 'nombre' | 'apellido', key: string): NameEntry | null => {
+  const g = GEN[kind][key];
+  if (!g) return null;
+  return g.n ? { origin: g.o, meaning: g.m, note: g.n } : { origin: g.o, meaning: g.m };
+};
+
+/** Cuántos trae ZODI de serie (para enseñarlo). */
+export const REGISTRY_SIZE = {
+  nombres: new Set([...Object.keys(NOMBRES), ...Object.keys(FIRST_NAMES)]).size,
+  apellidos: new Set([...Object.keys(APELLIDOS), ...Object.keys(SURNAMES)]).size,
+};
 
 export interface NamePart {
   word: string;
@@ -13,7 +34,7 @@ export interface NamePart {
   rule?: 'patronímico' | 'vasco' | 'mapuche';
 }
 
-const norm = (w: string) =>
+export const norm = (w: string) =>
   w
     .toLowerCase()
     .normalize('NFD')
@@ -88,7 +109,15 @@ function mapuche(w: string): NameEntry | null {
   };
 }
 
+/** Lo que se sabe sin IA de una palabra (o null). */
+export function knownEntry(kind: 'nombre' | 'apellido', w: string): NameEntry | null {
+  if (kind === 'nombre') return fromGen('nombre', w) ?? FIRST_NAMES[w] ?? null;
+  return surname(w, w).entry;
+}
+
 function surname(word: string, w: string): NamePart {
+  const gen = fromGen('apellido', w);
+  if (gen) return { word, kind: 'apellido', entry: gen };
   const dict = SURNAMES[w];
   if (dict) return { word, kind: 'apellido', entry: dict };
   const p = patronymic(w);
@@ -109,8 +138,10 @@ export function nameMeaning(fullName: string): NamePart[] {
     if (!w || PARTICLES.has(w)) return;
     const word = raw.charAt(0).toUpperCase() + raw.slice(1);
     // El primero es nombre; luego, si no es un nombre conocido, empiezan los apellidos.
-    if (i === 0 || (!surnames && FIRST_NAMES[w] && !SURNAMES[w] && !PATRONYMIC[w])) {
-      out.push({ word, kind: 'nombre', entry: FIRST_NAMES[w] ?? null });
+    const isName = Boolean(GEN.nombre[w] || FIRST_NAMES[w]);
+    const isSurname = Boolean(GEN.apellido[w] || SURNAMES[w] || PATRONYMIC[w]);
+    if (i === 0 || (!surnames && isName && !isSurname)) {
+      out.push({ word, kind: 'nombre', entry: knownEntry('nombre', w) });
       return;
     }
     surnames = true;

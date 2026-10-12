@@ -12,6 +12,7 @@ import Icon from '@/components/ui/Icon.astro';
 import ProgressBar from '@/components/ui/ProgressBar.astro';
 import { TarotOfDay } from '@/components/scenes/TarotOfDay';
 import { formatPosition } from '@/lib/astro-engine/labels';
+import { birthTeaser } from '@/lib/chart/birth-day';
 import { buildDashboard } from '@/lib/dashboard/build';
 import { describeTransit, plainTransit, transitStrength } from '@/lib/daily/today';
 import { ACHIEVEMENT_BY_ID } from '@/lib/progress/achievements';
@@ -47,6 +48,18 @@ const card = dailyCard(profile.id, d.today);
 const steps = await firstSteps(supabase, profile, Boolean(stored));
 const showSteps = steps.some((s) => !s.done);
 const trialDays = trialDaysLeft(profile.trial_ends_at);
+// Adelanto de "El día que naciste".
+const teaser = stored ? birthTeaser(stored.chart, stored.input.date, new Date()) : null;
+const MOON_EMOJI: Record<string, string> = {
+  'Luna nueva': '🌑',
+  Creciente: '🌒',
+  'Cuarto creciente': '🌓',
+  'Gibosa creciente': '🌔',
+  'Luna llena': '🌕',
+  'Gibosa menguante': '🌖',
+  'Cuarto menguante': '🌗',
+  Menguante: '🌘',
+};
 // Tu gente hoy: las cuatro primeras, con cómo está el día entre los dos.
 const tz = profile.time_zone ?? 'Europe/Madrid';
 const myBirth = stored?.input.date ?? profile.birth_date;
@@ -187,6 +200,24 @@ const gente = me
               </dd>
             </div>
           </dl>
+          {teaser && (
+            <a class="born-teaser" href="/app/carta/significado#nacimiento">
+              <span class="born-emoji" aria-hidden="true">
+                {MOON_EMOJI[teaser.moon]}
+              </span>
+              <span>
+                Naciste un <strong>{teaser.weekday}</strong> de{' '}
+                <strong>{teaser.moon.toLowerCase()}</strong>.
+                {teaser.daysToSolarReturn !== null && (
+                  <>
+                    {' '}
+                    Tu retorno solar es en <strong>{teaser.daysToSolarReturn} días</strong>.
+                  </>
+                )}{' '}
+                <span class="born-more">Mira el cielo de ese día →</span>
+              </span>
+            </a>
+          )}
           <a class="meaning-link" href="/app/carta/significado">
             <Icon name="sparkles" size={16} /> Lee todo lo que dice de ti (y tus números)
           </a>
@@ -584,5 +615,30 @@ const gente = me
     flex-wrap: wrap;
     gap: var(--space-2);
     margin-top: var(--space-3);
+  }
+  .born-teaser {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: linear-gradient(135deg, rgb(155 77 255 / 18%), rgb(184 255 23 / 6%));
+    color: var(--ink);
+    text-decoration: none;
+    font-size: var(--step--1);
+  }
+  .born-teaser:hover {
+    border-color: var(--acid);
+  }
+  .born-emoji {
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .born-more {
+    color: var(--acid);
+    font-weight: 700;
   }
 </style>

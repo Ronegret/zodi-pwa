@@ -6,6 +6,7 @@
 import { SIGN_GLYPHS } from '@/lib/astro-engine/labels';
 import { toZodiac } from '@/lib/astro-engine/math';
 import { longitudeOf } from '@/lib/astro-engine/planets';
+import { moonInfo, type MoonPhaseName } from '@/lib/astro-engine/sky';
 import type { Sign } from '@/lib/astro-engine/types';
 import { chineseZodiac, lifePathNumber } from '@/lib/ai/numerology';
 import { mayanSign, type MayanSign } from '@/lib/divination/maya';
@@ -41,7 +42,12 @@ export interface Teaser {
   chinese: { animal: string; element: string };
   maya: MayanSign;
   card: TarotCard;
+  /** "domingo"… y la fase de la Luna ese día (a mediodía). */
+  weekday: string;
+  moon: MoonPhaseName;
 }
+
+const WEEKDAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 
 export function birthTeaser(date: string): Teaser {
   // A mediodía: en los días de cambio de signo puede variar con la hora (se avisa).
@@ -55,5 +61,7 @@ export function birthTeaser(date: string): Teaser {
     chinese: { animal: chinese.animal, element: chinese.element },
     maya: mayanSign(date),
     card: birthCard(date),
+    weekday: WEEKDAYS[new Date(`${date}T12:00:00Z`).getUTCDay()]!,
+    moon: moonInfo(new Date(`${date}T12:00:00Z`)).name,
   };
 }

@@ -14,6 +14,7 @@ import { HeroZodiac } from '@/components/scenes/HeroZodiac';
 import '@/styles/landing.css';
 import { KINDS } from '@/lib/ai/kinds';
 import { SIGN_INFO } from '@/lib/public/signs';
+import { knownEntry, norm } from '@/lib/names/meaning';
 import { birthTeaser, parseBirthDate } from '@/lib/public/teaser';
 import { longDate, publicToday } from '@/lib/public/today';
 import { ZODI_ARCANA } from '@/lib/tarot/deck';
@@ -23,6 +24,23 @@ const fecha = longDate(today);
 const rawBirth = Astro.url.searchParams.get('nacimiento');
 const birth = parseBirthDate(rawBirth, today);
 const teaser = birth ? birthTeaser(birth) : null;
+// Opcional: el nombre de pila, para contar qué significa (solo el registro de serie, sin IA).
+const rawName =
+  (Astro.url.searchParams.get('nombre') ?? '').trim().split(/\s+/)[0]?.slice(0, 30) ?? '';
+const firstName = /^[\p{L}'-]{2,30}$/u.test(rawName)
+  ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
+  : '';
+const nameEntry = firstName ? knownEntry('nombre', norm(firstName)) : null;
+const MOON_EMOJI: Record<string, string> = {
+  'Luna nueva': '🌑',
+  Creciente: '🌒',
+  'Cuarto creciente': '🌓',
+  'Gibosa creciente': '🌔',
+  'Luna llena': '🌕',
+  'Gibosa menguante': '🌖',
+  'Cuarto menguante': '🌗',
+  Menguante: '🌘',
+};
 const NUMBER_ART = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33]);
 
 const VERDAD = [
@@ -259,7 +277,8 @@ const FAQ = [
           <p class="kicker">Pruébalo ahora</p>
           <h2 id="sabe-title">Mira lo que ZODI sabe de ti</h2>
           <p class="muted">
-            Solo con tu fecha de nacimiento. Sin registro. Una muestra de lo que te espera dentro.
+            Solo con tu fecha de nacimiento (y tu nombre, si quieres). Sin registro. Una muestra de
+            lo que te espera dentro.
           </p>
           <form method="get" action="/#sabe" class="sabe-form">
             <label class="field-label" for="nacimiento">
@@ -288,10 +307,41 @@ const FAQ = [
                 <span class="btn-label">Leerme</span>
               </button>
             </div>
+            <label class="field-label" for="nombre-sabe">
+              Tu nombre <span class="field-req">(opcional)</span>
+            </label>
+            <input
+              id="nombre-sabe"
+              name="nombre"
+              type="text"
+              class="input"
+              maxlength="30"
+              autocomplete="given-name"
+              value={firstName || undefined}
+            />
           </form>
           {teaser && (
             <div class="teaser" aria-live="polite">
               <ul class="teaser-grid" aria-label="Lo que ZODI sabe de ti">
+                {firstName && (
+                  <li class="tile tile-wide">
+                    <span class="tile-k">Tu nombre</span>
+                    <span class="tile-v">{firstName}</span>
+                    <span class="tile-s">
+                      {nameEntry
+                        ? `${nameEntry.origin}: «${nameEntry.meaning}».${nameEntry.note ? ` ${nameEntry.note}.` : ''}`
+                        : 'No está en mi lista pública: dentro lo investigo para ti, con tus apellidos.'}
+                    </span>
+                  </li>
+                )}
+                <li class="tile">
+                  <span class="tile-emoji" aria-hidden="true">
+                    {MOON_EMOJI[teaser.moon]}
+                  </span>
+                  <span class="tile-k">Naciste un {teaser.weekday}</span>
+                  <span class="tile-v">{teaser.moon}</span>
+                  <span class="tile-s">La Luna del día en que llegaste</span>
+                </li>
                 <li class="tile">
                   <img
                     src={`/signos/${teaser.sun.slug}-avatar-240.webp`}
@@ -1121,5 +1171,16 @@ const FAQ = [
     .sign:hover {
       transform: none;
     }
+  }
+  .tile-wide {
+    grid-column: 1 / -1;
+  }
+  .tile-emoji {
+    font-size: 2.4rem;
+    line-height: 1;
+  }
+  .sabe-form .input[type='text'] {
+    width: 100%;
+    max-width: 20rem;
   }
 </style>

@@ -768,3 +768,31 @@ describe('tu gente (fichas privadas)', () => {
     await expect(add(C, 'P50')).rejects.toThrow(/people_limit/);
   });
 });
+
+describe('registro de nombres', () => {
+  it('se lee con sesión y solo escribe el servidor', async () => {
+    await q(
+      'service_role',
+      `insert into public.name_meanings (kind, key, word, origin, meaning) values ('apellido', 'aros', 'Aros', 'vasco', 'carpintero')`,
+    );
+    expect(await q(A, `select word from public.name_meanings where key = 'aros'`)).toEqual([
+      { word: 'Aros' },
+    ]);
+    await denied('anon', 'select key from public.name_meanings');
+    await denied(
+      A,
+      `insert into public.name_meanings (kind, key, word, origin, meaning) values ('apellido', 'zz', 'Zz', 'x', 'y')`,
+    );
+    await denied(A, `update public.name_meanings set meaning = 'otra cosa'`);
+  });
+
+  it('tope de 30 consultas nuevas al día por persona', async () => {
+    for (let i = 0; i < 30; i++) {
+      expect(await q(B, 'select public.claim_name_lookup() as ok')).toEqual([{ ok: true }]);
+    }
+    expect(await q(B, 'select public.claim_name_lookup() as ok')).toEqual([{ ok: false }]);
+    expect(await q(C, 'select public.claim_name_lookup() as ok')).toEqual([{ ok: true }]);
+    await denied('anon', 'select public.claim_name_lookup()');
+    await denied(B, 'select id from public.name_lookups');
+  });
+});

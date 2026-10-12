@@ -71,6 +71,42 @@ const today = new Intl.DateTimeFormat('es-ES', {
 
 <Base title={title}>
   <div class="shell">
+    {/* La hoja "Más" va antes que su botón: con el HTML en streaming, el botón nunca
+        apunta a algo que aún no ha llegado. Al ser popover, se pinta en la capa superior. */}
+    <div id="mas-menu" class="more-sheet" popover>
+      <div class="more-head">
+        <p class="more-title">Más de ZODI</p>
+        <button
+          type="button"
+          class="btn btn-ghost btn-icon"
+          popovertarget="mas-menu"
+          popovertargetaction="hide"
+          aria-label="Cerrar el menú"
+        >
+          <Icon name="x" />
+        </button>
+      </div>
+      <nav aria-label="Más secciones">
+        <ul class="more-grid">
+          {more.map((item) => (
+            <li>
+              <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>
+                <span class="nav-icon">
+                  <Icon name={item.icon} size={22} />
+                </span>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <form method="post" action="/auth/salir">
+        <button class="btn btn-secondary btn-block" type="submit">
+          <Icon name="logout" size={18} />
+          <span class="btn-label">Cerrar sesión</span>
+        </button>
+      </form>
+    </div>
     <aside class="sidebar">
       <a class="logo" href="/app">
         <img
@@ -156,41 +192,6 @@ const today = new Intl.DateTimeFormat('es-ES', {
           <CreatorCredit />
         </footer>
       </main>
-    </div>
-
-    <div id="mas-menu" class="more-sheet" popover>
-      <div class="more-head">
-        <p class="more-title">Más de ZODI</p>
-        <button
-          type="button"
-          class="btn btn-ghost btn-icon"
-          popovertarget="mas-menu"
-          popovertargetaction="hide"
-          aria-label="Cerrar el menú"
-        >
-          <Icon name="x" />
-        </button>
-      </div>
-      <nav aria-label="Más secciones">
-        <ul class="more-grid">
-          {more.map((item) => (
-            <li>
-              <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>
-                <span class="nav-icon">
-                  <Icon name={item.icon} size={22} />
-                </span>
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <form method="post" action="/auth/salir">
-        <button class="btn btn-secondary btn-block" type="submit">
-          <Icon name="logout" size={18} />
-          <span class="btn-label">Cerrar sesión</span>
-        </button>
-      </form>
     </div>
 
     {current !== 'oraculo' && (

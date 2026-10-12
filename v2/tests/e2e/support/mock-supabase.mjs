@@ -24,6 +24,9 @@ const refreshTokens = new Map();
 const readings = [];
 /** Tu gente: fichas privadas de cada usuario. */
 const people = [];
+/** Registro de nombres: caché compartida y consultas por usuario. */
+const nameMeanings = [];
+const nameLookups = new Map();
 /** Cuota de IA usada hoy por usuario, y eventos (id → user id). */
 const quotaUsed = new Map();
 const quotaEvents = new Map();
@@ -523,6 +526,29 @@ async function handleRest(req, res, url) {
       return respondRows(req, res, [row], 201);
     }
   }
+  // ---------- Registro de nombres (caché compartida y tope diario) ----------
+  if (resource === 'rpc' && fn === 'claim_name_lookup') {
+    if (!u) return send(res, 200, false);
+    const used = nameLookups.get(u.id) ?? 0;
+    if (used >= 30) return send(res, 200, false);
+    nameLookups.set(u.id, used + 1);
+    return send(res, 200, true);
+  }
+  if (resource === 'name_meanings') {
+    if (req.method === 'GET') {
+      if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+      return respondRows(req, res, applyFilters(nameMeanings, url.searchParams));
+    }
+    if (req.method === 'POST') {
+      if (!isServiceRole(req))
+        return send(res, 401, { code: '42501', message: 'permission denied' });
+      const row = { created_at: new Date().toISOString(), ...(await readBody(req)) };
+      const i = nameMeanings.findIndex((r) => r.kind === row.kind && r.key === row.key);
+      if (i >= 0) nameMeanings[i] = row;
+      else nameMeanings.push(row);
+      return respondRows(req, res, [row], 201);
+    }
+  }
   if (resource === 'people') {
     if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
     const own = people.filter((r) => r.user_id === u.id);
@@ -779,16 +805,27 @@ async function handleAi(req, res) {
   // Los Arcanos ZODI llevan "·" en el numeral (Z·II): se corta en " · ".
   const cards = [...prompt.matchAll(/^\d+\. [^:\n]+: .+? · ([^\n(—]+)/gm)].map((m) => m[1].trim());
   const isChat = body.system.some((b) => b.text.includes('MODO CHAT'));
-  const text = isChat
-    ? `Oye **${name}**, respira. Cuéntame qué te pesa y lo miramos con tu carta.`
-    : [
-        `Mira, **${name}**: tu Sol en Aries llega con ganas de lío hoy.`,
-        cards.length ? `Tus cartas: ${cards.join(', ')}.` : 'La Luna te pide calma.',
-        '- **Amor:** di lo que piensas antes de las ocho.',
-        '- **Trabajo:** termina lo pendiente.',
-        '',
-        '**Hoy haz esto:** escribe tres cosas que quieres soltar.',
-      ].join('\n');
+  // Registro de nombres: responde en JSON como la IA real.
+  const nameWord = body.system.some((b) => b.text.includes('onomástica'))
+    ? (/: (\S+)$/.exec(body.messages.at(-1).content)?.[1] ?? '')
+    : null;
+  const text =
+    nameWord !== null
+      ? JSON.stringify(
+          /^zorblax$/i.test(nameWord)
+            ? { o: 'desconocido', m: 'desconocido' }
+            : { o: 'castellano (de prueba)', m: `significado de prueba de ${nameWord}` },
+        )
+      : isChat
+        ? `Oye **${name}**, respira. Cuéntame qué te pesa y lo miramos con tu carta.`
+        : [
+            `Mira, **${name}**: tu Sol en Aries llega con ganas de lío hoy.`,
+            cards.length ? `Tus cartas: ${cards.join(', ')}.` : 'La Luna te pide calma.',
+            '- **Amor:** di lo que piensas antes de las ocho.',
+            '- **Trabajo:** termina lo pendiente.',
+            '',
+            '**Hoy haz esto:** escribe tres cosas que quieres soltar.',
+          ].join('\n');
   res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
   const event = (type, data) =>
     res.write(`event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`);

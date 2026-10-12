@@ -21,6 +21,7 @@ import { todayFor } from '@/lib/ai/context';
 import { chartMeaning } from '@/lib/chart/meaning';
 import { HOUSES, PLANET_ROLE, plainPlanet } from '@/lib/chart/plain';
 import { nameMeaning } from '@/lib/names/meaning';
+import { lookupName } from '@/lib/server/names';
 import { SIGN_KEYWORDS } from '@/lib/public/signs';
 import { getLatestSelfChart } from '@/lib/server/charts';
 
@@ -50,7 +51,13 @@ const meaning = chartMeaning({
   displayName: fullName,
   today: todayFor(new Date(), profile.time_zone ?? 'Europe/Madrid'),
 });
-const nameParts = nameMeaning(fullName);
+const nameParts = await Promise.all(
+  nameMeaning(fullName).map(async (part) => {
+    if (part.entry) return part;
+    const r = await lookupName(supabase, part.kind, part.word).catch(() => null);
+    return r?.status === 'ok' ? { ...part, entry: r.entry } : part;
+  }),
+);
 const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const birth = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: 'UTC' }).format(
   new Date(`${stored.input.date}T12:00:00Z`),
