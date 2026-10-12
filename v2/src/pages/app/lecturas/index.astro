@@ -3,7 +3,7 @@ import AppShell from '@/layouts/AppShell.astro';
 import Badge from '@/components/ui/Badge.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { GROUPS, KINDS, KIND_BY_KIND } from '@/lib/ai/kinds';
-import { getQuotaStatus } from '@/lib/server/quota';
+import { getQuotaStatus, trialDaysLeft } from '@/lib/server/quota';
 import { listReadings } from '@/lib/server/readings';
 import { excerpt, readingDate } from '@/lib/readings/format';
 
@@ -14,6 +14,44 @@ const [quota, recent] = await Promise.all([getQuotaStatus(supabase), listReading
 const remaining = quota ? Math.max(0, quota.limit - quota.used) : null;
 const [featured, ...rest] = KINDS;
 const tz = profile.time_zone ?? 'Europe/Madrid';
+const planBadge =
+  profile.plan === 'free' && trialDaysLeft(profile.trial_ends_at) > 0
+    ? 'Todo gratis 30 días'
+    : ({ free: 'Free', premium: 'Premium', vip: 'VIP' } as const)[profile.plan];
+// Tarjetas que no son lecturas con IA pero viven en cada grupo.
+const EXTRA: Record<
+  string,
+  { href: string; art: string; kicker: string; title: string; blurb: string }[]
+> = {
+  tarot: [
+    {
+      href: '/app/oraculo',
+      art: '/art/zodi-bola-640.webp',
+      kicker: 'Consulta libre',
+      title: 'Oráculo de ZODI',
+      blurb: 'Pregunta lo que te pese y ZODI te contesta en directo, con tu carta delante.',
+    },
+  ],
+  'tu-carta': [
+    {
+      href: '/app/carta/significado',
+      art: '/art/numerologia-card-640.webp',
+      kicker: 'Al momento · sin gastar lecturas',
+      title: 'El significado de tu carta',
+      blurb:
+        'Tus planetas, tus números, tu animal chino y tu sello maya, explicados en palabras normales.',
+    },
+  ],
+  misticos: [
+    {
+      href: '/app/gente',
+      art: '/art/compatibilidad-640.webp',
+      kicker: 'Familia, pareja y amistades',
+      title: 'Tu gente',
+      blurb: 'Añade a quien quieras con su fecha: afinidad y cómo está el día entre los dos.',
+    },
+  ],
+};
 ---
 
 <AppShell
@@ -32,9 +70,7 @@ const tz = profile.time_zone ?? 'Europe/Madrid';
           Te quedan <strong>{remaining}</strong> de {quota!.limit} lecturas hoy
         </span>
       )}
-      <Badge tone="acid">
-        {({ free: 'Free', premium: 'Premium', vip: 'VIP' } as const)[profile.plan]}
-      </Badge>
+      <Badge tone="acid">{planBadge}</Badge>
     </p>
 
     <a class="featured reveal" href={`/app/lecturas/${featured!.slug}`}>
@@ -67,30 +103,21 @@ const tz = profile.time_zone ?? 'Europe/Madrid';
           <p class="muted">{g.blurb}</p>
         </div>
         <ul class="kinds">
-          {g.id === 'tarot' && (
+          {(EXTRA[g.id] ?? []).map((x) => (
             <li>
-              <a class="kind reveal" href="/app/oraculo">
-                <img
-                  src="/art/zodi-bola-640.webp"
-                  alt=""
-                  width="640"
-                  height="640"
-                  loading="lazy"
-                  decoding="async"
-                />
+              <a class="kind reveal" href={x.href}>
+                <img src={x.art} alt="" width="640" height="640" loading="lazy" decoding="async" />
                 <span class="kind-text">
-                  <span class="kicker">Consulta libre</span>
-                  <span class="kind-title">Oráculo de ZODI</span>
-                  <span class="kind-blurb">
-                    Pregunta lo que te pese y ZODI te contesta en directo, con tu carta delante.
-                  </span>
+                  <span class="kicker">{x.kicker}</span>
+                  <span class="kind-title">{x.title}</span>
+                  <span class="kind-blurb">{x.blurb}</span>
                 </span>
                 <span class="kind-go" aria-hidden="true">
                   <Icon name="chevronRight" />
                 </span>
               </a>
             </li>
-          )}
+          ))}
           {rest
             .filter((k) => k.group === g.id)
             .map((k) => (

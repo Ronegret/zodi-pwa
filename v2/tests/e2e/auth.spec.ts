@@ -64,6 +64,10 @@ test.describe('acceso', () => {
     await page.goto('/auth/login');
     await expect(page).toHaveURL(/\/app$/);
 
+    // En el móvil, "Cerrar sesión" está en la hoja "Más".
+    if (test.info().project.name === 'mobile') {
+      await page.getByRole('button', { name: 'Más' }).click();
+    }
     await page.getByRole('button', { name: 'Cerrar sesión' }).click();
     await expect(page).toHaveURL(/\/auth\/login\?aviso=salida$/);
     await expect(page.getByRole('status')).toContainText('Has cerrado sesión');

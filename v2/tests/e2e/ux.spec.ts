@@ -179,6 +179,31 @@ test.describe('el significado de tu carta', () => {
   });
 });
 
+test.describe('móvil: barra inferior y hoja Más', () => {
+  test('Más abre el resto de secciones y se cierra', async ({ page, request }) => {
+    test.skip(test.info().project.name !== 'mobile', 'La barra inferior es del móvil');
+    await login(page, await createTestUser(request, true));
+    await expect(page).toHaveURL(/\/app$/);
+    const bar = page.getByRole('navigation', { name: 'Principal' });
+    for (const name of ['Inicio', 'Lecturas', 'Tu gente', 'Carta']) {
+      await expect(bar.getByRole('link', { name })).toBeVisible();
+    }
+    await expect(bar.getByRole('link', { name: 'Ajustes' })).toBeHidden();
+    await bar.getByRole('button', { name: 'Más' }).click();
+    const more = page.getByRole('navigation', { name: 'Más secciones' });
+    for (const name of ['Horóscopo', 'Oráculo', 'Comunidad', 'Match', 'Progreso', 'Ajustes']) {
+      await expect(more.getByRole('link', { name })).toBeVisible();
+    }
+    await expect(page.getByRole('button', { name: 'Cerrar sesión' }).last()).toBeVisible();
+    await expectNoViolations(page);
+    await page.keyboard.press('Escape');
+    await expect(more).toBeHidden();
+    await bar.getByRole('button', { name: 'Más' }).click();
+    await more.getByRole('link', { name: 'Ajustes' }).click();
+    await expect(page).toHaveURL(/\/app\/ajustes$/);
+  });
+});
+
 test.describe('tu gente', () => {
   test('añadir a alguien, ver la afinidad y cómo está el día, y borrar', async ({
     page,

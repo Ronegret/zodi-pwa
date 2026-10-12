@@ -192,13 +192,26 @@ export function chineseMatch(
   };
 }
 
-const NUMBER_FAMILY: Record<number, { name: string; text: string }> = {};
+// `text` en plural ("los dos necesitan…") y `one` en singular ("uno necesita…").
+const NUMBER_FAMILY: Record<number, { name: string; text: string; one: string }> = {};
 for (const n of [1, 5, 7])
-  NUMBER_FAMILY[n] = { name: 'independientes', text: 'necesitan su espacio y su libertad' };
+  NUMBER_FAMILY[n] = {
+    name: 'independientes',
+    text: 'necesitan su espacio y su libertad',
+    one: 'necesita su espacio y su libertad',
+  };
 for (const n of [2, 4, 8])
-  NUMBER_FAMILY[n] = { name: 'constructores', text: 'buscan seguridad y cosas que duren' };
+  NUMBER_FAMILY[n] = {
+    name: 'constructores',
+    text: 'buscan seguridad y cosas que duren',
+    one: 'busca seguridad y cosas que duren',
+  };
 for (const n of [3, 6, 9])
-  NUMBER_FAMILY[n] = { name: 'corazones creativos', text: 'viven para la gente y la expresión' };
+  NUMBER_FAMILY[n] = {
+    name: 'corazones creativos',
+    text: 'viven para la gente y la expresión',
+    one: 'vive para la gente y la expresión',
+  };
 const base9 = (n: number) => (n === 11 ? 2 : n === 22 ? 4 : n === 33 ? 6 : n);
 
 export function numberMatch(
@@ -230,7 +243,7 @@ export function numberMatch(
     b,
     score: 65,
     name: 'Complementarios',
-    text: `El ${a} (${fa.name}) y el ${b} (${fb.name}) se enseñan cosas distintas: uno ${fa.text} y el otro ${fb.text}.`,
+    text: `El ${a} (${fa.name}) y el ${b} (${fb.name}) se enseñan cosas distintas: uno ${fa.one} y el otro ${fb.one}.`,
   };
 }
 
@@ -324,9 +337,12 @@ export function affinity(
     title: relation === 'pareja' ? 'Atracción y química' : 'Cómo se mueven juntos',
     what:
       relation === 'pareja'
-        ? 'Venus (lo que te atrae) con Marte (cómo va a por ello), cruzados.'
-        : 'Venus (lo que se disfruta) con Marte (cómo se actúa), cruzados.',
-    pair: `${you.sky.venus}/${them.sky.mars} · ${them.sky.venus}/${you.sky.mars}`,
+        ? 'Venus (lo que atrae) de cada cual con el Marte (cómo va a por ello) del otro. Te enseñamos la mejor combinación.'
+        : 'Venus (lo que se disfruta) de cada cual con el Marte (cómo se actúa) del otro. Te enseñamos la mejor combinación.',
+    pair:
+      q1.score >= q2.score
+        ? `Tu Venus en ${you.sky.venus} + su Marte en ${them.sky.mars}`
+        : `Su Venus en ${them.sky.venus} + tu Marte en ${you.sky.mars}`,
     score: Math.round((q1.score + q2.score) / 2),
     name: best.name,
     text: best.text,
