@@ -1,0 +1,35 @@
+---
+/** Firma del autor: quién ha creado ZODI, en todas las pantallas. */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<p class:list={['credit', className]}>
+  ZODI está creado por
+  <a href="https://rodrigonegrete.es" target="_blank" rel="author noopener">
+    Rodrigo Negrete
+    <span class="visually-hidden"> (rodrigonegrete.es, se abre en otra pestaña)</span>
+  </a>
+  · <span aria-hidden="true">rodrigonegrete.es</span>
+</p>
+
+<style>
+  .credit {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+    text-align: center;
+  }
+  .credit a {
+    color: var(--acid);
+    font-weight: 700;
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .credit a:hover {
+    text-decoration: underline;
+  }
+</style>

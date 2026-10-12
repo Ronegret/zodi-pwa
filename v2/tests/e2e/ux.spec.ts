@@ -112,3 +112,44 @@ test.describe('portada', () => {
     await expectNoViolations(page);
   });
 });
+
+test.describe('horóscopo de la app', () => {
+  test('tu día de un vistazo al momento y la temporada con el arte de ZODI', async ({
+    page,
+    request,
+  }) => {
+    await login(page, await createTestUser(request, true));
+    await page.goto('/app/horoscopo');
+    await expect(
+      page.getByRole('heading', { level: 2, name: /Tu día de un vistazo/ }),
+    ).toBeVisible();
+    for (const area of ['Amor', 'Trabajo y dinero', 'Energía', 'El consejo de ZODI']) {
+      await expect(page.getByRole('heading', { level: 3, name: area })).toBeVisible();
+    }
+    await expect(page.getByRole('heading', { level: 2, name: /Temporada de/ })).toBeVisible();
+    await expect(page.getByRole('img', { name: /según ZODI/ })).toBeVisible();
+    await expect(page.locator('.scene-frame')).toHaveCount(0);
+    await expectNoViolations(page);
+  });
+});
+
+test.describe('carta en palabras normales', () => {
+  test('pilares, cómo se lee la rueda y planetas uno a uno', async ({ page, request }) => {
+    await login(page, await createTestUser(request, true));
+    await page.goto('/app/carta');
+    await expect(page.getByRole('img', { name: 'Aries según ZODI' })).toBeVisible();
+    await expect(page.getByRole('list', { name: 'Cómo se lee la rueda' })).toContainText(
+      'Las piezas blancas son tus planetas',
+    );
+    const planets = page.getByRole('heading', { name: 'Tus planetas, uno a uno' });
+    await expect(planets).toBeVisible();
+    await expect(page.getByText(/^Brillas con valentía y a lo loco/)).toBeVisible();
+    await expect(page.getByText(/Casa \d+ · /).first()).toBeVisible();
+    // Las tablas técnicas están plegadas.
+    await expect(page.getByRole('table', { name: 'Planetas' })).toBeHidden();
+    await page.getByText('Datos técnicos (para quien sabe de astrología)').click();
+    await expect(page.getByRole('table', { name: 'Planetas' })).toBeVisible();
+    await expect(page.getByText('ZODI está creado por')).toBeVisible();
+    await expectNoViolations(page);
+  });
+});

@@ -11,6 +11,7 @@ import Badge from '@/components/ui/Badge.astro';
 import Icon from '@/components/ui/Icon.astro';
 import type { IconName } from '@/components/ui/icons';
 import WelcomeSplash from '@/components/media/WelcomeSplash.astro';
+import CreatorCredit from '@/components/CreatorCredit.astro';
 import { ToastRegion } from '@/components/ui/ToastRegion';
 import type { ToastDetail } from '@/components/ui/toast';
 
@@ -129,6 +130,9 @@ const today = new Intl.DateTimeFormat('es-ES', {
       </header>
       <main id="main" class="main" tabindex="-1">
         <slot />
+        <footer class="app-foot">
+          <CreatorCredit />
+        </footer>
       </main>
     </div>
 
@@ -302,6 +306,11 @@ const today = new Intl.DateTimeFormat('es-ES', {
   }
   .main:focus {
     outline: none;
+  }
+  .app-foot {
+    margin-top: var(--space-8);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
   }
 
   /* ---- Botón flotante del oráculo ---- */

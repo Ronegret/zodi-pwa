@@ -1,5 +1,6 @@
 ---
-/** Enlaces a las páginas legales (portada y pantallas de acceso). */
+/** Enlaces a las páginas legales y firma del autor (portada y pantallas de acceso). */
+import CreatorCredit from './CreatorCredit.astro';
 ---
 
 <nav class="legal-links" aria-label="Información legal">
@@ -7,6 +8,7 @@
   <span aria-hidden="true">·</span>
   <a href="/legal/terminos">Términos</a>
 </nav>
+<CreatorCredit />
 
 <style>
   .legal-links {
