@@ -156,3 +156,19 @@ export const SIGN_INFO: SignInfo[] = [
 export const SIGN_BY_SLUG = new Map(SIGN_INFO.map((s, i) => [s.slug, { ...s, index: i }]));
 
 export const signIndex = (sign: Sign) => SIGNS.indexOf(sign);
+
+/** Cada signo en dos palabras, para explicar la carta a quien empieza. */
+export const SIGN_KEYWORDS: Record<Sign, string> = {
+  Aries: 'Impulso y valentía',
+  Tauro: 'Calma y disfrute',
+  Géminis: 'Curiosidad y palabra',
+  Cáncer: 'Cuidado y emoción',
+  Leo: 'Brillo y orgullo',
+  Virgo: 'Orden y detalle',
+  Libra: 'Equilibrio y encanto',
+  Escorpio: 'Intensidad y verdad',
+  Sagitario: 'Libertad y aventura',
+  Capricornio: 'Ambición y constancia',
+  Acuario: 'Originalidad e independencia',
+  Piscis: 'Sensibilidad e imaginación',
+};
