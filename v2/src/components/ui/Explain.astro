@@ -1,0 +1,57 @@
+---
+/**
+ * "¿Qué es esto?" desplegable para explicar en palabras sencillas lo que
+ * enseña una tarjeta. Funciona sin JS (details/summary).
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  label?: string;
+}
+const { label = '¿Qué es esto?' } = Astro.props;
+---
+
+<details class="explain">
+  <summary>
+    <Icon name="info" size={16} /> {label}
+  </summary>
+  <div class="explain-body">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .explain {
+    margin-top: var(--space-2);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .explain summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 36px;
+    cursor: pointer;
+    color: var(--acid);
+    font-weight: 700;
+    list-style: none;
+  }
+  .explain summary::-webkit-details-marker {
+    display: none;
+  }
+  .explain[open] summary {
+    margin-bottom: var(--space-1);
+  }
+  .explain-body {
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 8%);
+  }
+  .explain-body :global(p) {
+    margin: 0 0 var(--space-2);
+  }
+  .explain-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

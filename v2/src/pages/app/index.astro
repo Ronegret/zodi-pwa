@@ -1,20 +1,24 @@
 ---
 import AppShell from '@/layouts/AppShell.astro';
 import ElementsDonut from '@/components/dashboard/ElementsDonut.astro';
+import FirstSteps from '@/components/dashboard/FirstSteps.astro';
 import EnergyChart from '@/components/dashboard/EnergyChart.astro';
 import Badge from '@/components/ui/Badge.astro';
 import Button from '@/components/ui/Button.astro';
 import Card from '@/components/ui/Card.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
+import Explain from '@/components/ui/Explain.astro';
 import Icon from '@/components/ui/Icon.astro';
 import ProgressBar from '@/components/ui/ProgressBar.astro';
 import { TarotOfDay } from '@/components/scenes/TarotOfDay';
 import { formatPosition } from '@/lib/astro-engine/labels';
 import { buildDashboard } from '@/lib/dashboard/build';
-import { describeTransit } from '@/lib/daily/today';
+import { describeTransit, plainTransit, transitStrength } from '@/lib/daily/today';
 import { ACHIEVEMENT_BY_ID } from '@/lib/progress/achievements';
 import { recordActivity } from '@/lib/server/activity';
 import { getLatestSelfChart } from '@/lib/server/charts';
+import { firstSteps } from '@/lib/server/first-steps';
+import { trialDaysLeft } from '@/lib/server/quota';
 import { dailyCard } from '@/lib/tarot/daily';
 
 const { supabase, profile } = Astro.locals;
@@ -35,6 +39,9 @@ const d = buildDashboard(
   new Date(),
 );
 const card = dailyCard(profile.id, d.today);
+const steps = await firstSteps(supabase, profile, Boolean(stored));
+const showSteps = steps.some((s) => !s.done);
+const trialDays = trialDaysLeft(profile.trial_ends_at);
 ---
 
 <AppShell
@@ -43,12 +50,24 @@ const card = dailyCard(profile.id, d.today);
   intro={d.headline}
   toast={
     welcome
-      ? { message: 'Carta calculada. Bienvenida al lado oscuro del cielo.' }
+      ? { message: 'Carta calculada. Te damos la bienvenida al lado oscuro del cielo.' }
       : unlocked.length
         ? { message: `Logro desbloqueado: ${unlocked.join(', ')}. +${unlocked.length * 5} gemas.` }
         : undefined
   }
 >
+  {trialDays > 0 && (
+    <p class="trial" role="note">
+      <Icon name="sparkles" />
+      <span>
+        <strong>
+          Tienes ZODI completo gratis {trialDays === 1 ? '1 día más' : `${trialDays} días más`}.
+        </strong>{' '}
+        Todas las lecturas, el oráculo y tu carta, sin pagar nada.
+      </span>
+    </p>
+  )}
+  {showSteps && <FirstSteps steps={steps} />}
   <div class="bento" data-celebrate={welcome ? '' : undefined}>
     <Card
       reveal
@@ -80,9 +99,14 @@ const card = dailyCard(profile.id, d.today);
         <ul class="transits">
           {d.transits.map((t) => (
             <li>
-              <span>{describeTransit(t)}</span>
+              <span class="transit-text">
+                <span>{plainTransit(t)}</span>
+                <span class="muted tiny">
+                  {describeTransit(t)} · orbe {t.orb.toFixed(1)}°
+                </span>
+              </span>
               <Badge tone={t.type === 'square' || t.type === 'opposition' ? 'hot' : 'acid'}>
-                orbe {t.orb.toFixed(1)}°
+                {transitStrength(t.orb)}
               </Badge>
             </li>
           ))}
@@ -90,13 +114,23 @@ const card = dailyCard(profile.id, d.today);
       ) : (
         <p class="muted">Hoy ningún planeta toca tu carta de cerca. Disfruta la calma, no dura.</p>
       )}
+      <Explain>
+        <p>
+          Los planetas se mueven cada día. Cuando uno de hoy forma un ángulo con un punto de tu
+          carta natal, se nota en esa parte de tu vida: eso es un <strong>tránsito</strong>.
+        </p>
+        <p>
+          "Exacto hoy" es cuando más se nota. Los verdes ayudan; los rosas ponen a prueba (no es
+          malo: es donde creces).
+        </p>
+      </Explain>
     </Card>
 
     <Card
       reveal
       tilt
       title="Tu carta"
-      kicker="Big three"
+      kicker="Tus tres pilares"
       class="span-carta"
       action={{ label: 'Ver carta', href: '/app/carta' }}
     >
@@ -114,19 +148,19 @@ const card = dailyCard(profile.id, d.today);
           <dl class="big3">
             <div>
               <dt>
-                <Icon name="sun" size={18} /> Sol
+                <Icon name="sun" size={18} /> Sol <span class="pill-hint">tu esencia</span>
               </dt>
               <dd>{formatPosition(d.chart.sun)}</dd>
             </div>
             <div>
               <dt>
-                <Icon name="moon" size={18} /> Luna
+                <Icon name="moon" size={18} /> Luna <span class="pill-hint">tus emociones</span>
               </dt>
               <dd>{formatPosition(d.chart.moon)}</dd>
             </div>
             <div>
               <dt>
-                <Icon name="star" size={18} /> Ascendente
+                <Icon name="star" size={18} /> Ascendente <span class="pill-hint">cómo te ven</span>
               </dt>
               <dd>
                 {d.chart.ascendant ? formatPosition(d.chart.ascendant) : 'Sin hora de nacimiento'}
@@ -147,15 +181,40 @@ const card = dailyCard(profile.id, d.today);
       ) : (
         <p class="muted">Necesitamos tu fecha de nacimiento para calcularlo.</p>
       )}
+      <Explain>
+        <p>
+          Tres ciclos que empiezan el día que naces: <strong>físico</strong> (23 días),
+          <strong> emocional</strong> (28) y <strong>intelectual</strong> (33).
+        </p>
+        <p>
+          Por encima de 0 % vas con pilas; por debajo, en modo ahorro. No es bueno ni malo: te ayuda
+          a elegir cuándo empujar y cuándo descansar.
+        </p>
+      </Explain>
     </Card>
 
-    <Card reveal title="Carta del día" kicker="Tarot · arcano mayor" class="span-tarot">
+    <Card reveal title="Carta del día" kicker="Tu carta para hoy" class="span-tarot">
       <TarotOfDay client:visible card={card} />
+      <Explain>
+        <p>
+          Cada día te toca una carta del tarot (los 22 arcanos mayores). Dale la vuelta y léela como
+          el consejo del día. Para preguntas concretas, mejor una tirada en Lecturas.
+        </p>
+      </Explain>
     </Card>
 
     <Card reveal tilt title="Tus elementos" kicker="Reparto de planetas" class="span-elementos">
       {d.chart ? (
-        <ElementsDonut balance={d.chart.elements} />
+        <>
+          <ElementsDonut balance={d.chart.elements} />
+          <Explain>
+            <p>
+              Cada signo es de un elemento: <strong>fuego</strong> (acción), <strong>tierra</strong>
+              (lo práctico), <strong>aire</strong> (ideas) o <strong>agua</strong> (emociones). Aquí
+              ves cuántos de tus planetas caen en cada uno: el que domina dice mucho de cómo eres.
+            </p>
+          </Explain>
+        </>
       ) : (
         <p class="muted">Sin carta todavía.</p>
       )}
@@ -294,6 +353,34 @@ const card = dailyCard(profile.id, d.today);
     border: 1px solid var(--line);
     font-weight: 600;
   }
+  .transit-text {
+    display: grid;
+    gap: 2px;
+  }
+  .tiny {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .pill-hint {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    opacity: 0.85;
+  }
+  .trial {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 10%);
+  }
+  .trial :global(svg) {
+    flex: none;
+    color: var(--acid);
+    margin-top: 2px;
+  }
   .sign-art {
     width: 100%;
     height: auto;
@@ -319,6 +406,7 @@ const card = dailyCard(profile.id, d.today);
   }
   .big3 dt {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
     color: var(--ink-soft);

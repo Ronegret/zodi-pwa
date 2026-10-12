@@ -24,6 +24,42 @@ export function describeTransit(t: Transit): string {
   return `${PLANET_NAMES[t.transiting]} en ${ASPECT_NAMES[t.type]} a tu ${natalName(t.natal)}`;
 }
 
+/** Qué parte de ti toca cada punto de la carta, en palabras de diario. */
+const NATAL_PLAIN: Record<Transit['natal'], string> = {
+  sun: 'tu energía',
+  moon: 'tus emociones',
+  mercury: 'tu forma de pensar y hablar',
+  venus: 'tu manera de querer',
+  mars: 'tus ganas y tu genio',
+  jupiter: 'tu suerte',
+  saturn: 'tus responsabilidades',
+  uranus: 'tu necesidad de libertad',
+  neptune: 'tu intuición',
+  pluto: 'tu poder personal',
+  northNode: 'tu camino',
+  ascendant: 'tu imagen',
+};
+
+const ASPECT_PLAIN: Record<Transit['type'], string> = {
+  conjunction: 'activa con fuerza',
+  trine: 'da viento a favor a',
+  sextile: 'abre una puerta en',
+  square: 'pone a prueba',
+  opposition: 'tira en contra de',
+};
+
+/** "El Sol da viento a favor a tu imagen." Para quien no sabe qué es un trígono. */
+export function plainTransit(t: Transit): string {
+  return `${subject(t.transiting)} ${ASPECT_PLAIN[t.type]} ${NATAL_PLAIN[t.natal]}.`;
+}
+
+/** Fuerza del tránsito según el orbe (en lugar de "orbe 0.3°"). */
+export function transitStrength(orb: number): string {
+  if (orb < 1) return 'Exacto hoy';
+  if (orb < 2.5) return 'Se nota';
+  return 'Suave';
+}
+
 export function headline(t: Transit | undefined, moon: MoonInfo): string {
   if (!t) {
     return `${moon.name} en ${moon.sign}. Día tranquilo en tu carta: aprovecha antes de que el universo se aburra.`;

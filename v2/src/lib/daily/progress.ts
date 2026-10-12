@@ -25,11 +25,11 @@ export function levelProgress(xp: number): LevelProgress {
   return { level, current, needed, ratio: current / needed };
 }
 
-/** Rangos con el tono Zodi. */
+/** Rangos con el tono Zodi (sin género: valen para cualquiera). */
 export function rankFor(level: number): string {
   if (level >= 20) return 'Oráculo sin filtro';
-  if (level >= 12) return 'Bruja de guardia';
-  if (level >= 7) return 'Lectora de señales';
-  if (level >= 3) return 'Aprendiz cósmica';
-  return 'Recién aterrizada';
+  if (level >= 12) return 'Ojo del cosmos';
+  if (level >= 7) return 'Radar de señales';
+  if (level >= 3) return 'Aprendiz del cosmos';
+  return 'Polvo de estrellas';
 }

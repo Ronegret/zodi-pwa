@@ -140,7 +140,7 @@ describe('buildDashboard', () => {
     expect(d.chart).toBeNull();
     expect(d.energy?.series).toHaveLength(14);
     expect(d.energy?.series[d.energy.todayIndex]?.date).toBe('2026-10-11');
-    expect(d.progress).toMatchObject({ level: 3, rank: 'Aprendiz cósmica' });
+    expect(d.progress).toMatchObject({ level: 3, rank: 'Aprendiz del cosmos' });
   });
 
   it('con carta sin hora: no hay Ascendente', async () => {

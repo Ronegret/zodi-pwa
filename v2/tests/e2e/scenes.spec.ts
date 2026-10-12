@@ -107,6 +107,8 @@ test.describe('escenas 3D', () => {
   test('carta: rueda 3D con datos reales y planetas por teclado', async ({ page, request }) => {
     await login(page, await createTestUser(request, true));
     await page.goto('/app/carta');
+    // La rueda va después de "Tus tres pilares": client:visible necesita verla.
+    await page.locator('.wheel-card .scene-frame').scrollIntoViewIfNeeded();
     await expectReady(page, 'natal-wheel');
     expect((await stats(page, 'natal-wheel'))?.calls).toBeLessThanOrEqual(MAX_CALLS);
     const sun = page.getByRole('button', { name: 'Sol', exact: true });
@@ -150,8 +152,8 @@ test.describe('sin WebGL', () => {
     await expect(hero.locator('canvas')).toHaveCount(0);
     await expect(hero.getByRole('img', { name: /ZODI, con su capucha/ })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Pausar animación' })).toHaveCount(0);
-    // Los chips vienen del servidor; responden en cuanto la isla hidrata.
-    await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+    // Los chips vienen del servidor; responden en cuanto la isla del héroe hidrata.
+    await expect(page.locator('astro-island[ssr]:has(.scene-frame)')).toHaveCount(0);
     await page.getByRole('button', { name: 'Escorpio' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Escorpio (' })).toBeVisible();
   });

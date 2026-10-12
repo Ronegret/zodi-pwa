@@ -440,9 +440,9 @@ const today = new Intl.DateTimeFormat('es-ES', {
       width: 56px;
       height: 56px;
     }
-    /* Los avisos, por encima de la barra inferior: nunca tapan la navegación. */
+    /* Los avisos, por encima de la barra inferior y del botón del oráculo: no tapan nada. */
     :global(.toast-region) {
-      bottom: calc(var(--nav-h) + var(--space-3) + var(--sab));
+      bottom: calc(var(--nav-h) + var(--space-3) + 56px + var(--space-3) + var(--sab));
     }
   }
 </style>
