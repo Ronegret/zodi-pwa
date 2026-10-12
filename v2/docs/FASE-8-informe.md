@@ -23,6 +23,15 @@ Rama `fase-7` · 12/10/2026 · Plan y comparación con la Zodi de antes en `FASE
 - **App**: el panel registra la visita del día; leer, consultar al oráculo, publicar y comentar suman; los logros nuevos salen como aviso. `/app/progreso` (nivel, racha, mejor racha, gemas, logros y tabla de puntos), estrella de favoritas, `/app/lecturas/historial` con filtro de favoritas y paginación.
 - **Arreglo**: con las secciones nuevas, en pantallas de 720 px de alto "Cerrar sesión" quedaba fuera del menú lateral (fallo que llegó a producción en la subida anterior); ahora el menú se desplaza. En el móvil, los avisos salen por encima de la barra inferior.
 
+### Ronda de usabilidad y automatización (12/10/2026, tarde)
+- **Estudio de usabilidad** de la primera vez en móvil: hallazgos y cambios en `ESTUDIO-UX.md`.
+- **30 días con todo gratis** por cuenta (migración `trial_and_oracle`, aplicada en Supabase) y **cuota propia del oráculo** (conversar no gasta lecturas).
+- Oráculo rediseñado; panel con primeros pasos y explicaciones sin jerga; alta explicada por ZODI con "Sobre ti"; Ajustes completos (sobre ti, cuenta, contraseña, borrar cuenta); carta con los tres pilares; portada con "Qué es ZODI" y demo interactiva; rangos sin género.
+- **CI en GitHub** (`.github/workflows/v2-ci.yml`): lint, tipos, unitarias con RLS, compilación y e2e en Linux en cada subida a `fase-7`. Primer pase en verde. Destapó que faltaba `@types/node` en la v2 (se tomaba de la app antigua).
+- **Correos de acceso en español** (`supabase/templates/`, instrucciones en `CORREOS-SUPABASE.md`).
+- **Vercel Web Analytics y Speed Insights** sin cookies (solo en producción; hay que activarlos en el panel de Vercel). Privacidad actualizada.
+- **Incidencia**: desde las 11:45 UTC Vercel no despliega ninguna subida (ni `zodi-v2` ni `zodi-pwa`): la integración con GitHub parece desconectada. Producción sigue en `7779008`.
+
 ## Verificado (12/10/2026)
 - `npm run check`: 0 errores. `npm run lint`: limpio.
 - `npm test`: 209/209 (nuevos: `divination.test.ts` con kines mayas de referencia, runas, cristales, nombre, validación y preparación; `public.test.ts` con casas solares y caché; `progress.test.ts` comprueba que el catálogo de logros es el mismo que el de la base de datos; 6 pruebas nuevas de RLS para la actividad).
