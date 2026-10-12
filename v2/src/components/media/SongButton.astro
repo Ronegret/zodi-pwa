@@ -1,0 +1,98 @@
+---
+/**
+ * "ZODI te lo dijo", la canción de ZODI. Nunca suena sola: solo si la
+ * persona le da al play. El audio no se descarga hasta entonces.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div class:list={['song js-only', className]} data-song>
+  <button type="button" class="song-btn" aria-pressed="false">
+    <span class="song-eq" aria-hidden="true">
+      <i></i>
+      <i></i>
+      <i></i>
+    </span>
+    <span class="song-label">Escuchar «ZODI te lo dijo»</span>
+  </button>
+</div>
+
+<script>
+  for (const box of document.querySelectorAll<HTMLElement>('[data-song]')) {
+    // Se crea al cargar la página pero no descarga nada hasta el primer play.
+    const audio = new Audio();
+    audio.preload = 'none';
+    audio.src = '/audio/zodi-te-lo-dijo.mp3';
+    const btn = box.querySelector('button')!;
+    const label = box.querySelector('.song-label')!;
+    const sync = () => {
+      const playing = !audio.paused;
+      btn.setAttribute('aria-pressed', String(playing));
+      label.textContent = playing ? 'Pausar «ZODI te lo dijo»' : 'Escuchar «ZODI te lo dijo»';
+    };
+    btn.addEventListener('click', () => {
+      if (audio.paused) void audio.play().catch(() => undefined);
+      else audio.pause();
+    });
+    audio.addEventListener('play', sync);
+    audio.addEventListener('pause', sync);
+    audio.addEventListener('ended', sync);
+  }
+</script>
+
+<style>
+  .song-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 10%);
+    color: var(--ink);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .song-btn:hover,
+  .song-btn[aria-pressed='true'] {
+    border-color: var(--acid);
+    color: var(--acid-soft);
+  }
+  .song-eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 16px;
+    height: 16px;
+  }
+  .song-eq i {
+    flex: 1;
+    height: 30%;
+    border-radius: 1px;
+    background: currentColor;
+  }
+  .song-btn[aria-pressed='true'] .song-eq i {
+    animation: eq 0.9s var(--ease) infinite alternate;
+  }
+  .song-btn[aria-pressed='true'] .song-eq i:nth-child(2) {
+    animation-delay: -0.3s;
+  }
+  .song-btn[aria-pressed='true'] .song-eq i:nth-child(3) {
+    animation-delay: -0.6s;
+  }
+  @keyframes eq {
+    to {
+      height: 100%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .song-btn[aria-pressed='true'] .song-eq i {
+      animation: none;
+      height: 70%;
+    }
+  }
+</style>

@@ -47,6 +47,7 @@ export const ICONS = {
   pause: ['M8 5v14M16 5v14'],
   play: ['M7 5l12 7-12 7z'],
   rotate: ['M20 12a8 8 0 1 1-2.3-5.7', 'M20 4v4h-4'],
+  music: ['M9 18V5l11-2v13', circle(6, 18, 3), circle(17, 16, 3)],
 } as const;
 
 export type IconName = keyof typeof ICONS;
