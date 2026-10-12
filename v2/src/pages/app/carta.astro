@@ -112,9 +112,14 @@ const wheelAspects = (chart?.aspects ?? []).map(({ a, b, type }) => ({ a, b, typ
             <p class="kicker">Para entenderla</p>
             <h2 id="pilares">Tus tres pilares, en palabras normales</h2>
           </div>
-          <Button href="/app/lecturas/carta-natal" icon="sparkles">
-            Que ZODI me la interprete
-          </Button>
+          <div class="pillars-actions">
+            <Button href="/app/lecturas/carta-natal" icon="sparkles">
+              Que ZODI me la interprete
+            </Button>
+            <Button href="/app/carta/imprimir" variant="secondary">
+              Descargar en PDF
+            </Button>
+          </div>
         </div>
         <ul class="pillars-list">
           {pillars.map((p) => (
@@ -519,6 +524,11 @@ const wheelAspects = (chart?.aspects ?? []).map(({ a, b, type }) => ({ a, b, typ
     justify-content: space-between;
     align-items: end;
     gap: var(--space-3);
+  }
+  .pillars-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
   }
   .pillars-head h2 {
     margin: 0;

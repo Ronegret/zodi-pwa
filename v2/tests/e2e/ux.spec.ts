@@ -153,3 +153,24 @@ test.describe('carta en palabras normales', () => {
     await expectNoViolations(page);
   });
 });
+
+test.describe('carta en PDF', () => {
+  test('página lista para guardar como PDF, accesible', async ({ page, request }) => {
+    await login(page, await createTestUser(request, true));
+    await page.goto('/app/carta');
+    await page.getByRole('link', { name: 'Descargar en PDF' }).click();
+    await expect(page).toHaveURL(/\/app\/carta\/imprimir$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Ana Estrella' })).toBeVisible();
+    for (const h of [
+      'Tu rueda del cielo',
+      'Tus elementos',
+      'Tus planetas, uno a uno',
+      'Tus 12 casas',
+    ]) {
+      await expect(page.getByRole('heading', { level: 2, name: h })).toBeVisible();
+    }
+    await expect(page.getByRole('button', { name: 'Guardar como PDF' })).toBeVisible();
+    await expect(page.getByText(/Creado por Rodrigo Negrete/)).toBeVisible();
+    await expectNoViolations(page);
+  });
+});
