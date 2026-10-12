@@ -9,7 +9,9 @@ import Button from '@/components/ui/Button.astro';
 import LegalLinks from '@/components/LegalLinks.astro';
 import AmbientVideo from '@/components/media/AmbientVideo.astro';
 import SongButton from '@/components/media/SongButton.astro';
+import { ZodiDemo } from '@/components/landing/ZodiDemo';
 import { HeroZodiac } from '@/components/scenes/HeroZodiac';
+import '@/styles/landing.css';
 import { KINDS } from '@/lib/ai/kinds';
 import { SIGN_INFO } from '@/lib/public/signs';
 import { birthTeaser, parseBirthDate } from '@/lib/public/teaser';
@@ -64,7 +66,7 @@ const STEPS = [
 const FAQ = [
   [
     '¿ZODI es gratis?',
-    'Sí. Entras gratis, completas tu perfil y tienes lecturas con IA cada día sin pagar nada. Queremos que compruebes si ZODI te habla claro antes de pensar en nada más.',
+    'Sí. Al crear tu cuenta tienes 30 días con todo, sin tarjeta y sin pagar nada: lecturas con IA, oráculo, tarot, tu carta y la comunidad. Queremos que compruebes si ZODI te habla claro antes de pensar en nada más.',
   ],
   [
     '¿Tengo que saber astrología?',
@@ -111,13 +113,13 @@ const FAQ = [
   <main id="main">
     <div class="hero" data-cursor-glow>
       <div class="copy">
-        <p class="kicker">Ecosistema astrológico cyberpunk</p>
+        <p class="kicker">Astrología con carácter</p>
         <h1>
           El universo tiene mensajes <span class="graffiti">para ti.</span>
         </h1>
         <p class="lead">
-          Zodi reúne carta natal real, horóscopo, Tarot ZODI, numerología, runas, compatibilidad y
-          comunidad. Sin humo: efemérides de verdad y una IA que no se muerde la lengua.
+          ZODI calcula tu carta natal real, te cuenta cómo viene tu día y responde lo que le
+          preguntes. Con humor ácido, en palabras normales y sin rodeos. Gratis 30 días con todo.
         </p>
         <div class="cta">
           <Button href="/auth/registro" icon="sparkles" magnetic>
@@ -144,6 +146,69 @@ const FAQ = [
         </HeroZodiac>
       </section>
     </div>
+
+    <section class="block" id="que-es" aria-labelledby="que-es-title">
+      <div class="block-head">
+        <p class="kicker">Qué es ZODI, en 20 segundos</p>
+        <h2 id="que-es-title">
+          Tu astrólogo de bolsillo. Sin humo y sin frases de sobre de azúcar.
+        </h2>
+      </div>
+      <ol class="what-grid">
+        <li class="what-card">
+          <img
+            src="/art/carta-astral-640.webp"
+            alt=""
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="what-n">01</span>
+          <h3>Tu carta real</h3>
+          <p>
+            Con tu fecha, hora y lugar de nacimiento calculamos dónde estaba cada planeta el día que
+            naciste. No es tu signo a secas: es tu mapa completo.
+          </p>
+        </li>
+        <li class="what-card">
+          <img
+            src="/art/zodi-movil-640.webp"
+            alt=""
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="what-n">02</span>
+          <h3>Te habla claro</h3>
+          <p>
+            ZODI lee tu carta y el cielo de cada día y te lo cuenta en el tono que elijas: suave,
+            directo, brutal o sarcástico. Y le puedes preguntar lo que quieras.
+          </p>
+        </li>
+        <li class="what-card">
+          <img
+            src="/art/tarot-zodi-640.webp"
+            alt=""
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="what-n">03</span>
+          <h3>Algo nuevo cada día</h3>
+          <p>
+            Horóscopo personal, Tarot ZODI, runas, numerología, compatibilidad y una comunidad para
+            contarlo. Cada lectura te explica qué es y qué significa.
+          </p>
+        </li>
+      </ol>
+      <div class="demo">
+        <p class="kicker">Pruébalo aquí mismo</p>
+        <ZodiDemo client:visible />
+      </div>
+    </section>
 
     <section class="cinema" aria-labelledby="sin-filtro">
       <AmbientVideo src="/video/zodi-portada" width={1280} height={720} class="cinema-video" />
@@ -419,14 +484,15 @@ const FAQ = [
     <section class="block" id="planes" aria-labelledby="planes-title">
       <div class="block-head">
         <p class="kicker">Planes</p>
-        <h2 id="planes-title">Empieza gratis. Profundiza cuando quieras.</h2>
+        <h2 id="planes-title">30 días con todo, gratis. Sin tarjeta.</h2>
       </div>
       <div class="plans">
         <div class="plan card plan-free">
-          <h3>Gratis</h3>
-          <p class="plan-price">0 €</p>
+          <h3>30 días con todo</h3>
+          <p class="plan-price">Gratis</p>
           <ul>
-            <li>Lecturas con IA cada día</li>
+            <li>40 lecturas con IA al día</li>
+            <li>60 mensajes al día con el oráculo</li>
             <li>Carta natal real en 3D</li>
             <li>Horóscopo diario personal</li>
             <li>Tarot ZODI, runas, numerología y más</li>
@@ -437,15 +503,14 @@ const FAQ = [
           </Button>
         </div>
         <div class="plan card">
-          <h3>Premium</h3>
-          <p class="plan-price">Muy pronto</p>
+          <h3>Después de los 30 días</h3>
+          <p class="plan-price">Tú decides</p>
           <ul>
-            <li>Más lecturas al día</li>
-            <li>Lecturas extensas y tiradas profundas</li>
-            <li>Tu carta natal en PDF</li>
-            <li>Predicciones con fechas</li>
+            <li>Sigues con una cuenta gratis: 5 lecturas y 15 mensajes al día</li>
+            <li>Tu carta, tu historial y la comunidad, siempre gratis</li>
+            <li>Si quieres más, te contaremos los planes con tiempo</li>
           </ul>
-          <p class="muted small">Te avisaremos dentro de la app cuando esté listo.</p>
+          <p class="muted small">Nunca te cobramos nada sin que lo pidas: no pedimos tarjeta.</p>
         </div>
       </div>
     </section>

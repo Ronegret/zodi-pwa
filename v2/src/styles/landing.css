@@ -1,0 +1,186 @@
+/* ---------- Portada: "Qué es ZODI" y demo interactiva ---------- */
+.what-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+.what-card {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.what-card img {
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  border: 1px solid var(--line-acid);
+}
+.what-n {
+  font-family: var(--font-mono);
+  color: var(--acid);
+  font-weight: 700;
+}
+.what-card h3 {
+  margin: 0;
+  font-size: var(--step-1);
+}
+.what-card p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.demo {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line-acid);
+  background: var(--panel);
+  box-shadow: var(--glow-acid);
+}
+.demo .tab-panel {
+  padding-top: var(--space-4);
+}
+.demo .tab-panel:focus-visible {
+  outline: 3px solid var(--acid);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+}
+.demo-fieldset {
+  border: 0;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.demo-bubble {
+  margin: 0 0 var(--space-3);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.demo-bubble img {
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--acid);
+}
+.demo-bubble blockquote {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  border-top-left-radius: var(--radius-sm);
+  border: 1px solid var(--line-acid);
+  background: rgb(184 255 23 / 6%);
+  font-size: var(--step-1);
+}
+.demo-bubble blockquote p {
+  margin: 0;
+}
+.demo-who {
+  font-size: 0.75rem !important;
+  color: var(--acid);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-1) !important;
+}
+.demo-chat {
+  list-style: none;
+  margin: var(--space-4) 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.demo-me {
+  justify-self: end;
+  max-width: 85%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-sm);
+  background: rgb(155 77 255 / 16%);
+  border: 1px solid rgb(155 77 255 / 40%);
+}
+.demo-zodi {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  max-width: 92%;
+}
+.demo-zodi img {
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--acid);
+}
+.demo-zodi > span {
+  min-height: 3rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  border-bottom-left-radius: var(--radius-sm);
+  border: 1px solid var(--line-acid);
+  background: var(--surface-2);
+}
+.demo-card {
+  display: grid;
+  gap: var(--space-5);
+  align-items: center;
+}
+@media (min-width: 640px) {
+  .demo-card {
+    grid-template-columns: 12rem minmax(0, 1fr);
+  }
+}
+.demo-card-flip {
+  width: min(12rem, 60vw);
+  aspect-ratio: 2 / 3;
+  perspective: 900px;
+  justify-self: center;
+}
+.demo-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 780ms var(--ease-spring);
+}
+.demo-card-flip[data-revealed] .demo-card-inner {
+  transform: rotateY(180deg);
+}
+.demo-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--acid);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.demo-front {
+  transform: rotateY(180deg);
+  box-shadow: var(--glow-acid);
+}
+.demo-card-text {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.demo-card-text p {
+  margin: 0;
+}
+.demo-card-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-2);
+  color: var(--acid);
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-card-inner {
+    transition: none;
+  }
+}
