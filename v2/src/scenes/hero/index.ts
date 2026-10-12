@@ -1,8 +1,9 @@
 /**
- * Hero: anillo zodiacal de 12 cajas redondeadas toon (color por elemento),
- * cada una con su glifo, alrededor de un núcleo que late. Gira despacio,
- * se inclina hacia el puntero y trae al frente el signo elegido.
- * Draw calls: 12 cajas + 12 contornos + 12 glifos + núcleo (2) + estrellas ≈ 39.
+ * Hero: anillo zodiacal de 12 medallones con la ilustración de ZODI de cada
+ * signo y un aro de neón del color de su elemento (siempre mirando a la
+ * cámara), alrededor de un núcleo que late. Gira despacio, se inclina hacia
+ * el puntero y trae al frente el signo elegido.
+ * Draw calls: 12 medallones + núcleo (2) + estrellas ≈ 15.
  */
 import {
   BufferGeometry,
@@ -10,17 +11,17 @@ import {
   Group,
   IcosahedronGeometry,
   Mesh,
-  MeshBasicMaterial,
   PerspectiveCamera,
-  PlaneGeometry,
   Points,
   PointsMaterial,
+  Sprite,
+  SpriteMaterial,
   type Vector2,
 } from 'three';
-import { ELEMENTS, SIGN_GLYPHS, elementOf } from '@/lib/astro-engine/labels';
+import { ELEMENTS, SIGN_GLYPHS, elementOf, signSlug } from '@/lib/astro-engine/labels';
 import { SIGNS, type Sign } from '@/lib/astro-engine/types';
 import { BaseScene, damp } from '../core/base';
-import { glyphTexture, hex, roundedBox } from '../geometry/shapes';
+import { hex, medallionTexture } from '../geometry/shapes';
 import { toonMaterial } from '../materials/toon';
 import { nearestTurn, ringPositions, rotationToFront } from '../math';
 
@@ -36,10 +37,11 @@ export class HeroScene extends BaseScene {
   readonly camera = new PerspectiveCamera(40, 1, 0.1, 100);
   private readonly ring = new Group();
   private readonly tilt = new Group();
-  private boxes: Mesh[] = [];
+  private medals: Sprite[] = [];
+  private medalSize = 1;
   private core: Mesh | null = null;
   private targetY = 0;
-  private hovered: Mesh | null = null;
+  private hovered: Sprite | null = null;
   private pointerNdc: Vector2 | null = null;
   private idleSpin = true;
   private readonly baseTilt: number;
@@ -52,7 +54,8 @@ export class HeroScene extends BaseScene {
   protected build() {
     const crown = this.opts.crown === true;
     const radius = crown ? 1.85 : 3.2;
-    const size = crown ? 0.48 : 0.9;
+    const size = crown ? 0.95 : 1.4;
+    this.medalSize = size;
     // Encuadre: el anillo entero cabe también en un marco estrecho.
     this.camera.position.set(0, 2.4, 11.5);
     this.camera.lookAt(0, 0, 0);
@@ -62,33 +65,24 @@ export class HeroScene extends BaseScene {
       Aire: this.palette.cyan,
       Agua: this.palette.violetText,
     };
-    const materials = Object.fromEntries(
-      ELEMENTS.map((e) => [
-        e,
-        toonMaterial(colors[e], { gradientMap: this.gradient, outline: 0.008 }),
-      ]),
-    ) as Record<(typeof ELEMENTS)[number], ReturnType<typeof toonMaterial>>;
-    const box = roundedBox(size, size, size, size * 0.18);
-    const plate = new PlaneGeometry(size * 0.69, size * 0.69);
 
     ringPositions(12, radius).forEach((pos, i) => {
       const sign = SIGNS[i]!;
-      const mesh = new Mesh(box, materials[elementOf(sign)]);
-      mesh.position.set(pos.x, 0, pos.z);
-      mesh.lookAt(pos.x * 2, 0, pos.z * 2);
-      mesh.userData = { sign, index: i };
-      const glyph = new Mesh(
-        plate,
-        new MeshBasicMaterial({
-          map: glyphTexture(SIGN_GLYPHS[sign], hex(this.palette.bg)),
-          transparent: true,
-        }),
+      const { texture, cancel } = medallionTexture(
+        `/signos/${signSlug(sign)}-avatar-240.webp`,
+        SIGN_GLYPHS[sign],
+        hex(colors[elementOf(sign)]),
+        hex(this.palette.bg),
       );
-      (glyph.material as MeshBasicMaterial).userData.outlineParameters = { visible: false };
-      glyph.position.z = size / 2 + 0.01;
-      mesh.add(glyph);
-      this.boxes.push(mesh);
-      this.ring.add(mesh);
+      this.track({ dispose: cancel });
+      const material = new SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
+      material.userData.outlineParameters = { visible: false };
+      const medal = new Sprite(material);
+      medal.position.set(pos.x, 0, pos.z);
+      medal.scale.setScalar(size);
+      medal.userData = { sign, index: i };
+      this.medals.push(medal);
+      this.ring.add(medal);
     });
 
     if (!crown) {
@@ -137,10 +131,10 @@ export class HeroScene extends BaseScene {
     const py = this.pointerNdc?.y ?? 0;
     this.tilt.rotation.x = damp(this.tilt.rotation.x, this.baseTilt - py * 0.12, 3, dt);
     this.tilt.rotation.z = damp(this.tilt.rotation.z, -px * 0.08, 3, dt);
-    this.boxes.forEach((b, i) => {
-      b.position.y = Math.sin(this.elapsed * 1.4 + i) * 0.12;
-      const s = b === this.hovered ? 1.18 : 1;
-      b.scale.setScalar(damp(b.scale.x, s, 10, dt));
+    this.medals.forEach((m, i) => {
+      m.position.y = Math.sin(this.elapsed * 1.4 + i) * 0.12;
+      const target = this.medalSize * (m === this.hovered ? 1.3 : 1);
+      m.scale.setScalar(damp(m.scale.x, target, 10, dt));
     });
     if (this.core) {
       this.core.rotation.y += dt * 0.4;
@@ -150,14 +144,14 @@ export class HeroScene extends BaseScene {
 
   pointer(ndc: Vector2 | null) {
     this.pointerNdc = ndc;
-    this.hovered = ndc ? this.hit(ndc, this.boxes) : null;
+    this.hovered = ndc ? this.hit(ndc, this.medals) : null;
   }
 
   select(ndc: Vector2): string | null {
-    const box = this.hit(ndc, this.boxes);
-    if (!box) return null;
-    this.focusSign(box.userData.sign as Sign);
-    return box.userData.sign as string;
+    const medal = this.hit(ndc, this.medals);
+    if (!medal) return null;
+    this.focusSign(medal.userData.sign as Sign);
+    return medal.userData.sign as string;
   }
 
   /** Trae el signo al frente (también desde el teclado). */
@@ -167,7 +161,7 @@ export class HeroScene extends BaseScene {
     this.idleSpin = false;
     const angle = Math.PI / 2 + (i * 2 * Math.PI) / 12;
     this.targetY = nearestTurn(this.ring.rotation.y, rotationToFront(angle));
-    this.hovered = this.boxes[i] ?? null;
+    this.hovered = this.medals[i] ?? null;
   }
 }
 

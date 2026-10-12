@@ -872,6 +872,31 @@ fieldset.group > legend {
   text-align: center;
   color: var(--ink-soft);
 }
+/* Signo elegido: su medallón junto a la frase. */
+.scene-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+.scene-status-avatar {
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--acid);
+  box-shadow: var(--glow-acid);
+}
+/* Botones de signo con la ilustración de ZODI en miniatura. */
+.chip-avatar {
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: -0.55rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+}
 .chip-button[aria-pressed='true'] {
   border-color: var(--acid);
   background: rgb(184 255 23 / 12%);
