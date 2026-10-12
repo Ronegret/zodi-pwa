@@ -39,6 +39,18 @@ const ART = {
   'zodi-carta': '4-Poses-del-personaje-ZODI/ZODI-sujetando-carta',
   'zodi-senalando': '2-Portada--Home/ZODI-senalando-al-usuario',
   'zodi-leyendo': '2-Portada--Home/ZODI-leyendo-el-destino',
+  mano: '3-Secciones-principales-de-la-web/Lectura-de-mano',
+  runas: '3-Secciones-principales-de-la-web/Runas-vikingas',
+  suerte: '3-Secciones-principales-de-la-web/Suerte--mala-suerte',
+  'tarot-zodi': '8-Tarot-ZODI/Imagen-general-tarot-ZODI',
+  'numerologia-zodi': '7-Numerologia/Imagen-general-numerologia',
+  'zodi-silencio': '4-Poses-del-personaje-ZODI/ZODI-haciendo-silencio',
+  'zodi-lanzando-cartas': '4-Poses-del-personaje-ZODI/ZODI-lanzando-cartas',
+  'zodi-mano': '4-Poses-del-personaje-ZODI/ZODI-mano-extendida',
+  'zodi-te-lo-adverti': '4-Poses-del-personaje-ZODI/ZODI-te-lo-adverti',
+  'zodi-trono': '4-Poses-del-personaje-ZODI/ZODI-en-trono-urbano',
+  'zodi-energia': '2-Portada--Home/ZODI-con-energia-en-la-mano',
+  'zodi-cartas-flotando': '2-Portada--Home/ZODI-con-cartas-flotando',
 };
 for (const [slug, file] of Object.entries(ART)) {
   for (const width of [640, 1024]) {
@@ -65,7 +77,58 @@ for (const [slug, file] of Object.entries(SIGNS)) {
   jobs.push([`zodiac/${file}.webp`, `zodiac/${slug}-640.webp`, { width: 640 }]);
 }
 
+// Arcanos ZODI (cartas propias del tarot de Zodi), 2:3.
+const ZODI_ARCANA = {
+  'el-destino': 'El-Destino',
+  'el-ego': 'El-Ego',
+  'el-ex-que-vuelve': 'El-Ex-que-Vuelve',
+  'el-karma': 'El-Karma',
+  'la-ilusion': 'La-Ilusion',
+  'la-mala-idea': 'La-Mala-Idea',
+  'la-red-flag': 'La-Red-Flag',
+  'la-venganza-cosmica': 'La-Venganza-Cosmica',
+  'la-verdad': 'La-Verdad',
+};
+const CARD = { width: 480, height: 720, fit: 'cover', position: 'centre' };
+for (const [slug, file] of Object.entries(ZODI_ARCANA)) {
+  jobs.push([`zodi-art/nuevas/8-Tarot-ZODI/${file}.webp`, `tarot/${slug}-480.webp`, CARD]);
+}
+// Reverso: el cartel "TAROT ZODI" recortado a carta.
+jobs.push(['zodi-art/nuevas/8-Tarot-ZODI/Imagen-general-tarot-ZODI.webp', 'tarot/reverso-480.webp', CARD]);
+// "La Identificación": la carta que invita a entrar (está fuera de public/).
+jobs.push(['../ZODI IMAGENES/cartaid.png', 'tarot/la-identificacion-480.webp', CARD]);
+
+// Números de la numerología (1-9 y maestros).
+for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33]) {
+  jobs.push([`zodi-art/nuevas/7-Numerologia/${n}.webp`, `numeros/${n}-480.webp`, { width: 480 }]);
+}
+
+// Los doce signos ilustrados (páginas públicas) y su avatar.
+const SIGN_ART = {
+  aries: 'Aries',
+  tauro: 'Tauro',
+  geminis: 'Geminis',
+  cancer: 'Cancer',
+  leo: 'Leo',
+  virgo: 'Virgo',
+  libra: 'Libra',
+  escorpio: 'Escorpio',
+  sagitario: 'Sagitario',
+  capricornio: 'Capricornio',
+  acuario: 'Acuario',
+  piscis: 'Piscis',
+};
+for (const [slug, file] of Object.entries(SIGN_ART)) {
+  const dir = 'zodi-art/nuevas/5-Signos-del-zodiaco-occidental';
+  jobs.push([`${dir}/${file}.webp`, `signos/${slug}-640.webp`, { width: 640 }]);
+  jobs.push([`${dir}/${file}.webp`, `signos/${slug}-1024.webp`, { width: 1024 }]);
+  jobs.push([`${dir}/Avatar_${file}.webp`, `signos/${slug}-avatar-240.webp`, { width: 240 }]);
+}
+
+// `node scripts/brand-assets.mjs tarot/ numeros/` regenera solo esos destinos.
+const only = process.argv.slice(2);
 for (const [src, dest, resize] of jobs) {
+  if (only.length && !only.some((p) => dest.startsWith(p))) continue;
   const target = out + dest;
   await mkdir(target.slice(0, target.lastIndexOf('/')), { recursive: true });
   const info = await sharp(root + src)
