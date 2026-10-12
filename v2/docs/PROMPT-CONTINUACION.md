@@ -138,7 +138,7 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 | **5. Escenas 3D** | Hecha (ver informe). Medir fps en móvil real en Fase 8. |
 | **6. PDF editorial** | Hecha: `/app/carta/imprimir` (ver informe). |
 | **7. Portar funcionalidades** | Hecha salvo Stripe y gemas (aplazado: 30 días gratis) y push/emails (bloqueado por los DNS de Resend). |
-| **8. Paridad y experiencia** | 8A y 8B hechas; 8C con actividad, logros, favoritas, moderación; estudio de usabilidad aplicado; CI en GitHub. Faltan predicciones a 90 días, ritual del día y amigos. |
+| **8. Paridad y experiencia** | 8A y 8B hechas; 8C con actividad, logros, favoritas, moderación; estudio de usabilidad aplicado; CI en GitHub; significado de la carta y del nombre, Tu gente, compatibilidad pública y barra móvil con "Más". Faltan predicciones a 90 días y ritual del día. |
 | **9. QA y corte** | Lighthouse, pruebas de carga en `zodi.aibueno.es`, fps en móvil real, retirada del proyecto Next (`zodi-pwa`). axe en 3 tamaños y redirects: hechos. |
 
 ## 8. Comandos (desde `v2/`)
@@ -152,6 +152,11 @@ npm run test:e2e     # playwright: mock de Supabase en :54329 + dev server en :4
 node scripts/db/migrate.mjs [--dry-run]   # aplica migraciones pendientes al Supabase real
 node scripts/places/import.mjs            # (re)carga GeoNames en places/place_aliases
 ```
+
+### Vercel desde la terminal
+- El CLI de Vercel está instalado y con sesión (`vercel whoami` → `ronegret`). La API se usa con `MSYS_NO_PATHCONV=1 vercel api /v9/projects/zodi-v2` (sin esa variable, Git Bash convierte la ruta en una de Windows).
+- Las claves se suben leyendo `.env.local` desde un script y pasándolas por stdin (`--input -`), nunca en la línea de comandos ni en pantalla.
+- Una subida = un despliegue (`astro-v2`) y una ejecución de CI. No subir commit a commit: agrupar.
 
 ## 9. Reglas de trabajo y trampas
 - `astro-v2` es **producción** (`zodi.aibueno.es`). Las funcionalidades nuevas van en una rama (ahora `fase-7`), que da un preview en Vercel; se fusionan cuando Rodrigo las aprueba. Commits pequeños por tarea.

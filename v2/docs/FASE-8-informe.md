@@ -30,9 +30,19 @@ Rama `fase-7` · 12/10/2026 · Plan y comparación con la Zodi de antes en `FASE
 - **CI en GitHub** (`.github/workflows/v2-ci.yml`): lint, tipos, unitarias con RLS, compilación y e2e en Linux en cada subida a `fase-7`. Primer pase en verde. Destapó que faltaba `@types/node` en la v2 (se tomaba de la app antigua).
 - **Correos de acceso en español** (`supabase/templates/`, instrucciones en `CORREOS-SUPABASE.md`).
 - **Vercel Web Analytics y Speed Insights** sin cookies (solo en producción; hay que activarlos en el panel de Vercel). Privacidad actualizada.
-- **Incidencia**: desde las 11:45 UTC Vercel no despliega ninguna subida (ni `zodi-v2` ni `zodi-pwa`): la integración con GitHub parece desconectada. Producción sigue en `7779008`.
+- **Incidencia resuelta**: Vercel estuvo sin desplegar desde las 11:45 UTC y después sacó la cola de golpe.
+
+### Personalización a fondo (12/10/2026, noche)
+- **El significado de tu carta** (`/app/carta/significado`): Sol, Luna, Ascendente, Mercurio, Venus, Marte, suerte y lecciones (Júpiter y Saturno), generación, elementos, modalidad, casas, aspectos, numerología con las ilustraciones de cada número (`/numeros/*`), horóscopo chino, maya y carta del tarot. Sin IA, al momento. Cada sección lleva **"Pregúntale a ZODI"**, que abre el oráculo con la pregunta escrita (`?pregunta=`, no se envía sola).
+- **Tu nombre**: diccionario propio (más de 200 nombres y 90 apellidos con origen, significado y curiosidades) y reglas para patronímicos (-ez = «hijo de»), apellidos vascos y mapuches por sus partes. Se puede escribir el nombre completo (no se guarda); cambia también los números.
+- **PDF completo**: la carta, el significado entero y el del nombre.
+- **Tu gente** (`/app/gente`, migración `20261012160000_people.sql`, aplicada en Supabase): pareja, familia, amistades y trabajo con su fecha (y hora opcional). Fichas privadas (RLS, máx. 50). Afinidad por Sol, Luna, Venus/Marte cruzados, Mercurio, horóscopo chino y numerología; **"Hoy entre los dos"** con la Luna del día y el biorritmo, consejo según la relación y aviso de cumpleaños. En el panel: "Tu gente hoy".
+- **Compatibilidad pública** (`/compatibilidad`, `/compatibilidad/aries-y-leo`): vínculo en la rueda, elementos, ritmo, amor, amistad y trabajo; 144 combinaciones con canónica única; enlazada desde el horóscopo de cada signo y el pie.
+- **Móvil**: barra inferior Inicio · Lecturas · Tu gente · Carta · **Más** (hoja que sube desde abajo con el resto y "Cerrar sesión", `popover` nativo sin JS). Títulos sin partir palabras, índice deslizable, columna que no se ensancha a 320 px. Revisión con capturas en Pixel 7.
+- **Vercel y avisos**: `ANTHROPIC_API_KEY` estaba en el proyecto antiguo (`zodi-pwa`), no en `zodi-v2`; añadida (Production y Preview, sensible) y la IA responde en producción (`/api/salud` → `"ia": true`). Apagados los comentarios del bot en commits y PR de los dos proyectos. `zodi-v2` ya no despliega `fase-7` y `zodi-pwa` ignora las ramas v2. El CI corre una vez por cambio (solo al subir a `astro-v2`, cancela la anterior y reintenta una vez los e2e). PR #3 cerrado por duplicado del #2.
 
 ## Verificado (12/10/2026)
+- Noche: `astro check` 0 errores, lint limpio, 241 unitarias (incluye 56 de RLS), e2e completos en móvil, tablet y escritorio con axe (incluye Tu gente, el significado, la hoja Más y la compatibilidad pública).
 - `npm run check`: 0 errores. `npm run lint`: limpio.
 - `npm test`: 209/209 (nuevos: `divination.test.ts` con kines mayas de referencia, runas, cristales, nombre, validación y preparación; `public.test.ts` con casas solares y caché; `progress.test.ts` comprueba que el catálogo de logros es el mismo que el de la base de datos; 6 pruebas nuevas de RLS para la actividad).
 - `npm run test:e2e`: 241 pasan y 8 se saltan a propósito (capturas de revisión), en móvil, tablet y escritorio, con axe WCAG 2.2 AA en las páginas nuevas (mano, nombre, maya, horóscopo público, progreso, historial).
@@ -42,9 +52,10 @@ Rama `fase-7` · 12/10/2026 · Plan y comparación con la Zodi de antes en `FASE
 - Revisión visual con capturas: tarot, cruz celta, runas, sello maya, hub, portada, Leo y login.
 
 ## Riesgos y pendientes
-- **IA en producción**: sin `ANTHROPIC_API_KEY` en Vercel las lecturas muestran "Zodi está afilando la lengua". El horóscopo público no la necesita.
+- **IA en producción**: resuelto (la clave estaba en el proyecto equivocado). `/api/salud` dice si está configurada.
 - **Google**: el proveedor sigue desactivado en Supabase (`/auth/v1/authorize?provider=google` → 400). El botón aparece solo cuando se active.
 - **Windows bloquea el compilador nativo de Astro** (Control inteligente de aplicaciones). En local se usa el compilador WebAssembly con `NAPI_RS_FORCE_WASI=1`; Vercel no está afectado. Detalle en `PROMPT-CONTINUACION.md`.
 - Los vídeos llevan la marca de agua "Veo" del generador; no se ha recortado.
 - El sello maya usa la cuenta de las 13 Lunas (la que busca el público), no la cuenta tradicional del Tzolkin.
-- Pendiente de la 8C: predicciones a 90 días, ritual del día y amigos. Después 8D (Stripe y gemas, compartir como imagen, PDF, emails y push).
+- Pendiente de la 8C: predicciones a 90 días y ritual del día ("amigos" queda cubierto por Tu gente). Después 8D (Stripe y gemas, compartir como imagen, emails y push).
+- Codex (ChatGPT) revisa el PR #2 en cada subida: para no recibir esos correos, desactivar sus revisiones automáticas o cerrar el PR.
