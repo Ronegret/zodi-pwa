@@ -50,5 +50,6 @@ export function prepareChat(
     messages,
     maxTokens: 500,
     input: { question: last.slice(0, 1000) },
+    visuals: {},
   };
 }

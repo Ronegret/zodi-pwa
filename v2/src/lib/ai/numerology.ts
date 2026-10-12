@@ -48,6 +48,8 @@ export function expressionNumber(name: string): number | null {
   return reduce(letters.split('').reduce((s, c) => s + (PYTHAGOREAN[c] ?? 0), 0));
 }
 
+export { nameNumbers, nameText, type NameNumbers } from '@/lib/divination/name';
+
 export const CHINESE_ANIMALS = [
   'Rata',
   'Buey',

@@ -1078,76 +1078,7 @@ fieldset.group > legend {
   color: var(--violet-text);
 }
 
-/* Tirada de tarot */
-.tarot-spread {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-.tarot-slot {
-  display: grid;
-  gap: var(--space-2);
-  justify-items: center;
-  text-align: center;
-}
-.tarot-card {
-  width: min(100%, 9rem);
-  aspect-ratio: 5 / 8;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  place-items: center;
-  padding: var(--space-3) var(--space-2);
-  border-radius: var(--radius-lg);
-  border: 2px solid var(--acid);
-  background:
-    radial-gradient(circle at 50% 45%, rgb(155 77 255 / 35%), transparent 60%), var(--surface-2);
-  box-shadow: var(--glow-acid);
-  font-family: var(--font-display);
-  font-weight: 800;
-  animation: card-in var(--dur-slow) var(--ease-spring) both;
-}
-.tarot-slot:nth-child(2) .tarot-card {
-  animation-delay: 120ms;
-}
-.tarot-slot:nth-child(3) .tarot-card {
-  animation-delay: 240ms;
-}
-@keyframes card-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px) rotateY(80deg);
-  }
-}
-.tarot-card[data-reversed] {
-  rotate: 180deg;
-  border-color: var(--hot);
-}
-.tarot-card-numeral {
-  color: var(--acid);
-  font-size: var(--step-1);
-}
-.tarot-card-sigil {
-  font-size: var(--step-3);
-  color: var(--violet-text);
-}
-.tarot-card-name {
-  font-size: var(--step--1);
-  line-height: 1.2;
-}
-.tarot-slot-name {
-  font-weight: 700;
-  font-size: var(--step--1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .studio-zodi,
-  .tarot-card,
-  .reading-paper[data-streaming] .rich-text > :last-child::after {
-    animation: none;
-  }
-}
+/* La tirada de tarot y demás visuales de lecturas: readings.css */
 
 /* ---------- Chat con Zodi ---------- */
 .chat {

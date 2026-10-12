@@ -2,8 +2,10 @@
 import AppShell from '@/layouts/AppShell.astro';
 import Button from '@/components/ui/Button.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
+import ReadingGuide from '@/components/readings/ReadingGuide.astro';
 import { ReadingStudio } from '@/components/readings/ReadingStudio';
 import { aiAvailable } from '@/lib/ai/client';
+import { GUIDES } from '@/lib/ai/guides';
 import { KIND_BY_SLUG } from '@/lib/ai/kinds';
 import { getLatestSelfChart } from '@/lib/server/charts';
 import { getQuotaStatus } from '@/lib/server/quota';
@@ -18,6 +20,7 @@ const [quota, stored] = await Promise.all([getQuotaStatus(supabase), getLatestSe
 const remaining = quota ? Math.max(0, quota.limit - quota.used) : null;
 const missingChart = def.needsChart && !stored;
 const current = def.slug === 'compatibilidad' ? 'match' : 'lecturas';
+const guide = GUIDES[def.slug];
 ---
 
 <AppShell title={def.title} current={current} kicker={def.kicker} intro={def.blurb}>
@@ -44,10 +47,23 @@ const current = def.slug === 'compatibilidad' ? 'match' : 'lecturas';
   ) : (
     <ReadingStudio
       client:load
-      def={{ slug: def.slug, title: def.title, input: def.input, cta: def.cta }}
+      def={{
+        slug: def.slug,
+        title: def.title,
+        input: def.input,
+        cta: def.cta,
+        art: def.art,
+        ...(def.spreads ? { spreads: def.spreads } : {}),
+      }}
       defaultTone={profile.reading_tone}
+      defaultName={def.input === 'name' ? profile.display_name : ''}
       remaining={remaining}
     />
+  )}
+  {guide && (
+    <div class="guide-wrap">
+      <ReadingGuide guide={guide} />
+    </div>
   )}
 </AppShell>
 
@@ -62,5 +78,8 @@ const current = def.slug === 'compatibilidad' ? 'match' : 'lecturas';
   }
   .crumbs a {
     color: var(--acid);
+  }
+  .guide-wrap {
+    margin-top: var(--space-7);
   }
 </style>

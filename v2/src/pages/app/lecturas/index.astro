@@ -2,7 +2,7 @@
 import AppShell from '@/layouts/AppShell.astro';
 import Badge from '@/components/ui/Badge.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { KINDS, KIND_BY_KIND } from '@/lib/ai/kinds';
+import { GROUPS, KINDS, KIND_BY_KIND } from '@/lib/ai/kinds';
 import { getQuotaStatus } from '@/lib/server/quota';
 import { listReadings } from '@/lib/server/readings';
 import { excerpt, readingDate } from '@/lib/readings/format';
@@ -58,24 +58,66 @@ const tz = profile.time_zone ?? 'Europe/Madrid';
       </div>
     </a>
 
-    <h2 class="section-title">Elige tu lectura</h2>
-    <ul class="kinds">
-      {rest.map((k) => (
-        <li>
-          <a class="kind reveal" href={`/app/lecturas/${k.slug}`}>
-            <img src={k.art} alt="" width="640" height="640" loading="lazy" decoding="async" />
-            <span class="kind-text">
-              <span class="kicker">{k.kicker}</span>
-              <span class="kind-title">{k.title}</span>
-              <span class="kind-blurb">{k.blurb}</span>
-            </span>
-            <span class="kind-go" aria-hidden="true">
-              <Icon name="chevronRight" />
-            </span>
-          </a>
-        </li>
-      ))}
-    </ul>
+    {GROUPS.map((g) => (
+      <section class="group" aria-labelledby={`grupo-${g.id}`}>
+        <div class="group-head">
+          <h2 id={`grupo-${g.id}`} class="section-title">
+            {g.title}
+          </h2>
+          <p class="muted">{g.blurb}</p>
+        </div>
+        <ul class="kinds">
+          {g.id === 'tarot' && (
+            <li>
+              <a class="kind reveal" href="/app/oraculo">
+                <img
+                  src="/art/zodi-bola-640.webp"
+                  alt=""
+                  width="640"
+                  height="640"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="kind-text">
+                  <span class="kicker">Consulta libre</span>
+                  <span class="kind-title">Oráculo de ZODI</span>
+                  <span class="kind-blurb">
+                    Pregunta lo que te pese y ZODI te contesta en directo, con tu carta delante.
+                  </span>
+                </span>
+                <span class="kind-go" aria-hidden="true">
+                  <Icon name="chevronRight" />
+                </span>
+              </a>
+            </li>
+          )}
+          {rest
+            .filter((k) => k.group === g.id)
+            .map((k) => (
+              <li>
+                <a class="kind reveal" href={`/app/lecturas/${k.slug}`}>
+                  <img
+                    src={k.art}
+                    alt=""
+                    width="640"
+                    height="640"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="kind-text">
+                    <span class="kicker">{k.kicker}</span>
+                    <span class="kind-title">{k.title}</span>
+                    <span class="kind-blurb">{k.blurb}</span>
+                  </span>
+                  <span class="kind-go" aria-hidden="true">
+                    <Icon name="chevronRight" />
+                  </span>
+                </a>
+              </li>
+            ))}
+        </ul>
+      </section>
+    ))}
 
     <section class="recent" aria-labelledby="recent-title">
       <h2 id="recent-title" class="section-title">
@@ -167,6 +209,17 @@ const tz = profile.time_zone ?? 'Europe/Madrid';
   .featured p:not(.kicker) {
     color: var(--ink-soft);
     font-size: var(--step-1);
+  }
+  .group {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .group-head {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .group-head p {
+    margin: 0;
   }
   .section-title {
     display: flex;

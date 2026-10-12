@@ -26,12 +26,15 @@ const PRIVATE = [
   '/app',
   '/app/lecturas',
   '/app/lecturas/tarot',
+  '/app/lecturas/mano',
+  '/app/lecturas/nombre',
+  '/app/lecturas/horoscopo-maya',
   '/app/comunidad',
   '/app/carta',
   '/app/ajustes',
   '/app/horoscopo',
   '/app/compatibilidad',
-  '/app/asistente',
+  '/app/oraculo',
 ];
 
 for (const path of PUBLIC) {

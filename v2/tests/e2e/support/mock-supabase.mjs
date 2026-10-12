@@ -582,8 +582,9 @@ async function handleAi(req, res) {
     '\n',
   );
   const name = /Nombre: ([^ (\n]+)/.exec(prompt)?.[1] ?? 'tú';
-  const cards = [...prompt.matchAll(/- (Pasado|Presente|Futuro): [^·]+· ([^\n(]+)/g)].map((m) =>
-    m[2].trim(),
+  // "1. Pasado: III · La Emperatriz (invertida) — Arcano ZODI: …"
+  const cards = [...prompt.matchAll(/^\d+\. [^:\n]+: [^·\n]+· ([^\n(—]+)/gm)].map((m) =>
+    m[1].trim(),
   );
   const isChat = body.system.some((b) => b.text.includes('MODO CHAT'));
   const text = isChat

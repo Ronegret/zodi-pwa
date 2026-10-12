@@ -3,7 +3,7 @@
  * extras), la genera en streaming (NDJSON), la guarda con service role y
  * devuelve la cuota si algo falla. El usuario nunca paga nuestros errores.
  */
-import type { NatalChart } from '@/lib/astro-engine';
+import { SIGNS, type NatalChart } from '@/lib/astro-engine';
 import type { ChatTurn, GenerationResult, generate } from '@/lib/ai/client';
 import { buildReadingContext, type ProfileForReading } from '@/lib/ai/context';
 import {
@@ -15,14 +15,28 @@ import {
   type DrawnCard,
 } from '@/lib/ai/extras';
 import { KIND_BY_SLUG, LENGTHS, type ReadingKind } from '@/lib/ai/kinds';
+import { nameNumbers, nameText, type NameNumbers } from '@/lib/divination/name';
 import { ZODI_SYSTEM, buildUserMessage, type Tone } from '@/lib/ai/prompts';
+import { crystalText, elementOfSign, pickCrystal, type Crystal } from '@/lib/divination/crystals';
+import { mayanSign, mayanText, type MayanSign } from '@/lib/divination/maya';
+import { palmText } from '@/lib/divination/palm';
+import { drawRunes, runesText, type DrawnRune } from '@/lib/divination/runes';
 import type { Json } from '@/lib/supabase/database.types';
 import type { ZodiSupabaseClient } from '@/lib/supabase/server';
 import type { ReadingRequest } from '@/lib/validation/reading';
 import type { QuotaStore } from './quota';
 
+/** Lo que se pinta antes del texto: cartas, runas, cristal, sello o números. */
+export interface ReadingVisuals {
+  cards?: DrawnCard[];
+  runes?: DrawnRune[];
+  crystal?: Crystal & { intent: string };
+  maya?: MayanSign;
+  numbers?: NameNumbers;
+}
+
 export type StreamEvent =
-  | { type: 'meta'; cards?: DrawnCard[] }
+  | ({ type: 'meta' } & ReadingVisuals)
   | { type: 'text'; text: string }
   | { type: 'done'; id: string; remaining: number }
   | { type: 'error'; message: string };
@@ -35,7 +49,7 @@ export interface PreparedReading {
   maxTokens: number;
   /** Lo que se guarda en readings.input (sin datos del perfil). */
   input: Record<string, Json>;
-  cards?: DrawnCard[];
+  visuals: ReadingVisuals;
 }
 
 export function prepareReading(
@@ -55,18 +69,68 @@ export function prepareReading(
     ...(request.focus ? { focus: request.focus } : {}),
   };
   let extra: string | undefined;
-  let cards: DrawnCard[] | undefined;
+  const visuals: ReadingVisuals = {};
 
   if (def.input === 'question' && request.question) {
-    cards = drawTarot(random);
+    const spread = request.spread ?? def.spreads?.[0] ?? 'tres';
+    const cards = drawTarot(spread, random);
+    visuals.cards = cards;
     extra = tarotText(cards, request.question);
     input.question = request.question;
+    input.spread = spread;
     input.cards = cards.map((c) => ({
       numeral: c.numeral,
       name: c.name,
       position: c.position,
       reversed: c.reversed,
+      ...(c.art ? { art: c.art } : {}),
     }));
+  }
+  if (def.input === 'runes') {
+    const runes = drawRunes(request.runes ?? 3, random);
+    visuals.runes = runes;
+    extra = runesText(runes, request.question);
+    if (request.question) input.question = request.question;
+    input.runes = runes.map((r) => ({
+      symbol: r.symbol,
+      name: r.name,
+      meaning: r.meaning,
+      position: r.position,
+      reversed: r.reversed,
+    }));
+  }
+  if (def.input === 'crystal' && request.intent) {
+    const sun = stored?.chart.planets.find((p) => p.id === 'sun');
+    const element = sun ? elementOfSign(SIGNS.indexOf(sun.sign)) : null;
+    const crystal = pickCrystal(request.intent, element, context.today);
+    visuals.crystal = { ...crystal, intent: request.intent };
+    extra = crystalText(crystal, request.intent, request.question);
+    input.intent = request.intent;
+    input.crystal = crystal.name;
+    if (request.question) input.question = request.question;
+  }
+  if (def.input === 'name' && request.name) {
+    const numbers = nameNumbers(request.name);
+    if (numbers) {
+      visuals.numbers = numbers;
+      extra = nameText(numbers);
+    }
+    input.name = {
+      first: request.name.first,
+      last1: request.name.last1 ?? null,
+      last2: request.name.last2 ?? null,
+    };
+  }
+  if (def.input === 'palm' && request.palm) {
+    extra = palmText(request.palm, request.notes);
+    input.palm = { ...request.palm };
+    if (request.notes) input.notes = request.notes;
+  }
+  if (def.kind === 'mayan-horoscope' && profile.birth_date) {
+    const maya = mayanSign(profile.birth_date);
+    visuals.maya = maya;
+    extra = mayanText(maya);
+    input.kin = maya.kin;
   }
   if (def.input === 'dream' && request.dream) {
     extra = `Sueño:\n"""${request.dream}"""`;
@@ -100,7 +164,7 @@ export function prepareReading(
     ],
     maxTokens: LENGTHS[request.length].maxTokens,
     input,
-    ...(cards ? { cards } : {}),
+    visuals,
   };
 }
 
@@ -134,7 +198,7 @@ export function readingStream(opts: RunOptions): ReadableStream<Uint8Array> {
     async start(controller) {
       const send = (event: StreamEvent) =>
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
-      send({ type: 'meta', ...(prepared.cards ? { cards: prepared.cards } : {}) });
+      send({ type: 'meta', ...prepared.visuals });
       let content = '';
       try {
         const result: GenerationResult = await opts.generateFn(

@@ -162,7 +162,7 @@ describe('validación de peticiones', () => {
 
 describe('extras', () => {
   it('tres arcanos distintos con posición', () => {
-    const cards = drawTarot(() => 0.5);
+    const cards = drawTarot('tres', () => 0.5);
     expect(cards.map((c) => c.position)).toEqual(['Pasado', 'Presente', 'Futuro']);
     expect(new Set(cards.map((c) => c.name)).size).toBe(3);
     expect(tarotText(cards, '¿Me mudo?')).toContain('Pregunta: "¿Me mudo?"');
@@ -271,7 +271,7 @@ describe('stream de una lectura', () => {
     expect(p.system).toEqual([ZODI_SYSTEM]);
     expect(p.messages).toHaveLength(1);
     expect(p.messages[0]!.content).toContain('Nombre: Ana');
-    expect(p.messages[0]!.content).toContain('Cartas tiradas:');
+    expect(p.messages[0]!.content).toContain('Cartas tiradas (tres cartas):');
     expect(JSON.stringify(p.input)).not.toContain('Ana');
     expect(p.input).toMatchObject({ slug: 'tarot', tone: 'sarcastico', question: '¿Me mudo?' });
   });

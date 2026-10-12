@@ -38,8 +38,19 @@ test.describe('lecturas con IA', () => {
     await page.goto('/app/lecturas');
     await expect(page.getByRole('heading', { level: 1, name: 'Lecturas' })).toBeVisible();
     await expect(page.getByText(/Te quedan 5 de 5 lecturas hoy/)).toBeVisible();
-    await expect(page.getByRole('link', { name: /Tarot: tres cartas/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Tarot ZODI/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Roast astral/ })).toBeVisible();
+    // Agrupadas por temas, con las de la Zodi de antes y el oráculo.
+    for (const group of ['Horóscopos', 'Tarot y runas', 'Tu carta y tus números']) {
+      await expect(page.getByRole('heading', { level: 2, name: group })).toBeVisible();
+    }
+    for (const name of [/Cruz celta/, /Runas vikingas/, /Lectura de mano/, /Horóscopo maya/]) {
+      await expect(page.getByRole('link', { name })).toBeVisible();
+    }
+    await expect(page.getByRole('link', { name: /Oráculo de ZODI/ })).toHaveAttribute(
+      'href',
+      '/app/oraculo',
+    );
     await expectNoViolations(page);
   });
 
@@ -86,11 +97,97 @@ test.describe('lecturas con IA', () => {
     await page.getByRole('button', { name: 'Tirar las cartas' }).click();
     const spread = page.getByRole('list', { name: 'Cartas tiradas' });
     await expect(spread.getByRole('listitem')).toHaveCount(3);
+    // Se reparten boca abajo y se voltean una a una.
+    await expect(spread.locator('.tarot-card3d[data-revealed]')).toHaveCount(3);
     const names = await spread.locator('.tarot-slot-name').allInnerTexts();
     // La IA recibió exactamente esas cartas (el mock las repite).
     const first = names[0]!.replace(' · invertida', '');
     await expect(page.locator('.reading-paper')).toContainText(first);
     await expectNoViolations(page);
+  });
+
+  test('tarot de una carta y cruz celta de diez', async ({ page, request }) => {
+    await login(page, await createTestUser(request, true));
+    await openStudio(page, 'tarot');
+    await page.getByRole('radio', { name: /^Una carta/ }).check();
+    await page.getByLabel('Tu pregunta').fill('¿Le escribo hoy?');
+    await page.getByRole('button', { name: 'Tirar las cartas' }).click();
+    const spread = page.getByRole('list', { name: 'Cartas tiradas' });
+    await expect(spread.getByRole('listitem')).toHaveCount(1);
+    await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
+    expect((await aiRequest(request, '¿Le escribo hoy?')).messages[0]!.content).toContain(
+      'Cartas tiradas (una carta)',
+    );
+
+    await openStudio(page, 'tirada-celta');
+    await page.getByLabel('Tu pregunta').fill('¿Dejo el trabajo este año?');
+    await page.getByRole('button', { name: 'Echar la cruz celta' }).click();
+    await expect(spread.getByRole('listitem')).toHaveCount(10);
+    await expect(spread.locator('.tarot-card3d[data-revealed]')).toHaveCount(10);
+    await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
+    // La guía explica qué es la cruz celta.
+    await expect(page.getByRole('heading', { level: 2, name: '¿Qué es esto?' })).toBeVisible();
+    await page.getByText('El báculo', { exact: true }).click();
+    await expect(page.getByText(/Las cuatro últimas/)).toBeVisible();
+  });
+
+  test('runas y cristal', async ({ page, request }) => {
+    await login(page, await createTestUser(request, true));
+    await openStudio(page, 'runas');
+    // Pregunta única por proyecto: los tres navegadores comparten la IA falsa.
+    const question = `¿Le digo lo que siento? (${test.info().project.name})`;
+    await page.getByLabel(/Tu pregunta/).fill(question);
+    await page.getByRole('button', { name: 'Tirar las runas' }).click();
+    const cast = page.getByRole('list', { name: 'Runas tiradas' });
+    await expect(cast.getByRole('listitem')).toHaveCount(3);
+    const rune = (await cast.locator('.rune-name').first().innerText()).split(' ·')[0]!;
+    await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
+    const ai = await aiRequest(request, question);
+    expect(ai.messages[0]!.content).toContain(`Lo que fue: `);
+    expect(ai.messages[0]!.content).toContain(rune);
+
+    await openStudio(page, 'cristales');
+    await page.getByRole('button', { name: 'Ver mi cristal' }).click();
+    await expect(page.getByText('Elige una intención.').first()).toBeVisible();
+    await page.getByRole('radio', { name: 'Calma y descanso' }).check();
+    await page.getByRole('button', { name: 'Ver mi cristal' }).click();
+    await expect(page.locator('.crystal-card')).toContainText('Para calma y descanso');
+    await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
+    await expectNoViolations(page);
+  });
+
+  test('nombre, mano y sello maya', async ({ page, request }) => {
+    await login(page, await createTestUser(request, true));
+    await openStudio(page, 'nombre');
+    await page.getByLabel('Nombre', { exact: true }).fill('Ana');
+    await page.getByLabel(/Primer apellido/).fill('Estrella');
+    // Vista previa al escribir: Estrella vibra en 11 (número maestro).
+    await expect(page.getByText('Estrella → 11').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Leer mi nombre' }).click();
+    await expect(page.locator('.name-card')).toContainText('Expresión');
+    await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
+
+    await openStudio(page, 'mano');
+    await page.getByRole('button', { name: 'Leer mi mano' }).click();
+    await expect(page.getByText('Elige la forma de tu mano.').first()).toBeVisible();
+    for (const option of [
+      'Palma alargada y dedos largos',
+      'Larga y bien marcada',
+      'Sube curvada hacia los dedos',
+      'Baja inclinada hacia la muñeca',
+      'No la veo',
+    ]) {
+      await page.getByRole('radio', { name: option }).check();
+    }
+    await page.getByRole('button', { name: 'Leer mi mano' }).click();
+    await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
+    const ai = await aiRequest(request, 'Línea del destino: No la veo');
+    expect(ai.messages[0]!.content).toContain('Forma de tu mano: Palma alargada y dedos largos');
+
+    await openStudio(page, 'horoscopo-maya');
+    await page.getByRole('button', { name: 'Ver mi sello maya' }).click();
+    await expect(page.locator('.maya-card')).toContainText(/Kin \d+ de 260/);
+    await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
   });
 
   test('compatibilidad con la carta de otra persona', async ({ page, request }) => {
@@ -142,9 +239,9 @@ test.describe('lecturas con IA', () => {
     await expectNoViolations(page);
   });
 
-  test('asistente: chat con el perfil, sugerencias y teclado', async ({ page, request }) => {
+  test('oráculo: chat con el perfil, sugerencias y teclado', async ({ page, request }) => {
     await login(page, await createTestUser(request, true));
-    await page.goto('/app/asistente');
+    await page.goto('/app/oraculo');
     await hydrated(page);
     await expect(page.getByRole('list', { name: 'Conversación con Zodi' })).toContainText(
       'Oye, Ana',

@@ -75,7 +75,13 @@ const generatedAt = todays
         <ReadingStudio
           client:load
           compact
-          def={{ slug: daily.slug, title: daily.title, input: daily.input, cta: daily.cta }}
+          def={{
+            slug: daily.slug,
+            title: daily.title,
+            input: daily.input,
+            cta: daily.cta,
+            art: daily.art,
+          }}
           defaultTone={profile.reading_tone}
           remaining={remaining}
         />

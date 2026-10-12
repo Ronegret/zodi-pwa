@@ -11,36 +11,22 @@ import {
 import { ASPECT_NAMES, PLANET_NAMES, formatPosition } from '@/lib/astro-engine/labels';
 import { diff180 } from '@/lib/astro-engine/math';
 import type { AspectType } from '@/lib/astro-engine/types';
-import { MAJOR_ARCANA, type TarotCard } from '@/lib/tarot/daily';
+import { drawCards, type DrawnCard, type SpreadId } from '@/lib/tarot/deck';
 
-export interface DrawnCard extends TarotCard {
-  position: 'Pasado' | 'Presente' | 'Futuro';
-  reversed: boolean;
-}
+export type { DrawnCard } from '@/lib/tarot/deck';
 
-const POSITIONS = ['Pasado', 'Presente', 'Futuro'] as const;
-
-/** Tres arcanos distintos; `random` devuelve [0, 1) (inyectable en tests). */
-export function drawTarot(random: () => number = secureRandom): DrawnCard[] {
-  const deck = [...MAJOR_ARCANA];
-  return POSITIONS.map((position) => {
-    const card = deck.splice(Math.floor(random() * deck.length), 1)[0]!;
-    return { ...card, position, reversed: random() < 0.3 };
-  });
-}
-
-function secureRandom(): number {
-  const buf = new Uint32Array(1);
-  crypto.getRandomValues(buf);
-  return buf[0]! / 2 ** 32;
+/** Tira las cartas de la tirada; `random` devuelve [0, 1) (inyectable en tests). */
+export function drawTarot(spread: SpreadId = 'tres', random?: () => number): DrawnCard[] {
+  return drawCards(spread, random);
 }
 
 export function tarotText(cards: DrawnCard[], question: string): string {
   return [
     `Pregunta: "${question}"`,
-    'Cartas tiradas:',
+    `Cartas tiradas (${cards.length === 1 ? 'una carta' : cards.length === 3 ? 'tres cartas' : 'cruz celta'}):`,
     ...cards.map(
-      (c) => `- ${c.position}: ${c.numeral} · ${c.name}${c.reversed ? ' (invertida)' : ''}`,
+      (c, i) =>
+        `${i + 1}. ${c.position}: ${c.numeral} · ${c.name}${c.reversed ? ' (invertida)' : ''}${c.meaning ? ` — Arcano ZODI: ${c.meaning}` : ''}`,
     ),
   ].join('\n');
 }
