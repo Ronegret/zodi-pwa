@@ -216,7 +216,29 @@ describe('readings', () => {
 });
 
 describe('cuota diaria de IA', () => {
-  it('free permite 5 lecturas al día y bloquea la sexta', async () => {
+  it('las cuentas nuevas tienen 30 días con todo (límite premium) y no pueden alargarlos', async () => {
+    const [p] = await q<{ days: number }>(
+      A,
+      `select round(extract(epoch from (trial_ends_at - now())) / 86400)::int as days from public.profiles where id = $1`,
+      [A.uid],
+    );
+    expect(p!.days).toBe(30);
+    expect(await q(A, 'select used, daily_limit from public.ai_quota_status()')).toEqual([
+      { used: 0, daily_limit: 40 },
+    ]);
+    await denied(
+      A,
+      `update public.profiles set trial_ends_at = now() + interval '10 years' where id = $1`,
+      [A.uid],
+    );
+  });
+
+  it('free (periodo gratis vencido) permite 5 lecturas al día y bloquea la sexta', async () => {
+    await q(
+      'service_role',
+      `update public.profiles set trial_ends_at = now() - interval '1 day' where id = $1`,
+      [B.uid],
+    );
     const results = [];
     for (let i = 0; i < 6; i++) {
       const [r] = await q<{ allowed: boolean; used: number; daily_limit: number }>(
@@ -238,6 +260,21 @@ describe('cuota diaria de IA', () => {
       B.uid,
     ]);
     expect(await q(A, 'select id from public.usage_events')).toEqual([]);
+  });
+
+  it('el oráculo tiene su propia cuota: conversar no gasta lecturas', async () => {
+    const [r] = await q<{ allowed: boolean; used: number; daily_limit: number }>(
+      B,
+      `select allowed, used, daily_limit from public.consume_ai_quota('assistant')`,
+    );
+    expect(r).toEqual({ allowed: true, used: 1, daily_limit: 15 });
+    expect(await q(B, 'select used, daily_limit from public.oracle_quota_status()')).toEqual([
+      { used: 1, daily_limit: 15 },
+    ]);
+    // Las lecturas siguen en 5 de 5 (el mensaje no cuenta como lectura).
+    expect(await q(B, 'select used, daily_limit from public.ai_quota_status()')).toEqual([
+      { used: 5, daily_limit: 5 },
+    ]);
   });
 
   it('subir de plan (service role) amplía el límite', async () => {
