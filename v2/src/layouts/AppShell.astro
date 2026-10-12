@@ -15,7 +15,15 @@ import { ToastRegion } from '@/components/ui/ToastRegion';
 import type { ToastDetail } from '@/components/ui/toast';
 
 export type NavId =
-  'inicio' | 'lecturas' | 'comunidad' | 'carta' | 'horoscopo' | 'match' | 'ajustes' | 'oraculo';
+  | 'inicio'
+  | 'lecturas'
+  | 'comunidad'
+  | 'carta'
+  | 'horoscopo'
+  | 'match'
+  | 'ajustes'
+  | 'oraculo'
+  | 'progreso';
 
 interface Props {
   title: string;
@@ -38,6 +46,7 @@ const nav: { id: NavId; label: string; href: string; icon: IconName; mobile: boo
   { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo', icon: 'sun', mobile: false },
   { id: 'match', label: 'Match', href: '/app/compatibilidad', icon: 'heart', mobile: false },
   { id: 'oraculo', label: 'Oráculo', href: '/app/oraculo', icon: 'send', mobile: false },
+  { id: 'progreso', label: 'Progreso', href: '/app/progreso', icon: 'star', mobile: false },
   { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes', icon: 'sliders', mobile: true },
 ];
 
@@ -68,7 +77,7 @@ const today = new Intl.DateTimeFormat('es-ES', {
           height="48"
         />
       </a>
-      <nav aria-label="Principal">
+      <nav aria-label="Principal" class="nav-scroll">
         <ul class="nav">
           {nav.map((item) => (
             <li class:list={{ 'desktop-only': !item.mobile }}>
@@ -149,7 +158,8 @@ const today = new Intl.DateTimeFormat('es-ES', {
     top: 0;
     height: 100dvh;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    /* El menú se desplaza si no cabe: "Cerrar sesión" siempre a la vista. */
+    grid-template-rows: auto minmax(0, 1fr) auto;
     gap: var(--space-5);
     padding: var(--space-5) var(--space-4);
     background: linear-gradient(180deg, rgb(12 12 20) 0%, rgb(8 8 16) 100%);
@@ -169,6 +179,11 @@ const today = new Intl.DateTimeFormat('es-ES', {
   }
   .logo-mark {
     display: none;
+  }
+  .nav-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
   .nav {
     list-style: none;
@@ -354,7 +369,7 @@ const today = new Intl.DateTimeFormat('es-ES', {
     }
     .sidebar {
       padding: var(--space-4) var(--space-2);
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto minmax(0, 1fr);
     }
     .logo-full,
     .me {
@@ -419,8 +434,14 @@ const today = new Intl.DateTimeFormat('es-ES', {
       padding: var(--space-4) var(--space-4) 6rem;
     }
     .fab {
+      bottom: calc(var(--nav-h) + var(--space-3) + var(--sab));
+    }
+    .fab img {
       width: 56px;
       height: 56px;
+    }
+    /* Los avisos, por encima de la barra inferior: nunca tapan la navegación. */
+    :global(.toast-region) {
       bottom: calc(var(--nav-h) + var(--space-3) + var(--sab));
     }
   }
