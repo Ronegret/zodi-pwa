@@ -22,6 +22,8 @@ const accessTokens = new Map();
 const refreshTokens = new Map();
 /** Lecturas guardadas (todas; la "RLS" filtra por usuario). */
 const readings = [];
+/** Tu gente: fichas privadas de cada usuario. */
+const people = [];
 /** Cuota de IA usada hoy por usuario, y eventos (id → user id). */
 const quotaUsed = new Map();
 const quotaEvents = new Map();
@@ -519,6 +521,27 @@ async function handleRest(req, res, url) {
       own.push(row);
       charts.set(u.id, own);
       return respondRows(req, res, [row], 201);
+    }
+  }
+  if (resource === 'people') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const own = people.filter((r) => r.user_id === u.id);
+    if (req.method === 'GET') return respondRows(req, res, applyFilters(own, url.searchParams));
+    if (req.method === 'POST') {
+      if (own.length >= 50) return send(res, 400, { code: 'P0001', message: 'people_limit' });
+      const row = {
+        id: randomUUID(),
+        user_id: u.id,
+        birth_time: null,
+        created_at: new Date().toISOString(),
+        ...(await readBody(req)),
+      };
+      people.push(row);
+      return respondRows(req, res, [row], 201);
+    }
+    if (req.method === 'DELETE') {
+      for (const row of applyFilters(own, url.searchParams)) people.splice(people.indexOf(row), 1);
+      return send(res, 204);
     }
   }
   const community = await handleCommunity(req, res, url, u, resource, fn);

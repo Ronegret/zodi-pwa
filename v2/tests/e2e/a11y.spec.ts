@@ -34,6 +34,7 @@ const PRIVATE = [
   '/app/comunidad',
   '/app/carta',
   '/app/carta/significado',
+  '/app/gente',
   '/app/ajustes',
   '/app/horoscopo',
   '/app/compatibilidad',

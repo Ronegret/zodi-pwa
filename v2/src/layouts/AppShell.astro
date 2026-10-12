@@ -20,6 +20,7 @@ export type NavId =
   | 'lecturas'
   | 'comunidad'
   | 'carta'
+  | 'gente'
   | 'horoscopo'
   | 'match'
   | 'ajustes'
@@ -45,6 +46,7 @@ const nav: { id: NavId; label: string; href: string; icon: IconName; mobile: boo
   { id: 'lecturas', label: 'Lecturas', href: '/app/lecturas', icon: 'sparkles', mobile: true },
   { id: 'comunidad', label: 'Comunidad', href: '/app/comunidad', icon: 'users', mobile: true },
   { id: 'carta', label: 'Carta', href: '/app/carta', icon: 'wheel', mobile: true },
+  { id: 'gente', label: 'Tu gente', href: '/app/gente', icon: 'people', mobile: false },
   { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo', icon: 'sun', mobile: false },
   { id: 'match', label: 'Match', href: '/app/compatibilidad', icon: 'heart', mobile: false },
   { id: 'oraculo', label: 'Oráculo', href: '/app/oraculo', icon: 'send', mobile: false },

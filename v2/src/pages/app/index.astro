@@ -15,9 +15,13 @@ import { formatPosition } from '@/lib/astro-engine/labels';
 import { buildDashboard } from '@/lib/dashboard/build';
 import { describeTransit, plainTransit, transitStrength } from '@/lib/daily/today';
 import { ACHIEVEMENT_BY_ID } from '@/lib/progress/achievements';
+import { todayFor } from '@/lib/ai/context';
+import { personSky } from '@/lib/people/affinity';
+import { birthdayLabel, personView } from '@/lib/people/view';
 import { recordActivity } from '@/lib/server/activity';
 import { getLatestSelfChart } from '@/lib/server/charts';
 import { firstSteps } from '@/lib/server/first-steps';
+import { listPeople } from '@/lib/server/people';
 import { trialDaysLeft } from '@/lib/server/quota';
 import { dailyCard } from '@/lib/tarot/daily';
 
@@ -25,9 +29,10 @@ const { supabase, profile } = Astro.locals;
 if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
 
 // Entrar al panel cuenta para la racha (una vez al día).
-const [stored, activity] = await Promise.all([
+const [stored, activity, people] = await Promise.all([
   getLatestSelfChart(supabase),
   recordActivity(supabase, 'visit'),
+  listPeople(supabase).catch(() => []),
 ]);
 const welcome = Astro.url.searchParams.get('bienvenida') === '1';
 const unlocked = (activity?.unlocked ?? []).map((id) => ACHIEVEMENT_BY_ID.get(id)?.title ?? id);
@@ -42,6 +47,21 @@ const card = dailyCard(profile.id, d.today);
 const steps = await firstSteps(supabase, profile, Boolean(stored));
 const showSteps = steps.some((s) => !s.done);
 const trialDays = trialDaysLeft(profile.trial_ends_at);
+// Tu gente hoy: las cuatro primeras, con cómo está el día entre los dos.
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const myBirth = stored?.input.date ?? profile.birth_date;
+const now = new Date();
+const me = myBirth
+  ? {
+      birthDate: myBirth,
+      sky: personSky(myBirth, stored?.input.timeKnown ? stored.input.time : null, tz),
+    }
+  : null;
+const gente = me
+  ? people
+      .slice(0, 4)
+      .map((p) => personView(p, me, { timeZone: tz, today: todayFor(now, tz), now }))
+  : [];
 ---
 
 <AppShell
@@ -269,13 +289,47 @@ const trialDays = trialDaysLeft(profile.trial_ends_at);
       </ul>
     </Card>
 
-    <Card reveal tilt title="Match" kicker="Compatibilidad" class="span-match">
-      <p class="muted">
-        ¿Encajas o chocas? Compara tu carta con la de quien te quita el sueño (o la paciencia).
-      </p>
-      <Button href="/app/compatibilidad" variant="violet" icon="heart" magnetic>
-        Comparar cartas
-      </Button>
+    <Card
+      reveal
+      title="Tu gente hoy"
+      kicker="Familia, pareja y amistades"
+      class="span-match"
+      action={gente.length ? { label: 'Ver todos', href: '/app/gente' } : undefined}
+    >
+      {gente.length ? (
+        <ul class="gente">
+          {gente.map((x) => (
+            <li class={`tone-${x.day.tone}`}>
+              <a href={`/app/gente/${x.person.id}`}>
+                <img src={x.avatar} alt="" width="240" height="240" loading="lazy" />
+                <span>
+                  <strong>{x.person.name}</strong>
+                  <span class="gente-day">{x.day.label}</span>
+                  {birthdayLabel(x.day.birthdayIn) && (
+                    <span class="gente-bday">{birthdayLabel(x.day.birthdayIn)}</span>
+                  )}
+                </span>
+                <span class="gente-score">{x.affinity.score}%</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div class="gente-empty">
+          <p class="muted">
+            Añade a tu pareja, tu familia o tus amistades con su fecha de nacimiento: te digo cuánta
+            afinidad hay y cómo está el día entre los dos. Y no se te pasa ningún cumpleaños.
+          </p>
+          <div class="gente-actions">
+            <Button href="/app/gente#anadir" variant="violet" icon="people" magnetic>
+              Añadir a mi gente
+            </Button>
+            <Button href="/app/compatibilidad" variant="ghost" icon="heart">
+              Comparar cartas con IA
+            </Button>
+          </div>
+        </div>
+      )}
     </Card>
   </div>
 </AppShell>
@@ -470,5 +524,65 @@ const trialDays = trialDaysLeft(profile.trial_ends_at);
     margin-top: var(--space-2);
     color: var(--acid);
     font-weight: 700;
+  }
+  .gente {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  }
+  .gente a {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: center;
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    border-left-width: 4px;
+    color: inherit;
+    text-decoration: none;
+  }
+  .gente .tone-fluye a {
+    border-left-color: var(--acid);
+  }
+  .gente .tone-cuidado a {
+    border-left-color: var(--hot);
+  }
+  .gente a:hover {
+    background: rgb(155 77 255 / 10%);
+  }
+  .gente img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .gente a > span:nth-child(2) {
+    display: grid;
+    min-width: 0;
+  }
+  .gente-day,
+  .gente-bday {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .gente-bday {
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .gente-score {
+    font-family: var(--font-display);
+    color: var(--acid);
+    font-size: var(--step-1);
+  }
+  .gente-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
   }
 </style>

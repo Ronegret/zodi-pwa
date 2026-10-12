@@ -129,7 +129,15 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
     paragraphs: [SUN[sun], houseLine('sun')].filter(Boolean),
     ask: `Explícame mi Sol en ${sun}${houseAsk('sun')}: cómo se nota en mi personalidad y qué potencia tengo.`,
   });
-  sections.push(personal('moon', 'Lo que necesitas', 'Tu Luna', MOON[p('moon').sign], '/art/zodi-silencio-640.webp'));
+  sections.push(
+    personal(
+      'moon',
+      'Lo que necesitas',
+      'Tu Luna',
+      MOON[p('moon').sign],
+      '/art/zodi-silencio-640.webp',
+    ),
+  );
   if (timeKnown) {
     const asc = chart.ascendant.sign;
     sections.push({
@@ -155,9 +163,27 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
       ask: '¿Por qué es tan importante la hora de nacimiento para mi carta?',
     });
   }
-  sections.push(personal('mercury', 'Cómo piensas', 'Tu Mercurio', MERCURY[p('mercury').sign], '/art/zodi-movil-640.webp'));
-  sections.push(personal('venus', 'Cómo amas', 'Tu Venus', VENUS[p('venus').sign], '/art/compatibilidad-640.webp'));
-  sections.push(personal('mars', 'Cómo actúas', 'Tu Marte', MARS[p('mars').sign], '/art/energia-640.webp'));
+  sections.push(
+    personal(
+      'mercury',
+      'Cómo piensas',
+      'Tu Mercurio',
+      MERCURY[p('mercury').sign],
+      '/art/zodi-movil-640.webp',
+    ),
+  );
+  sections.push(
+    personal(
+      'venus',
+      'Cómo amas',
+      'Tu Venus',
+      VENUS[p('venus').sign],
+      '/art/compatibilidad-640.webp',
+    ),
+  );
+  sections.push(
+    personal('mars', 'Cómo actúas', 'Tu Marte', MARS[p('mars').sign], '/art/energia-640.webp'),
+  );
 
   const jup = p('jupiter');
   const sat = p('saturn');
@@ -210,10 +236,14 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
 
   // Modalidad: cómo actúas (con los planetas personales y sociales).
   const counts = { Cardinal: 0, Fijo: 0, Mutable: 0 };
-  for (const x of chart.planets.filter((y) => !['uranus', 'neptune', 'pluto', 'northNode'].includes(y.id))) {
+  for (const x of chart.planets.filter(
+    (y) => !['uranus', 'neptune', 'pluto', 'northNode'].includes(y.id),
+  )) {
     counts[MODALITY_OF[SIGNS.indexOf(x.sign) % 3]!]++;
   }
-  const modality = (Object.entries(counts) as [keyof typeof MODALITY, number][]).sort((a, b) => b[1] - a[1])[0]![0];
+  const modality = (Object.entries(counts) as [keyof typeof MODALITY, number][]).sort(
+    (a, b) => b[1] - a[1],
+  )[0]![0];
   sections.push({
     id: 'modalidad',
     kicker: 'Tu manera de moverte',
@@ -347,4 +377,3 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
 
   return sections;
 }
-

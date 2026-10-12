@@ -2,5 +2,14 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "git": {
+    "deploymentEnabled": {
+      "fase-7": false,
+      "astro-v2": false
+    }
+  },
+  "github": {
+    "silent": true
+  }
 }

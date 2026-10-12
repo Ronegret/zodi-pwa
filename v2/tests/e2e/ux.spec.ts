@@ -179,6 +179,55 @@ test.describe('el significado de tu carta', () => {
   });
 });
 
+test.describe('tu gente', () => {
+  test('añadir a alguien, ver la afinidad y cómo está el día, y borrar', async ({
+    page,
+    request,
+  }) => {
+    await login(page, await createTestUser(request, true));
+    await page.goto('/app/gente');
+    await expect(page.getByRole('heading', { name: 'Aún no has añadido a nadie' })).toBeVisible();
+    await expectNoViolations(page);
+    // Errores claros si falta algo.
+    await page.getByRole('button', { name: 'Añadir y ver nuestra afinidad' }).click();
+    await expect(page.getByText('Escribe su nombre.').first()).toBeVisible();
+    await page.getByLabel(/Nombre o apodo/).fill('Mamá');
+    await page.getByLabel(/¿Qué es para ti?/).selectOption('familia');
+    await page.getByLabel(/Fecha de nacimiento/).fill('1965-08-03');
+    await page.getByRole('button', { name: 'Añadir y ver nuestra afinidad' }).click();
+    await expect(page).toHaveURL(/\/app\/gente\/[0-9a-f-]{36}\?nuevo=1$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Mamá' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^\d+%$/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Hoy entre los dos' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Cómo es Mamá según las estrellas' }),
+    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Tu esencia y la suya' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Su camino de vida es el \d+/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Pregúntale a ZODI por Mamá' })).toHaveAttribute(
+      'href',
+      /\/app\/oraculo\?pregunta=/,
+    );
+    await expectNoViolations(page);
+    // En la lista y en el panel.
+    await page.goto('/app/gente');
+    await expect(page.getByRole('link', { name: 'Mamá' })).toBeVisible();
+    await page.goto('/app');
+    await expect(
+      page.getByRole('region', { name: 'Tu gente hoy' }).getByRole('link', { name: /Mamá/ }),
+    ).toBeVisible();
+    // Borrar.
+    await page
+      .getByRole('region', { name: 'Tu gente hoy' })
+      .getByRole('link', { name: /Mamá/ })
+      .click();
+    await page.getByText('Borrar a Mamá', { exact: true }).click();
+    await page.getByRole('button', { name: 'Sí, borrar a Mamá' }).click();
+    await expect(page).toHaveURL(/\/app\/gente\?borrado=1$/);
+    await expect(page.getByRole('heading', { name: 'Aún no has añadido a nadie' })).toBeVisible();
+  });
+});
+
 test.describe('carta en PDF', () => {
   test('página lista para guardar como PDF, accesible', async ({ page, request }) => {
     await login(page, await createTestUser(request, true));

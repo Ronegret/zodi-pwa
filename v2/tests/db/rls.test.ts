@@ -719,3 +719,52 @@ describe('moderación', () => {
     expect(queue.map((x) => x.id)).not.toContain(postId);
   });
 });
+
+describe('tu gente (fichas privadas)', () => {
+  const add = (who: Who, name: string, relation = 'familia') =>
+    q<{ id: string }>(
+      who,
+      `insert into public.people (name, relation, birth_date) values ($1, $2, '1992-08-03') returning id`,
+      [name, relation],
+    );
+
+  it('cada cual ve, edita y borra solo las suyas', async () => {
+    const [mama] = await add(A, 'Mamá');
+    await add(B, 'Jefa', 'trabajo');
+    expect(await q(A, 'select name from public.people')).toEqual([{ name: 'Mamá' }]);
+    expect(await q(C, 'select id from public.people')).toEqual([]);
+    await denied('anon', 'select id from public.people');
+    // B no puede tocar la ficha de A (no la ve: 0 filas).
+    expect(
+      await q(B, `update public.people set name = 'x' where id = $1 returning id`, [mama!.id]),
+    ).toEqual([]);
+    expect(await q(B, `delete from public.people where id = $1 returning id`, [mama!.id])).toEqual(
+      [],
+    );
+    await q(A, `update public.people set relation = 'pareja' where id = $1`, [mama!.id]);
+    expect(await q(A, 'select relation from public.people')).toEqual([{ relation: 'pareja' }]);
+  });
+
+  it('no se crea a nombre de otro ni con datos raros', async () => {
+    await denied(
+      A,
+      `insert into public.people (user_id, name, relation, birth_date) values ($1, 'X', 'familia', '1990-01-01')`,
+      [B.uid],
+    );
+    await denied(
+      A,
+      `insert into public.people (name, relation, birth_date) values ('  ', 'familia', '1990-01-01')`,
+    );
+    await denied(
+      A,
+      `insert into public.people (name, relation, birth_date) values ('X', 'ex', '1990-01-01')`,
+    );
+    await denied(A, `update public.people set user_id = $1`, [B.uid]);
+  });
+
+  it('tope de 50 fichas por persona', async () => {
+    for (let i = 0; i < 49; i++) await add(C, `P${i}`);
+    await add(C, 'P49');
+    await expect(add(C, 'P50')).rejects.toThrow(/people_limit/);
+  });
+});
