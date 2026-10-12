@@ -7,24 +7,54 @@
 import AppShell from '@/layouts/AppShell.astro';
 import Button from '@/components/ui/Button.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
+import Field from '@/components/ui/Field.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { todayFor } from '@/lib/ai/context';
 import { chartMeaning, numberImage } from '@/lib/chart/meaning';
+import { nameMeaning } from '@/lib/names/meaning';
 import { getLatestSelfChart } from '@/lib/server/charts';
 
 const { supabase, profile } = Astro.locals;
 if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
 
+// El nombre completo (con los dos apellidos) se puede escribir aquí: no se guarda.
+let fullName = profile.display_name.trim();
+if (Astro.request.method === 'POST') {
+  const typed = String((await Astro.request.formData()).get('nombre') ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .slice(0, 80);
+  if (typed) fullName = typed;
+}
+const nameParts = nameMeaning(fullName);
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
 const stored = await getLatestSelfChart(supabase);
-const sections = stored
+const meaning = stored
   ? chartMeaning({
       chart: stored.chart,
       timeKnown: stored.input.timeKnown,
       birthDate: stored.input.date,
-      displayName: profile.display_name,
+      displayName: fullName,
       today: todayFor(new Date(), profile.time_zone ?? 'Europe/Madrid'),
     })
   : [];
+// "Tu nombre" va justo después de los números.
+const sections = meaning.flatMap((s) =>
+  s.id === 'numeros'
+    ? [
+        s,
+        {
+          id: 'nombre',
+          kicker: 'Tu nombre',
+          title: `Lo que significa «${fullName}»`,
+          image: '/art/numerologia-banner-640.webp',
+          paragraphs: [],
+          ask: `¿Qué significa mi nombre completo, ${fullName}, y de dónde viene cada apellido?`,
+        },
+      ]
+    : [s],
+);
 const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
 ---
 
@@ -73,6 +103,47 @@ const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
               {s.paragraphs.map((p) => (
                 <p>{p}</p>
               ))}
+              {s.id === 'nombre' && (
+                <>
+                  <p>
+                    Los nombres y apellidos también cuentan una historia: de dónde venía tu familia,
+                    a qué se dedicaba o cómo la llamaban.
+                  </p>
+                  <ul class="name-parts">
+                    {nameParts.map((part) => (
+                      <li>
+                        <p class="name-word">
+                          <strong>{part.word}</strong>
+                          <span class="muted">
+                            {' '}
+                            · {part.kind}
+                            {part.entry && <> · {part.entry.origin}</>}
+                          </span>
+                        </p>
+                        <p>
+                          {part.entry
+                            ? cap(part.entry.meaning) + '.'
+                            : 'Todavía no está en mi libro. Pregúntamelo y lo investigo.'}
+                        </p>
+                        {part.entry?.note && <p class="muted">{part.entry.note}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                  <form method="post" action="/app/carta/significado#nombre" class="name-form">
+                    <Field
+                      name="nombre"
+                      label="Tu nombre completo"
+                      hint="Como en tu carnet o DNI, con los dos apellidos. No lo guardamos: también cambia tus números."
+                      value={fullName}
+                      maxlength="80"
+                      autocomplete="name"
+                    />
+                    <Button type="submit" variant="secondary" size="sm">
+                      Ver lo que significa
+                    </Button>
+                  </form>
+                </>
+              )}
               {s.numbers && (
                 <ul class="numbers">
                   {s.numbers.map((n) => (
@@ -121,9 +192,12 @@ const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
             <Button href="/app/lecturas/carta-natal" icon="sparkles">
               Interpretar mi carta con IA
             </Button>
-            <Button href="/app/carta/imprimir" variant="secondary">
-              Descargar en PDF
-            </Button>
+            <form method="post" action="/app/carta/imprimir" class="pdf-form">
+              <input type="hidden" name="nombre" value={fullName} />
+              <Button type="submit" variant="secondary">
+                Descargar todo en PDF
+              </Button>
+            </form>
           </div>
         </div>
       </section>
@@ -293,5 +367,37 @@ const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
     flex-wrap: wrap;
     gap: var(--space-2);
     margin-top: var(--space-3);
+  }
+  .name-parts {
+    list-style: none;
+    margin: var(--space-2) 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .name-parts li {
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 8%);
+    display: grid;
+    gap: var(--space-1);
+  }
+  .name-word strong {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    color: var(--ink);
+  }
+  .name-form {
+    display: grid;
+    gap: var(--space-2);
+    justify-items: start;
+    margin-top: var(--space-2);
+  }
+  .name-form :global(.field) {
+    width: 100%;
+  }
+  .pdf-form {
+    display: contents;
   }
 </style>

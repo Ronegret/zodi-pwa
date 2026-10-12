@@ -169,7 +169,22 @@ test.describe('el significado de tu carta', () => {
     }
     await expect(page.getByText('Camino de vida', { exact: true })).toBeVisible();
     await expect(page.locator('img[src^="/numeros/"]').first()).toBeVisible();
+    // Tu nombre: con el nombre completo, nombre y apellidos explicados.
+    await expect(
+      page.getByRole('heading', { level: 2, name: 'Lo que significa «Ana Estrella»' }),
+    ).toBeVisible();
+    await page.getByLabel(/Tu nombre completo/).fill('Ana Millapán Fernández');
+    await page.getByRole('button', { name: 'Ver lo que significa' }).click();
+    await expect(page.getByText('Milla = oro · pan = puma.')).toBeVisible();
+    await expect(page.getByText('«hijo de Fernando».')).toBeVisible();
     await expectNoViolations(page);
+    // El PDF lleva todo, con el nombre completo que se escribió.
+    await page.getByRole('button', { name: 'Descargar todo en PDF' }).click();
+    await expect(page).toHaveURL(/\/app\/carta\/imprimir$/);
+    await expect(
+      page.getByText('«Ana Millapán Fernández»: de dónde viene cada parte.'),
+    ).toBeVisible();
+    await page.goto('/app/carta/significado');
     await page
       .getByRole('region', { name: 'Tu Sol en Aries' })
       .getByRole('link', { name: 'Pregúntale a ZODI sobre esto' })
@@ -265,6 +280,8 @@ test.describe('carta en PDF', () => {
       'Tus elementos',
       'Tus planetas, uno a uno',
       'Tus 12 casas',
+      'El significado de tu carta',
+      'Lo que significa tu nombre',
     ]) {
       await expect(page.getByRole('heading', { level: 2, name: h })).toBeVisible();
     }

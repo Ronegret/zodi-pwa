@@ -3,7 +3,8 @@
  * Tu carta natal en PDF (Fase 6): una página pensada para imprimir o
  * "Guardar como PDF" desde el navegador, en A4 y con el estilo de ZODI.
  * Portada, tres pilares, la rueda, los elementos, los planetas uno a uno y
- * las casas, todo en palabras normales.
+ * las casas, todo en palabras normales. Y al final, el significado completo
+ * (planetas, números, chino, maya, tarot) y lo que significa tu nombre.
  */
 import Base from '@/layouts/Base.astro';
 import NatalWheel from '@/components/chart/NatalWheel.astro';
@@ -16,7 +17,10 @@ import {
   signSlug,
   SIGN_GLYPHS,
 } from '@/lib/astro-engine/labels';
+import { todayFor } from '@/lib/ai/context';
+import { chartMeaning } from '@/lib/chart/meaning';
 import { HOUSES, PLANET_ROLE, plainPlanet } from '@/lib/chart/plain';
+import { nameMeaning } from '@/lib/names/meaning';
 import { SIGN_KEYWORDS } from '@/lib/public/signs';
 import { getLatestSelfChart } from '@/lib/server/charts';
 
@@ -30,6 +34,24 @@ const timeKnown = stored.input.timeKnown;
 const sun = chart.planets.find((p) => p.id === 'sun')!;
 const moon = chart.planets.find((p) => p.id === 'moon')!;
 const name = profile.display_name || 'Tu carta';
+// Desde "El significado" llega el nombre completo que se haya escrito (no se guarda).
+let fullName = profile.display_name.trim();
+if (Astro.request.method === 'POST') {
+  const typed = String((await Astro.request.formData()).get('nombre') ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .slice(0, 80);
+  if (typed) fullName = typed;
+}
+const meaning = chartMeaning({
+  chart: stored.chart,
+  timeKnown: stored.input.timeKnown,
+  birthDate: stored.input.date,
+  displayName: fullName,
+  today: todayFor(new Date(), profile.time_zone ?? 'Europe/Madrid'),
+});
+const nameParts = nameMeaning(fullName);
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const birth = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: 'UTC' }).format(
   new Date(`${stored.input.date}T12:00:00Z`),
 );
@@ -170,6 +192,51 @@ const pillars = [
         </ol>
       </section>
     )}
+
+    <section class="sheet">
+      <h2>El significado de tu carta</h2>
+      <p class="lead">Todo lo que dice tu nacimiento, explicado por ZODI en palabras normales.</p>
+      {meaning.map((s) => (
+        <article class="mean">
+          <p class="mean-kicker">{s.kicker}</p>
+          <h3>{s.title}</h3>
+          {s.paragraphs.map((t) => (
+            <p>{t}</p>
+          ))}
+          {s.numbers && (
+            <ul class="nums">
+              {s.numbers.map((n) => (
+                <li>
+                  <strong>{n.n}</strong>
+                  <span>
+                    <b>{n.label}.</b> {n.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
+    </section>
+
+    <section class="sheet">
+      <h2>Lo que significa tu nombre</h2>
+      <p class="lead">«{fullName}»: de dónde viene cada parte.</p>
+      <ul class="name-list">
+        {nameParts.map((part) => (
+          <li>
+            <strong>{part.word}</strong>
+            <span class="plain">
+              {part.kind}
+              {part.entry
+                ? ` · ${part.entry.origin}: ${cap(part.entry.meaning)}.`
+                : ' · todavía no está en el libro de ZODI.'}
+              {part.entry?.note && ` ${part.entry.note}`}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
 
     <p class="foot">
       Calculada por ZODI con efemérides astronómicas el {today}. Guía simbólica, no profecía: las
@@ -330,5 +397,50 @@ const pillars = [
       break-after: page;
       border-color: #3a4a12;
     }
+  }
+  .mean {
+    break-inside: avoid;
+    display: grid;
+    gap: var(--space-1);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--line);
+  }
+  .mean h3 {
+    font-size: var(--step-1);
+  }
+  .mean p {
+    margin: 0;
+    line-height: 1.55;
+  }
+  .mean-kicker {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--acid);
+  }
+  .nums,
+  .name-list {
+    list-style: none;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .nums li {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: var(--space-2);
+    align-items: start;
+  }
+  .nums strong {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1;
+    color: var(--acid);
+  }
+  .name-list li {
+    display: grid;
+    gap: 2px;
+    break-inside: avoid;
   }
 </style>
