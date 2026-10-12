@@ -648,3 +648,74 @@ describe('actividad, logros y favoritas (8C)', () => {
     expect(await toggle(D)).toEqual([{ fav: false }]);
   });
 });
+
+describe('moderación', () => {
+  let M: { uid: string };
+  let autor: { uid: string };
+  const reporters: { uid: string }[] = [];
+  let postId = '';
+
+  beforeAll(async () => {
+    M = await newUser('mod@example.com');
+    autor = await newUser('autor@example.com');
+    for (const e of ['r1@example.com', 'r2@example.com', 'r3@example.com']) {
+      reporters.push(await newUser(e));
+    }
+    const [post] = await q<{ id: string }>(
+      autor,
+      `insert into public.community_posts (body) values ('Mensaje con mala pinta') returning id`,
+    );
+    postId = post!.id;
+    for (const r of reporters) {
+      await q(r, `insert into public.content_reports (post_id, reason) values ($1, 'spam')`, [
+        postId,
+      ]);
+    }
+  });
+
+  it('nadie se hace moderador a sí mismo', async () => {
+    await denied(M, 'update public.profiles set is_moderator = true where id = $1', [M.uid]);
+    expect(await q(M, 'select public.is_moderator() as m')).toEqual([{ m: false }]);
+    await expect(q(M, 'select * from public.moderation_queue()')).rejects.toThrow(/forbidden/);
+    await expect(q(M, `select public.moderate('post', $1, 'restaurar')`, [postId])).rejects.toThrow(
+      /forbidden/,
+    );
+  });
+
+  it('la cola muestra lo oculto con sus denuncias y se puede restaurar', async () => {
+    await q('service_role', 'update public.profiles set is_moderator = true where id = $1', [
+      M.uid,
+    ]);
+    const queue = await q<{ id: string; status: string; reports: number; reasons: string[] }>(
+      M,
+      'select id, status, reports, reasons from public.moderation_queue()',
+    );
+    expect(queue).toContainEqual({ id: postId, status: 'hidden', reports: 3, reasons: ['spam'] });
+    await q(M, `select public.moderate('post', $1, 'restaurar')`, [postId]);
+    expect(
+      await q('service_role', 'select status from public.community_posts where id = $1', [postId]),
+    ).toEqual([{ status: 'published' }]);
+    expect(
+      await q(
+        'service_role',
+        'select count(*)::int as n from public.content_reports where post_id = $1',
+        [postId],
+      ),
+    ).toEqual([{ n: 0 }]);
+  });
+
+  it('eliminar retira el contenido para siempre', async () => {
+    await q(
+      reporters[0]!,
+      `insert into public.content_reports (post_id, reason) values ($1, 'odio')`,
+      [postId],
+    );
+    await q(M, `select public.moderate('post', $1, 'eliminar')`, [postId]);
+    expect(
+      await q('service_role', 'select status from public.community_posts where id = $1', [postId]),
+    ).toEqual([{ status: 'removed' }]);
+    // Ya no sale en la cola ni en el feed.
+    const queue = await q<{ id: string }>(M, 'select id from public.moderation_queue()');
+    expect(queue.map((x) => x.id)).not.toContain(postId);
+  });
+});

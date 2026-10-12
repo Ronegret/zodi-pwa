@@ -13,9 +13,11 @@ export async function createTestUser(
   onboarded: boolean,
   /** Con los 30 días gratis activos (límites premium). */
   trial = false,
+  /** Con permisos de moderación. */
+  moderator = false,
 ): Promise<TestUser> {
   const res = await request.post(`${MOCK_SUPABASE_URL}/__test/users`, {
-    data: { onboarded, trial },
+    data: { onboarded, trial, moderator },
   });
   return (await res.json()) as TestUser;
 }

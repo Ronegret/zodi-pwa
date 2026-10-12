@@ -1,0 +1,158 @@
+---
+/**
+ * Moderación de la comunidad (solo moderadores; el resto ve un 404). Lo
+ * denunciado aparece aquí; lo que tiene 3 denuncias ya está oculto solo.
+ * Funciona sin JS: cada acción es un formulario.
+ */
+import AppShell from '@/layouts/AppShell.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import { readingDate } from '@/lib/readings/format';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+if (!profile.is_moderator) return Astro.rewrite('/404');
+
+const ACTIONS = ['restaurar', 'eliminar', 'descartar'] as const;
+type Action = (typeof ACTIONS)[number];
+let done = '';
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const kind = String(form.get('kind'));
+  const id = String(form.get('id'));
+  const action = String(form.get('action')) as Action;
+  if (
+    (kind === 'post' || kind === 'comment') &&
+    ACTIONS.includes(action) &&
+    /^[0-9a-f-]{36}$/i.test(id)
+  ) {
+    const { error: rpcError } = await supabase.rpc('moderate', {
+      p_kind: kind,
+      p_id: id,
+      p_action: action,
+    });
+    if (rpcError) {
+      console.error('[moderación]', rpcError.message);
+      error = 'No se ha podido aplicar. Inténtalo otra vez.';
+    } else {
+      done = {
+        restaurar: 'Restaurado y denuncias borradas.',
+        eliminar: 'Eliminado de la comunidad.',
+        descartar: 'Denuncias descartadas.',
+      }[action];
+    }
+  } else {
+    error = 'Acción no válida.';
+  }
+}
+
+const { data: queue, error: queueError } = await supabase.rpc('moderation_queue');
+if (queueError) console.error('[moderación] cola', queueError.message);
+const items = queue ?? [];
+const tz = profile.time_zone ?? 'Europe/Madrid';
+---
+
+<AppShell
+  title="Moderación"
+  current="moderacion"
+  kicker="Comunidad"
+  intro="Lo que la gente ha denunciado. Con 3 denuncias se oculta solo hasta que lo revises."
+  toast={done ? { message: done } : error ? { message: error, tone: 'error' } : undefined}
+>
+  {items.length ? (
+    <ul class="queue">
+      {items.map((it) => (
+        <li class="item card">
+          <div class="item-head">
+            <Badge tone={it.status === 'hidden' ? 'hot' : 'violet'}>
+              {it.status === 'hidden' ? 'Oculto automáticamente' : 'Publicado'}
+            </Badge>
+            <span class="muted small">
+              {it.kind === 'post' ? 'Publicación' : 'Comentario'} de {it.author_name} ·{' '}
+              {readingDate(it.created_at, tz)}
+            </span>
+          </div>
+          <blockquote class="body">{it.body}</blockquote>
+          <p class="muted small">
+            <strong>
+              {it.reports} {it.reports === 1 ? 'denuncia' : 'denuncias'}
+            </strong>
+            : {it.reasons.join(' · ')}
+          </p>
+          <div class="actions">
+            {ACTIONS.map((action) => (
+              <form method="post">
+                <input type="hidden" name="kind" value={it.kind} />
+                <input type="hidden" name="id" value={it.id} />
+                <input type="hidden" name="action" value={action} />
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant={
+                    action === 'eliminar' ? 'danger' : action === 'restaurar' ? 'primary' : 'ghost'
+                  }
+                >
+                  {
+                    {
+                      restaurar: 'Restaurar',
+                      eliminar: 'Eliminar',
+                      descartar: 'Descartar denuncias',
+                    }[action]
+                  }
+                </Button>
+              </form>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <EmptyState title="Todo en calma" headingLevel={2}>
+      <p>No hay denuncias pendientes. La comunidad se porta bien (por ahora).</p>
+      <Button href="/app/comunidad" variant="secondary">
+        Ir a la comunidad
+      </Button>
+    </EmptyState>
+  )}
+</AppShell>
+
+<style>
+  .queue {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    max-width: 52rem;
+  }
+  .item {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .item-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .body {
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    border-left: 3px solid var(--line-violet);
+    background: rgb(255 255 255 / 3%);
+    border-radius: var(--radius-md);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+</style>

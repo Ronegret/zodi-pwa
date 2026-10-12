@@ -101,6 +101,50 @@ test.describe('comunidad', () => {
     await expect(page.getByRole('listitem').filter({ hasText: text })).toHaveCount(0);
   });
 
+  test('moderación: lo denunciado llega a la cola y se revisa', async ({
+    page,
+    browser,
+    request,
+  }) => {
+    // Quien no modera no ve la sección (404) ni el enlace.
+    const author = await createTestUser(request, true);
+    await login(page, author);
+    await expect(page.getByRole('link', { name: 'Moderación' })).toHaveCount(0);
+    const res = await page.goto('/app/moderacion');
+    expect(res?.status()).toBe(404);
+
+    await openCommunity(page);
+    const text = unique('Post denunciado');
+    await publish(page, text, 'Confesiones');
+
+    const other = await browser.newContext();
+    const page2 = await other.newPage();
+    await login(page2, await createTestUser(request, true));
+    await openCommunity(page2);
+    const seen = page2.getByRole('listitem').filter({ hasText: text });
+    await seen.getByRole('button', { name: 'Denunciar' }).click();
+    await seen.getByRole('button', { name: 'Spam' }).click();
+    await expect(page2.getByRole('status').filter({ hasText: 'Gracias' })).toBeAttached();
+    await other.close();
+
+    const mod = await browser.newContext();
+    const page3 = await mod.newPage();
+    await login(page3, await createTestUser(request, true, false, true));
+    // En el móvil se llega desde Ajustes; en tablet y escritorio, también desde el menú.
+    await page3.goto('/app/ajustes');
+    await page3.getByRole('link', { name: 'Moderación de la comunidad' }).click();
+    await expect(page3.getByRole('heading', { level: 1, name: 'Moderación' })).toBeVisible();
+    const item = page3.getByRole('listitem').filter({ hasText: text });
+    await expect(item).toContainText('1 denuncia');
+    await expectNoViolations(page3);
+    await item.getByRole('button', { name: 'Descartar denuncias' }).click();
+    await expect(
+      page3.getByRole('status').filter({ hasText: 'Denuncias descartadas' }),
+    ).toBeAttached();
+    await expect(page3.getByRole('listitem').filter({ hasText: text })).toHaveCount(0);
+    await mod.close();
+  });
+
   test('sin texto no se publica; accesible', async ({ page, request }) => {
     await login(page, await createTestUser(request, true));
     await openCommunity(page);

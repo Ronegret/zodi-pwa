@@ -83,7 +83,7 @@ function blankProfile(id, now) {
   };
 }
 
-function createUser({ onboarded, trial = false }) {
+function createUser({ onboarded, trial = false, moderator = false }) {
   const id = randomUUID();
   const email = `e2e-${id.slice(0, 8)}@zodi.test`;
   users.set(id, { id, email, password: PASSWORD });
@@ -91,6 +91,7 @@ function createUser({ onboarded, trial = false }) {
   profiles.set(id, {
     ...blankProfile(id, now),
     ...(trial ? { trial_ends_at: new Date(Date.now() + 30 * 86_400_000).toISOString() } : {}),
+    ...(moderator ? { is_moderator: true } : {}),
     ...(onboarded
       ? {
           display_name: 'Ana Estrella',
@@ -394,6 +395,45 @@ async function handleRest(req, res, url) {
     quotaEvents.set(id, key);
     return send(res, 200, [{ allowed: true, used: used + 1, daily_limit: limit, event_id: id }]);
   }
+  // ---------- Moderación (misma lógica que moderation_queue y moderate) ----------
+  if (resource === 'rpc' && (fn === 'moderation_queue' || fn === 'moderate')) {
+    if (!u || !profiles.get(u.id)?.is_moderator) {
+      return send(res, 403, { code: '42501', message: 'forbidden' });
+    }
+    if (fn === 'moderate') {
+      const { p_id, p_action } = await readBody(req);
+      const item = posts.find((x) => x.id === p_id) ?? comments.find((x) => x.id === p_id);
+      if (!item) return send(res, 400, { code: 'P0002', message: 'not_found' });
+      if (p_action === 'eliminar') item.status = 'removed';
+      if (p_action === 'restaurar') item.status = 'published';
+      if (p_action === 'restaurar' || p_action === 'descartar') {
+        for (let i = reports.length - 1; i >= 0; i--)
+          if (reports[i].target === p_id) reports.splice(i, 1);
+      }
+      return send(res, 204);
+    }
+    const byTarget = new Map();
+    for (const r of reports) byTarget.set(r.target, [...(byTarget.get(r.target) ?? []), r]);
+    const rows = [];
+    for (const [target, rs] of byTarget) {
+      const post = posts.find((x) => x.id === target);
+      const item = post ?? comments.find((x) => x.id === target);
+      if (!item || item.status === 'removed') continue;
+      rows.push({
+        kind: post ? 'post' : 'comment',
+        id: target,
+        body: item.body,
+        status: item.status,
+        author_name: profiles.get(item.author_id)?.display_name || 'Anónimo',
+        created_at: item.created_at,
+        reports: new Set(rs.map((r) => r.reporter)).size,
+        reasons: [...new Set(rs.map((r) => r.reason))],
+        last_report_at: new Date().toISOString(),
+      });
+    }
+    rows.sort((a, b) => (b.status === 'hidden') - (a.status === 'hidden') || b.reports - a.reports);
+    return send(res, 200, rows);
+  }
   if (resource === 'rpc' && fn === 'record_activity') {
     if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
     return send(res, 200, [recordActivity(u.id, (await readBody(req)).p_action)]);
@@ -689,7 +729,7 @@ async function handleCommunity(req, res, url, u, resource, fn) {
     const body = await readBody(req);
     const target = body.post_id ?? body.comment_id;
     if (reports.some((r) => r.reporter === u.id && r.target === target)) return conflict(res);
-    reports.push({ reporter: u.id, target });
+    reports.push({ reporter: u.id, target, reason: body.reason ?? '' });
     const reporters = new Set(reports.filter((r) => r.target === target).map((r) => r.reporter));
     if (reporters.size >= 3) {
       const post = posts.find((p) => p.id === target);

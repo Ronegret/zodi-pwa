@@ -305,6 +305,13 @@ const planLabel = { free: 'Gratis', premium: 'Premium', vip: 'VIP' }[profile.pla
             Cambiar contraseña
           </Button>
         </div>
+        {profile.is_moderator && (
+          <p class="small">
+            <a href="/app/moderacion" class="mod-link">
+              Moderación de la comunidad
+            </a>
+          </p>
+        )}
         <p class="muted small">
           <a href="/app/cuenta/borrar" class="danger-link">
             Borrar mi cuenta y mis datos
@@ -462,5 +469,9 @@ const planLabel = { free: 'Gratis', premium: 'Premium', vip: 'VIP' }[profile.pla
   }
   .danger-link {
     color: #ff8fa3;
+  }
+  .mod-link {
+    color: var(--acid);
+    font-weight: 700;
   }
 </style>

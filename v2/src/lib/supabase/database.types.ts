@@ -60,6 +60,7 @@ export type Database = {
           referred_by: string | null;
           onboarding_completed_at: string | null;
           trial_ends_at: string | null;
+          is_moderator: boolean;
         };
         Insert: {
           id: string;
@@ -93,6 +94,7 @@ export type Database = {
           referred_by?: string | null;
           onboarding_completed_at?: string | null;
           trial_ends_at?: string | null;
+          is_moderator?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -466,6 +468,32 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      is_moderator: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      moderation_queue: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          kind: 'post' | 'comment';
+          id: string;
+          body: string;
+          status: Database['public']['Enums']['content_status'];
+          author_name: string;
+          created_at: string;
+          reports: number;
+          reasons: string[];
+          last_report_at: string;
+        }[];
+      };
+      moderate: {
+        Args: {
+          p_kind: 'post' | 'comment';
+          p_id: string;
+          p_action: 'restaurar' | 'eliminar' | 'descartar';
+        };
+        Returns: undefined;
+      };
       record_activity: {
         Args: { p_action: 'visit' | 'reading' | 'post' | 'comment' | 'favorite' };
         Returns: {

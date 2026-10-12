@@ -24,7 +24,8 @@ export type NavId =
   | 'match'
   | 'ajustes'
   | 'oraculo'
-  | 'progreso';
+  | 'progreso'
+  | 'moderacion';
 
 interface Props {
   title: string;
@@ -48,6 +49,8 @@ const nav: { id: NavId; label: string; href: string; icon: IconName; mobile: boo
   { id: 'match', label: 'Match', href: '/app/compatibilidad', icon: 'heart', mobile: false },
   { id: 'oraculo', label: 'Oráculo', href: '/app/oraculo', icon: 'send', mobile: false },
   { id: 'progreso', label: 'Progreso', href: '/app/progreso', icon: 'star', mobile: false },
+  // Solo para moderadores (se filtra abajo).
+  { id: 'moderacion', label: 'Moderación', href: '/app/moderacion', icon: 'eye', mobile: false },
   { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes', icon: 'sliders', mobile: true },
 ];
 
@@ -80,16 +83,18 @@ const today = new Intl.DateTimeFormat('es-ES', {
       </a>
       <nav aria-label="Principal" class="nav-scroll">
         <ul class="nav">
-          {nav.map((item) => (
-            <li class:list={{ 'desktop-only': !item.mobile }}>
-              <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>
-                <span class="nav-icon">
-                  <Icon name={item.icon} size={20} />
-                </span>
-                <span class="nav-label">{item.label}</span>
-              </a>
-            </li>
-          ))}
+          {nav
+            .filter((item) => item.id !== 'moderacion' || profile?.is_moderator)
+            .map((item) => (
+              <li class:list={{ 'desktop-only': !item.mobile }}>
+                <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>
+                  <span class="nav-icon">
+                    <Icon name={item.icon} size={20} />
+                  </span>
+                  <span class="nav-label">{item.label}</span>
+                </a>
+              </li>
+            ))}
         </ul>
       </nav>
       <div class="me">
