@@ -27,8 +27,10 @@ async function aiRequest(request: APIRequestContext, contains: string) {
   expect(res.ok(), `petición a la IA con "${contains}"`).toBe(true);
   return (await res.json()) as {
     model: string;
+    thinking?: unknown;
+    output_config?: unknown;
     system: { text: string; cache_control?: unknown }[];
-    messages: { role: string; content: string }[];
+    messages: { role: string; content: string | { text: string; cache_control?: unknown }[] }[];
   };
 }
 
@@ -69,7 +71,9 @@ test.describe('lecturas con IA', () => {
 
     // El prompt que llegó a la IA: voz cacheada + perfil + cielo real.
     const ai = await aiRequest(request, 'HORÓSCOPO DE HOY');
-    expect(ai.model).toBe('claude-sonnet-5-5');
+    // El horóscopo diario va con el modelo rápido y sin razonamiento.
+    expect(ai.model).toBe('claude-haiku-5-5');
+    expect(ai.thinking).toEqual({ type: 'disabled' });
     expect(ai.system[0]!.cache_control).toEqual({ type: 'ephemeral' });
     expect(ai.system[0]!.text).toContain('IDENTIDAD ABSOLUTA: eres ZODI');
     const prompt = ai.messages[0]!.content;
@@ -115,9 +119,12 @@ test.describe('lecturas con IA', () => {
     const spread = page.getByRole('list', { name: 'Cartas tiradas' });
     await expect(spread.getByRole('listitem')).toHaveCount(1);
     await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
-    expect((await aiRequest(request, '¿Le escribo hoy?')).messages[0]!.content).toContain(
-      'Cartas tiradas (una carta)',
-    );
+    const tarot = await aiRequest(request, '¿Le escribo hoy?');
+    expect(tarot.messages[0]!.content).toContain('Cartas tiradas (una carta)');
+    // El tarot va con el modelo profundo, sin razonamiento previo y esfuerzo bajo.
+    expect(tarot.model).toBe('claude-sonnet-5-5');
+    expect(tarot.thinking).toEqual({ type: 'between_tools' });
+    expect(tarot.output_config).toEqual({ effort: 'low' });
 
     await openStudio(page, 'tirada-celta');
     await page.getByLabel('Tu pregunta').fill('¿Dejo el trabajo este año?');
@@ -269,6 +276,35 @@ test.describe('lecturas con IA', () => {
     expect(ai.system[1]!.text).toContain('MODO CHAT');
     expect(ai.system[1]!.text).toContain('Nombre: Ana');
     expect(ai.messages.map((m) => m.role)).toEqual(['user', 'assistant', 'user']);
+    // El oráculo va con el modelo rápido, sin razonamiento y con la conversación cacheada.
+    expect(ai.model).toBe('claude-haiku-5-5');
+    expect(ai.thinking).toEqual({ type: 'disabled' });
+    expect(ai.system.every((b) => b.cache_control)).toBe(true);
+    expect(ai.messages.at(-1)!.content).toEqual([
+      { type: 'text', text: '¿Y mañana?', cache_control: { type: 'ephemeral' } },
+    ]);
     await expectNoViolations(page);
+  });
+
+  test('lecturas fijas: la segunda vez se enseña la guardada sin gastar', async ({
+    page,
+    request,
+  }) => {
+    await login(page, await createTestUser(request, true));
+    await openStudio(page, 'numerologia');
+    await page.getByRole('button', { name: 'Ver mis números' }).click();
+    await expect(page.getByRole('button', { name: 'Copiar' })).toBeVisible();
+    await expect(page.getByText(/Ya la tenías/)).toHaveCount(0);
+
+    await openStudio(page, 'numerologia');
+    await page.getByRole('button', { name: 'Ver mis números' }).click();
+    await expect(page.getByText(/Ya la tenías de hace poco/)).toBeVisible();
+    await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
+    await expectNoViolations(page);
+
+    // A propósito, se puede pedir otra (esta sí gasta).
+    await page.getByRole('button', { name: 'Hacer una nueva' }).click();
+    await expect(page.getByRole('button', { name: 'Copiar' })).toBeVisible();
+    await expect(page.getByText(/Ya la tenías/)).toHaveCount(0);
   });
 });

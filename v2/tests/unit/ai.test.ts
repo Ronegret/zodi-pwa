@@ -15,6 +15,7 @@ import {
 import { ZODI_SYSTEM, buildUserMessage } from '@/lib/ai/prompts';
 import { RichText, parseBlocks } from '@/components/readings/RichText';
 import { excerpt } from '@/lib/readings/format';
+import { costParams } from '@/lib/ai/cost';
 import { chatRequestSchema, prepareChat } from '@/lib/server/assistant';
 import { prepareReading, readingStream, type StreamEvent } from '@/lib/server/readings';
 import { readingRequestSchema } from '@/lib/validation/reading';
@@ -274,6 +275,35 @@ describe('stream de una lectura', () => {
     expect(p.messages[0]!.content).toContain('Cartas tiradas (tres cartas):');
     expect(JSON.stringify(p.input)).not.toContain('Ana');
     expect(p.input).toMatchObject({ slug: 'tarot', tone: 'sarcastico', question: '¿Me mudo?' });
+  });
+});
+
+describe('ahorro de tokens', () => {
+  it('Haiku sin razonamiento; Sonnet sin pensar antes y con esfuerzo bajo', () => {
+    expect(costParams('claude-haiku-5-5')).toEqual({ thinking: { type: 'disabled' } });
+    expect(costParams('claude-sonnet-5-5')).toEqual({
+      thinking: { type: 'between_tools' },
+      output_config: { effort: 'low' },
+    });
+    expect(costParams('claude-opus-5-5')).toEqual({ output_config: { effort: 'low' } });
+  });
+
+  it('las lecturas profundas van con Sonnet y el resto y el oráculo con Haiku', () => {
+    const stored = { chart: FIXTURE.chart, timeKnown: true };
+    const tier = (slug: string) =>
+      prepareReading({ slug, length: 'normal', question: '¿Sí?' } as never, PROFILE, stored, NOW)
+        .tier;
+    expect(tier('carta-natal')).toBe('deep');
+    expect(tier('tarot')).toBe('deep');
+    expect(tier('horoscopo-diario')).toBe('fast');
+    expect(tier('numerologia')).toBe('fast');
+    const chat = prepareChat(
+      { messages: [{ role: 'user', content: 'Hola' }] },
+      PROFILE,
+      stored,
+      NOW,
+    );
+    expect(chat).toMatchObject({ tier: 'fast', cacheHistory: true });
   });
 });
 

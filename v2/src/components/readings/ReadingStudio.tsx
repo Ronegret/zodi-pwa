@@ -68,6 +68,10 @@ export function ReadingStudio({
   const [status, setStatus] = useState('');
   const [copied, setCopied] = useState(false);
   const resultRef = useRef<HTMLElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  // Si la lectura ya estaba guardada (no gasta), se puede pedir otra a propósito.
+  const forceNew = useRef(false);
+  const [reused, setReused] = useState(false);
   const busy = phase === 'loading' || phase === 'streaming';
   const outOfQuota = remaining !== null && remaining <= 0;
 
@@ -82,6 +86,10 @@ export function ReadingStudio({
       length: get('length') || 'normal',
       focus: get('focus') || undefined,
     };
+    if (forceNew.current) {
+      payload.nueva = true;
+      forceNew.current = false;
+    }
     const optional = (k: string) => get(k) || undefined;
     if (def.input === 'question') {
       payload.question = get('question');
@@ -121,6 +129,7 @@ export function ReadingStudio({
     setError(null);
     setFieldErrors({});
     setReadingId(null);
+    setReused(false);
     setStatus('Generando tu lectura…');
     resultRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
 
@@ -150,7 +159,12 @@ export function ReadingStudio({
           setReadingId(event.id);
           setRemaining(event.remaining);
           setPhase('done');
-          setStatus('Lectura lista. Guardada en tu historial.');
+          setReused(Boolean(event.reused));
+          setStatus(
+            event.reused
+              ? 'Ya la tenías: te la enseño sin gastar lectura.'
+              : 'Lectura lista. Guardada en tu historial.',
+          );
           for (const a of event.unlocked ?? []) {
             toast(`Logro desbloqueado: ${ACHIEVEMENT_BY_ID.get(a)?.title ?? a}. +5 gemas.`);
           }
@@ -186,7 +200,13 @@ export function ReadingStudio({
 
   return (
     <div className={compact ? 'studio studio-compact' : 'studio'}>
-      <form className="studio-form card" onSubmit={submit} noValidate aria-busy={busy}>
+      <form
+        ref={formRef}
+        className="studio-form card"
+        onSubmit={submit}
+        noValidate
+        aria-busy={busy}
+      >
         {def.input === 'question' && (
           <div className="field">
             <label className="field-label" htmlFor={`${uid}-q`}>
@@ -531,6 +551,23 @@ export function ReadingStudio({
         {error && (
           <p className="notice notice-error" role="alert">
             {error}
+          </p>
+        )}
+        {phase === 'done' && reused && (
+          <p className="notice reused-note">
+            Ya la tenías de hace poco: te la enseño sin gastar lectura.{' '}
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              disabled={outOfQuota}
+              onClick={() => {
+                forceNew.current = true;
+                formRef.current?.requestSubmit();
+              }}
+            >
+              <Icon name="rotate" />
+              <span className="btn-label">Hacer una nueva</span>
+            </button>
           </p>
         )}
         {phase === 'done' && readingId && (

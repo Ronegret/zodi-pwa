@@ -14,7 +14,8 @@ import {
   tarotText,
   type DrawnCard,
 } from '@/lib/ai/extras';
-import { KIND_BY_SLUG, LENGTHS, type ReadingKind } from '@/lib/ai/kinds';
+import { DEEP_KINDS, KIND_BY_SLUG, LENGTHS, type ReadingKind } from '@/lib/ai/kinds';
+import type { AiTier } from '@/lib/ai/cost';
 import { nameNumbers, nameText, type NameNumbers } from '@/lib/divination/name';
 import { ZODI_SYSTEM, buildUserMessage, type Tone } from '@/lib/ai/prompts';
 import { crystalText, elementOfSign, pickCrystal, type Crystal } from '@/lib/divination/crystals';
@@ -38,15 +39,19 @@ export interface ReadingVisuals {
 export type StreamEvent =
   | ({ type: 'meta' } & ReadingVisuals)
   | { type: 'text'; text: string }
-  | { type: 'done'; id: string; remaining: number; unlocked?: string[] }
+  | { type: 'done'; id: string; remaining: number; unlocked?: string[]; reused?: boolean }
   | { type: 'error'; message: string };
 
 export interface PreparedReading {
   kind: ReadingKind;
-  /** Bloques de system: el primero (la voz de Zodi) se cachea. */
+  /** Bloques de system (se cachean): la voz de Zodi y, en el chat, el perfil. */
   system: string[];
   messages: ChatTurn[];
   maxTokens: number;
+  /** Modelo: rápido (Haiku) o profundo (Sonnet). */
+  tier: AiTier;
+  /** Chat: cachear también la conversación. */
+  cacheHistory?: boolean;
   /** Lo que se guarda en readings.input (sin datos del perfil). */
   input: Record<string, Json>;
   visuals: ReadingVisuals;
@@ -163,6 +168,7 @@ export function prepareReading(
       },
     ],
     maxTokens: LENGTHS[request.length].maxTokens,
+    tier: DEEP_KINDS.has(def.kind) ? 'deep' : 'fast',
     input,
     visuals,
   };
@@ -212,6 +218,7 @@ export function readingStream(opts: RunOptions): ReadableStream<Uint8Array> {
             send({ type: 'text', text });
           },
           opts.signal,
+          { tier: prepared.tier, cacheHistory: prepared.cacheHistory ?? false },
         );
         if (!content.trim()) throw new Error('respuesta vacía');
         const id = await opts.saveReading({
@@ -241,6 +248,44 @@ export function readingStream(opts: RunOptions): ReadableStream<Uint8Array> {
       } finally {
         controller.close();
       }
+    },
+  });
+}
+
+/** La última lectura igual (mismo tipo y mismos ajustes) desde `since`, si la hay. */
+export async function findReusable(
+  supabase: ZodiSupabaseClient,
+  kind: ReadingKind,
+  key: Record<string, Json>,
+  since: Date,
+): Promise<{ id: string; content: string } | null> {
+  const { data, error } = await supabase
+    .from('readings')
+    .select('id, content')
+    .eq('kind', kind)
+    .gte('created_at', since.toISOString())
+    .contains('input', key)
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (error) return null;
+  return data?.[0] ?? null;
+}
+
+/** Stream de una lectura guardada: el mismo protocolo, sin IA ni cuota. */
+export function savedReadingStream(
+  prepared: PreparedReading,
+  saved: { id: string; content: string },
+  remaining: number,
+): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    start(controller) {
+      const send = (event: StreamEvent) =>
+        controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+      send({ type: 'meta', ...prepared.visuals });
+      send({ type: 'text', text: saved.content });
+      send({ type: 'done', id: saved.id, remaining, reused: true });
+      controller.close();
     },
   });
 }

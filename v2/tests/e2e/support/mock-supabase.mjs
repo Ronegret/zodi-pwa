@@ -275,6 +275,13 @@ function applyFilters(rows, params) {
     if (op === 'neq') out = out.filter((r) => String(r[key]) !== expected);
     if (op === 'gte') out = out.filter((r) => String(r[key]) >= expected);
     if (op === 'lt') out = out.filter((r) => String(r[key]) < expected);
+    // jsonb @> (PostgREST "cs"): cada clave del objeto pedido coincide.
+    if (op === 'cs') {
+      const want = JSON.parse(expected);
+      out = out.filter((r) =>
+        Object.entries(want).every(([k, v]) => JSON.stringify(r[key]?.[k]) === JSON.stringify(v)),
+      );
+    }
     if (op === 'in') {
       // in.(a,b,"c d") → ['a', 'b', 'c d']
       const set = expected

@@ -26,5 +26,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     needsChart: def.needsChart,
     prepare: (profile, stored) => prepareReading(body.data, profile, stored, new Date()),
     route: 'POST /api/lecturas',
+    // Si ya la tienes igual y aún vale, se enseña sin gastar (salvo que pidas una nueva).
+    reuse: !body.data.nueva,
   });
 };

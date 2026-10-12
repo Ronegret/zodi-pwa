@@ -50,7 +50,7 @@ describe('significado del nombre', () => {
 
   it('el registro de serie es grande y está bien formado', () => {
     expect(REGISTRY_SIZE.nombres).toBeGreaterThan(740);
-    expect(REGISTRY_SIZE.apellidos).toBeGreaterThan(180);
+    expect(REGISTRY_SIZE.apellidos).toBeGreaterThan(650);
     const gen = { ...NOMBRES, ...APELLIDOS } as Record<string, { w: string; o: string; m: string }>;
     for (const [k, v] of Object.entries(gen)) {
       expect(k, k).toMatch(/^[a-z]+$/);

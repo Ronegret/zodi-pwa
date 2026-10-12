@@ -1,9 +1,22 @@
 /**
- * Cliente de IA (Anthropic). Solo servidor. El system prompt va con
- * cache_control: es igual para todas las lecturas y abarata cada llamada.
+ * Cliente de IA (Anthropic). Solo servidor. Ahorro de tokens:
+ * - Dos niveles: "fast" (Haiku, ~20 veces más barato) para el oráculo y la
+ *   mayoría de lecturas, y "deep" (Sonnet) para las que piden más síntesis.
+ * - Sin razonamiento previo: cobra como salida y no lo necesitamos (y además
+ *   se comía el max_tokens y cortaba las lecturas).
+ * - Caché en los bloques de system (la voz de ZODI y el perfil) y, en el
+ *   chat, también en la conversación: lo repetido se cobra al 5–10 %.
  */
 import Anthropic from '@anthropic-ai/sdk';
-import { ANTHROPIC_API_KEY, ANTHROPIC_BASE_URL, ANTHROPIC_MODEL } from 'astro:env/server';
+import {
+  ANTHROPIC_API_KEY,
+  ANTHROPIC_BASE_URL,
+  ANTHROPIC_MODEL,
+  ANTHROPIC_MODEL_FAST,
+} from 'astro:env/server';
+import { costParams, type AiTier } from './cost';
+
+export type { AiTier } from './cost';
 
 export interface ChatTurn {
   role: 'user' | 'assistant';
@@ -15,6 +28,15 @@ export interface GenerationResult {
   inputTokens: number;
   outputTokens: number;
 }
+
+export interface GenerateOptions {
+  tier?: AiTier;
+  /** Chat: cachea también la conversación (cada turno reaprovecha el anterior). */
+  cacheHistory?: boolean;
+}
+
+export const modelFor = (tier: AiTier) =>
+  tier === 'fast' ? ANTHROPIC_MODEL_FAST : ANTHROPIC_MODEL;
 
 export const aiAvailable = () => Boolean(ANTHROPIC_API_KEY);
 
@@ -39,18 +61,37 @@ export async function generate(
   maxTokens: number,
   onText: (text: string) => void,
   signal?: AbortSignal,
+  options: GenerateOptions = {},
 ): Promise<GenerationResult> {
+  const model = modelFor(options.tier ?? 'deep');
+  const last = messages.length - 1;
   const stream = getClient().messages.stream(
     {
-      model: ANTHROPIC_MODEL,
+      model,
       max_tokens: maxTokens,
-      system: system.map((text, i) => ({
+      // Cada bloque de system es estable (voz de ZODI; perfil del día): se cachean.
+      system: system.map((text) => ({
         type: 'text' as const,
         text,
-        // El primer bloque (la voz de Zodi) es fijo: se cachea.
-        ...(i === 0 ? { cache_control: { type: 'ephemeral' as const } } : {}),
+        cache_control: { type: 'ephemeral' as const },
       })),
-      messages,
+      messages: options.cacheHistory
+        ? messages.map((m, i) =>
+            i === last
+              ? {
+                  role: m.role,
+                  content: [
+                    {
+                      type: 'text' as const,
+                      text: m.content,
+                      cache_control: { type: 'ephemeral' as const },
+                    },
+                  ],
+                }
+              : m,
+          )
+        : messages,
+      ...costParams(model),
     },
     signal ? { signal } : undefined,
   );

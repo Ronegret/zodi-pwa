@@ -75,10 +75,17 @@ export default defineConfig({
         optional: true,
       }),
       ANTHROPIC_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Modelo de las lecturas profundas (carta, tránsitos, compatibilidad, tarot).
       ANTHROPIC_MODEL: envField.string({
         context: 'server',
         access: 'public',
         default: 'claude-sonnet-5-5',
+      }),
+      // Modelo rápido y barato (oráculo, horóscopo diario y el resto): ~20 veces menos.
+      ANTHROPIC_MODEL_FAST: envField.string({
+        context: 'server',
+        access: 'public',
+        default: 'claude-haiku-5-5',
       }),
       // Solo para los e2e (servidor simulado); en producción no se define.
       ANTHROPIC_BASE_URL: envField.string({

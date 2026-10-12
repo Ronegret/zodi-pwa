@@ -311,6 +311,19 @@ export const GROUPS: { id: KindGroup; title: string; blurb: string }[] = [
   },
 ];
 
+/**
+ * Lecturas que van con el modelo profundo (Sonnet): las que cruzan muchos
+ * datos o interpretan cartas. El resto, y el oráculo, con el rápido (Haiku),
+ * unas 20 veces más barato.
+ */
+export const DEEP_KINDS: ReadonlySet<ReadingKind> = new Set([
+  'natal-chart',
+  'transits',
+  'compatibility',
+  'tarot',
+  'celtic-tarot',
+]);
+
 export const KIND_BY_SLUG = new Map(KINDS.map((k) => [k.slug, k]));
 export const KIND_BY_KIND = new Map(KINDS.map((k) => [k.kind, k]));
 

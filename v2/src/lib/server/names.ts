@@ -62,6 +62,8 @@ export async function lookupName(
       (t) => {
         text += t;
       },
+      undefined,
+      { tier: 'deep' },
     );
   } catch (error) {
     console.error('[nombre] generación fallida', error);

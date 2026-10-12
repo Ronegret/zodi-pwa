@@ -81,6 +81,8 @@ export const readingRequestSchema = z
       'Cuéntame algo más (unas palabras).',
       'Resúmelo en menos de 500 caracteres.',
     ),
+    /** true: no reutilizar la guardada, generar otra. */
+    nueva: z.boolean().optional(),
   })
   .superRefine((value, ctx) => {
     const def = KIND_BY_SLUG.get(value.slug);

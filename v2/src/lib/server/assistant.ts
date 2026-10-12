@@ -54,6 +54,8 @@ export function prepareChat(
     ],
     messages,
     maxTokens: 500,
+    tier: 'fast',
+    cacheHistory: true,
     input: { question: last.slice(0, 1000) },
     visuals: {},
   };

@@ -5,6 +5,9 @@
  */
 import type { NatalChart } from '@/lib/astro-engine';
 import { aiAvailable, generate } from '@/lib/ai/client';
+import { reuseKey, reuseSince } from '@/lib/ai/reuse';
+import { localToUtc } from '@/lib/astro-engine/time';
+import { civilDate } from '@/lib/daily/biorhythm';
 import type { ReadingKind } from '@/lib/ai/kinds';
 import { fail, internal } from '@/lib/api/http';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -12,8 +15,14 @@ import type { ZodiSupabaseClient } from '@/lib/supabase/server';
 import { recordActivity } from './activity';
 import { getLatestSelfChart } from './charts';
 import { getOwnProfile, type Profile } from './profile';
-import { supabaseQuotaStore } from './quota';
-import { insertReading, readingStream, type PreparedReading } from './readings';
+import { getQuotaStatus, supabaseQuotaStore } from './quota';
+import {
+  findReusable,
+  insertReading,
+  readingStream,
+  savedReadingStream,
+  type PreparedReading,
+} from './readings';
 
 const SHARPENING = 'Zodi está afilando la lengua. Vuelve en un rato.';
 
@@ -28,7 +37,15 @@ export interface AiRequestOptions {
     stored: { chart: NatalChart; timeKnown: boolean } | null,
   ) => PreparedReading;
   route: string;
+  /** Si existe una lectura igual y aún vale, se enseña sin gastar IA (false = pedir una nueva). */
+  reuse?: boolean;
 }
+
+const NDJSON = {
+  'Content-Type': 'application/x-ndjson; charset=utf-8',
+  'Cache-Control': 'private, no-store',
+  'X-Accel-Buffering': 'no',
+};
 
 export async function runAiRequest(opts: AiRequestOptions): Promise<Response> {
   if (!aiAvailable()) return fail(503, 'unavailable', SHARPENING);
@@ -47,6 +64,26 @@ export async function runAiRequest(opts: AiRequestOptions): Promise<Response> {
       );
     }
 
+    const prepared = opts.prepare(
+      profile,
+      stored ? { chart: stored.chart, timeKnown: stored.input.timeKnown } : null,
+    );
+
+    // Ahorro: la misma lectura (fija o del día) se enseña guardada, sin IA ni cuota.
+    if (opts.reuse) {
+      const now = new Date();
+      const tz = profile.time_zone ?? 'Europe/Madrid';
+      const since = reuseSince(opts.kind, now, localToUtc(civilDate(now, tz), '00:00', tz));
+      const saved = since
+        ? await findReusable(opts.supabase, opts.kind, reuseKey(prepared.input), since)
+        : null;
+      if (saved) {
+        const status = await getQuotaStatus(opts.supabase).catch(() => null);
+        const remaining = status ? Math.max(0, status.limit - status.used) : 0;
+        return new Response(savedReadingStream(prepared, saved, remaining), { headers: NDJSON });
+      }
+    }
+
     const quota = supabaseQuotaStore(opts.supabase, admin);
     const { eventId, used, limit } = await quota.consume(opts.kind);
     if (eventId === null) {
@@ -57,10 +94,6 @@ export async function runAiRequest(opts: AiRequestOptions): Promise<Response> {
       );
     }
 
-    const prepared = opts.prepare(
-      profile,
-      stored ? { chart: stored.chart, timeKnown: stored.input.timeKnown } : null,
-    );
     const stream = readingStream({
       prepared,
       userId: opts.userId,
