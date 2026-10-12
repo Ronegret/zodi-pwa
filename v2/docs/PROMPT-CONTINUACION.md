@@ -136,9 +136,10 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 | **3. Diseño y layout** | Hecha (ver informe). |
 | **4. Motion** | Hecha (ver informe). Lighthouse pendiente para Fase 8. |
 | **5. Escenas 3D** | Hecha (ver informe). Medir fps en móvil real en Fase 8. |
-| **6. PDF editorial** | Plantilla por signo, rueda natal en SVG, secciones según datos, tipografía cuidada, exportación desde el dashboard. |
-| **7. Portar funcionalidades** | En curso (rama `fase-7`). Hechas lecturas IA, chat y comunidad. Faltan Stripe y gemas, push y emails, horóscopos SEO por signo y moderación. |
-| **8. QA y corte** | Lighthouse, axe en 3 tamaños, redirects, pruebas de carga en `zodi.aibueno.es`, retirada de Next. |
+| **6. PDF editorial** | Hecha: `/app/carta/imprimir` (ver informe). |
+| **7. Portar funcionalidades** | Hecha salvo Stripe y gemas (aplazado: 30 días gratis) y push/emails (bloqueado por los DNS de Resend). |
+| **8. Paridad y experiencia** | 8A y 8B hechas; 8C con actividad, logros, favoritas, moderación; estudio de usabilidad aplicado; CI en GitHub. Faltan predicciones a 90 días, ritual del día y amigos. |
+| **9. QA y corte** | Lighthouse, pruebas de carga en `zodi.aibueno.es`, fps en móvil real, retirada del proyecto Next (`zodi-pwa`). axe en 3 tamaños y redirects: hechos. |
 
 ## 8. Comandos (desde `v2/`)
 ```
@@ -158,6 +159,9 @@ node scripts/places/import.mjs            # (re)carga GeoNames en places/place_a
 - Windows: en Git Bash los heredocs largos con comillas fallan; crea archivos con la herramienta de escritura de ficheros, no con `cat <<EOF`.
 - Windows (desde el 12/10/2026): el **Control inteligente de aplicaciones** bloquea el compilador nativo de Astro (`@astrojs/compiler-binding-win32-x64-msvc` 0.5.1, "Una directiva de Control de aplicaciones bloqueó este archivo"). En local se usa el compilador WebAssembly oficial: está descomprimido a mano en `node_modules/@astrojs/compiler-binding-wasm32-wasi` (no está en `package.json`; un `npm ci` lo borra: volver a sacarlo con `npm pack @astrojs/compiler-binding-wasm32-wasi@0.5.1`) y todos los comandos de Astro van con `NAPI_RS_FORCE_WASI=1` (`check`, `build`, `dev`, `test:e2e`). Vercel (Linux) no se ve afectado.
 - Recursos: `node scripts/brand-assets.mjs [prefijos]` (imágenes) y `node scripts/media-assets.mjs` (vídeos, pósters y canción; necesita ffmpeg).
+- Supabase Auth por API: `node scripts/supabase/configure-auth.mjs [--dry-run] [--confirmar-correo]` (correos en español; Google y Resend si sus claves están en `.env.local`; necesita `SUPABASE_ACCESS_TOKEN`). Moderadores: `node scripts/db/make-moderator.mjs <correo> [--quitar]`.
+- CI: `.github/workflows/v2-ci.yml` corre todo en Linux en cada subida a `fase-7`.
+- Firma: "ZODI está creado por Rodrigo Negrete (rodrigonegrete.es)" en todas las pantallas (`CreatorCredit.astro`).
 - Antes de afirmar que algo funciona, ejecútalo (check, lint, tests, build, axe). Reporta fallos con su salida.
 - Nunca pegues claves en el chat ni las versiones; van en `v2/.env.local` (ignorado por git).
 - Idioma de UI y copy: español.

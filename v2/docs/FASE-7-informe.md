@@ -77,13 +77,10 @@ Prioridad marcada por Rodrigo: **lecturas con IA y comunidad**, mucho mejor que 
 - el system prompt va cacheado;
 - las cartas que interpreta la IA son las que se tiraron.
 
-## Pendiente (Rodrigo)
-- **`ANTHROPIC_API_KEY`** en Vercel → `zodi-v2` → Environment Variables, en Production y Preview. Para desarrollo local, también en `v2/.env.local`. Es la línea `ANTHROPIC_API_KEY=` del `.env.local` de la raíz.
-- Sin ella, las lecturas y el chat muestran "Zodi está afilando la lengua".
-
-## Pendiente (siguiente)
-- Stripe y gemas: planes premium y vip, compra de gemas. Revisar los webhooks antiguos.
-- Notificaciones push y emails (Resend; faltan los DNS).
-- Horóscopos públicos por signo (SEO): ahora redirigen a la portada.
-- Moderación: panel para revisar denuncias (ahora solo ocultan solas).
-- Fase 6: PDF editorial del perfil.
+## Estado del pendiente (12/10/2026)
+- `ANTHROPIC_API_KEY`: puesta por Rodrigo en Vercel y en `v2/.env.local`. ✅
+- Horóscopos públicos por signo (SEO): hechos en la Fase 8B (`/horoscopo/[signo]`). ✅
+- Moderación: hecha (`/app/moderacion`, migración `moderation`, `scripts/db/make-moderator.mjs`; Rodrigo es moderador). ✅
+- PDF de la carta (Fase 6): hecho (`FASE-6-informe.md`). ✅
+- Stripe y gemas: **aplazado por decisión de Rodrigo** (30 días con todo gratis; los planes se definen después). Las tablas de pagos y gemas ya existen.
+- Notificaciones push y emails: **bloqueado** hasta verificar el dominio en Resend (faltan los 3 registros DNS en Hostinger). Plantillas de acceso en español y script de configuración listos.
