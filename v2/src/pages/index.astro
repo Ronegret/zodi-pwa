@@ -329,7 +329,7 @@ const FAQ = [
                     <span class="tile-v">{firstName}</span>
                     <span class="tile-s">
                       {nameEntry
-                        ? `${nameEntry.origin}: «${nameEntry.meaning}».${nameEntry.note ? ` ${nameEntry.note}.` : ''}`
+                        ? `${nameEntry.origin}: ${nameEntry.meaning.includes('«') ? nameEntry.meaning : `«${nameEntry.meaning}»`}.${nameEntry.note ? ` ${nameEntry.note}.` : ''}`
                         : 'No está en mi lista pública: dentro lo investigo para ti, con tus apellidos.'}
                     </span>
                   </li>
