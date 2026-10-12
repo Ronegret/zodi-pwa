@@ -231,6 +231,8 @@ test.describe('lecturas con IA', () => {
     await hydrated(page);
     await page.getByRole('button', { name: 'Leer mi día' }).click();
     await expect(page.locator('.reading-paper')).toContainText('Hoy haz esto:');
+    // Recargar solo cuando ya está guardada (si no, la recarga corta el guardado).
+    await expect(page.getByRole('status').filter({ hasText: 'Lectura lista' })).toBeAttached();
     await page.reload();
     // Ya está el de hoy: se lee sin gastar otra lectura.
     await expect(page.getByRole('button', { name: 'Leer mi día' })).toHaveCount(0);

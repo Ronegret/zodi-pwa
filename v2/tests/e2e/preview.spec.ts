@@ -9,6 +9,16 @@ const OUT = process.env.PREVIEW_DIR ?? 'test-results/preview';
 
 test.skip(!process.env.PREVIEW, 'Solo para revisar a ojo');
 
+test('capturas públicas', async ({ page }) => {
+  await page.goto('/?nacimiento=1990-04-15#sabe');
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${OUT}/portada.png`, fullPage: true });
+  await page.goto('/horoscopo/leo');
+  await page.screenshot({ path: `${OUT}/leo.png`, fullPage: true });
+  await page.goto('/auth/login');
+  await page.screenshot({ path: `${OUT}/login.png`, fullPage: true });
+});
+
 test('capturas de las lecturas', async ({ page, request }) => {
   test.setTimeout(120_000);
   await login(page, await createTestUser(request, true));

@@ -583,7 +583,8 @@ async function handleAi(req, res) {
   );
   const name = /Nombre: ([^ (\n]+)/.exec(prompt)?.[1] ?? 'tú';
   // "1. Pasado: III · La Emperatriz (invertida) — Arcano ZODI: …"
-  const cards = [...prompt.matchAll(/^\d+\. [^:\n]+: [^·\n]+· ([^\n(—]+)/gm)].map((m) =>
+  // Los Arcanos ZODI llevan "·" en el numeral (Z·II): se corta en " · ".
+  const cards = [...prompt.matchAll(/^\d+\. [^:\n]+: .+? · ([^\n(—]+)/gm)].map((m) =>
     m[1].trim(),
   );
   const isChat = body.system.some((b) => b.text.includes('MODO CHAT'));
