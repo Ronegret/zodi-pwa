@@ -18,10 +18,17 @@ Rama `fase-7` · 12/10/2026 · Plan y comparación con la Zodi de antes en `FASE
 - **Acceso**: la carta "La Identificación" del Tarot ZODI junto al login y el registro.
 - No se han traído los "testimonios" de la portada antigua: eran inventados.
 
+### 8C — Volver cada día (primera parte)
+- **Migración `20261012130000_activity.sql`** (aplicada y verificada en el Supabase real con `scripts/db/verify-activity.mjs`): `record_activity()` suma la racha una vez al día en la zona de cada persona, XP por acción (lectura 10, publicación 8, comentario 3, favorita 2, primer paso del día 5) y nivel; desbloquea 19 logros reales (por lecturas hechas, racha, nivel y comunidad, no por puntos inventados como en la versión antigua) y da 5 gemas por logro y 10 por cada semana de racha. `toggle_favorite()` solo sobre lecturas propias. Nadie puede escribir puntos, racha ni logros a mano (probado en `tests/db/rls.test.ts`).
+- **App**: el panel registra la visita del día; leer, consultar al oráculo, publicar y comentar suman; los logros nuevos salen como aviso. `/app/progreso` (nivel, racha, mejor racha, gemas, logros y tabla de puntos), estrella de favoritas, `/app/lecturas/historial` con filtro de favoritas y paginación.
+- **Arreglo**: con las secciones nuevas, en pantallas de 720 px de alto "Cerrar sesión" quedaba fuera del menú lateral (fallo que llegó a producción en la subida anterior); ahora el menú se desplaza. En el móvil, los avisos salen por encima de la barra inferior.
+
 ## Verificado (12/10/2026)
 - `npm run check`: 0 errores. `npm run lint`: limpio.
-- `npm test`: 201/201 (nuevos: `divination.test.ts` con kines mayas de referencia, runas, cristales, nombre, validación y preparación; `public.test.ts` con casas solares y caché).
-- `npm run test:e2e`: 235 pasan y 8 se saltan a propósito (capturas de revisión), en móvil, tablet y escritorio, con axe WCAG 2.2 AA en las páginas nuevas (mano, nombre, maya, horóscopo público).
+- `npm test`: 209/209 (nuevos: `divination.test.ts` con kines mayas de referencia, runas, cristales, nombre, validación y preparación; `public.test.ts` con casas solares y caché; `progress.test.ts` comprueba que el catálogo de logros es el mismo que el de la base de datos; 6 pruebas nuevas de RLS para la actividad).
+- `npm run test:e2e`: 241 pasan y 8 se saltan a propósito (capturas de revisión), en móvil, tablet y escritorio, con axe WCAG 2.2 AA en las páginas nuevas (mano, nombre, maya, horóscopo público, progreso, historial).
+- Función compilada probada fuera del repo como en Vercel (`/`, muestra con fecha, `/horoscopo`, `/horoscopo/leo`, redirección 301, login y 404).
+- Producción (`zodi.aibueno.es`) comprobada tras el despliegue: portada nueva, horóscopos por signo, vídeos y cartas.
 - `npm run build`: correcto.
 - Revisión visual con capturas: tarot, cruz celta, runas, sello maya, hub, portada, Leo y login.
 
@@ -31,4 +38,4 @@ Rama `fase-7` · 12/10/2026 · Plan y comparación con la Zodi de antes en `FASE
 - **Windows bloquea el compilador nativo de Astro** (Control inteligente de aplicaciones). En local se usa el compilador WebAssembly con `NAPI_RS_FORCE_WASI=1`; Vercel no está afectado. Detalle en `PROMPT-CONTINUACION.md`.
 - Los vídeos llevan la marca de agua "Veo" del generador; no se ha recortado.
 - El sello maya usa la cuenta de las 13 Lunas (la que busca el público), no la cuenta tradicional del Tzolkin.
-- Pendiente 8C (puntos, rachas, logros, favoritos, predicciones, ritual, amigos) y 8D (Stripe, compartir, PDF, emails, push). La 8C necesita una migración en Supabase.
+- Pendiente de la 8C: predicciones a 90 días, ritual del día y amigos. Después 8D (Stripe y gemas, compartir como imagen, PDF, emails y push).

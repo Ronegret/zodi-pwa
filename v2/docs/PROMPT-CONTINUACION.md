@@ -103,7 +103,9 @@ Zodi es una app de astrología personal con IA, desplegada en https://zodi.aibue
 **Fase 8, en la misma rama `fase-7`** (volver a tener todo lo de la Zodi de antes; plan en `FASE-8-plan.md`, estado en `FASE-8-informe.md`):
 - 8A hecha: Tarot ZODI vivo (22 arcanos + 9 Arcanos ZODI con arte, cartas que se reparten y voltean en 3D, tiradas de 1, 3 y cruz celta), runas, cristales, nombre, mano y horóscopo maya (18 lecturas en total); "¿Qué es esto?", temas y glosario en cada lectura (`src/lib/ai/guides.ts`); el asistente es ahora el **oráculo** (`/app/oraculo`, botón flotante).
 - 8B hecha: horóscopo público por signo sin IA (`/horoscopo`, `/horoscopo/[signo]`, casas solares en `src/lib/public/sign-day.ts`, caché de CDN hasta medianoche de Madrid); portada completa con vídeos (`public/video`), canción (`public/audio`), "Mira lo que ZODI sabe de ti", carrusel de Arcanos ZODI y FAQ; bienvenida con ZODI bailando; carta "La Identificación" en login y registro.
-- 8C y 8D pendientes: puntos, rachas, logros, favoritos, predicciones, ritual del día, amigos; Stripe y gemas, compartir como imagen, PDF, emails y push.
+- 8C en marcha: hecha la actividad (racha, XP, nivel, 19 logros reales, gemas por logro y racha, favoritas, historial, `/app/progreso`) con la migración `activity` aplicada al Supabase real. Faltan predicciones a 90 días, ritual del día y amigos.
+- 8D pendiente: Stripe y gemas, compartir como imagen, PDF, emails y push.
+- `fase-7` y `astro-v2` (producción) van a la par: Rodrigo pidió publicar directo a producción.
 
 ## 5. Hallazgos de la app actual (a resolver en v2)
 - `lib/astral.ts`: Luna y Ascendente salen de `signs[(seed + birthCity.length) % 12]` (falso). Solo el signo solar es correcto. El horóscopo chino usa el año natural, no el Año Nuevo Lunar.
@@ -182,6 +184,6 @@ node scripts/places/import.mjs            # (re)carga GeoNames en places/place_a
 - Acciones destructivas o que publican (borrar archivos del repo raíz, reescribir historial, push, deploy) requieren mi confirmación.
 
 ## 10. Primer paso que quiero ahora
-1. Con permiso de Rodrigo: push de `fase-7` (preview) y, cuando lo apruebe, fusión en `astro-v2` (producción).
+1. Comprueba en `zodi.aibueno.es` lo último publicado (8A, 8B y 8C).
 2. Con `ANTHROPIC_API_KEY` en Vercel, prueba en el preview: registro → onboarding → lecturas (tarot, celta, runas, mano…) → oráculo → comunidad.
-3. Fase 8C: migración de actividad (racha, puntos, nivel, logros, favoritos) con su test en `tests/db/rls.test.ts`, panel de progreso y ritual del día. Después 8D (Stripe y gemas, compartir, PDF, emails).
+3. Resto de la 8C: predicciones a 90 días, ritual del día y amigos. Después 8D (Stripe y gemas, compartir, PDF, emails).
