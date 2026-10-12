@@ -26,7 +26,14 @@ const readings = [];
 const quotaUsed = new Map();
 const quotaEvents = new Map();
 let nextEventId = 1;
-const DAILY_LIMIT = 5;
+/** Límites por plan (usage_limits); durante el periodo gratis cuenta como premium. */
+const LIMITS = { free: { lecturas: 5, oraculo: 15 }, premium: { lecturas: 40, oraculo: 60 } };
+function limitFor(userId, bucket) {
+  const p = profiles.get(userId);
+  const trial = p?.trial_ends_at && Date.parse(p.trial_ends_at) > Date.now();
+  const plan = p?.plan === 'free' && trial ? 'premium' : (p?.plan ?? 'free');
+  return (LIMITS[plan] ?? LIMITS.premium)[bucket];
+}
 /** Clave de service role que Playwright pasa al servidor de la app. */
 export const SERVICE_KEY = 'e2e-service-role-key';
 /** Última petición a la IA falsa (para que los tests miren el prompt). */
@@ -69,18 +76,21 @@ function blankProfile(id, now) {
     referral_code: id.slice(0, 10),
     referred_by: null,
     onboarding_completed_at: null,
+    // Sin periodo gratis por defecto: los tests ven los límites de free.
+    trial_ends_at: null,
     created_at: now,
     updated_at: now,
   };
 }
 
-function createUser({ onboarded }) {
+function createUser({ onboarded, trial = false }) {
   const id = randomUUID();
   const email = `e2e-${id.slice(0, 8)}@zodi.test`;
   users.set(id, { id, email, password: PASSWORD });
   const now = new Date().toISOString();
   profiles.set(id, {
     ...blankProfile(id, now),
+    ...(trial ? { trial_ends_at: new Date(Date.now() + 30 * 86_400_000).toISOString() } : {}),
     ...(onboarded
       ? {
           display_name: 'Ana Estrella',
@@ -259,6 +269,14 @@ function applyFilters(rows, params) {
     if (op === 'neq') out = out.filter((r) => String(r[key]) !== expected);
     if (op === 'gte') out = out.filter((r) => String(r[key]) >= expected);
     if (op === 'lt') out = out.filter((r) => String(r[key]) < expected);
+    if (op === 'in') {
+      // in.(a,b,"c d") → ['a', 'b', 'c d']
+      const set = expected
+        .replace(/^\(|\)$/g, '')
+        .split(',')
+        .map((x) => x.replace(/^"|"$/g, ''));
+      out = out.filter((r) => set.includes(String(r[key])));
+    }
   }
   const order = params.get('order');
   if (order) {
@@ -319,6 +337,19 @@ async function handleAuth(req, res, url) {
     if (!u) return send(res, 403, { code: 'bad_jwt', error_code: 'bad_jwt', msg: 'invalid JWT' });
     return send(res, 200, userJson(u));
   }
+  // Borrar usuario (admin, service role): cae en cascada todo lo suyo.
+  const adminDelete = /^\/admin\/users\/([0-9a-f-]{36})$/.exec(path);
+  if (adminDelete && req.method === 'DELETE') {
+    if (!isServiceRole(req)) return send(res, 401, { msg: 'mock: solo service role' });
+    const id = adminDelete[1];
+    users.delete(id);
+    profiles.delete(id);
+    charts.delete(id);
+    for (let i = readings.length - 1; i >= 0; i--)
+      if (readings[i].user_id === id) readings.splice(i, 1);
+    for (const [token, owner] of accessTokens) if (owner === id) accessTokens.delete(token);
+    return send(res, 200, {});
+  }
   if (path === '/logout' && req.method === 'POST') {
     const token = (req.headers.authorization ?? '').replace(/^Bearer /, '');
     accessTokens.delete(token);
@@ -342,21 +373,26 @@ async function handleRest(req, res, url) {
   if (resource === 'rpc' && fn === 'search_places') {
     return send(res, 200, searchPlaces(await readBody(req)));
   }
-  if (resource === 'rpc' && fn === 'ai_quota_status') {
-    return send(res, 200, u ? [{ used: quotaUsed.get(u.id) ?? 0, daily_limit: DAILY_LIMIT }] : []);
+  if (resource === 'rpc' && (fn === 'ai_quota_status' || fn === 'oracle_quota_status')) {
+    if (!u) return send(res, 200, []);
+    const bucket = fn === 'oracle_quota_status' ? 'oraculo' : 'lecturas';
+    const key = `${u.id}:${bucket}`;
+    return send(res, 200, [{ used: quotaUsed.get(key) ?? 0, daily_limit: limitFor(u.id, bucket) }]);
   }
   if (resource === 'rpc' && fn === 'consume_ai_quota') {
     if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
-    const used = quotaUsed.get(u.id) ?? 0;
-    if (used >= DAILY_LIMIT) {
-      return send(res, 200, [{ allowed: false, used, daily_limit: DAILY_LIMIT, event_id: null }]);
+    // Lecturas y oráculo llevan cuentas separadas (como consume_ai_quota).
+    const bucket = (await readBody(req)).p_kind === 'assistant' ? 'oraculo' : 'lecturas';
+    const key = `${u.id}:${bucket}`;
+    const limit = limitFor(u.id, bucket);
+    const used = quotaUsed.get(key) ?? 0;
+    if (used >= limit) {
+      return send(res, 200, [{ allowed: false, used, daily_limit: limit, event_id: null }]);
     }
     const id = nextEventId++;
-    quotaUsed.set(u.id, used + 1);
-    quotaEvents.set(id, u.id);
-    return send(res, 200, [
-      { allowed: true, used: used + 1, daily_limit: DAILY_LIMIT, event_id: id },
-    ]);
+    quotaUsed.set(key, used + 1);
+    quotaEvents.set(id, key);
+    return send(res, 200, [{ allowed: true, used: used + 1, daily_limit: limit, event_id: id }]);
   }
   if (resource === 'rpc' && fn === 'record_activity') {
     if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
@@ -735,8 +771,8 @@ createServer(async (req, res) => {
       return send(res, found ? 200 : 404, found ?? { message: 'sin coincidencias' });
     }
     if (url.pathname === '/__test/quota' && req.method === 'POST') {
-      const { userId, used } = await readBody(req);
-      quotaUsed.set(userId, used);
+      const { userId, used, bucket = 'lecturas' } = await readBody(req);
+      quotaUsed.set(`${userId}:${bucket}`, used);
       return send(res, 200, { ok: true });
     }
     if (url.pathname === '/v1/messages' && req.method === 'POST') return await handleAi(req, res);

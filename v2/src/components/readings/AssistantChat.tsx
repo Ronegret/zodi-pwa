@@ -12,15 +12,28 @@ interface Turn {
 
 interface Props {
   firstName: string;
+  /** Mensajes que le quedan hoy al oráculo. */
   remaining: number | null;
+  /** Sol, Luna y Ascendente ("Aries"…), para enseñar con qué lee ZODI. */
+  bigThree?: { sun: string; moon: string; ascendant?: string | undefined } | undefined;
+  /** Tono con el que habla ("Directo"…). */
+  toneLabel?: string;
 }
 
 const STORAGE_KEY = 'zodi:chat';
 const SUGGESTIONS = [
   '¿Qué me depara hoy?',
   '¿Le escribo o no le escribo?',
-  'Explícame mi Luna como si tuviera cinco años',
-  '¿Por qué estoy tan cansada esta semana?',
+  '¿Es buen momento para cambiar de trabajo?',
+  'Explícame mi Luna en palabras sencillas',
+  '¿Qué dice mi carta del amor?',
+  'Dame un consejo para esta semana',
+];
+const FOLLOW_UPS = [
+  'Cuéntame más',
+  '¿Y en el amor?',
+  '¿Y en el trabajo?',
+  'Dame algo concreto para hoy',
 ];
 
 function loadTurns(): Turn[] {
@@ -33,10 +46,16 @@ function loadTurns(): Turn[] {
 }
 
 /**
- * Chat con Zodi. La conversación vive en esta pestaña (sessionStorage): al
- * cerrar, se olvida. Cada respuesta de Zodi gasta una lectura del día.
+ * El oráculo: chat con Zodi. La conversación vive en esta pestaña
+ * (sessionStorage): al cerrar, se olvida. Los mensajes tienen su propia cuota
+ * diaria (no gastan lecturas). Tras cada respuesta propone cómo seguir.
  */
-export function AssistantChat({ firstName, remaining: initialRemaining }: Props) {
+export function AssistantChat({
+  firstName,
+  remaining: initialRemaining,
+  bigThree,
+  toneLabel,
+}: Props) {
   const uid = useId();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState('');
@@ -135,16 +154,48 @@ export function AssistantChat({ firstName, remaining: initialRemaining }: Props)
 
   return (
     <div className="chat">
-      {turns.length === 0 && (
+      <header className="oracle-head">
         <img
-          className="chat-hero"
-          src="/art/zodi-movil-1024.webp"
-          srcSet="/art/zodi-movil-640.webp 640w, /art/zodi-movil-1024.webp 1024w"
-          sizes="(min-width: 900px) 52rem, 100vw"
-          alt="ZODI mirando el móvil, listo para contestarte"
-          width="1024"
-          height="1024"
+          className="oracle-avatar"
+          src="/art/zodi-bola-640.webp"
+          alt=""
+          width="640"
+          height="640"
         />
+        <div className="oracle-intro">
+          <p className="oracle-title">ZODI tiene tu carta delante</p>
+          {bigThree && (
+            <ul className="oracle-pillars" aria-label="Con qué lee ZODI">
+              <li className="badge badge-acid">☉ Sol en {bigThree.sun}</li>
+              <li className="badge badge-violet">☽ Luna en {bigThree.moon}</li>
+              {bigThree.ascendant && <li className="badge">↑ Ascendente {bigThree.ascendant}</li>}
+            </ul>
+          )}
+          {toneLabel && (
+            <p className="muted small">
+              Te habla en tono <strong>{toneLabel.toLowerCase()}</strong> ·{' '}
+              <a href="/app/ajustes#tono">Cambiar</a>
+            </p>
+          )}
+        </div>
+      </header>
+      {turns.length === 0 && (
+        <ol className="oracle-how" aria-label="Cómo funciona">
+          <li>
+            <strong>Pregunta lo que quieras</strong>
+            <span>Amor, trabajo, una decisión, un mal día. Como a alguien que te conoce.</span>
+          </li>
+          <li>
+            <strong>Responde con tu cielo</strong>
+            <span>
+              Usa tu carta real y lo que pasa hoy en el cielo, no frases de sobre de azúcar.
+            </span>
+          </li>
+          <li>
+            <strong>Se queda en esta pestaña</strong>
+            <span>No guardamos la conversación: al cerrar, se borra.</span>
+          </li>
+        </ol>
       )}
       <ol ref={logRef} className="chat-log" aria-label="Conversación con Zodi">
         <li className="chat-msg chat-zodi">
@@ -152,7 +203,7 @@ export function AssistantChat({ firstName, remaining: initialRemaining }: Props)
           <div className="chat-bubble">
             <p>
               Oye, <strong>{firstName}</strong>. Tengo tu carta abierta y el cielo de hoy delante.
-              Pregunta sin miedo: lo que hablemos se queda en esta pestaña.
+              ¿Qué te ronda la cabeza? Pregunta sin miedo.
             </p>
           </div>
         </li>
@@ -197,9 +248,13 @@ export function AssistantChat({ firstName, remaining: initialRemaining }: Props)
         )}
       </ol>
 
-      {turns.length === 0 && (
-        <div className="chip-group chat-suggestions" role="group" aria-label="Ideas para empezar">
-          {SUGGESTIONS.map((s) => (
+      {!busy && (turns.length === 0 || turns.at(-1)?.role === 'assistant') && (
+        <div
+          className="chip-group chat-suggestions"
+          role="group"
+          aria-label={turns.length === 0 ? 'Ideas para empezar' : 'Seguir hablando'}
+        >
+          {(turns.length === 0 ? SUGGESTIONS : FOLLOW_UPS).map((s) => (
             <button
               key={s}
               type="button"
@@ -233,9 +288,7 @@ export function AssistantChat({ firstName, remaining: initialRemaining }: Props)
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder={
-            outOfQuota
-              ? 'Sin mensajes por hoy. Vuelve mañana.'
-              : 'Escribe aquí. Intro envía, Mayús+Intro salta línea.'
+            outOfQuota ? 'Sin mensajes por hoy. Vuelve mañana.' : 'Escribe tu pregunta para ZODI…'
           }
           disabled={outOfQuota}
         />
@@ -251,8 +304,8 @@ export function AssistantChat({ firstName, remaining: initialRemaining }: Props)
       <div className="chat-foot">
         <p className="muted small">
           {remaining === null
-            ? 'Cada respuesta cuenta como una lectura.'
-            : `Cada respuesta cuenta como una lectura. Te quedan ${remaining}.`}
+            ? 'Conversar con el oráculo no gasta tus lecturas.'
+            : `Te quedan ${remaining} ${remaining === 1 ? 'mensaje' : 'mensajes'} hoy. No gastan tus lecturas.`}
         </p>
         {turns.length > 0 && (
           <button type="button" className="btn btn-ghost btn-sm" onClick={reset}>

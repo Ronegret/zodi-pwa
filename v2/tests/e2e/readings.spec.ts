@@ -262,7 +262,8 @@ test.describe('lecturas con IA', () => {
     await expect(log.locator('[aria-busy="true"]')).toHaveCount(0);
     await expect(log.getByRole('listitem')).toHaveCount(5);
     await expect(input).toBeFocused();
-    await expect(page.getByText(/Te quedan 3\./)).toBeVisible();
+    // El oráculo tiene su propia cuota: 15 mensajes en free, sin gastar lecturas.
+    await expect(page.getByText(/Te quedan 13 mensajes hoy/)).toBeVisible();
 
     const ai = await aiRequest(request, '¿Y mañana?');
     expect(ai.system[1]!.text).toContain('MODO CHAT');

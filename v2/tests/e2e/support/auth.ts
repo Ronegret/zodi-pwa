@@ -11,8 +11,12 @@ export interface TestUser {
 export async function createTestUser(
   request: APIRequestContext,
   onboarded: boolean,
+  /** Con los 30 días gratis activos (límites premium). */
+  trial = false,
 ): Promise<TestUser> {
-  const res = await request.post(`${MOCK_SUPABASE_URL}/__test/users`, { data: { onboarded } });
+  const res = await request.post(`${MOCK_SUPABASE_URL}/__test/users`, {
+    data: { onboarded, trial },
+  });
   return (await res.json()) as TestUser;
 }
 

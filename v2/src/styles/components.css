@@ -1086,17 +1086,6 @@ fieldset.group > legend {
   gap: var(--space-4);
   max-width: 52rem;
 }
-.chat-hero {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  max-height: 20rem;
-  object-fit: cover;
-  object-position: center 28%;
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--line-acid);
-  box-shadow: var(--shadow-lg);
-}
 .chat-log {
   list-style: none;
   margin: 0;

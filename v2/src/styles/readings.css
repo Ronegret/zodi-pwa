@@ -354,3 +354,69 @@
     transition: none;
   }
 }
+
+/* ---------- Oráculo: cabecera, cómo funciona ---------- */
+.oracle-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.oracle-avatar {
+  flex: none;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 30%;
+  border: 2px solid var(--acid);
+  box-shadow: 0 0 28px rgb(184 255 23 / 30%);
+}
+.oracle-intro {
+  display: grid;
+  gap: var(--space-2);
+}
+.oracle-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-1);
+  line-height: 1.15;
+}
+.oracle-pillars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.oracle-intro a {
+  color: var(--acid);
+}
+.oracle-how {
+  list-style: none;
+  counter-reset: how;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+.oracle-how li {
+  counter-increment: how;
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 3%);
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+.oracle-how li strong {
+  color: var(--ink);
+  font-size: var(--step-0);
+}
+.oracle-how li strong::before {
+  content: counter(how) '. ';
+  color: var(--acid);
+}

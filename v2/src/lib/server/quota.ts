@@ -67,3 +67,18 @@ export async function getQuotaStatus(user: ZodiSupabaseClient): Promise<QuotaSna
   const row = data[0];
   return row ? { used: row.used, limit: row.daily_limit } : null;
 }
+
+/** Mensajes al oráculo hoy (cuota aparte de las lecturas). */
+export async function getOracleQuota(user: ZodiSupabaseClient): Promise<QuotaSnapshot | null> {
+  const { data, error } = await user.rpc('oracle_quota_status');
+  if (error) throw new Error(`oracle_quota_status: ${error.message}`);
+  const row = data[0];
+  return row ? { used: row.used, limit: row.daily_limit } : null;
+}
+
+/** Días que le quedan del periodo gratis (0 si ya terminó o no tiene). */
+export function trialDaysLeft(trialEndsAt: string | null, now = new Date()): number {
+  if (!trialEndsAt) return 0;
+  const ms = Date.parse(trialEndsAt) - now.getTime();
+  return ms > 0 ? Math.ceil(ms / 86_400_000) : 0;
+}

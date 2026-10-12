@@ -59,6 +59,7 @@ export type Database = {
           referral_code: string;
           referred_by: string | null;
           onboarding_completed_at: string | null;
+          trial_ends_at: string | null;
         };
         Insert: {
           id: string;
@@ -91,6 +92,7 @@ export type Database = {
           referral_code?: string;
           referred_by?: string | null;
           onboarding_completed_at?: string | null;
+          trial_ends_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -177,11 +179,13 @@ export type Database = {
         Row: {
           plan: Database['public']['Enums']['plan_tier'];
           daily_ai_readings: number;
+          daily_oracle_messages: number;
           updated_at: string;
         };
         Insert: {
           plan: Database['public']['Enums']['plan_tier'];
           daily_ai_readings: number;
+          daily_oracle_messages?: number;
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['usage_limits']['Insert']>;
@@ -503,6 +507,10 @@ export type Database = {
         Returns: { allowed: boolean; used: number; daily_limit: number; event_id: number | null }[];
       };
       ai_quota_status: {
+        Args: Record<PropertyKey, never>;
+        Returns: { used: number; daily_limit: number }[];
+      };
+      oracle_quota_status: {
         Args: Record<PropertyKey, never>;
         Returns: { used: number; daily_limit: number }[];
       };
