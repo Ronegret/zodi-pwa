@@ -48,9 +48,17 @@ const site = Astro.site ?? Astro.url;
     </a>
     <slot />
     <script>
+      import { inject } from '@vercel/analytics';
+      import { injectSpeedInsights } from '@vercel/speed-insights';
       import { initMotion } from '@/lib/motion/client';
 
       initMotion();
+      // Métricas sin cookies (Vercel Web Analytics y Speed Insights), solo en producción:
+      // cargan /_vercel/... del propio dominio, así que la CSP no cambia.
+      if (import.meta.env.PROD) {
+        inject({ framework: 'astro' });
+        injectSpeedInsights({ framework: 'astro' });
+      }
     </script>
   </body>
 </html>

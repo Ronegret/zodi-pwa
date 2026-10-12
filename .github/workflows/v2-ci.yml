@@ -4,8 +4,10 @@
 name: v2 · calidad
 
 on:
+  # Se sube primero a fase-7 y el mismo commit pasa a astro-v2 (producción):
+  # basta con probarlo una vez.
   push:
-    branches: [fase-7, astro-v2]
+    branches: [fase-7]
     paths: ['v2/**', '.github/workflows/v2-ci.yml']
   pull_request:
     paths: ['v2/**', '.github/workflows/v2-ci.yml']
