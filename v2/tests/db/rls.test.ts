@@ -516,3 +516,98 @@ describe('lugares (buscador propio)', () => {
     expect(await search('anon', 'ma', 999)).toHaveLength(3);
   });
 });
+
+describe('actividad, logros y favoritas (8C)', () => {
+  let D: { uid: string };
+  type Activity = {
+    xp: number;
+    level: number;
+    streak: number;
+    best_streak: number;
+    gems: number;
+    unlocked: string[];
+  };
+  const record = async (action: string) =>
+    (await q<Activity>(D, 'select * from public.record_activity($1)', [action]))[0]!;
+
+  beforeAll(async () => {
+    D = await newUser('dani@example.com');
+  });
+
+  it('el nivel sale del XP igual que en la app', async () => {
+    const { levelFromXp } = await import('@/lib/daily/progress');
+    for (const xp of [0, 50, 99, 100, 299, 300, 599, 600, 1000, 4500, 10000]) {
+      const [row] = await q<{ level: number }>('anon', 'select public.level_for_xp($1) as level', [
+        xp,
+      ]);
+      expect(row!.level, `xp ${xp}`).toBe(levelFromXp(xp));
+    }
+  });
+
+  it('la racha cuenta una vez al día y las acciones suman XP', async () => {
+    expect(await record('visit')).toMatchObject({ xp: 5, level: 1, streak: 1, unlocked: [] });
+    expect(await record('visit')).toMatchObject({ xp: 5, streak: 1 });
+    expect(await record('comment')).toMatchObject({ xp: 8, streak: 1 });
+    await expect(record('trampa')).rejects.toThrow(/invalid_action/);
+  });
+
+  it('semana de racha: logros, gemas y mejor racha', async () => {
+    await q(
+      'service_role',
+      `update public.profiles set last_active_on = (now() at time zone 'UTC')::date - 1, streak = 6 where id = $1`,
+      [D.uid],
+    );
+    const r = await record('visit');
+    expect(r).toMatchObject({ streak: 7, best_streak: 7 });
+    expect(r.unlocked.sort()).toEqual(['racha-3', 'racha-7']);
+    // 10 por la semana de racha + 5 por cada logro.
+    expect(r.gems).toBe(20);
+    // Si ayer no hubo actividad, la racha vuelve a 1 (la mejor se queda).
+    await q(
+      'service_role',
+      `update public.profiles set last_active_on = (now() at time zone 'UTC')::date - 3 where id = $1`,
+      [D.uid],
+    );
+    expect(await record('visit')).toMatchObject({ streak: 1, best_streak: 7, unlocked: [] });
+  });
+
+  it('los logros de lecturas salen de las lecturas reales', async () => {
+    await q(
+      'service_role',
+      `insert into public.readings (user_id, kind, content, model) values ($1, 'tarot', 'x', 'm')`,
+      [D.uid],
+    );
+    const r = await record('reading');
+    expect(r.unlocked.sort()).toEqual(['primer-tarot', 'primera-senal']);
+    expect(await q(D, 'select achievement from public.user_achievements order by 1')).toHaveLength(
+      4,
+    );
+    expect(await q(B, 'select achievement from public.user_achievements')).toEqual([]);
+  });
+
+  it('nadie se sube puntos ni logros a mano', async () => {
+    await denied(D, 'update public.profiles set xp = 99999 where id = $1', [D.uid]);
+    await denied(D, 'update public.profiles set streak = 365 where id = $1', [D.uid]);
+    await denied(
+      D,
+      `insert into public.user_achievements (user_id, achievement) values ($1, 'nivel-10')`,
+      [D.uid],
+    );
+    await expect(q('anon', `select * from public.record_activity('visit')`)).rejects.toThrow(
+      /permission denied|not_authenticated/,
+    );
+  });
+
+  it('favoritas: solo las propias', async () => {
+    const [reading] = await q<{ id: string }>(D, 'select id from public.readings limit 1');
+    const toggle = (who: Who) =>
+      q<{ fav: boolean }>(who, 'select public.toggle_favorite($1) as fav', [reading!.id]);
+    expect(await toggle(D)).toEqual([{ fav: true }]);
+    await expect(toggle(B)).rejects.toThrow(/reading_not_found/);
+    expect(await q(D, 'select favorite from public.readings where id = $1', [reading!.id])).toEqual(
+      [{ favorite: true }],
+    );
+    expect((await record('favorite')).unlocked).toEqual(['favorita']);
+    expect(await toggle(D)).toEqual([{ fav: false }]);
+  });
+});
