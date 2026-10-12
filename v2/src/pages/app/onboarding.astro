@@ -14,7 +14,6 @@ import ProgressBar from '@/components/ui/ProgressBar.astro';
 import { placeSchema, type Place } from '@/lib/geo/places';
 import {
   ARRAY_FIELDS,
-  NOTIFICATIONS,
   STEPS,
   TONES,
   TOPICS,
@@ -22,8 +21,10 @@ import {
   resolveStep,
   stepIndex,
   stepSchemas,
+  suggestUsername,
   type StepId,
 } from '@/lib/onboarding/steps';
+import { RELATIONSHIP_OPTIONS } from '@/lib/validation/about';
 import { geocode } from '@/lib/server/geocoding';
 import { finishOnboarding, UsernameTakenError, updateOwnProfile } from '@/lib/server/profile';
 import { READING_TONES } from '@/lib/supabase/enums';
@@ -120,7 +121,12 @@ const savedPlace: Place | null =
       }
     : null;
 const topics = (raw.favorite_topics as string[] | undefined) ?? profile.favorite_topics;
-const notifs = (raw.notification_prefs as string[] | undefined) ?? profile.notification_prefs;
+const relationship = String(raw.relationship_status ?? profile.relationship_status ?? '');
+// Sin nombre de usuario aún: proponemos uno a partir del nombre (se puede cambiar).
+const usernameValue = v(
+  'username',
+  profile.username ?? (profile.display_name ? suggestUsername(profile.display_name, user.id) : ''),
+);
 const tone = String(raw.reading_tone ?? profile.reading_tone);
 const timeUnknown =
   raw.birth_time_unknown === 'on' || (!raw.birth_date && profile.birth_time_known === false);
@@ -132,8 +138,9 @@ const isLast = index === STEPS.length - 1;
 ---
 
 <AuthLayout
-  title="Construye tu perfil astral."
+  title="Tu perfil astral"
   kicker={`Paso ${index + 1} de ${STEPS.length} · ${current.label}`}
+  intro="Cinco pasos y tienes tu carta natal real, calculada con el cielo del día que naciste."
   wide
 >
   <ProgressBar
@@ -165,6 +172,10 @@ const isLast = index === STEPS.length - 1;
 
   <form method="post" class="stack step-form" data-step={step} novalidate>
     <h2>{current.heading}</h2>
+    <aside class="zodi-tip" aria-label="Lo que te explica ZODI">
+      <img src="/art/zodi-senalando-640.webp" alt="" width="640" height="640" decoding="async" />
+      <p>{current.tip}</p>
+    </aside>
 
     {step === 'perfil' && (
       <>
@@ -182,7 +193,7 @@ const isLast = index === STEPS.length - 1;
           autocomplete="username"
           spellcheck="false"
           hint="De 3 a 24 caracteres: letras sin tildes, números o guion bajo."
-          value={v('username', profile.username)}
+          value={usernameValue}
           required
           error={errors.username}
         />
@@ -204,7 +215,7 @@ const isLast = index === STEPS.length - 1;
           name="birth_time"
           label="Hora"
           type="time"
-          hint="Hora local del sitio donde naciste. Sin ella no hay Ascendente ni casas."
+          hint="La que pone en tu partida de nacimiento. Si no la sabes, marca la casilla de abajo."
           value={v('birth_time', profile.birth_time?.slice(0, 5))}
           error={errors.birth_time}
         />
@@ -269,6 +280,7 @@ const isLast = index === STEPS.length - 1;
                 />
                 <span class="choice-title">{TONES[t].title}</span>
                 <small>{TONES[t].hint}</small>
+                <em class="tone-example">“{TONES[t].example}”</em>
               </label>
             ))}
           </div>
@@ -309,26 +321,61 @@ const isLast = index === STEPS.length - 1;
       </>
     )}
 
-    {step === 'avisos' && (
-      <fieldset class="group">
-        <legend>Avisos que quieres recibir</legend>
-        <div class="choice-grid">
-          {NOTIFICATIONS.map((n, i) => (
-            <label class="choice">
-              <input
-                type="checkbox"
-                name="notification_prefs"
-                value={n.value}
-                checked={notifs.includes(n.value)}
-                id={i === 0 ? 'f-notification_prefs' : undefined}
-              />
-              <span class="choice-title">{n.label}</span>
-              <small>{n.hint}</small>
-            </label>
-          ))}
+    {step === 'sobre-ti' && (
+      <>
+        <div class="field">
+          <label class="field-label" for="f-relationship_status">
+            Situación sentimental
+          </label>
+          <p
+            id="f-relationship_status-error"
+            class="field-error"
+            data-error-for="relationship_status"
+            hidden={!errors.relationship_status}
+          >
+            {errors.relationship_status}
+          </p>
+          <select id="f-relationship_status" name="relationship_status" class="select">
+            <option value="" selected={relationship === ''}>
+              Prefiero no decirlo
+            </option>
+            {RELATIONSHIP_OPTIONS.map((o) => (
+              <option value={o.value} selected={relationship === o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <p class="field-hint">Puedes cambiarlo cuando quieras en Ajustes.</p>
-      </fieldset>
+        <div class="field">
+          <label class="field-label" for="f-personal_bio">
+            Cuéntale a ZODI de ti <span class="field-req">(opcional)</span>
+          </label>
+          <p id="f-personal_bio-hint" class="field-hint">
+            A qué te dedicas, qué te preocupa ahora o qué quieres conseguir. Máximo 500 caracteres.
+          </p>
+          <p
+            id="f-personal_bio-error"
+            class="field-error"
+            data-error-for="personal_bio"
+            hidden={!errors.personal_bio}
+          >
+            {errors.personal_bio}
+          </p>
+          <textarea
+            id="f-personal_bio"
+            name="personal_bio"
+            class="input"
+            rows="4"
+            maxlength="500"
+            aria-describedby="f-personal_bio-hint"
+            placeholder="Trabajo en diseño, acabo de mudarme y estoy pensando en cambiar de trabajo."
+          >{v('personal_bio', profile.personal_bio)}</textarea>
+        </div>
+        <p class="field-hint">
+          Puedes dejarlo en blanco y completarlo cuando quieras en Ajustes, junto con tu pareja y
+          tus hijos.
+        </p>
+      </>
     )}
 
     <div class="actions">
@@ -343,6 +390,35 @@ const isLast = index === STEPS.length - 1;
     </div>
   </form>
 </AuthLayout>
+
+<style>
+  .zodi-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 9%);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .zodi-tip img {
+    flex: none;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--acid);
+  }
+  .zodi-tip p {
+    margin: 0;
+  }
+  .tone-example {
+    font-size: var(--step--1);
+    color: var(--acid-soft);
+  }
+</style>
 
 <script>
   import { enhanceForm } from '@/lib/forms/enhance';

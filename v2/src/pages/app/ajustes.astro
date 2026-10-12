@@ -10,7 +10,9 @@ import { getLatestSelfChart } from '@/lib/server/charts';
 import { UsernameTakenError, updateOwnProfile } from '@/lib/server/profile';
 import { READING_TONES } from '@/lib/supabase/enums';
 import { fieldErrors, formToObject } from '@/lib/validation/common';
-import { settingsSchema, SETTINGS_ARRAYS } from '@/lib/validation/settings';
+import { readingDate } from '@/lib/readings/format';
+import { trialDaysLeft } from '@/lib/server/quota';
+import { RELATIONSHIP_OPTIONS, settingsSchema, SETTINGS_ARRAYS } from '@/lib/validation/settings';
 
 const { supabase, user } = Astro.locals;
 let profile = Astro.locals.profile;
@@ -46,14 +48,32 @@ const topics = (raw.favorite_topics as string[] | undefined) ?? profile.favorite
 const notifs = (raw.notification_prefs as string[] | undefined) ?? profile.notification_prefs;
 const tone = String(raw.reading_tone ?? profile.reading_tone);
 const saved = Astro.url.searchParams.get('guardado') === '1';
+const passwordChanged = Astro.url.searchParams.get('clave') === '1';
+const relationship = String(raw.relationship_status ?? profile.relationship_status ?? '');
+const hasKids = String(
+  raw.has_kids ?? (profile.has_kids === true ? 'si' : profile.has_kids === false ? 'no' : ''),
+);
+const trialDays = trialDaysLeft(profile.trial_ends_at);
+const birthDate = profile.birth_date
+  ? new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: 'UTC' }).format(
+      new Date(`${profile.birth_date}T12:00:00Z`),
+    )
+  : '—';
+const planLabel = { free: 'Gratis', premium: 'Premium', vip: 'VIP' }[profile.plan];
 ---
 
 <AppShell
   title="Ajustes"
   current="ajustes"
   kicker="Tu cuenta"
-  intro="Cambia cómo te llamamos, cómo te hablamos y cuándo te molestamos."
-  toast={saved ? { message: 'Guardado. Zodi toma nota.' } : undefined}
+  intro="Cómo te llamamos, lo que ZODI sabe de ti y cómo te habla. Todo se puede cambiar cuando quieras."
+  toast={
+    saved
+      ? { message: 'Guardado. ZODI toma nota.' }
+      : passwordChanged
+        ? { message: 'Contraseña cambiada.' }
+        : undefined
+  }
 >
   <div class="layout">
     <form method="post" class="stack" novalidate data-settings>
@@ -79,9 +99,104 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
         />
       </Card>
 
+      <section id="sobre-ti" class="anchor">
+        <Card title="Sobre ti" kicker="Opcional">
+          <p class="muted">
+            Lo usa solo ZODI para que tus lecturas hablen de tu vida real (no se enseña a nadie).
+            Deja en blanco lo que no quieras contar.
+          </p>
+          <div class="field">
+            <label class="field-label" for="f-relationship_status">
+              Situación sentimental
+            </label>
+            <p
+              id="f-relationship_status-error"
+              class="field-error"
+              data-error-for="relationship_status"
+              hidden={!errors.relationship_status}
+            >
+              {errors.relationship_status}
+            </p>
+            <select id="f-relationship_status" name="relationship_status" class="select">
+              <option value="" selected={relationship === ''}>
+                Prefiero no decirlo
+              </option>
+              {RELATIONSHIP_OPTIONS.map((o) => (
+                <option value={o.value} selected={relationship === o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Field
+            name="partner_name"
+            label="Nombre de tu pareja o de quien te quita el sueño"
+            hint="Opcional. ZODI lo usará en las lecturas de amor."
+            autocomplete="off"
+            maxlength={60}
+            value={v('partner_name', profile.partner_name)}
+            error={errors.partner_name}
+          />
+          <fieldset class="group">
+            <legend>¿Tienes hijos?</legend>
+            <div class="chip-group">
+              <label class="chip">
+                <input type="radio" name="has_kids" value="si" checked={hasKids === 'si'} />
+                Sí
+              </label>
+              <label class="chip">
+                <input type="radio" name="has_kids" value="no" checked={hasKids === 'no'} />
+                No
+              </label>
+              <label class="chip">
+                <input type="radio" name="has_kids" value="" checked={hasKids === ''} />
+                Prefiero no decirlo
+              </label>
+            </div>
+          </fieldset>
+          <Field
+            name="kids_count"
+            label="¿Cuántos?"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            max="20"
+            hint="Solo si has dicho que sí."
+            value={v('kids_count', profile.kids_count)}
+            error={errors.kids_count}
+          />
+          <div class="field">
+            <label class="field-label" for="f-personal_bio">
+              Cuéntale a ZODI de ti
+            </label>
+            <p id="f-personal_bio-hint" class="field-hint">
+              A qué te dedicas, qué te preocupa ahora, qué quieres conseguir. Máximo 500 caracteres.
+            </p>
+            <p
+              id="f-personal_bio-error"
+              class="field-error"
+              data-error-for="personal_bio"
+              hidden={!errors.personal_bio}
+            >
+              {errors.personal_bio}
+            </p>
+            <textarea
+              id="f-personal_bio"
+              name="personal_bio"
+              class="input"
+              rows="4"
+              maxlength="500"
+              aria-describedby="f-personal_bio-hint"
+              placeholder="Trabajo en diseño, acabo de mudarme y estoy pensando en cambiar de trabajo."
+            >{v('personal_bio', profile.personal_bio)}</textarea>
+          </div>
+        </Card>
+      </section>
+
       <Card title="Tu Zodi" kicker="Lecturas">
-        <fieldset class="group">
+        <fieldset class="group anchor" id="tono">
           <legend>Tono</legend>
+          <p class="field-hint">Así te habla ZODI en las lecturas y en el oráculo.</p>
           <div class="choice-grid">
             {READING_TONES.map((t, i) => (
               <label class="choice">
@@ -94,6 +209,7 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
                 />
                 <span class="choice-title">{TONES[t].title}</span>
                 <small>{TONES[t].hint}</small>
+                <em class="tone-example">“{TONES[t].example}”</em>
               </label>
             ))}
           </div>
@@ -133,7 +249,11 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
         </fieldset>
       </Card>
 
-      <Card title="Avisos" kicker="Notificaciones">
+      <Card title="Avisos" kicker="Muy pronto">
+        <p class="muted">
+          Todavía no enviamos avisos. Marca los que te interesan y te llegarán en cuanto estén
+          listos.
+        </p>
         <div class="choice-grid">
           {NOTIFICATIONS.map((n, i) => (
             <label class="choice">
@@ -159,11 +279,44 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
     </form>
 
     <div class="side">
+      <Card title="Tu cuenta" kicker={planLabel}>
+        <dl class="facts">
+          <div>
+            <dt>Correo</dt>
+            <dd class="break">{user.email ?? '—'}</dd>
+          </div>
+          <div>
+            <dt>Plan</dt>
+            <dd>
+              {trialDays > 0
+                ? `Todo gratis ${trialDays === 1 ? '1 día más' : `${trialDays} días más`}`
+                : planLabel}
+            </dd>
+          </div>
+          {profile.trial_ends_at && trialDays > 0 && (
+            <div>
+              <dt>Hasta el</dt>
+              <dd>{readingDate(profile.trial_ends_at, profile.time_zone ?? 'Europe/Madrid')}</dd>
+            </div>
+          )}
+        </dl>
+        <div class="account-actions">
+          <Button href="/auth/nueva-clave?desde=ajustes" variant="secondary">
+            Cambiar contraseña
+          </Button>
+        </div>
+        <p class="muted small">
+          <a href="/app/cuenta/borrar" class="danger-link">
+            Borrar mi cuenta y mis datos
+          </a>
+        </p>
+      </Card>
+
       <Card title="Nacimiento" kicker="Datos de tu carta" class="birth">
         <dl class="facts">
           <div>
             <dt>Fecha</dt>
-            <dd>{profile.birth_date ?? '—'}</dd>
+            <dd>{birthDate}</dd>
           </div>
           <div>
             <dt>Hora</dt>
@@ -174,8 +327,8 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
             <dd>{profile.birth_place ?? '—'}</dd>
           </div>
           <div>
-            <dt>Zona</dt>
-            <dd class="mono">{profile.time_zone ?? '—'}</dd>
+            <dt>Zona horaria</dt>
+            <dd>{profile.time_zone?.replace('_', ' ') ?? '—'}</dd>
           </div>
           {stored && (
             <div>
@@ -184,7 +337,10 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
             </div>
           )}
         </dl>
-        <p class="muted">Si cambias estos datos recalculamos tu carta desde cero.</p>
+        <p class="muted">
+          ¿Has encontrado tu hora exacta de nacimiento? Cámbiala aquí y recalculamos tu carta (y tu
+          Ascendente) desde cero.
+        </p>
         <Button href="/app/onboarding?paso=nacimiento" variant="secondary">
           Cambiar datos de nacimiento
         </Button>
@@ -284,5 +440,27 @@ const saved = Astro.url.searchParams.get('guardado') === '1';
     margin: 0;
     font-weight: 700;
     text-align: right;
+  }
+  .break {
+    overflow-wrap: anywhere;
+  }
+  .anchor {
+    scroll-margin-top: var(--space-6);
+  }
+  .tone-example {
+    font-size: var(--step--1);
+    color: var(--acid-soft);
+  }
+  .account-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+  .danger-link {
+    color: #ff8fa3;
   }
 </style>

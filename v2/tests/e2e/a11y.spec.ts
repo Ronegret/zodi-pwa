@@ -45,6 +45,8 @@ for (const path of PUBLIC) {
 }
 
 test('axe en las páginas privadas', async ({ page, request }) => {
+  // Doce páginas con axe en serie: en frío, el servidor de desarrollo tarda.
+  test.setTimeout(120_000);
   await login(page, await createTestUser(request, true));
   await expect(page).toHaveURL(/\/app$/);
   for (const path of PRIVATE) {
@@ -57,6 +59,8 @@ test('axe en los 5 pasos del onboarding y en sus errores', async ({ page, reques
   const user = await createTestUser(request, false);
   await login(page, user);
   await expectNoViolations(page);
+  // ZODI propone un usuario: vaciarlo para ver el estado de error.
+  await page.getByLabel('Nombre de usuario').fill('');
   await page.getByRole('button', { name: 'Siguiente' }).click();
   await expect(page.locator('[data-error-summary]')).toBeVisible();
   await expectNoViolations(page);

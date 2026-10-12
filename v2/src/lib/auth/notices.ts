@@ -1,6 +1,10 @@
 /** Avisos por ?aviso= en /auth/login. Solo claves conocidas: nada de texto libre en la URL. */
 const NOTICES = {
   salida: { tone: 'info', text: 'Has cerrado sesión. El universo seguirá aquí cuando vuelvas.' },
+  'cuenta-borrada': {
+    tone: 'info',
+    text: 'Tu cuenta y todos tus datos se han borrado. Si algún día vuelves, aquí estaremos.',
+  },
   'enlace-invalido': {
     tone: 'error',
     text: 'El enlace no es válido o ha caducado. Pide uno nuevo.',

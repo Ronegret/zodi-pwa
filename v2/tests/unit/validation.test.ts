@@ -159,7 +159,7 @@ describe('perfil', () => {
     expect(resolveStep('estilo', partial)).toBe('lugar');
     const done = { ...partial, birth_lat: 40, time_zone: 'Europe/Madrid' };
     expect(firstIncompleteStep(done)).toBeNull();
-    expect(resolveStep('avisos', done)).toBe('avisos');
+    expect(resolveStep('sobre-ti', done)).toBe('sobre-ti');
     expect(resolveStep(null, done)).toBe('estilo');
   });
 });

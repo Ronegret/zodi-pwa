@@ -13,9 +13,11 @@ test('onboarding completo: 5 pasos, ciudad con teclado y carta real', async ({ p
   await login(page, user);
   await expect(page).toHaveURL(/\/app\/onboarding$/);
 
-  // 1 · Tú (la validación en cliente no deja avanzar con el usuario vacío)
+  // 1 · Tú: ZODI propone un usuario; vacío, la validación en cliente no deja avanzar.
   await stepTo(page, 1);
+  await expect(page.getByLabel('Nombre de usuario')).toHaveValue(/^e2e_\d{3}$/);
   await page.getByLabel('Nombre visible').fill('Ana Estrella');
+  await page.getByLabel('Nombre de usuario').fill('');
   await page.getByRole('button', { name: 'Siguiente' }).click();
   await expect(page.locator('[data-error-summary]')).toBeFocused();
   await page.getByLabel('Nombre de usuario').fill(`ana_${user.id.slice(0, 6)}`);
@@ -57,9 +59,11 @@ test('onboarding completo: 5 pasos, ciudad con teclado y carta real', async ({ p
   await expect(page.getByRole('checkbox', { name: 'Amor' })).toBeChecked();
   await page.getByRole('button', { name: 'Siguiente' }).click();
 
-  // 5 · Avisos → calcula la carta
+  // 5 · Sobre ti (opcional) → calcula la carta
   await stepTo(page, 5);
-  await page.getByRole('checkbox', { name: /Alertas lunares/ }).check();
+  await expect(page.getByText(/Opcional, pero marca la diferencia/)).toBeVisible();
+  await page.getByLabel('Situación sentimental').selectOption('relationship');
+  await page.getByLabel(/Cuéntale a ZODI de ti/).fill('Diseñadora con insomnio.');
   await page.getByRole('button', { name: 'Calcular mi carta' }).click();
 
   await expect(page).toHaveURL(/\/app\?bienvenida=1$/);
@@ -80,7 +84,7 @@ test('onboarding completo: 5 pasos, ciudad con teclado y carta real', async ({ p
 
 test('no deja saltarse pasos', async ({ page, request }) => {
   await login(page, await createTestUser(request, false));
-  await page.goto('/app/onboarding?paso=avisos');
+  await page.goto('/app/onboarding?paso=sobre-ti');
   await expect(page).toHaveURL(/paso=perfil$/);
   await page.goto('/app/carta');
   await expect(page).toHaveURL(/\/app\/onboarding$/);

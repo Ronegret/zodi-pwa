@@ -22,7 +22,11 @@ if (Astro.request.method === 'POST') {
     const { error } = await Astro.locals.supabase.auth.updateUser({
       password: parsed.data.password,
     });
-    if (!error) return Astro.redirect('/app', 303);
+    // Desde Ajustes se vuelve a Ajustes; desde el correo de recuperación, al panel.
+    if (!error) {
+      const fromSettings = Astro.url.searchParams.get('desde') === 'ajustes';
+      return Astro.redirect(fromSettings ? '/app/ajustes?clave=1' : '/app', 303);
+    }
     errors = { _form: authErrorMessage(error) };
     Astro.response.status = 400;
   }
