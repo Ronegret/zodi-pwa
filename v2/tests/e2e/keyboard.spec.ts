@@ -35,7 +35,7 @@ test('dashboard: salto al contenido y toda la navegación con Tab', async ({ pag
     'Carta',
     'Ajustes',
     'Ver carta',
-    'Hablar con Zodi, tu asistente',
+    'Consultar al oráculo de ZODI',
   ]) {
     expect(
       [...reached].some((r) => r.includes(name)),

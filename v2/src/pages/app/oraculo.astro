@@ -1,7 +1,9 @@
 ---
 import AppShell from '@/layouts/AppShell.astro';
+import ReadingGuide from '@/components/readings/ReadingGuide.astro';
 import { AssistantChat } from '@/components/readings/AssistantChat';
 import { aiAvailable } from '@/lib/ai/client';
+import { GUIDES } from '@/lib/ai/guides';
 import { getQuotaStatus } from '@/lib/server/quota';
 
 const { supabase, profile } = Astro.locals;
@@ -13,14 +15,23 @@ const firstName = profile.display_name.trim().split(/\s+/)[0] || 'tú';
 ---
 
 <AppShell
-  title="Habla con Zodi"
-  current="asistente"
-  kicker="Asistente"
-  intro="Conoce tu carta y tu cielo de hoy. No te va a dar la razón por darte la razón."
+  title="El oráculo de ZODI"
+  current="oraculo"
+  kicker="Oráculo personal"
+  intro="Pregunta lo que te pese. ZODI tiene tu carta abierta y el cielo de hoy delante, y no te va a dar la razón por darte la razón."
 >
   {aiAvailable() ? (
     <AssistantChat client:load firstName={firstName} remaining={remaining} />
   ) : (
     <p class="notice">Zodi está afilando la lengua. Vuelve en un rato.</p>
   )}
+  <div class="guide-wrap">
+    <ReadingGuide guide={GUIDES.oraculo!} title="¿Cómo funciona el oráculo?" />
+  </div>
 </AppShell>
+
+<style>
+  .guide-wrap {
+    margin-top: var(--space-7);
+  }
+</style>

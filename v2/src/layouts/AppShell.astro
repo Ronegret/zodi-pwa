@@ -14,7 +14,7 @@ import { ToastRegion } from '@/components/ui/ToastRegion';
 import type { ToastDetail } from '@/components/ui/toast';
 
 export type NavId =
-  'inicio' | 'lecturas' | 'comunidad' | 'carta' | 'horoscopo' | 'match' | 'ajustes' | 'asistente';
+  'inicio' | 'lecturas' | 'comunidad' | 'carta' | 'horoscopo' | 'match' | 'ajustes' | 'oraculo';
 
 interface Props {
   title: string;
@@ -36,6 +36,7 @@ const nav: { id: NavId; label: string; href: string; icon: IconName; mobile: boo
   { id: 'carta', label: 'Carta', href: '/app/carta', icon: 'wheel', mobile: true },
   { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo', icon: 'sun', mobile: false },
   { id: 'match', label: 'Match', href: '/app/compatibilidad', icon: 'heart', mobile: false },
+  { id: 'oraculo', label: 'Oráculo', href: '/app/oraculo', icon: 'send', mobile: false },
   { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes', icon: 'sliders', mobile: true },
 ];
 
@@ -121,9 +122,12 @@ const today = new Intl.DateTimeFormat('es-ES', {
       </main>
     </div>
 
-    {current !== 'asistente' && (
-      <a class="fab" href="/app/asistente" aria-label="Hablar con Zodi, tu asistente">
+    {current !== 'oraculo' && (
+      <a class="fab" href="/app/oraculo" aria-label="Consultar al oráculo de ZODI">
         <img src="/brand/isotipo-96.webp" alt="" width="64" height="64" />
+        <span class="fab-label" aria-hidden="true">
+          Pregúntale a ZODI
+        </span>
       </a>
     )}
     <ToastRegion client:idle initial={toast} />
@@ -283,26 +287,56 @@ const today = new Intl.DateTimeFormat('es-ES', {
     outline: none;
   }
 
-  /* ---- Botón flotante del asistente ---- */
+  /* ---- Botón flotante del oráculo ---- */
   .fab {
     position: fixed;
     right: clamp(1rem, 3vw, 2rem);
     bottom: calc(clamp(1rem, 3vw, 2rem) + var(--sab));
     z-index: var(--z-fab);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform var(--dur) var(--ease);
+  }
+  .fab img {
+    order: 2;
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    overflow: hidden;
+    object-fit: cover;
     border: 2px solid var(--acid);
     box-shadow:
       0 0 0 4px rgb(184 255 23 / 12%),
       0 12px 32px rgb(184 255 23 / 25%);
-    transition: transform var(--dur) var(--ease);
+    animation: fab-pulse 2.8s var(--ease) infinite;
   }
-  .fab img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .fab-label {
+    display: none;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line-acid);
+    background: rgb(6 6 8 / 88%);
+    font-weight: 700;
+    font-size: var(--step--1);
+  }
+  @media (min-width: 1400px) {
+    .fab-label {
+      display: block;
+    }
+  }
+  @keyframes fab-pulse {
+    50% {
+      box-shadow:
+        0 0 0 10px rgb(184 255 23 / 0%),
+        0 12px 32px rgb(155 77 255 / 40%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fab img {
+      animation: none;
+    }
   }
   .fab:hover {
     transform: scale(1.06) rotate(-4deg);
