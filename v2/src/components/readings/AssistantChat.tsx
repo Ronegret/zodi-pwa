@@ -18,6 +18,8 @@ interface Props {
   bigThree?: { sun: string; moon: string; ascendant?: string | undefined } | undefined;
   /** Tono con el que habla ("Directo"…). */
   toneLabel?: string;
+  /** Pregunta que llega escrita (desde "Pregúntale a ZODI"): no se envía sola. */
+  initialQuestion?: string | undefined;
 }
 
 const STORAGE_KEY = 'zodi:chat';
@@ -55,10 +57,11 @@ export function AssistantChat({
   remaining: initialRemaining,
   bigThree,
   toneLabel,
+  initialQuestion,
 }: Props) {
   const uid = useId();
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [draft, setDraft] = useState('');
+  const [draft, setDraft] = useState(initialQuestion ?? '');
   const [streaming, setStreaming] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState(initialRemaining);
@@ -69,6 +72,9 @@ export function AssistantChat({
   const outOfQuota = remaining !== null && remaining <= 0;
 
   useEffect(() => setTurns(loadTurns()), []);
+  useEffect(() => {
+    if (initialQuestion) inputRef.current?.focus();
+  }, [initialQuestion]);
   useEffect(() => {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(turns.slice(-30)));

@@ -154,6 +154,31 @@ test.describe('carta en palabras normales', () => {
   });
 });
 
+test.describe('el significado de tu carta', () => {
+  test('todo lo que dice tu nacimiento, con números y pregunta al oráculo', async ({
+    page,
+    request,
+  }) => {
+    await login(page, await createTestUser(request, true));
+    await page.goto('/app/carta');
+    await page.getByRole('link', { name: 'Lee el significado completo' }).click();
+    await expect(page).toHaveURL(/\/app\/carta\/significado$/);
+    await expect(page.getByRole('heading', { level: 2, name: 'Tu Sol en Aries' })).toBeVisible();
+    for (const h of ['Tus números', 'Tus aspectos más fuertes']) {
+      await expect(page.getByRole('heading', { level: 2, name: h })).toBeVisible();
+    }
+    await expect(page.getByText('Camino de vida', { exact: true })).toBeVisible();
+    await expect(page.locator('img[src^="/numeros/"]').first()).toBeVisible();
+    await expectNoViolations(page);
+    await page
+      .getByRole('region', { name: 'Tu Sol en Aries' })
+      .getByRole('link', { name: 'Pregúntale a ZODI sobre esto' })
+      .click();
+    await expect(page).toHaveURL(/\/app\/oraculo\?pregunta=/);
+    await expect(page.getByRole('textbox')).toHaveValue(/Explícame mi Sol en Aries/);
+  });
+});
+
 test.describe('carta en PDF', () => {
   test('página lista para guardar como PDF, accesible', async ({ page, request }) => {
     await login(page, await createTestUser(request, true));

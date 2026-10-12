@@ -167,6 +167,9 @@ const trialDays = trialDaysLeft(profile.trial_ends_at);
               </dd>
             </div>
           </dl>
+          <a class="meaning-link" href="/app/carta/significado">
+            <Icon name="sparkles" size={16} /> Lee todo lo que dice de ti (y tus números)
+          </a>
         </>
       ) : (
         <EmptyState title="Aún no hay carta" image={false}>
@@ -458,5 +461,14 @@ const trialDays = trialDaysLeft(profile.trial_ends_at);
     color: var(--acid);
     flex: none;
     margin-top: 0.2em;
+  }
+  .meaning-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    margin-top: var(--space-2);
+    color: var(--acid);
+    font-weight: 700;
   }
 </style>

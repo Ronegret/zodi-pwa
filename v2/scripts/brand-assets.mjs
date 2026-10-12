@@ -51,6 +51,9 @@ const ART = {
   'zodi-trono': '4-Poses-del-personaje-ZODI/ZODI-en-trono-urbano',
   'zodi-energia': '2-Portada--Home/ZODI-con-energia-en-la-mano',
   'zodi-cartas-flotando': '2-Portada--Home/ZODI-con-cartas-flotando',
+  'numerologia-banner': '7-Numerologia/Banner-que-dice-tu-numero',
+  'numerologia-card': '7-Numerologia/Card-descubre-tu-numero',
+  'numerologia-fondo': '7-Numerologia/Fondo-numeros-misticos',
 };
 for (const [slug, file] of Object.entries(ART)) {
   for (const width of [640, 1024]) {

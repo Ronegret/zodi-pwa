@@ -1,0 +1,263 @@
+---
+/**
+ * El significado de tu carta: todo lo que se lee con tu nacimiento, escrito
+ * por ZODI y en palabras normales. Cada sección trae su pregunta lista para
+ * el oráculo. Sin IA: está siempre, al momento.
+ */
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { todayFor } from '@/lib/ai/context';
+import { chartMeaning, numberImage } from '@/lib/chart/meaning';
+import { getLatestSelfChart } from '@/lib/server/charts';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const stored = await getLatestSelfChart(supabase);
+const sections =
+  stored
+    ? chartMeaning({
+        chart: stored.chart,
+        timeKnown: stored.input.timeKnown,
+        birthDate: stored.input.date,
+        displayName: profile.display_name,
+        today: todayFor(new Date(), profile.time_zone ?? 'Europe/Madrid'),
+      })
+    : [];
+const ask = (q: string) => `/app/oraculo?pregunta=${encodeURIComponent(q)}`;
+---
+
+<AppShell
+  title="El significado de tu carta"
+  current="carta"
+  kicker="Todo lo que dice tu nacimiento"
+  intro="Tu carta natal, tus números, tu animal chino, tu sello maya y tu carta del tarot, explicados por ZODI. ¿Quieres saber más de algo? Pregúntale directamente."
+>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/app/carta">Tu carta</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Significado</span>
+  </nav>
+
+  {
+    !sections.length ? (
+      <EmptyState title="Todavía no hay carta" headingLevel={2}>
+        <p>Danos tu fecha, hora y lugar de nacimiento y te cuento todo lo que dicen de ti.</p>
+        <Button href="/app/onboarding">Completar mis datos</Button>
+      </EmptyState>
+    ) : (
+      <>
+        <nav class="toc" aria-label="Índice">
+          {sections.map((s) => (
+            <a href={`#${s.id}`} class="badge">
+              {s.kicker}
+            </a>
+          ))}
+        </nav>
+
+        <div class="sections">
+          {sections.map((s) => (
+            <section id={s.id} class="sec card" aria-labelledby={`${s.id}-t`}>
+              <img class="sec-art" src={s.image} alt="" width="640" height="640" loading="lazy" decoding="async" />
+              <div class="sec-text">
+                <p class="kicker">{s.kicker}</p>
+                <h2 id={`${s.id}-t`}>{s.title}</h2>
+                {s.paragraphs.map((p) => (
+                  <p>{p}</p>
+                ))}
+                {s.numbers && (
+                  <ul class="numbers">
+                    {s.numbers.map((n) => (
+                      <li>
+                        <img src={numberImage(n.n)} alt="" width="480" height="480" loading="lazy" decoding="async" />
+                        <span>
+                          <span class="num-label">{n.label}</span>
+                          <strong class="num-value">{n.n}</strong>
+                          <span class="muted">{n.text}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <a class="ask" href={ask(s.ask)}>
+                  <Icon name="chat" size={16} /> Pregúntale a ZODI sobre esto
+                </a>
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <section class="more card" aria-labelledby="mas">
+          <img src="/art/zodi-bola-640.webp" alt="" width="640" height="640" loading="lazy" decoding="async" />
+          <div>
+            <h2 id="mas">¿Quieres que te lo cuente ZODI, con todo junto?</h2>
+            <p class="muted">
+              La lectura con IA cruza todos estos datos entre sí y con el cielo de hoy, en el tono que
+              elijas.
+            </p>
+            <div class="more-actions">
+              <Button href="/app/lecturas/carta-natal" icon="sparkles">
+                Interpretar mi carta con IA
+              </Button>
+              <Button href="/app/carta/imprimir" variant="secondary">
+                Descargar en PDF
+              </Button>
+            </div>
+          </div>
+        </section>
+      </>
+    )
+  }
+</AppShell>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+  }
+  .toc a {
+    min-height: 32px;
+    text-decoration: none;
+  }
+  .toc a:hover {
+    border-color: var(--acid);
+    color: var(--acid-soft);
+  }
+  .sections {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    max-width: 58rem;
+  }
+  .sec {
+    display: grid;
+    gap: var(--space-4);
+    scroll-margin-top: var(--space-6);
+  }
+  @media (min-width: 720px) {
+    .sec {
+      grid-template-columns: 9rem minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+  .sec-art {
+    width: 9rem;
+    height: 9rem;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    border: 1px solid var(--line-acid);
+  }
+  .sec-text {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  .sec-text h2 {
+    margin: 0;
+    font-size: var(--step-2);
+  }
+  .sec-text p {
+    margin: 0;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .numbers {
+    list-style: none;
+    margin: var(--space-2) 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  }
+  .numbers li {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 8%);
+  }
+  .numbers img {
+    flex: none;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+  .numbers li > span {
+    display: grid;
+    gap: 2px;
+    font-size: var(--step--1);
+  }
+  .num-label {
+    color: var(--acid);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .num-value {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1;
+  }
+  .ask {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line-acid);
+    color: var(--acid);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .ask:hover {
+    background: rgb(184 255 23 / 10%);
+  }
+  .more {
+    margin-top: var(--space-6);
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+    max-width: 58rem;
+  }
+  @media (min-width: 720px) {
+    .more {
+      grid-template-columns: 9rem minmax(0, 1fr);
+    }
+  }
+  .more img {
+    width: 9rem;
+    height: 9rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--acid);
+  }
+  .more h2 {
+    font-size: var(--step-2);
+    margin: 0 0 var(--space-2);
+  }
+  .more-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+</style>

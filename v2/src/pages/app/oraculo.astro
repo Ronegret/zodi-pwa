@@ -25,6 +25,9 @@ const bigThree =
         ascendant: stored.input.timeKnown ? stored.chart.ascendant.sign : undefined,
       }
     : undefined;
+// "Pregúntale a ZODI" llega con la pregunta escrita; la persona decide enviarla.
+const initialQuestion =
+  Astro.url.searchParams.get('pregunta')?.trim().slice(0, 300) || undefined;
 ---
 
 <AppShell
@@ -40,6 +43,7 @@ const bigThree =
       remaining={remaining}
       bigThree={bigThree}
       toneLabel={TONES[profile.reading_tone].title}
+      initialQuestion={initialQuestion}
     />
   ) : (
     <EmptyState title="El oráculo está descansando" headingLevel={2}>

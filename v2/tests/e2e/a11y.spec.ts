@@ -33,6 +33,7 @@ const PRIVATE = [
   '/app/lecturas/horoscopo-maya',
   '/app/comunidad',
   '/app/carta',
+  '/app/carta/significado',
   '/app/ajustes',
   '/app/horoscopo',
   '/app/compatibilidad',
