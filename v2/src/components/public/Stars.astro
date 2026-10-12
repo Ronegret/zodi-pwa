@@ -1,0 +1,32 @@
+---
+/** Puntuación de 1 a 5 con estrellas; el número va en texto para lectores. */
+interface Props {
+  value: number;
+  label: string;
+}
+const { value, label } = Astro.props;
+---
+
+<span class="stars" role="img" aria-label={`${label}: ${value} de 5`}>
+  {Array.from({ length: 5 }, (_, i) => (
+    <span class:list={['star', { on: i < value }]} aria-hidden="true">
+      ★
+    </span>
+  ))}
+</span>
+
+<style>
+  .stars {
+    display: inline-flex;
+    gap: 2px;
+    font-size: 1.05rem;
+    letter-spacing: 0;
+  }
+  .star {
+    color: rgb(255 255 255 / 18%);
+  }
+  .star.on {
+    color: var(--acid);
+    text-shadow: 0 0 10px rgb(184 255 23 / 55%);
+  }
+</style>

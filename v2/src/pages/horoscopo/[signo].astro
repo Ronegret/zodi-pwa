@@ -1,0 +1,342 @@
+---
+/**
+ * Horóscopo de hoy para un signo (público, indexable). El cielo real del día
+ * por casas solares; la CDN lo guarda hasta medianoche de Madrid.
+ */
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import Stars from '@/components/public/Stars.astro';
+import { SIGN_GLYPHS } from '@/lib/astro-engine/labels';
+import { signDay } from '@/lib/public/sign-day';
+import { SIGN_BY_SLUG, SIGN_INFO } from '@/lib/public/signs';
+import { longDate, publicCacheControl, publicToday } from '@/lib/public/today';
+
+const info = SIGN_BY_SLUG.get(Astro.params.signo ?? '');
+if (!info) return Astro.rewrite('/404');
+
+const today = publicToday();
+const day = signDay(info.index, today);
+const fecha = longDate(today);
+const allySlug = SIGN_INFO.find((s) => s.name === day.ally)!.slug;
+Astro.response.headers.set('Cache-Control', publicCacheControl());
+
+const title = `Horóscopo de hoy para ${info.name}`;
+const description = `${info.name}, ${fecha}: ${day.headline} Amor, trabajo, energía y el consejo sin filtro de ZODI.`;
+---
+
+<PublicLayout
+  title={title}
+  description={description}
+  canonical={`/horoscopo/${info.slug}`}
+  image={`/signos/${info.slug}-1024.webp`}
+>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/horoscopo">Horóscopos</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{info.name}</span>
+  </nav>
+
+  <article class="day">
+    <header class="day-hero">
+      <img
+        src={`/signos/${info.slug}-1024.webp`}
+        srcset={`/signos/${info.slug}-640.webp 640w, /signos/${info.slug}-1024.webp 1024w`}
+        sizes="(min-width: 900px) 26rem, 90vw"
+        alt={`${info.name} según ZODI`}
+        width="1024"
+        height="1024"
+        fetchpriority="high"
+      />
+      <div class="day-title">
+        <p class="kicker">
+          Horóscopo de hoy · <time datetime={today}>{fecha}</time>
+        </p>
+        <h1>
+          <span aria-hidden="true">{info.glyph}</span> {info.name}
+        </h1>
+        <ul class="facts" aria-label="Datos del signo">
+          <li class="badge badge-acid">{info.dates}</li>
+          <li class="badge badge-violet">{info.element}</li>
+          <li class="badge">{info.modality}</li>
+          <li class="badge">Rige {info.ruler}</li>
+        </ul>
+        <p class="headline">{day.headline}</p>
+        <p class="muted">
+          Luna en {SIGN_GLYPHS[day.moon.sign]} {day.moon.sign} · {day.moon.name.toLowerCase()} (
+          {Math.round(day.moon.illumination * 100)} %)
+        </p>
+      </div>
+    </header>
+
+    <section class="areas" aria-label="Tu día por áreas">
+      <div class="area card">
+        <h2>Amor</h2>
+        <Stars value={day.scores.love} label="Amor" />
+        <p>{day.love}</p>
+      </div>
+      <div class="area card">
+        <h2>Trabajo y dinero</h2>
+        <Stars value={day.scores.work} label="Trabajo y dinero" />
+        <p>{day.work}</p>
+      </div>
+      <div class="area card">
+        <h2>Energía</h2>
+        <Stars value={day.scores.energy} label="Energía" />
+        <p>{day.energy}</p>
+      </div>
+    </section>
+
+    {day.alerts.length > 0 && (
+      <ul class="alerts" aria-label="Avisos del cielo">
+        {day.alerts.map((a) => (
+          <li>{a}</li>
+        ))}
+      </ul>
+    )}
+
+    <section class="advice" aria-labelledby="consejo">
+      <img
+        src="/art/zodi-te-lo-adverti-640.webp"
+        alt=""
+        width="640"
+        height="640"
+        loading="lazy"
+        decoding="async"
+      />
+      <div>
+        <h2 id="consejo">El consejo de ZODI</h2>
+        <p class="advice-text">“{day.advice}”</p>
+        <dl class="luck">
+          <div>
+            <dt>Número</dt>
+            <dd>{day.luckyNumber}</dd>
+          </div>
+          <div>
+            <dt>Color</dt>
+            <dd>{day.color}</dd>
+          </div>
+          <div>
+            <dt>Fluye con</dt>
+            <dd>
+              <a href={`/horoscopo/${allySlug}`}>{day.ally}</a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="cta card" aria-labelledby="cta-title">
+      <div>
+        <p class="kicker">Esto es para todos los {info.name}</p>
+        <h2 id="cta-title">El tuyo, con tu carta real</h2>
+        <p>
+          Este horóscopo vale para cualquier {info.name} del planeta. El tuyo sale de tu fecha, hora
+          y lugar de nacimiento: tus tránsitos de hoy, tu Luna, tu ascendente. Y ZODI te lo cuenta
+          en el tono que elijas.
+        </p>
+        <div class="cta-actions">
+          <Button href="/auth/registro" icon="sparkles">
+            Crear mi carta gratis
+          </Button>
+          <Button href="/horoscopo" variant="secondary">
+            Ver otros signos
+          </Button>
+        </div>
+      </div>
+      <img
+        src="/art/zodi-senalando-640.webp"
+        alt=""
+        width="640"
+        height="640"
+        loading="lazy"
+        decoding="async"
+      />
+    </section>
+
+    <section class="about" aria-labelledby="como-es">
+      <h2 id="como-es">Cómo es {info.name}</h2>
+      <p>{info.desc}</p>
+      <ul class="facts" aria-label={`Rasgos de ${info.name}`}>
+        {info.traits.map((t) => (
+          <li class="badge badge-violet">{t}</li>
+        ))}
+      </ul>
+    </section>
+  </article>
+</PublicLayout>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .day {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .day-hero {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .day-hero {
+      grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+    }
+  }
+  .day-hero img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-acid);
+    box-shadow: var(--glow-acid);
+  }
+  .day-title {
+    display: grid;
+    gap: var(--space-3);
+  }
+  h1 {
+    font-size: clamp(2.6rem, 1.4rem + 5vw, 5rem);
+  }
+  .facts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .headline {
+    font-size: var(--step-1);
+    max-width: 55ch;
+  }
+  .areas {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+  .area {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+  .area h2 {
+    font-size: var(--step-1);
+    margin: 0;
+  }
+  .area p {
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .alerts {
+    margin: 0;
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgb(255 43 214 / 35%);
+    background: rgb(255 43 214 / 8%);
+    display: grid;
+    gap: var(--space-2);
+  }
+  .alerts li {
+    margin-left: var(--space-3);
+  }
+  .advice {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+    padding: var(--space-5);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 8%);
+  }
+  @media (min-width: 700px) {
+    .advice {
+      grid-template-columns: 10rem minmax(0, 1fr);
+    }
+  }
+  .advice img {
+    width: 10rem;
+    height: 10rem;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+  }
+  .advice h2 {
+    font-size: var(--step-1);
+    margin: 0 0 var(--space-2);
+  }
+  .advice-text {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--acid-soft);
+  }
+  .luck {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin: var(--space-4) 0 0;
+  }
+  .luck dt {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .luck dd {
+    margin: 0;
+    font-weight: 800;
+    font-size: var(--step-1);
+    text-transform: capitalize;
+  }
+  .luck a {
+    color: var(--acid);
+  }
+  .cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+  @media (min-width: 800px) {
+    .cta {
+      grid-template-columns: minmax(0, 1fr) 14rem;
+    }
+  }
+  .cta h2 {
+    font-size: var(--step-3);
+    margin: var(--space-1) 0 var(--space-3);
+  }
+  .cta p {
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+  .cta img {
+    width: 100%;
+    max-width: 14rem;
+    height: auto;
+    border-radius: var(--radius-lg);
+    justify-self: center;
+  }
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+  .about {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 62ch;
+  }
+  .about h2 {
+    font-size: var(--step-2);
+  }
+  .about p {
+    color: var(--ink-soft);
+  }
+</style>

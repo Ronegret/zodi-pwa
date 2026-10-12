@@ -8,8 +8,18 @@ import syneUrl from '@fontsource-variable/syne/files/syne-latin-wght-normal.woff
 interface Props {
   title: string;
   description?: string;
+  /** Ruta canónica (páginas públicas indexables). */
+  canonical?: string;
+  /** Imagen para compartir (ruta de public/). */
+  image?: string;
 }
-const { title, description = 'Zodi — astrología personal con IA, sin filtro.' } = Astro.props;
+const {
+  title,
+  description = 'Zodi — astrología personal con IA, sin filtro.',
+  canonical,
+  image = '/brand/zodi-720.webp',
+} = Astro.props;
+const site = Astro.site ?? Astro.url;
 ---
 
 <!doctype html>
@@ -24,6 +34,13 @@ const { title, description = 'Zodi — astrología personal con IA, sin filtro.'
     <link rel="preload" href={syneUrl} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={jakartaUrl} as="font" type="font/woff2" crossorigin />
     <title>{title} · Zodi</title>
+    {canonical && <link rel="canonical" href={new URL(canonical, site).href} />}
+    <meta property="og:site_name" content="ZODI" />
+    <meta property="og:title" content={`${title} · Zodi`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, site).href} />
+    <meta property="og:locale" content="es_ES" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <a class="skip-link" href="#main">

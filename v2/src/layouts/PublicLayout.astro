@@ -1,0 +1,138 @@
+---
+/** Páginas públicas (sin cuenta): cabecera con accesos y pie con los signos. */
+import Base from './Base.astro';
+import Button from '@/components/ui/Button.astro';
+import LegalLinks from '@/components/LegalLinks.astro';
+import { SIGN_INFO } from '@/lib/public/signs';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  image?: string;
+}
+
+const { title, description, canonical, image } = Astro.props;
+---
+
+<Base
+  title={title}
+  {...(description ? { description } : {})}
+  {...(canonical ? { canonical } : {})}
+  {...(image ? { image } : {})}
+>
+  <header class="pub-top">
+    <a href="/" class="pub-logo" aria-label="ZODI, ir a la portada">
+      <img src="/brand/logo-240.webp" alt="" width="240" height="160" />
+    </a>
+    <nav aria-label="Principal" class="pub-nav">
+      <a href="/horoscopo" class="pub-link">
+        Horóscopos
+      </a>
+      <Button href="/auth/login" variant="ghost" size="sm">
+        Entrar
+      </Button>
+      <Button href="/auth/registro" size="sm">
+        Crear cuenta
+      </Button>
+    </nav>
+  </header>
+  <main id="main" class="pub-main">
+    <slot />
+  </main>
+  <footer class="pub-foot">
+    <nav aria-label="Horóscopo de hoy por signo">
+      <p class="kicker">Horóscopo de hoy</p>
+      <ul class="pub-signs">
+        {SIGN_INFO.map((s) => (
+          <li>
+            <a href={`/horoscopo/${s.slug}`}>
+              <span aria-hidden="true">{s.glyph}</span> {s.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <p class="pub-disclaimer">
+      Las lecturas de ZODI son entretenimiento y guía simbólica. No sustituyen consejo médico,
+      legal, financiero ni psicológico.
+    </p>
+    <LegalLinks />
+  </footer>
+</Base>
+
+<style>
+  .pub-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) clamp(1rem, 4vw, 3rem);
+  }
+  .pub-logo img {
+    width: 110px;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 16px rgb(184 255 23 / 25%));
+  }
+  .pub-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .pub-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-3);
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .pub-link:hover {
+    color: var(--acid);
+  }
+  .pub-main {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: var(--space-4) clamp(1rem, 4vw, 3rem) var(--space-8);
+  }
+  .pub-foot {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: center;
+    padding: var(--space-6) var(--space-4) var(--space-7);
+    border-top: 1px solid var(--line);
+    text-align: center;
+  }
+  .pub-signs {
+    list-style: none;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-1) var(--space-3);
+  }
+  .pub-signs a {
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    color: var(--ink-soft);
+  }
+  .pub-signs a:hover {
+    color: var(--acid);
+  }
+  .pub-disclaimer {
+    max-width: 60ch;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  @media (max-width: 380px) {
+    .pub-logo img {
+      width: 84px;
+    }
+  }
+</style>

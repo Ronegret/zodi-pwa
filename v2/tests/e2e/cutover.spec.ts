@@ -8,8 +8,7 @@ test.describe('cambio de dominio', () => {
     ['/dashboard', '/app', 301],
     ['/dashboard/carta', '/app', 301],
     ['/reset', '/', 301],
-    ['/horoscopo/aries', '/', 302],
-    ['/horoscopo-diario/leo', '/', 302],
+    ['/horoscopo-diario/leo', '/horoscopo/leo', 301],
   ] as const) {
     test(`${from} redirige a ${to}`, async ({ request }) => {
       const res = await request.get(from, { maxRedirects: 0 });
