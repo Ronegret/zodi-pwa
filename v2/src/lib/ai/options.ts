@@ -9,9 +9,9 @@ export const TONE_LABELS: Record<Tone, string> = {
 };
 
 export const LENGTHS = {
-  breve: { label: 'Breve', maxTokens: 450 },
-  normal: { label: 'Normal', maxTokens: 900 },
-  extensa: { label: 'Extensa', maxTokens: 1600 },
+  breve: { label: 'Breve', maxTokens: 700 },
+  normal: { label: 'Normal', maxTokens: 1300 },
+  extensa: { label: 'Extensa', maxTokens: 2300 },
 } as const;
 export type ReadingLength = keyof typeof LENGTHS;
 

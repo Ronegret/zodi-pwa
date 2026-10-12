@@ -221,6 +221,14 @@ export function readingStream(opts: RunOptions): ReadableStream<Uint8Array> {
           { tier: prepared.tier, cacheHistory: prepared.cacheHistory ?? false },
         );
         if (!content.trim()) throw new Error('respuesta vacía');
+        // Si llegó al tope, que no acabe a mitad de frase.
+        if (result.stopReason === 'max_tokens') {
+          console.warn(
+            `[lecturas] ${prepared.kind} cortada por max_tokens (${prepared.maxTokens})`,
+          );
+          content += '…';
+          send({ type: 'text', text: '…' });
+        }
         const id = await opts.saveReading({
           user_id: opts.userId,
           kind: prepared.kind,

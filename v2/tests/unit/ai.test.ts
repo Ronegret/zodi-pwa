@@ -12,7 +12,7 @@ import {
   lunarNewYear,
   personalYear,
 } from '@/lib/ai/numerology';
-import { ZODI_SYSTEM, buildUserMessage } from '@/lib/ai/prompts';
+import { ZODI_SYSTEM, ZODI_VOICE, buildUserMessage } from '@/lib/ai/prompts';
 import { RichText, parseBlocks } from '@/components/readings/RichText';
 import { excerpt } from '@/lib/readings/format';
 import { costParams } from '@/lib/ai/cost';
@@ -137,7 +137,7 @@ describe('prompts', () => {
     expect(msg).toContain('HORÓSCOPO DE HOY');
     expect(msg).toContain('[Enfócate especialmente en el área de: amor]');
     expect(msg).toContain('TONO BRUTAL');
-    expect(msg).toContain('EXTENSIÓN: breve');
+    expect(msg).toContain('EXTENSIÓN MÁXIMA: 130 palabras');
   });
 
   it('cada tipo de lectura tiene slug único e instrucciones', () => {
@@ -344,7 +344,7 @@ describe('chat con Zodi', () => {
       NOW,
     );
     expect(p.kind).toBe('assistant');
-    expect(p.system[0]).toBe(ZODI_SYSTEM);
+    expect(p.system[0]).toBe(ZODI_VOICE);
     expect(p.system[1]).toContain('MODO CHAT');
     expect(p.system[1]).toContain('TONO SARCÁSTICO');
     expect(p.system[1]).toContain('Nombre: Ana');

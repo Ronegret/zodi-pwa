@@ -7,7 +7,7 @@ import { z } from 'zod';
 import type { NatalChart } from '@/lib/astro-engine';
 import type { ChatTurn } from '@/lib/ai/client';
 import { buildReadingContext, type ProfileForReading } from '@/lib/ai/context';
-import { TONES, ZODI_CHAT_MODE, ZODI_SYSTEM } from '@/lib/ai/prompts';
+import { TONES, ZODI_CHAT_MODE, ZODI_VOICE } from '@/lib/ai/prompts';
 import { peopleContext } from '@/lib/people/context';
 import type { Person } from './people';
 import type { PreparedReading } from './readings';
@@ -49,11 +49,11 @@ export function prepareChat(
   return {
     kind: 'assistant',
     system: [
-      ZODI_SYSTEM,
-      `${ZODI_CHAT_MODE}\n${TONES[profile.reading_tone].instruction}\n\n<perfil>\n${context.text}${gente ? `\n\n${gente}` : ''}\n</perfil>`,
+      ZODI_VOICE,
+      `<perfil>\n${context.text}${gente ? `\n\n${gente}` : ''}\n</perfil>\n\n${ZODI_CHAT_MODE}\n${TONES[profile.reading_tone].instruction}`,
     ],
     messages,
-    maxTokens: 500,
+    maxTokens: 800,
     tier: 'fast',
     cacheHistory: true,
     input: { question: last.slice(0, 1000) },

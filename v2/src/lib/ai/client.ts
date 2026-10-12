@@ -27,6 +27,8 @@ export interface GenerationResult {
   model: string;
   inputTokens: number;
   outputTokens: number;
+  /** 'max_tokens' = se cortó por el tope. */
+  stopReason?: string | null;
 }
 
 export interface GenerateOptions {
@@ -104,5 +106,6 @@ export async function generate(
       (final.usage.cache_read_input_tokens ?? 0) +
       (final.usage.cache_creation_input_tokens ?? 0),
     outputTokens: final.usage.output_tokens,
+    stopReason: final.stop_reason,
   };
 }
