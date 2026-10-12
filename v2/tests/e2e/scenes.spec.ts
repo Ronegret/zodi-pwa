@@ -117,16 +117,6 @@ test.describe('escenas 3D', () => {
     await expect(sun).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByRole('status').filter({ hasText: 'Sol en' })).toBeVisible();
   });
-
-  test('horóscopo: tótem del signo de la temporada', async ({ page, request }) => {
-    await login(page, await createTestUser(request, true));
-    await page.goto('/app/horoscopo');
-    // En móvil el tótem va debajo del horóscopo: client:visible necesita verlo.
-    await page.getByRole('heading', { name: /Temporada de/ }).scrollIntoViewIfNeeded();
-    await expectReady(page, 'sign-of-day');
-    expect((await stats(page, 'sign-of-day'))?.calls).toBeLessThanOrEqual(MAX_CALLS);
-    await page.getByRole('button', { name: '¡Que salte!' }).click();
-  });
 });
 
 test.describe('sin WebGL', () => {

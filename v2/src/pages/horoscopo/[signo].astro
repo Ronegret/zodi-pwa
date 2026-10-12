@@ -5,10 +5,10 @@
  */
 import PublicLayout from '@/layouts/PublicLayout.astro';
 import Button from '@/components/ui/Button.astro';
-import Stars from '@/components/public/Stars.astro';
+import SignDayPanel from '@/components/public/SignDayPanel.astro';
 import { SIGN_GLYPHS } from '@/lib/astro-engine/labels';
 import { signDay } from '@/lib/public/sign-day';
-import { SIGN_BY_SLUG, SIGN_INFO } from '@/lib/public/signs';
+import { SIGN_BY_SLUG } from '@/lib/public/signs';
 import { longDate, publicCacheControl, publicToday } from '@/lib/public/today';
 
 const info = SIGN_BY_SLUG.get(Astro.params.signo ?? '');
@@ -17,7 +17,6 @@ if (!info) return Astro.rewrite('/404');
 const today = publicToday();
 const day = signDay(info.index, today);
 const fecha = longDate(today);
-const allySlug = SIGN_INFO.find((s) => s.name === day.ally)!.slug;
 Astro.response.headers.set('Cache-Control', publicCacheControl());
 
 const title = `Horóscopo de hoy para ${info.name}`;
@@ -68,62 +67,7 @@ const description = `${info.name}, ${fecha}: ${day.headline} Amor, trabajo, ener
       </div>
     </header>
 
-    <section class="areas" aria-label="Tu día por áreas">
-      <div class="area card">
-        <h2>Amor</h2>
-        <Stars value={day.scores.love} label="Amor" />
-        <p>{day.love}</p>
-      </div>
-      <div class="area card">
-        <h2>Trabajo y dinero</h2>
-        <Stars value={day.scores.work} label="Trabajo y dinero" />
-        <p>{day.work}</p>
-      </div>
-      <div class="area card">
-        <h2>Energía</h2>
-        <Stars value={day.scores.energy} label="Energía" />
-        <p>{day.energy}</p>
-      </div>
-    </section>
-
-    {day.alerts.length > 0 && (
-      <ul class="alerts" aria-label="Avisos del cielo">
-        {day.alerts.map((a) => (
-          <li>{a}</li>
-        ))}
-      </ul>
-    )}
-
-    <section class="advice" aria-labelledby="consejo">
-      <img
-        src="/art/zodi-te-lo-adverti-640.webp"
-        alt=""
-        width="640"
-        height="640"
-        loading="lazy"
-        decoding="async"
-      />
-      <div>
-        <h2 id="consejo">El consejo de ZODI</h2>
-        <p class="advice-text">“{day.advice}”</p>
-        <dl class="luck">
-          <div>
-            <dt>Número</dt>
-            <dd>{day.luckyNumber}</dd>
-          </div>
-          <div>
-            <dt>Color</dt>
-            <dd>{day.color}</dd>
-          </div>
-          <div>
-            <dt>Fluye con</dt>
-            <dd>
-              <a href={`/horoscopo/${allySlug}`}>{day.ally}</a>
-            </dd>
-          </div>
-        </dl>
-      </div>
-    </section>
+    <SignDayPanel day={day} />
 
     <section class="cta card" aria-labelledby="cta-title">
       <div>
@@ -179,6 +123,7 @@ const description = `${info.name}, ${fecha}: ${day.headline} Amor, trabajo, ener
   }
   .day {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
   .day-hero {
@@ -216,86 +161,6 @@ const description = `${info.name}, ${fecha}: ${day.headline} Amor, trabajo, ener
   .headline {
     font-size: var(--step-1);
     max-width: 55ch;
-  }
-  .areas {
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-  }
-  .area {
-    display: grid;
-    gap: var(--space-2);
-    align-content: start;
-  }
-  .area h2 {
-    font-size: var(--step-1);
-    margin: 0;
-  }
-  .area p {
-    color: var(--ink-soft);
-    margin: 0;
-  }
-  .alerts {
-    margin: 0;
-    padding: var(--space-4) var(--space-5);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgb(255 43 214 / 35%);
-    background: rgb(255 43 214 / 8%);
-    display: grid;
-    gap: var(--space-2);
-  }
-  .alerts li {
-    margin-left: var(--space-3);
-  }
-  .advice {
-    display: grid;
-    gap: var(--space-5);
-    align-items: center;
-    padding: var(--space-5);
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--line-violet);
-    background: rgb(155 77 255 / 8%);
-  }
-  @media (min-width: 700px) {
-    .advice {
-      grid-template-columns: 10rem minmax(0, 1fr);
-    }
-  }
-  .advice img {
-    width: 10rem;
-    height: 10rem;
-    border-radius: var(--radius-lg);
-    object-fit: cover;
-  }
-  .advice h2 {
-    font-size: var(--step-1);
-    margin: 0 0 var(--space-2);
-  }
-  .advice-text {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: var(--step-2);
-    line-height: 1.2;
-    color: var(--acid-soft);
-  }
-  .luck {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-5);
-    margin: var(--space-4) 0 0;
-  }
-  .luck dt {
-    font-size: var(--step--1);
-    color: var(--ink-soft);
-  }
-  .luck dd {
-    margin: 0;
-    font-weight: 800;
-    font-size: var(--step-1);
-    text-transform: capitalize;
-  }
-  .luck a {
-    color: var(--acid);
   }
   .cta {
     display: grid;

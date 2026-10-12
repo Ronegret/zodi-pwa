@@ -21,6 +21,8 @@ const PUBLIC = [
   '/legal/privacidad',
   '/legal/terminos',
   '/dev/componentes',
+  '/horoscopo',
+  '/horoscopo/escorpio',
 ];
 const PRIVATE = [
   '/app',
