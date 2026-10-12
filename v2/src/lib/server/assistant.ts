@@ -8,6 +8,8 @@ import type { NatalChart } from '@/lib/astro-engine';
 import type { ChatTurn } from '@/lib/ai/client';
 import { buildReadingContext, type ProfileForReading } from '@/lib/ai/context';
 import { TONES, ZODI_CHAT_MODE, ZODI_SYSTEM } from '@/lib/ai/prompts';
+import { peopleContext } from '@/lib/people/context';
+import type { Person } from './people';
 import type { PreparedReading } from './readings';
 
 export const MAX_TURNS = 16;
@@ -35,8 +37,11 @@ export function prepareChat(
   profile: ProfileForReading,
   stored: { chart: NatalChart; timeKnown: boolean } | null,
   now: Date,
+  /** Su gente: para que el oráculo pueda hablar de cada persona. */
+  people: Person[] = [],
 ): PreparedReading {
   const context = buildReadingContext(profile, stored, now);
+  const gente = peopleContext(people, profile, now);
   // Solo los últimos turnos, empezando siempre por uno de la persona.
   let messages: ChatTurn[] = request.messages.slice(-MAX_TURNS);
   while (messages[0]?.role === 'assistant') messages = messages.slice(1);
@@ -45,7 +50,7 @@ export function prepareChat(
     kind: 'assistant',
     system: [
       ZODI_SYSTEM,
-      `${ZODI_CHAT_MODE}\n${TONES[profile.reading_tone].instruction}\n\n<perfil>\n${context.text}\n</perfil>`,
+      `${ZODI_CHAT_MODE}\n${TONES[profile.reading_tone].instruction}\n\n<perfil>\n${context.text}${gente ? `\n\n${gente}` : ''}\n</perfil>`,
     ],
     messages,
     maxTokens: 500,

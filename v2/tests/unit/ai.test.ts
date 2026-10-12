@@ -277,6 +277,30 @@ describe('stream de una lectura', () => {
   });
 });
 
+describe('el oráculo conoce a su gente', () => {
+  it('añade cada persona con su cielo, la afinidad y el día', () => {
+    const p = prepareChat(
+      { messages: [{ role: 'user', content: '¿Cómo me irá hoy con mi madre?' }] },
+      PROFILE,
+      { chart: FIXTURE.chart, timeKnown: true },
+      NOW,
+      [{ id: 'x', name: 'Mamá', relation: 'familia', birthDate: '1965-08-03', birthTime: null }],
+    );
+    expect(p.system[1]).toContain('## Su gente');
+    expect(p.system[1]).toMatch(/- Mamá \(familia, nació el 1965-08-03\): Sol en Leo/);
+    expect(p.system[1]).toMatch(/Afinidad: \d+ %/);
+    expect(p.system[1]).not.toMatch(/undefined|NaN/);
+    // Sin gente, no aparece la sección.
+    const sin = prepareChat(
+      { messages: [{ role: 'user', content: 'Hola' }] },
+      PROFILE,
+      { chart: FIXTURE.chart, timeKnown: true },
+      NOW,
+    );
+    expect(sin.system[1]).not.toContain('## Su gente');
+  });
+});
+
 describe('chat con Zodi', () => {
   it('voz cacheada + modo chat con perfil; solo los últimos turnos', () => {
     const many = Array.from({ length: 21 }, (_, i) => ({
