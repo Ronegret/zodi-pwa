@@ -7,6 +7,7 @@ import PublicLayout from '@/layouts/PublicLayout.astro';
 import Button from '@/components/ui/Button.astro';
 import SignDayPanel from '@/components/public/SignDayPanel.astro';
 import { SIGN_GLYPHS } from '@/lib/astro-engine/labels';
+import { bestFor, pairSlug } from '@/lib/public/compat';
 import { signDay } from '@/lib/public/sign-day';
 import { SIGN_BY_SLUG } from '@/lib/public/signs';
 import { longDate, publicCacheControl, publicToday } from '@/lib/public/today';
@@ -104,6 +105,24 @@ const description = `${info.name}, ${fecha}: ${day.headline} Amor, trabajo, ener
         {info.traits.map((t) => (
           <li class="badge badge-violet">{t}</li>
         ))}
+      </ul>
+    </section>
+
+    <section class="about" aria-labelledby="encaja">
+      <h2 id="encaja">Con quién encaja {info.name}</h2>
+      <ul class="facts">
+        {bestFor(info).map((o) => (
+          <li>
+            <a class="badge badge-acid" href={`/compatibilidad/${pairSlug(info, o)}`}>
+              {info.name} y {o.name}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a class="badge" href="/compatibilidad">
+            Comparar con otro signo
+          </a>
+        </li>
       </ul>
     </section>
   </article>

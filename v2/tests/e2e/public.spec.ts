@@ -48,3 +48,36 @@ test.describe('horóscopo público (sin cuenta)', () => {
     expect(res?.status()).toBe(404);
   });
 });
+
+test.describe('compatibilidad de signos', () => {
+  test('eliges dos signos y ves amor, amistad y trabajo', async ({ page }) => {
+    await page.goto('/compatibilidad');
+    await expect(page.getByRole('heading', { level: 1, name: '¿Encajan o chocan?' })).toBeVisible();
+    await page.getByLabel(/Tu signo/).selectOption('aries');
+    await page.getByLabel(/Su signo/).selectOption('leo');
+    await page.getByRole('button', { name: 'Ver compatibilidad' }).click();
+    await expect(page).toHaveURL(/\/compatibilidad\/aries-y-leo$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Aries y Leo' })).toBeVisible();
+    await expect(page.getByText('92%')).toBeVisible();
+    for (const h of ['En el amor', 'En la amistad', 'En el trabajo', 'Cómo es Leo']) {
+      await expect(page.getByRole('heading', { name: h })).toBeVisible();
+    }
+    // La otra orden enseña lo mismo con la misma canónica.
+    await page.goto('/compatibilidad/leo-y-aries');
+    await expect(page.locator('link[rel=canonical]')).toHaveAttribute(
+      'href',
+      /\/compatibilidad\/aries-y-leo$/,
+    );
+    const res = await page.goto('/compatibilidad/aries-y-dragon');
+    expect(res?.status()).toBe(404);
+  });
+
+  test('el horóscopo de cada signo enlaza con quién encaja', async ({ page }) => {
+    await page.goto('/horoscopo/aries');
+    await page
+      .getByRole('link', { name: /^Aries y / })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/compatibilidad\/aries-y-/);
+  });
+});

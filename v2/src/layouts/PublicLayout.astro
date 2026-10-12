@@ -41,6 +41,9 @@ const { title, description, canonical, image } = Astro.props;
     <slot />
   </main>
   <footer class="pub-foot">
+    <p class="pub-compat">
+      <a href="/compatibilidad">Compatibilidad de signos: amor, amistad y trabajo</a>
+    </p>
     <nav aria-label="Horóscopo de hoy por signo">
       <p class="kicker">Horóscopo de hoy</p>
       <ul class="pub-signs">
@@ -134,5 +137,12 @@ const { title, description, canonical, image } = Astro.props;
     .pub-logo img {
       width: 84px;
     }
+  }
+  .pub-compat a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--acid);
+    font-weight: 700;
   }
 </style>

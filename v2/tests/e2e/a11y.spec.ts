@@ -23,6 +23,8 @@ const PUBLIC = [
   '/dev/componentes',
   '/horoscopo',
   '/horoscopo/escorpio',
+  '/compatibilidad',
+  '/compatibilidad/aries-y-leo',
 ];
 const PRIVATE = [
   '/app',

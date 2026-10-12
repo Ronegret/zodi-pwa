@@ -117,7 +117,7 @@ const deleted = Astro.url.searchParams.get('borrado') === '1';
                     <p class="person-bday">🎂 {birthdayLabel(x.day.birthdayIn)}</p>
                   )}
                 </div>
-                <p class="person-score" aria-label={`Afinidad ${x.affinity.score} %`}>
+                <p class="person-score">
                   <strong>{x.affinity.score}%</strong>
                   <span>afinidad</span>
                 </p>

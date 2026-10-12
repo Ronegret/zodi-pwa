@@ -1,0 +1,262 @@
+---
+/**
+ * Compatibilidad de dos signos (pública, indexable): vínculo en la rueda,
+ * elementos, ritmo, y amor/amistad/trabajo. "aries-y-leo" y "leo-y-aries"
+ * enseñan lo mismo; la canónica es la del orden del zodiaco.
+ */
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import { canonicalPair, compatPage, pairSlug, parsePair } from '@/lib/public/compat';
+import { SIGN_INFO } from '@/lib/public/signs';
+import { publicCacheControl } from '@/lib/public/today';
+
+const pair = parsePair(Astro.params.pareja ?? '');
+if (!pair) return Astro.rewrite('/404');
+const [a, b] = pair;
+const c = compatPage(a, b);
+Astro.response.headers.set('Cache-Control', publicCacheControl());
+
+const title = `Compatibilidad ${a.name} y ${b.name}: amor, amistad y trabajo`;
+const description = `${a.name} y ${b.name}: ${c.match.score} % de afinidad. ${c.match.text}`;
+---
+
+<PublicLayout
+  title={title}
+  description={description}
+  canonical={`/compatibilidad/${canonicalPair(a, b)}`}
+  image={`/signos/${a.slug}-1024.webp`}
+>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/compatibilidad">Compatibilidad</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">
+      {a.name} y {b.name}
+    </span>
+  </nav>
+
+  <article class="pair">
+    <header class="pair-hero card">
+      <div class="faces">
+        <figure>
+          <img
+            src={`/signos/${a.slug}-640.webp`}
+            alt={`${a.name} según ZODI`}
+            width="640"
+            height="640"
+            fetchpriority="high"
+          />
+          <figcaption>
+            {a.glyph} {a.name}
+          </figcaption>
+        </figure>
+        <span class="plus" aria-hidden="true">
+          +
+        </span>
+        <figure>
+          <img
+            src={`/signos/${b.slug}-640.webp`}
+            alt={`${b.name} según ZODI`}
+            width="640"
+            height="640"
+          />
+          <figcaption>
+            {b.glyph} {b.name}
+          </figcaption>
+        </figure>
+      </div>
+      <div class="score">
+        <p class="kicker">Compatibilidad</p>
+        <h1>
+          {a.name} y {b.name}
+        </h1>
+        <p class="big">
+          {c.match.score}%<span class="visually-hidden"> de afinidad</span>
+        </p>
+        <p class="badge badge-acid">{c.match.name}</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="rueda">
+        <h2 id="rueda">Su vínculo en la rueda</h2>
+        <p>{c.wheel}</p>
+        <p>{c.match.text}</p>
+      </section>
+      <section class="card" aria-labelledby="elementos">
+        <h2 id="elementos">
+          {a.element} y {b.element}
+        </h2>
+        <p>{c.match.elements}</p>
+        <p class="muted">{c.rhythm}</p>
+      </section>
+    </div>
+
+    <ul class="areas">
+      {c.areas.map((x) => (
+        <li class="card">
+          <h2>{x.title}</h2>
+          <p>{x.text}</p>
+        </li>
+      ))}
+    </ul>
+
+    <div class="grid">
+      {[a, b].map((s) => (
+        <section class="card" aria-labelledby={`como-${s.slug}`}>
+          <h2 id={`como-${s.slug}`}>Cómo es {s.name}</h2>
+          <p>{s.desc}</p>
+          <a href={`/horoscopo/${s.slug}`}>Horóscopo de hoy de {s.name}</a>
+        </section>
+      ))}
+    </div>
+
+    <section class="cta card" aria-labelledby="completa">
+      <h2 id="completa">¿Y con su carta completa?</h2>
+      <p>
+        Esto es solo el Sol. En ZODI añades a esa persona con su fecha de nacimiento y comparas
+        también la Luna, Venus, Marte y Mercurio, con el horóscopo chino y los números. Y cada día
+        te digo cómo está la cosa entre los dos.
+      </p>
+      <Button href="/auth/registro" icon="sparkles">
+        Probar gratis 30 días
+      </Button>
+    </section>
+
+    <nav class="others" aria-labelledby="otras">
+      <h2 id="otras">{a.name} con los demás signos</h2>
+      <ul>
+        {SIGN_INFO.filter((s) => s.slug !== b.slug).map((s) => (
+          <li>
+            <a href={`/compatibilidad/${pairSlug(a, s)}`}>
+              {a.name} y {s.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </article>
+</PublicLayout>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .pair {
+    display: grid;
+    gap: var(--space-5);
+  }
+  .pair-hero {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+    justify-items: center;
+    text-align: center;
+  }
+  @media (min-width: 900px) {
+    .pair-hero {
+      grid-template-columns: auto minmax(0, 1fr);
+      justify-items: start;
+      text-align: left;
+    }
+  }
+  .faces {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .faces figure {
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+    justify-items: center;
+    font-weight: 700;
+  }
+  .faces img {
+    width: clamp(7rem, 30vw, 11rem);
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--line-acid);
+  }
+  .plus {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    color: var(--acid);
+  }
+  .score h1 {
+    margin: var(--space-1) 0;
+  }
+  .big {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 12vw, 5.5rem);
+    line-height: 1;
+    color: var(--acid);
+    margin: 0 0 var(--space-2);
+  }
+  .grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+  .grid h2,
+  .areas h2,
+  .cta h2,
+  .others h2 {
+    font-size: var(--step-2);
+    margin: 0 0 var(--space-2);
+  }
+  .grid p,
+  .areas p {
+    margin: 0 0 var(--space-2);
+    line-height: 1.6;
+  }
+  .grid a {
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .areas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+  .cta {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+  }
+  .cta p {
+    margin: 0;
+  }
+  .others ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .others a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .others a:hover {
+    border-color: var(--acid);
+    color: var(--acid);
+  }
+</style>
