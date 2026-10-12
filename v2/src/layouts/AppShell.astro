@@ -10,6 +10,7 @@ import Avatar from '@/components/ui/Avatar.astro';
 import Badge from '@/components/ui/Badge.astro';
 import Icon from '@/components/ui/Icon.astro';
 import type { IconName } from '@/components/ui/icons';
+import WelcomeSplash from '@/components/media/WelcomeSplash.astro';
 import { ToastRegion } from '@/components/ui/ToastRegion';
 import type { ToastDetail } from '@/components/ui/toast';
 
@@ -131,6 +132,7 @@ const today = new Intl.DateTimeFormat('es-ES', {
       </a>
     )}
     <ToastRegion client:idle initial={toast} />
+    <WelcomeSplash />
   </div>
 </Base>
 

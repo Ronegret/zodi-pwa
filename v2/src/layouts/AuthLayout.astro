@@ -8,8 +8,10 @@ interface Props {
   kicker?: string | undefined;
   intro?: string | undefined;
   wide?: boolean;
+  /** La carta "La Identificación" del Tarot ZODI junto al formulario. */
+  card?: boolean;
 }
-const { title, kicker, intro, wide = false } = Astro.props;
+const { title, kicker, intro, wide = false, card = false } = Astro.props;
 ---
 
 <Base title={title}>
@@ -17,16 +19,28 @@ const { title, kicker, intro, wide = false } = Astro.props;
     <a class="brand" href="/">
       <img src="/brand/logo-240.webp" alt="ZODI, ir al inicio" width="240" height="160" />
     </a>
-    <section class:list={['panel', { wide }]} aria-labelledby="auth-title">
-      <div class="head">
-        {kicker && <p class="kicker">{kicker}</p>}
-        <h1 id="auth-title" class="vt-title">
-          {title}
-        </h1>
-        {intro && <p class="intro">{intro}</p>}
-      </div>
-      <slot />
-    </section>
+    <div class:list={['duo', { 'has-card': card }]}>
+      {card && (
+        <img
+          class="id-card"
+          src="/tarot/la-identificacion-480.webp"
+          alt="Carta del Tarot ZODI «La Identificación»: haz clic en la carta y loguéate. Tu destino no se desbloquea solo."
+          width="480"
+          height="720"
+          fetchpriority="high"
+        />
+      )}
+      <section class:list={['panel', { wide }]} aria-labelledby="auth-title">
+        <div class="head">
+          {kicker && <p class="kicker">{kicker}</p>}
+          <h1 id="auth-title" class="vt-title">
+            {title}
+          </h1>
+          {intro && <p class="intro">{intro}</p>}
+        </div>
+        <slot />
+      </section>
+    </div>
     <slot name="after" />
     <LegalLinks />
   </main>
@@ -48,6 +62,45 @@ const { title, kicker, intro, wide = false } = Astro.props;
     display: block;
     filter: drop-shadow(0 0 18px rgb(184 255 23 / 25%));
   }
+  .duo {
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-5);
+  }
+  @media (min-width: 960px) {
+    .duo.has-card {
+      grid-template-columns: 17rem minmax(0, 30rem);
+      justify-content: center;
+      align-items: center;
+      gap: var(--space-7);
+    }
+  }
+  .id-card {
+    width: min(42vw, 9rem);
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--acid);
+    box-shadow: 0 0 40px rgb(155 77 255 / 45%);
+    rotate: -4deg;
+    animation: card-float 5s var(--ease) infinite alternate;
+  }
+  @media (min-width: 960px) {
+    .id-card {
+      width: 17rem;
+    }
+  }
+  @keyframes card-float {
+    to {
+      translate: 0 -10px;
+      rotate: 2deg;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .id-card {
+      animation: none;
+    }
+  }
   .panel {
     width: min(100%, 30rem);
     background: var(--panel);
@@ -58,6 +111,9 @@ const { title, kicker, intro, wide = false } = Astro.props;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-5);
+  }
+  .duo.has-card .panel {
+    justify-self: stretch;
   }
   .panel.wide {
     width: min(100%, 44rem);
