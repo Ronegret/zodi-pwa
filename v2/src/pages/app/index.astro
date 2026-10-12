@@ -141,7 +141,7 @@ const trialDays = trialDaysLeft(profile.trial_ends_at);
             src={d.chart.sunImage}
             alt=""
             width="640"
-            height="366"
+            height="640"
             loading="eager"
             decoding="async"
           />
@@ -381,13 +381,16 @@ const trialDays = trialDaysLeft(profile.trial_ends_at);
     color: var(--acid);
     margin-top: 2px;
   }
+  /* Arte de ZODI del signo solar: cuadrado y centrado. */
   .sign-art {
-    width: 100%;
+    display: block;
+    width: min(100%, 15rem);
     height: auto;
-    aspect-ratio: 640 / 366;
+    aspect-ratio: 1;
+    margin-inline: auto;
     object-fit: cover;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-acid);
   }
   .big3 {
     margin: 0;

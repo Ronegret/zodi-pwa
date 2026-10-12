@@ -151,7 +151,7 @@ describe('buildDashboard', () => {
       new Date('2026-10-11T10:00:00Z'),
     );
     expect(d.chart?.ascendant).toBeNull();
-    expect(d.chart?.sunImage).toBe('/zodiac/aries-640.webp');
+    expect(d.chart?.sunImage).toBe('/signos/aries-640.webp');
     expect(d.transits.every((t) => t.natal !== 'ascendant')).toBe(true);
   });
 });

@@ -44,7 +44,7 @@ export function buildDashboard(
           sun: sun!,
           moon: find('moon')!,
           ascendant: chart.timeKnown ? chart.chart.ascendant : null,
-          sunImage: `/zodiac/${signSlug(sun!.sign)}-640.webp`,
+          sunImage: `/signos/${signSlug(sun!.sign)}-640.webp`,
           elements: elementBalance(chart.chart.planets),
         }
       : null,

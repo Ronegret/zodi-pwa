@@ -108,6 +108,7 @@ test('hora desconocida: la carta no muestra casas ni Ascendente', async ({ page,
   await expect(page.getByText('Sin hora de nacimiento')).toBeVisible();
 
   await page.goto('/app/carta');
+  await page.getByText('Datos técnicos (para quien sabe de astrología)').click();
   await expect(page.getByRole('table', { name: 'Planetas' })).toBeVisible();
   await expect(page.getByRole('table', { name: /Casas/ })).toHaveCount(0);
   await expect(page.getByText(/Sin hora de nacimiento no hay Ascendente/)).toBeVisible();
