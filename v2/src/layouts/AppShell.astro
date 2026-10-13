@@ -11,7 +11,7 @@ import Badge from '@/components/ui/Badge.astro';
 import Icon from '@/components/ui/Icon.astro';
 import type { IconName } from '@/components/ui/icons';
 import WelcomeSplash from '@/components/media/WelcomeSplash.astro';
-import CreatorCredit from '@/components/CreatorCredit.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
 import { ToastRegion } from '@/components/ui/ToastRegion';
 import type { ToastDetail } from '@/components/ui/toast';
 
@@ -21,6 +21,7 @@ export type NavId =
   | 'comunidad'
   | 'carta'
   | 'gente'
+  | 'yo'
   | 'horoscopo'
   | 'match'
   | 'ajustes'
@@ -48,6 +49,7 @@ const allNav: NavItem[] = [
   { id: 'lecturas', label: 'Lecturas', href: '/app/lecturas', icon: 'sparkles', mobile: true },
   { id: 'gente', label: 'Tu gente', href: '/app/gente', icon: 'people', mobile: true },
   { id: 'carta', label: 'Carta', href: '/app/carta', icon: 'wheel', mobile: true },
+  { id: 'yo', label: 'Todo sobre mí', href: '/app/yo', icon: 'user', mobile: false },
   { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo', icon: 'sun', mobile: false },
   { id: 'oraculo', label: 'Oráculo', href: '/app/oraculo', icon: 'chat', mobile: false },
   { id: 'comunidad', label: 'Comunidad', href: '/app/comunidad', icon: 'users', mobile: false },
@@ -188,9 +190,7 @@ const today = new Intl.DateTimeFormat('es-ES', {
       </header>
       <main id="main" class="main" tabindex="-1">
         <slot />
-        <footer class="app-foot">
-          <CreatorCredit />
-        </footer>
+        <SiteFooter variant="compact" />
       </main>
     </div>
 

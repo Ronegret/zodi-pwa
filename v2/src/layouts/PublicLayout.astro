@@ -2,8 +2,7 @@
 /** Páginas públicas (sin cuenta): cabecera con accesos y pie con los signos. */
 import Base from './Base.astro';
 import Button from '@/components/ui/Button.astro';
-import LegalLinks from '@/components/LegalLinks.astro';
-import { SIGN_INFO } from '@/lib/public/signs';
+import SiteFooter from '@/components/SiteFooter.astro';
 
 interface Props {
   title: string;
@@ -40,28 +39,7 @@ const { title, description, canonical, image } = Astro.props;
   <main id="main" class="pub-main">
     <slot />
   </main>
-  <footer class="pub-foot">
-    <p class="pub-compat">
-      <a href="/compatibilidad">Compatibilidad de signos: amor, amistad y trabajo</a>
-    </p>
-    <nav aria-label="Horóscopo de hoy por signo">
-      <p class="kicker">Horóscopo de hoy</p>
-      <ul class="pub-signs">
-        {SIGN_INFO.map((s) => (
-          <li>
-            <a href={`/horoscopo/${s.slug}`}>
-              <span aria-hidden="true">{s.glyph}</span> {s.name}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-    <p class="pub-disclaimer">
-      Las lecturas de ZODI son entretenimiento y guía simbólica. No sustituyen consejo médico,
-      legal, financiero ni psicológico.
-    </p>
-    <LegalLinks />
-  </footer>
+  <SiteFooter variant="full" />
 </Base>
 
 <style>
@@ -100,49 +78,5 @@ const { title, description, canonical, image } = Astro.props;
     max-width: 76rem;
     margin: 0 auto;
     padding: var(--space-4) clamp(1rem, 4vw, 3rem) var(--space-8);
-  }
-  .pub-foot {
-    display: grid;
-    gap: var(--space-4);
-    justify-items: center;
-    padding: var(--space-6) var(--space-4) var(--space-7);
-    border-top: 1px solid var(--line);
-    text-align: center;
-  }
-  .pub-signs {
-    list-style: none;
-    margin: var(--space-2) 0 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-1) var(--space-3);
-  }
-  .pub-signs a {
-    min-height: 32px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-    color: var(--ink-soft);
-  }
-  .pub-signs a:hover {
-    color: var(--acid);
-  }
-  .pub-disclaimer {
-    max-width: 60ch;
-    font-size: var(--step--1);
-    color: var(--ink-soft);
-  }
-  @media (max-width: 380px) {
-    .pub-logo img {
-      width: 84px;
-    }
-  }
-  .pub-compat a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    color: var(--acid);
-    font-weight: 700;
   }
 </style>

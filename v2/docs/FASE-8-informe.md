@@ -49,6 +49,14 @@ Rama `fase-7` · 12/10/2026 · Plan y comparación con la Zodi de antes en `FASE
 - **Hoja "Más"**: va antes que su botón en el HTML (en streaming, el botón podía no abrir nada; se veía en e2e bajo carga).
 - **Incidencia**: la cuenta de Anthropic se quedó **sin saldo** durante la generación del registro. Sin saldo, el oráculo y las lecturas fallan en producción. Al recargar: `node scripts/names/generate.mjs --lote 25 --paralelo 2` completa el registro (unos 700 apellidos y 150 nombres pendientes).
 
+### Todo sobre mí, informe en PDF, pie y legal (13/10/2026)
+- **Todo sobre mí** (`/app/yo`): ficha cósmica (Sol, Luna, Ascendente, número, animal chino, sello maya, tarot, día que naciste, energía), signos afines, accesos a cada sección y "Tus datos son tuyos". Datos reunidos en `lib/report/build.ts` (sin IA).
+- **Informe cósmico en PDF** (`/app/yo/informe`; `/app/carta/imprimir` redirige): portada oscura con el logo, hojas de papel con marca de agua, pie con "Hoja N" y "Creado por rodrigonegrete.es" (márgenes de página), tinte del fondo de la web desactivado al imprimir, cierre con humor y crédito. Verificado con PDF real (22 hojas A4, desktop y móvil) rasterizado con PyMuPDF; test e2e comprueba A4 y que nada sobresale.
+- **Pie de página nuevo** (`SiteFooter.astro`): ticker con humor, enlaces del creador (✦ rodrigonegrete.es ↗, rodd.es ↗), legal, volver arriba; compacto en la app.
+- **Legal**: privacidad rehecha (responsable, bases legales, IA y qué se envía, encargados, transferencias, derechos RGPD, edad 16+), términos ampliados, **cookies** (tabla exacta de lo que se guarda), **aviso legal**. Registro con casilla obligatoria de edad, términos y privacidad. Descarga de datos en JSON (`/api/mis-datos`). `robots.txt`, `sitemap.xml` y `/.well-known/security.txt`.
+- **Seguridad revisada**: sin secretos en el repositorio; cabeceras (CSP con hashes, HSTS, X-Frame, nosniff, COOP, Referrer y Permissions-Policy) activas en producción; sin sumideros XSS; `checkOrigin` activo; RLS probada (59 pruebas). `npm audit`: 3 avisos altos en `path-to-regexp` dentro de `@astrojs/vercel` (solo en compilación de rutas; el arreglo propuesto es bajar de versión): riesgo aceptado y a revisar.
+- **Pendiente de Rodrigo (no se puede inventar)**: NIF/RUT y domicilio si procede, un correo de contacto propio para derechos de privacidad, y confirmar la jurisdicción (los textos dicen legislación española).
+
 ## Verificado (12/10/2026)
 - Noche: `astro check` 0 errores, lint limpio, 241 unitarias (incluye 56 de RLS), e2e completos en móvil, tablet y escritorio con axe (incluye Tu gente, el significado, la hoja Más y la compatibilidad pública).
 - `npm run check`: 0 errores. `npm run lint`: limpio.

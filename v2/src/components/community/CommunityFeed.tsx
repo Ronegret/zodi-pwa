@@ -329,7 +329,7 @@ function PostCard({
               <span aria-hidden="true">{topic.emoji}</span> {topic.label}
             </span>
           )}
-          <time dateTime={post.created_at} className="muted small">
+          <time dateTime={post.created_at} className="muted small" suppressHydrationWarning>
             {timeAgo(post.created_at)}
           </time>
         </span>
@@ -504,7 +504,7 @@ function Comments({
               <Author p={c} />
               <p className="comment-body">{c.body}</p>
               <span className="comment-foot">
-                <time dateTime={c.created_at} className="muted small">
+                <time dateTime={c.created_at} className="muted small" suppressHydrationWarning>
                   {timeAgo(c.created_at)}
                 </time>
                 {(c.author_id === me.id || postIsMine) && (

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /api/
+Disallow: /auth/
+
+Sitemap: https://zodi.aibueno.es/sitemap.xml

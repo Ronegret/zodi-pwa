@@ -23,8 +23,22 @@ describe('auth', () => {
     });
   });
 
+  it('registro: sin aceptar términos y privacidad no hay cuenta', () => {
+    const ok = {
+      name: 'Ana',
+      email: 'ana@example.com',
+      password: 'Estrella2024',
+      confirm: 'Estrella2024',
+    };
+    expect(registerSchema.safeParse({ ...ok, terms: 'on' }).success).toBe(true);
+    expect(errorsOf(registerSchema.safeParse(ok))).toEqual({
+      terms: 'Marca la casilla para poder crear tu cuenta.',
+    });
+    expect(registerSchema.safeParse({ ...ok, terms: 'off' }).success).toBe(false);
+  });
+
   it('registro: contraseña robusta y confirmación', () => {
-    const base = { name: 'Ana', email: 'ana@example.com' };
+    const base = { name: 'Ana', email: 'ana@example.com', terms: 'on' };
     expect(
       errorsOf(registerSchema.safeParse({ ...base, password: 'corta1', confirm: 'corta1' }))
         .password,

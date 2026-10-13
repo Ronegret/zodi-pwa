@@ -149,4 +149,29 @@ test.describe('API', () => {
     expect(h['referrer-policy']).toBe('strict-origin-when-cross-origin');
     expect(h['cache-control']).toBe('private, no-store');
   });
+
+  test('el registro exige aceptar los términos y la privacidad', async ({ page }) => {
+    await page.goto('/auth/registro');
+    await page.getByLabel(/^Nombre/).fill('Ana');
+    await page.getByLabel(/^Correo electrónico/).fill(`ana-${Date.now()}@zodi.test`);
+    await page.getByLabel(/^Contraseña/).fill('Estrella2024x');
+    await page.getByLabel(/^Repite la contraseña/).fill('Estrella2024x');
+    await page.getByRole('button', { name: 'Crear cuenta' }).click();
+    await expect(
+      page.getByText('Marca la casilla para poder crear tu cuenta.').first(),
+    ).toBeVisible();
+    const consent = page.locator('.consent');
+    await expect(consent.getByRole('link', { name: /^Términos/ })).toHaveAttribute(
+      'href',
+      '/legal/terminos',
+    );
+    await expect(consent.getByRole('link', { name: /^Política de Privacidad/ })).toHaveAttribute(
+      'href',
+      '/legal/privacidad',
+    );
+    await page.getByRole('checkbox', { name: /Tengo 16 años o más/ }).check();
+    await page.getByRole('button', { name: 'Crear cuenta' }).click();
+    await expect(page).toHaveURL(/\/app\/onboarding|\/auth\/registro/);
+    await expect(page.getByText('Marca la casilla para poder crear tu cuenta.')).toHaveCount(0);
+  });
 });

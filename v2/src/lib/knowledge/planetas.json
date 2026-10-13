@@ -1,506 +1,506 @@
 {
- "ascendente-acuario": {
-  "texto": "El Ascendente es la cara que pones antes de que te conozcan del todo: la primera impresión que deja tu energía en una habitación. Si lo tienes en Acuario, la gente te ve como alguien original, con ideas propias y un punto de rareza que llama la atención. Tú no vas de figurante: vas de protagonista de tu propia peli indie. Y aunque por fuera pareces algo distante o muy racional, en realidad eres curioso y bastante más cercano de lo que aparentas cuando alguien te da confianza.",
-  "en_el_dia_a_dia": "Llegas a una cena de amigos y en vez de hablar del tiempo sueltas una teoría sobre por qué los gatos nos miran fijo. Todos se quedan pensando, unos fascinados y otros un poco perdidos, pero nadie te olvida al final de la noche.",
-  "luz": "Pareces auténtico y con ideas frescas. La gente te percibe como alguien que piensa por sí mismo y que no sigue la corriente porque sí.",
-  "sombra": "A veces tu aire de 'no me pertenezco del todo' hace que parezcas frío o desconectado, aunque por dentro te importe más de lo que dejas ver.",
-  "tip": "Antes de sacar tu teoría más original, lanza una pregunta sobre la otra persona. Tu rareza brilla más cuando la gente siente que la invitas a entrar."
- },
- "ascendente-aries": {
-  "texto": "El Ascendente es la primera impresión que das antes de abrir la boca: es como la portada de tu libro. Si lo tienes en Aries, la gente te percibe como alguien directo, con energía y ganas de empezar cosas. Aries es el primer signo del zodiaco y lo rige Marte, el planeta de la acción, así que tu carta de presentación dice «aquí estoy, vamos». Ojo, no es que vayas gritando por la calle; es que entras en una habitación y se nota que tienes prisa por vivir.",
-  "en_el_dia_a_dia": "Estás en una reunión y nadie se decide a proponer nada. Tú dices: «Pues empiezo yo y que me corrijan». La gente te ve como el que mueve la pelota mientras los demás todavía están buscando el balón.",
-  "luz": "Eres valiente para arrancar, te lanzas sin esperar a tenerlo todo perfecto y contagias ganas de hacer cosas.",
-  "sombra": "A veces te lanzas tan rápido que te olvidas de mirar si hay suelo. Y la paciencia te dura lo que la batería de un móvil nuevo en el frío.",
-  "tip": "Antes de decir «yo me encargo», cuenta hasta tres. Tu entusiasmo gana puntos cuando va acompañado de un plan."
- },
- "ascendente-cancer": {
-  "texto": "El Ascendente es la primera impresión que das antes de abrir la boca, la cara que ve el mundo al cruzarse contigo. Cuando sale Cáncer, tu fachada es de calidez y cercanía: pareces el amigo que te trae sopa cuando estás malito. Por dentro puede que tengas una coraza más dura, pero la mayoría de la gente solo ve el abrazo. Es como una casa con la puerta siempre entreabierta y olor a bizcocho: la gente entra sin pensarlo. Eso sí, la fachada es un poco de caracol: se esconde rápido si notas que te atacan.",
-  "en_el_dia_a_dia": "Entras a una reunión nueva y, en diez minutos, alguien ya te está contando su mudanza. No lo buscaste: tu tono suave y tu sonrisa de abuela acogedora hacen que la gente se sienta en casa contigo.",
-  "luz": "Transmites seguridad emocional: la gente sabe que puede confiar en ti sin que tengas que pedir nada.",
-  "sombra": "A veces tu primera impresión parece más blanda de lo que eres, y te cuesta que te tomen en serio cuando hace falta firmeza.",
-  "tip": "Cuando quieras que te vean también con firmeza, di en voz alta lo que necesitas en frases cortas. Un 'esto me importa' dicho con calma cambia la imagen más que cualquier esfuerzo."
- },
- "ascendente-capricornio": {
-  "texto": "El Ascendente es la primera impresión que das antes de abrir la boca, la cara que ve el mundo al cruzarse contigo en el metro. Si tu Ascendente está en Capricornio, la gente te percibe como alguien serio, sensato y con los pies en la tierra, de los que no se van de fiesta sin un plan B. Tu aire es de adulto responsable, incluso si por dentro tienes ganas de hacer el tonto. Es como llevar traje a una boda: no es que no sepas divertirte, es que llegas con cara de querer que todo salga bien. Esa imagen de seriedad suele generar confianza casi al instante.",
-  "en_el_dia_a_dia": "Entras a una reunión de trabajo nueva y, sin decir nada, los demás asumen que eres el que sabe lo que hace. Te piden que lleves la lista de tareas aunque no te hayas ofrecido, porque tu cara dice 'este lo tiene controlado'.",
-  "luz": "Transmites solidez y fiabilidad. La gente siente que puede apoyarse en ti y eso te abre muchas puertas.",
-  "sombra": "A veces tu seriedad se confunde con frialdad o distancia, y la gente no ve lo cálido que eres hasta que te conoce bien.",
-  "tip": "Cuando conozcas a alguien, suelta una broma tonta o cuenta algo personal pronto. Así tu primera impresión se completa con lo que de verdad eres."
- },
- "ascendente-escorpio": {
-  "texto": "El Ascendente es la primera impresión que das antes de abrir la boca: la cara que pones, cómo entras en una sala, lo que la gente cree de ti en los primeros cinco minutos. Con Escorpio como Ascendente, esa impresión tiene peso y misterio, como si llegaras con una canción de fondo que nadie más oye. Escorpio se rige por Plutón y Marte, así que la energía es intensa, observadora y poco de hablar por hablar. Tú miras primero, juzgas despacio y no regalas confianza por cualquier cosa. La gente te percibe como alguien que ve más de lo que dice, y eso intriga bastante.",
-  "en_el_dia_a_dia": "Entras a una reunión nueva, te quedas un par de segundos en silencio observando quién manda y quién finge, y la gente acaba pensando que tienes un plan secreto. En realidad solo estabas escaneando el ambiente, como quien busca el enchufe antes de sentarse.",
-  "luz": "Transmites profundidad y lealtad. La gente sabe que contigo no se juega a medias y que tu palabra vale.",
-  "sombra": "A veces el silencio te sale de fábrica y los demás lo leen como frialdad o desconfianza. Tu intensidad puede imponerse antes de que te conozcan.",
-  "tip": "Cuando entres en un sitio nuevo, sonríe y di algo ligero en los primeros minutos. Tu intriga se mantiene, pero tu calidez se nota desde el principio."
- },
- "ascendente-geminis": {
-  "texto": "El Ascendente es la cara que pones al mundo antes de que abras la boca: la primera impresión que se llevan de ti en los cinco minutos que tardan en decidir si les caes bien. Con Géminis en el Ascendente, esa primera impresión es la de alguien vivaz, curioso y con conversación de sobra. Tú llegas y ya estás contando tres cosas a la vez, como una pestaña del navegador que nunca se cierra. La gente te ve como alguien fácil de hablar, ágil y con gracia, aunque por dentro quizá no estés tan seguro de tu sitio como pareces desde fuera.",
-  "en_el_dia_a_dia": "Entras a una reunión o a una fiesta con un amigo nuevo y, sin querer, ya eres el que hace que la conversación fluya: tienes una anécdota para cada tema y todos se quedan con la sensación de que eres muy simpático, aunque tú solo estabas tratando de romper el hielo.",
-  "luz": "Te ven como alguien ingenioso, cercano y capaz de conectar con casi cualquiera. Tu energía abre puertas.",
-  "sombra": "A veces tu chispa se confunde con dispersión: pasas de un tema a otro tan rápido que la gente no sabe si te interesa lo que te cuentan. Y cuidado con prometer más de lo que vas a cumplir.",
-  "tip": "Antes de una situación importante, elige una sola idea que quieras transmitir y repítela con calma. Así tu primera impresión será tan brillante como profunda, no solo rápida."
- },
- "ascendente-leo": {
-  "texto": "Tu Ascendente es el signo que sale por el horizonte en el momento exacto en que naciste. Es, en pocas palabras, la primera impresión que das antes de abrir la boca. Si tu Ascendente es Leo, la gente te nota de entrada: entras a un sitio y la energía se mueve un poco. No es que vayas con foco de teatro, pero sí tienes presencia, calidez y ganas de brillar. Como cuando llegas a una fiesta y, sin querer, todos se giran a ver quién es.",
-  "en_el_dia_a_dia": "Entras a una reunión de trabajo y, sin proponértelo, la gente te busca para opinar. Te dan la palabra primero porque transmites seguridad y entusiasmo, aunque por dentro estés tan nervioso como cualquiera al hablar en público.",
-  "luz": "Generosidad y carisma natural. Animas a los demás y contagias buen humor cuando el ambiente está apagado.",
-  "sombra": "Puedes necesitar demasiado aplauso, y si no llega, te cuesta disimular la decepción. A veces el drama se te cuela aunque no lo busques.",
-  "tip": "Antes de una situación importante, pregúntate qué quieres aportar, no solo cómo quieres que te vean. Así tu brillo sale auténtico y te cansas menos."
- },
- "ascendente-libra": {
-  "texto": "El Ascendente es la primera impresión que das antes de abrir la boca, la cara con la que entras a una sala. Si lo tienes en Libra, la gente te percibe como alguien amable, elegante y fácil de tratar, como el vecino que siempre tiene buena cara incluso un lunes a las ocho de la mañana. Tú pones armonía donde hay tensión y casi siempre sabes qué decir para que el ambiente se relaje. Eso sí, la gente tiende a verte como alguien encantador y equilibrado, aunque por dentro tengas dudas que no cuentas a cualquiera.",
-  "en_el_dia_a_dia": "Llegas a una reunión de trabajo donde dos compañeros discuten, y sin levantar la voz consigues que ambos se sientan escuchados. Tu primera impresión es de persona tranquila y justa, aunque por dentro estés pensando qué almorzar.",
-  "luz": "Sabes crear puentes entre personas distintas y dejas a la gente con buen sabor de boca.",
-  "sombra": "A veces cuesta tanto quedar bien con todos que te olvidas de decir lo que tú quieres de verdad.",
-  "tip": "Antes de decir que sí a algo, pregúntate en voz baja si lo quieres o solo quieres evitar un conflicto. Tu paz es importante, pero también tu opinión."
- },
- "ascendente-piscis": {
-  "texto": "El Ascendente es la primera impresión que das al mundo, esa cara que ven antes de que abras la boca. Si lo tienes en Piscis, la gente te percibe como alguien suave, empático y un poco soñador, como si llevaras una manta invisible encima. Tú no siempre te das cuenta de cuánto transmites calma, pero la gente se acerca a contarte cosas sin saber muy bien por qué. Es como el wifi de una cafetería buena: nadie lo nota hasta que lo necesita.",
-  "en_el_dia_a_dia": "Entras a una reunión nueva y, sin hablar mucho, alguien ya te cuenta su problema personal en cinco minutos. Tú piensas que solo fuiste amable, pero los demás te ven como esa persona de confianza con la que se desahogan.",
-  "luz": "Generas un espacio seguro donde otros se sienten comprendidos y acogidos sin juzgarles.",
-  "sombra": "A veces te disuelves tanto en el ambiente que te cuesta saber qué quieres tú, como un café que se queda con el sabor de la leche.",
-  "tip": "Antes de decir que sí a algo, haz una pausa de diez segundos y pregúntate qué sientes tú, no solo lo que el otro espera."
- },
- "ascendente-sagitario": {
-  "texto": "El Ascendente es la primera impresión que das antes de abrir la boca del todo: la cara que ponen los demás cuando te conocen. Si lo tienes en Sagitario, la gente te ve como alguien con energía de viajero, optimista y con ganas de aventura, como el amigo que propone irse a la playa un jueves sin avisar. Tu carta de presentación dice: \"tengo ganas de descubrir cosas\". No es mala señal, solo que tu entusiasmo llega antes que tus planes.",
-  "en_el_dia_a_dia": "Estás en una reunión tranquila y sueltas, sin pensarlo mucho, \"oye, ¿y si nos vamos el finde a la montaña?\". La gente te mira como si fueras el que siempre tiene un plan B, C y D, aunque tú solo quisieras charlar.",
-  "luz": "Transmites curiosidad, optimismo y franqueza. Haces que la gente se anime y se sienta con ganas de explorar algo nuevo.",
-  "sombra": "A veces prometes más de lo que cumples o hablas sin filtro. La franqueza es un regalo, pero también puede sonar a sermón si se pasa de frenada.",
-  "tip": "Antes de lanzar un plan épico, pregúntate si lo puedes sostener hasta el final. Tu entusiasmo gana puntos cuando va acompañado de un calendario que aguante la semana."
- },
- "ascendente-tauro": {
-  "texto": "El Ascendente es la primera impresión que das antes de abrir la boca: lo que la gente nota en tu forma de moverte, mirar y vestir. Con Tauro como Ascendente, tu primera impresión es la de alguien tranquilo, sólido y de fiar, como un sofá cómodo que aguanta bien las visitas. Tauro es el signo de la tierra y del placer sereno, así que los demás suelen sentir que contigo las cosas van a ir despacio, pero bien. Eso sí, no te vendas como alguien con prisa: la gente te ve como alguien que disfruta lo que tiene.",
-  "en_el_dia_a_dia": "Llegas a una reunión y, sin decir nada, pareces la persona que ya tiene el café pedido y el plan claro. Los compañeros se acercan a ti cuando algo se tuerce porque transmites calma, aunque por dentro estés hecho un lío.",
-  "luz": "Transmites estabilidad y calidez real. La gente se siente segura cerca de ti.",
-  "sombra": "A veces tu calma se confunde con terquedad o con que no te mueves ni por el wifi. Cuesta sacarte de tu sitio, y eso también tiene su precio.",
-  "tip": "Antes de decir que no a algo nuevo, dale tres días. Tu primera reacción es de sofá; tu segunda suele ser más abierta y te sorprenderá."
- },
- "ascendente-virgo": {
-  "texto": "El Ascendente es la primera impresión que das, la cara que ve el mundo antes de que te conozca de verdad. Cuando tienes Virgo ahí, la gente suele notar enseguida que eres ordenado, observador y que te fijas en los detalles. Puede que piensen que eres un poco serio o reservado al principio, como un libro bien encuadernado que no abres en la primera cena. Pero no te preocupes: es solo la portada. Por dentro hay alguien con muchísimo sentido práctico.",
-  "en_el_dia_a_dia": "Llegas a una reunión de amigos y, sin querer, ya has notado que la nevera está a medio vaciar y que alguien ha dejado la puerta mal cerrada. Te toca ayudar a recoger y acabas organizando la cocina sin que nadie te lo pida, mientras los demás te miran como si fueras el encargado del local.",
-  "luz": "Eres de fiar: cumples lo que prometes, te preocupas por lo que de verdad importa y la gente sabe que puede contar contigo para resolver algo.",
-  "sombra": "Tu ojo para los detalles a veces se pasa de rosca y te fijas en lo que sobra o falta antes que en lo bueno. Tu paciencia con los demás puede durar menos que el wifi del tren.",
-  "tip": "Antes de corregir algo a alguien, pregúntate si es un error de verdad o solo una manera distinta de hacerlo. Y deja que la gente vea también tu lado cálido, que es más grande de lo que aparenta."
- },
- "luna-acuario": {
-  "texto": "Vale, empecemos. La Luna en la carta natal habla de tus emociones y de lo que necesitas para sentirte a salvo, como tu manual de mantenimiento interno. Y tu Luna cae en Acuario, el signo del aire que va por libre. Eso significa que te sientes tranquilo cuando tienes espacio, ideas nuevas y gente que respeta tu independencia. Si alguien te exige pegarte a él todo el día, tu sistema emocional se pone a buscar la salida como un gato al que cierran la puerta. Y ojo, tú necesitas sentir que tu forma de pensar es libre.",
-  "en_el_dia_a_dia": "Te toca un plan de fin de semana con amigos, pero tú necesitas un rato a solas para recargar. Si te lo permites sin darle mil vueltas, llegas al grupo con buena energía. Si te obligas a quedarte, acabas contando los minutos como en una sala de espera.",
-  "luz": "Tienes una mente original y una enorme capacidad para aceptar a la gente tal como es. Dejas que cada cual sea como quiera, y eso genera confianza de verdad.",
-  "sombra": "A veces te distancias emocionalmente sin avisar, como quien se pone los auriculares en el metro. Puede dejar a los demás con la duda de si les quieres cerca.",
-  "tip": "Antes de cerrar la puerta, di en voz alta lo que necesitas: 'me voy un rato a mi bola, luego nos vemos'. Te ahorras malentendidos y tu espacio sigue siendo tuyo sin que nadie se sienta abandonado."
- },
- "luna-aries": {
-  "texto": "Vale, empecemos: la Luna es tu parte emocional, lo que te hace sentir en casa y a salvo. Cuando está en Aries, esa parte funciona a toda velocidad, como un café doble a las ocho de la mañana. Tú sientes rápido, reaccionas en caliente y necesitas claridad, acción y que las cosas se resuelvan ya. Quedarte dando vueltas a un sentimiento sin hacer nada te pone de los nervios, y eso también es parte de tu paz.",
-  "en_el_dia_a_dia": "Alguien te suelta una crítica en una reunión. Tu emoción sale primero, en un segundo, y ya estás pensando en qué contestar. Si después de un rato respiras y dices lo que sientes sin dramatizar, te quedas tranquilo. Si te lo guardas, te come por dentro como un mosquito en verano.",
-  "luz": "Eres valiente para decir lo que sientes y te recuperas rápido de los disgustos. Tu energía anima a otros a moverse.",
-  "sombra": "A veces saltas antes de mirar, y te enfadas más rápido de lo que te gustaría. Cuesta que pidas ayuda, porque preferirías arreglarlo solo.",
-  "tip": "Cuando notes que la emoción sube, cuenta hasta diez antes de responder. Y después di en voz alta qué necesitas, en una frase corta. Te ahorrará más de una discusión."
- },
- "luna-cancer": {
-  "texto": "Vale, la Luna es tu parte emocional: lo que sientes, lo que te hace sentir en casa y lo que necesitas para relajarte de verdad. Cuando está en Cáncer, tu mundo interior pide nido. Cáncer es un signo de agua, el de la casa, la familia y el cuidado, así que tu corazón funciona mejor cuando hay gente querida cerca y un sitio donde no tengas que fingir. Eso sí, tu sensibilidad va en modo radar: lo notas todo, aunque nadie te diga nada. Es como tener el wifi de las emociones siempre encendido, con buena cobertura y algún que otro corte.",
-  "en_el_dia_a_dia": "Llegas a casa después de un día largo y, sin saber por qué, te pesa el ánimo. Basta con que alguien te prepare algo caliente, te escuche diez minutos y te diga que no pasa nada, para que vuelvas a respirar. Ese alivio es tu Luna en Cáncer pidiendo refugio.",
-  "luz": "Eres de los que cuidan con todo el corazón: sabes crear un ambiente acogedor, recordar detalles importantes y ser ese amigo al que se acude cuando algo va mal. Tu intuición emocional es una brújula muy fina.",
-  "sombra": "A veces te guardas las cosas hasta que se te llena el depósito y explotan por un detalle tonto. También puedes ponerte a la defensiva si sientes que no te cuidan igual que tú cuidas a los demás.",
-  "tip": "Antes de decidir cómo te sientes, pon nombre a la emoción en voz alta o por escrito. Y cuando te sientas sobrepasado, date permiso para pedir un abrazo, un rato a solas o una conversación sincera. Pedir refugio también es cuidarte."
- },
- "luna-capricornio": {
-  "texto": "La Luna es tu parte emocional: lo que te hace sentir en casa y a salvo. Cuando está en Capricornio, tu paz llega con orden, planes claros y la sensación de que las cosas están bajo control. Tu corazón no se rinde al caos, así que necesitas estructura para relajarte. Es como un termo de café: caliente, sólido y bien cerrado, aunque al principio cueste abrirlo. Eso sí, quieres que la vida cumpla lo prometido, y te afecta más de lo que admites.",
-  "en_el_dia_a_dia": "Te sientes tranquilo cuando tienes la agenda de la semana medio organizada, la nevera llena y un plan para el fin de semana. Si todo se descontrola de golpe, tu cabeza entra en modo bombero y empiezas a hacer listas hasta para ir a por pan.",
-  "luz": "Eres de fiar. Cumples lo que dices, aguantas el tirón cuando otros se rinden y das seguridad a quienes te rodean.",
-  "sombra": "Puedes ser demasiado duro contigo y con los demás cuando algo no sale como esperabas. Cuesta que te muestres vulnerable, aunque por dentro lo necesites.",
-  "tip": "Antes de decidir si algo va bien o mal, escribe tres cosas que sí han salido bien esta semana. Tu parte práctica necesita pruebas, y esta es una buena."
- },
- "luna-escorpio": {
-  "texto": "La Luna en Escorpio es la parte de ti que siente hondo y no lo anuncia a los cuatro vientos. Tus emociones no son un charco, son un pozo: cuesta ver el fondo, pero hay mucho ahí abajo. Necesitas sentirte a salvo para bajar la guardia, y eso lo consigues con lealtad real, no con promesas bonitas. Si alguien te gana la confianza, se queda grabado como tatuaje, no como pegatina.",
-  "en_el_dia_a_dia": "Tu amiga te cuenta algo a medias y tú notas el tono antes que las palabras. No dices nada en el momento, pero dos días después le preguntas por eso con una precisión que la deja sin palabras. Tu radar emocional funciona como un GPS que nadie te pidió.",
-  "luz": "Eres de los que aguantan la tormenta sin hacer ruido y cuidan a los demás con una lealtad que da gusto. Tu intuición acierta más de lo que te gustaría admitir.",
-  "sombra": "A veces guardas tanto que tu cabeza se convierte en una olla a presión sin válvula. Y cuando desconfías, pones a prueba a la gente como quien revisa la cerradura tres veces antes de dormir.",
-  "tip": "Antes de cerrar una conversación difícil, di en voz alta lo que sientes en una frase corta. No hace falta contarlo todo; basta con dejar una puerta abierta para que el otro entre."
- },
- "luna-geminis": {
-  "texto": "Vale, empecemos. La Luna en tu carta natal es lo que sientes por dentro, lo que te calma y lo que necesitas para sentirte a salvo. Si está en Géminis, tu mundo emocional funciona como una radio con muchas emisoras a la vez: necesitas movimiento, conversación y mentes curiosas alrededor. Te calmas hablando, preguntando y aprendiendo algo nuevo, no encerrándote a sufrir en silencio. Eso sí, tus sentimientos pueden cambiar de canal más rápido que un mando a distancia con pilas nuevas.",
-  "en_el_dia_a_dia": "Tienes un mal día y, en vez de quedarte en el sofá dándole vueltas, llamas a una amiga, le cuentas todo en veinte mensajes de voz y acabas riéndote de algo que el lunes te parecía una tragedia.",
-  "luz": "Eres capaz de entender puntos de vista muy distintos y de explicar lo que sientes con palabras que ayudan a los demás.",
-  "sombra": "Puedes saltar de una emoción a otra sin darte cuenta y acabar agotado por tanto pensamiento que no termina de asentarse.",
-  "tip": "Cuando algo te remueva, ponlo por escrito o cuéntaselo a alguien de confianza antes de decidir cómo te sientes. Tus emociones necesitan salir por la boca para no quedarse dando vueltas."
- },
- "luna-leo": {
-  "texto": "La Luna en tu carta natal habla de tus emociones, de lo que te hace sentir en casa y a salvo. Si la tienes en Leo, tu corazón necesita calidez, reconocimiento y espacio para brillar un poco. Tu alma funciona como un buen anfitrión: quiere que los demás se sientan bienvenidos, pero también necesita que alguien le diga que lo está haciendo bien. No es vanidad, es sentirse visto. Eso sí, si no te dan ese aplauso, te sientes como el móvil sin cobertura: funciona, pero no conecta.",
-  "en_el_dia_a_dia": "Te cuesta un mundo que tu jefe o tu pareja no noten el esfuerzo que has hecho. Un simple 'gracias, esto te quedó genial' te alegra la semana, mientras que un trabajo perfecto pasado por alto te deja de mal humor toda la tarde.",
-  "luz": "Tu calidez es contagiosa: generas confianza, alegría y ganas de compartir. Eres de los que hacen que un grupo se sienta en familia.",
-  "sombra": "Puedes depender demasiado de la mirada ajena y sentirte herido cuando el aplauso tarda. A veces te cuesta aceptar un 'no' sin tomártelo como algo personal.",
-  "tip": "Aprende a darte tú mismo el reconocimiento: al final del día, anota una cosa que hiciste bien. Así tu seguridad no depende solo de que los demás te aplaudan."
- },
- "luna-libra": {
-  "texto": "Vale, empecemos: la Luna en tu carta natal es tu parte emocional, lo que necesitas para sentirte a salvo y en casa dentro de ti. Si tu Luna está en Libra, tu brújula interna busca equilibrio, armonía y que nadie se sienta fuera del grupo. Libra es el signo de la balanza, así que tu corazón funciona como un buen mediador: pesa, compara y quiere que todos queden bien. Eso sí, a veces te toca decidir y la balanza se te atasca como un ascensor en hora punta.",
-  "en_el_dia_a_dia": "Estás en una cena de amigos y hay que elegir restaurante. Tú ya tienes tres opciones en la cabeza, pero como lo que de verdad te calma es que todos estén a gusto, pasas veinte minutos buscando el sitio perfecto para el grupo, mientras la comida se enfría en el WhatsApp.",
-  "luz": "Tienes un don para leer el ambiente y hacer que la gente se sienta escuchada. Creas paz donde había tensión y sabes cuándo una broma alivia más que mil palabras.",
-  "sombra": "Te cuesta decir que no o expresar lo que quieres de verdad, porque el conflicto te pone nervioso. Acabas cediendo para evitar fricciones y luego te quedas con un poso de resentimiento.",
-  "tip": "Antes de decidir por los demás, pregúntate en voz alta: '¿qué quiero yo?'. Empieza por cosas pequeñas, como elegir la peli del viernes, y verás que la balanza se mueve sin drama."
- },
- "luna-piscis": {
-  "texto": "La Luna es tu parte emocional: lo que sientes por dentro y lo que necesitas para sentirte a salvo, como el sofá donde te refugias después de un día largo. Con la Luna en Piscis, tu mundo interior es amplio, sensible y muy imaginativo. Captas el ambiente de una habitación antes de que nadie diga nada, y eso es un superpoder, aunque a veces te cansa. Piscis es el signo que cierra el zodiaco, así que tu sensibilidad lleva mucha historia encima. Necesitas espacios suaves, afecto sin prisa y tiempo para soñar, porque tu corazón funciona mejor cuando no hay prisa.",
-  "en_el_dia_a_dia": "Llegas a casa tras una reunión tensa y no necesitas hablar de nada; te basta con una manta, una serie tranquila y alguien que te deje estar en silencio. Si te piden que te pongas a mil de golpe, te apagas como un móvil con el 5 %.",
-  "luz": "Empatía de verdad: entiendes a los demás sin que te lo expliquen y das consuelo que de verdad consuela.",
-  "sombra": "Puedes absorber los problemas ajenos como una esponja y olvidarte de lo que sientes tú, o refugiarte en la fantasía cuando la realidad aprieta.",
-  "tip": "Antes de decidir algo importante, pregúntate qué sentirías en paz, no solo qué te emociona. Y ponte un rato cada día para ti, sin nadie más alrededor."
- },
- "luna-sagitario": {
-  "texto": "Vale, empecemos: la Luna en tu carta natal es lo que sientes por dentro y lo que necesitas para sentirte a salvo, o sea, tu zona de confort emocional. Cuando está en Sagitario, esa zona huele a aire libre. Tu corazón necesita espacio, aventura y la sensación de que hay horizonte. Si te metes en una habitación sin ventanas, te sientes como un gato en una caja de zapatos. Sagitario es el signo del viajero, del filósofo despistado y del que cuenta chistes en el peor momento, así que tu paz llega cuando puedes preguntar, explorar y reírte un poco de todo.",
-  "en_el_dia_a_dia": "Tienes un domingo tranquilo, pero de pronto te entran ganas de cambiar de plan: coger el coche sin rumbo, apuntarte a un curso de algo raro o llamar a un amigo que vive en otra ciudad. Si sientes que la rutina te asfixia, no es capricho: es tu Luna pidiendo aire.",
-  "luz": "Eres de los que contagian optimismo cuando todo se tuerce. Ves salidas donde otros ven muros, y tu franqueza, bien usada, genera confianza. Tu emoción fluye cuando hay sentido y crecimiento.",
-  "sombra": "Puedes huir del malestar con planes nuevos antes de mirar lo que te pasa de verdad. Y a veces tu sinceridad llega sin filtro, como un chiste que nadie pidió. Ojo con confundir libertad con evasión.",
-  "tip": "Cuando te sientas inquieto, haz algo que te dé horizonte pero con raíz: una caminata larga sin el móvil, o una conversación honesta con alguien de confianza. Así tu Luna se calma sin que tengas que huir."
- },
- "luna-tauro": {
-  "texto": "La Luna en carta natal es tu mundo emocional: lo que te calma, lo que te hace sentir en casa. Cuando está en Tauro, tu paz llega por lo tangible: una comida rica, una manta buena, saber que hay un plan. Tauro es un signo de tierra, así que lo que te ancla es lo que se puede tocar y repetir. Si alguien te promete calma pero no te la demuestra, tu corazón lo nota antes que tú. Tu seguridad no se construye con palabras bonitas, sino con rutinas que se cumplen, como el café que siempre sale igual.",
-  "en_el_dia_a_dia": "Después de un día caótico en el trabajo, llegas a casa y lo que te baja las pulsaciones es preparar algo sencillo, sentarte con tu sofá favorito y oír tu playlist de siempre. No necesitas nada espectacular; necesitas que el entorno te responda como esperas.",
-  "luz": "Eres estable, leal y generoso con tu gente. Tu presencia tranquiliza a los demás porque cumples lo que dices.",
-  "sombra": "Puedes aferrarte a lo conocido más de la cuenta y cerrarte al cambio, como quien no se mueve del sofá aunque la casa se esté inundando. Recuerda que soltar también da calma.",
-  "tip": "Crea un pequeño ritual diario que te haga sentir a salvo, como un té a la misma hora o un paseo corto. Y cuando algo te inquiete, pregunta: ¿qué necesito de forma concreta? Tu Luna en Tauro agradece las respuestas prácticas."
- },
- "luna-virgo": {
-  "texto": "La Luna es la parte de tu carta que habla de tus emociones y de lo que necesitas para sentirte en casa. Cuando está en Virgo, tu tranquilidad depende de que las cosas tengan orden: que sepas qué va a pasar, que lo práctico esté resuelto y que nada quede a medio hacer. Eres de los que se fijan en los detalles que a otros se les escapan, y eso te da calma, aunque a veces te quite el sueño. Tu corazón no pide grandes gestos, pide coherencia: que la gente haga lo que dice. Y sí, un calcetín fuera de sitio puede arruinarte la tarde, así que no te sientas raro.",
-  "en_el_dia_a_dia": "Llegas a casa después de un día largo y lo primero que haces es ordenar la cocina y dejar lista la ropa de mañana. No es manía: así tu cabeza se apaga y puedes relajarte. Si alguien te cambia el plan a última hora, notas que se te tensa la mandíbula aunque no digas nada.",
-  "luz": "Eres cuidadoso, fiable y muy atento a lo que necesitan los demás. Cuando te comprometes, cumples, y la gente sabe que puede contar contigo.",
-  "sombra": "Puedes ser tu peor crítico: te fijas tanto en lo que sale mal que te cuesta disfrutar de lo que sale bien. A veces la perfección se convierte en una exigencia que te pesa, y eso también cansa.",
-  "tip": "Prueba a elegir cada día una cosa que no vas a revisar ni corregir. Un mensaje sin releer, una tarea sin acabar de pulir. Verás que el mundo sigue girando y que tu calma no depende de que todo esté impecable."
- },
- "marte-acuario": {
-  "texto": "Marte es el planeta de la acción: cómo empujas, cómo te enfadas y cómo vas a por lo que quieres. Cuando está en Acuario, tu energía no va de martillazos sino de ideas raras y brillantes. Tú no peleas por lo de siempre: peleas por lo que crees justo, por lo que tiene sentido para ti y para el grupo. Eres de los que se revientan a trabajar por una causa, pero odias que te den órdenes sin explicar el porqué. Un poco rebelde, sí, como el que cambia de canal justo cuando todos quieren ver lo mismo.",
-  "en_el_dia_a_dia": "Estás en una reunión de trabajo y todo el mundo acepta el plan de siempre sin rechistar. Tú levantas la mano y propones algo distinto, con un argumento claro. No lo haces para llevar la contraria: lo haces porque crees que se puede hacer mejor.",
-  "luz": "Tienes valentía para decir lo que piensas y ganas de mejorar las cosas en serio, sin quedarte de brazos cruzados.",
-  "sombra": "Puedes cerrarte en tu idea y pelear más por tener razón que por llegar a un acuerdo, como quien se empeña en no pedir indicaciones aunque se haya perdido.",
-  "tip": "Antes de defender tu idea, pregunta qué le preocupa a la otra persona. Escuchar primero te da más argumentos y menos discusiones innecesarias."
- },
- "marte-aries": {
-  "texto": "Marte es el planeta de la acción: la energía que te pone en marcha, la que sientes cuando te enfadas y la que te empuja a ir a por lo que quieres. Cuando Marte cae en Aries, esa energía va sin frenos de serie, como un coche que arranca en primera y ya va por la autopista. Aries es el signo de la iniciativa, así que tú no esperas turno: actúas primero y piensas después, y a veces ni eso. Tu enfado suele ser rápido, se enciende como una cerilla y se apaga parecido, sin rencores de película. Eso sí, si tu paciencia se mide en minutos, no te preocupes: no eres el único.",
-  "en_el_dia_a_dia": "Estás en una reunión y alguien propone una idea que ya se intentó y falló. Tú ya has levantado la mano y dicho 'hagámoslo ya' antes de que terminen la frase. Puede salir genial o acabar con un café en el suelo, pero seguro que nadie se aburre a tu lado.",
-  "luz": "Tienes un valor enorme para empezar cosas, defender lo tuyo y dar la cara. Donde otros dudan, tú das el primer paso.",
-  "sombra": "La prisa y el genio corto pueden hacerte chocar con gente que solo necesitaba un poco más de tiempo. Puedes sentir que todo tiene que pasar ya.",
-  "tip": "Antes de contestar al primer impulso, cuenta hasta tres. Tu energía no desaparece, solo llega un segundo después y con mejor puntería."
- },
- "marte-cancer": {
-  "texto": "Marte es el planeta de la acción: la energía de enfadarte, de ponerte en marcha y de ir a por lo que quieres. Cuando está en Cáncer, tu fuego se vuelve algo más de casa: actúas por lo que te importa y te proteges con uñas y dientes. Es como un bombero que solo sale a apagar incendios de su propia familia. Tu energía es intensa, pero sensible: te mueves con más fuerza cuando sientes que algo o alguien que quieres está en juego.",
-  "en_el_dia_a_dia": "Alguien en tu grupo de amigos cancela el plan por tercera vez y tú no dices nada en el momento. Pero al día siguiente te pones a organizar la siguiente quedada con una energía de general, porque lo que te mueve es que el grupo siga unido.",
-  "luz": "Defiendes a los tuyos con una lealtad feroz y tienes el valor de actuar cuando hace falta, sin esperar a que otro dé el primer paso.",
-  "sombra": "Puedes guardar un enfado en silencio durante días, como quien guarda un Tupper en la nevera, hasta que se abre de golpe y no sabes por qué ha explotado.",
-  "tip": "Cuando notes que te hierve la sangre, pon el foco en lo que de verdad te duele antes de actuar. Di en voz alta 'me siento así porque...' y verás que la acción sale más limpia y menos a golpes."
- },
- "marte-capricornio": {
-  "texto": "Marte es el planeta de la acción: es el que te pone en marcha, te da el empujón para ir a por lo que quieres y también la chispa del enfado. Cuando Marte está en Capricornio, la energía no sale a tirones como un petardo, sale como una máquina de hacer bizcochos: lenta al principio, pero constante y muy difícil de parar. Capricornio es el signo de la ambición, la disciplina y la paciencia de quien sabe que las cosas buenas no llegan en cinco minutos. Así que tú no te lanzas de cabeza sin mirar; primero planificas, calculas y luego vas a por todas. Y cuando te enfadas, no explotas: se te acumula y lo sueltas cuando ya tienes un plan.",
-  "en_el_dia_a_dia": "Te propones aprender a hacer una cosa nueva, por ejemplo un idioma. No te apuntas a la primera clase y ya: haces un calendario, buscas un método y te pones metas semanales. Al cabo de meses, mientras otros lo dejaron a la segunda semana, tú sigues ahí, con tu libreta y tu constancia de hormiga.",
-  "luz": "Tu fuerza tranquila: cumples lo que prometes y consigues metas largas que a otros se les escapan.",
-  "sombra": "Puedes guardar rencor en silencio más de la cuenta y cargar tú solo con todo porque te cuesta pedir ayuda, como si pedirla fuera perder puntos.",
-  "tip": "Cuando notes que algo te molesta, dilo pronto y en voz alta, aunque sea en una frase corta. Así la energía sale antes de convertirse en un nudo y tu paciencia no tendrá que aguantar tanto."
- },
- "marte-escorpio": {
-  "texto": "Marte es el planeta de la acción: es lo que te mueve, lo que te hace levantarte, enfadarte o ir a por algo. Cuando está en Escorpio, tu energía no va a la carrera, va en silencio y con mucha intensidad. Piensa en alguien que no grita pero que, cuando se propone algo, no hay quien lo pare. Tu fuego es más de brasas que de hoguera: tarda en encenderse, pero quema durante mucho tiempo. Y si alguien te ha fallado, te acuerdas. Como un buen cajón de memoria, que no olvida nada.",
-  "en_el_dia_a_dia": "Te han dicho algo que te sienta mal en una reunión. No dices nada en el momento, pero esa tarde preparas tu respuesta con calma y la sueltas en el momento justo, cuando nadie se lo espera.",
-  "luz": "Tienes una determinación enorme y una lealtad que no se compra. Cuando te comprometes, cumples hasta el final, incluso cuando los demás ya se han rendido.",
-  "sombra": "A veces guardas rencor más tiempo del que te conviene, y tu silencio puede parecer frialdad. Como un fuego que no se apaga del todo, a veces te quema también a ti.",
-  "tip": "Cuando algo te moleste, dilo el mismo día en lugar de dejarlo madurar. Una frase sincera a tiempo vale más que una larga factura guardada en el cajón."
- },
- "marte-geminis": {
-  "texto": "Marte es el planeta de la acción: la energía con la que te enfadas, te pones en marcha y vas a por lo que quieres, como el que sale corriendo cuando suena la alarma. Cuando Marte cae en Géminis, esa energía se vuelve rápida, curiosa y muy hablada. Tú no te enfadas en silencio: discutes, argumentas, cambias de frente y te aburres si la conversación no avanza. Géminis es el signo de la mente ágil, así que tu impulso va por la palabra, la idea y el movimiento constante, más que por la fuerza bruta.",
-  "en_el_dia_a_dia": "Te molesta un comentario en el grupo de WhatsApp y, en vez de dejarlo pasar, contestas en tres mensajes seguidos con argumentos, y luego te acuerdas de que querías estar en otra cosa. Tu enfado sale rápido, en forma de frase ingeniosa, y se te pasa casi tan rápido como llega.",
-  "luz": "Tienes una valentía verbal enorme: dices lo que piensas, improvisas bien bajo presión y sabes convencer con ingenio. Cuando algo te importa, te pones en modo acción y avanzas con chispa.",
-  "sombra": "Te cuesta sostener un mismo conflicto o una misma tarea mucho tiempo. Puedes empezar mil discusiones o proyectos y dejar la mitad a medias, como un tren que para en todas las estaciones sin llegar nunca.",
-  "tip": "Antes de contestar en caliente, escribe tu respuesta en el móvil y espera diez minutos. Si al releerla sigue pareciéndote buena, envíala; si no, verás que te quedaba más ingenio que razón."
- },
- "marte-leo": {
-  "texto": "Marte es el planeta de la acción: la energía que te pone en marcha, el impulso que hace que te enfades rápido o que vayas a por lo que quieres sin pensarlo dos veces. Cuando Marte cae en Leo, esa energía se viste de gala. Tú actúas con ganas de que te vean, de destacar y de dejar huella. Si te enfadas, lo haces con fuego, y si quieres algo, lo quieres con convicción. Es como tener un motor de deportivo con un volante de color llamativo: no pasas desapercibido.",
-  "en_el_dia_a_dia": "Estás en una reunión de equipo y el proyecto va a salir mal por un fallo que nadie quiere asumir. Tú te plantas, propones la solución y te pones al frente para sacarla adelante, aunque eso signifique que todos te miren. Quieres que se note tu esfuerzo, y lo defiendes con energía.",
-  "luz": "Tienes valentía, liderazgo y una generosidad enorme cuando te comprometes de corazón. Contagias entusiasmo y sabes tomar la iniciativa cuando hace falta.",
-  "sombra": "Puedes convertir un pequeño roce en un incendio, y necesitas reconocimiento más de lo que admites. Cuando no te ven, te frustras y el orgullo te puede jugar malas pasadas.",
-  "tip": "Antes de contestar en caliente, cuenta hasta tres y pregúntate si lo que te molesta es el asunto o que no te hayan dado la razón. Canalizar ese fuego en algo creativo o deportivo le sienta de maravilla."
- },
- "marte-libra": {
-  "texto": "Marte es el planeta de la acción: la energía que te pone en marcha, el impulso de discutir, competir y ir a por lo que quieres. Cuando está en Libra, ese empuje se mezcla con el deseo de equilibrio y de caer bien. Tú peleas, pero intentas que todos salgan con la sensación de que se ha hecho justicia. Es como un bombero que quiere apagar el fuego sin hacer ruido ni mojar a nadie. Tu acción llega con cortesía, aunque a veces te cueste ser amable cuando te hierven las venas.",
-  "en_el_dia_a_dia": "Estás en una reunión y tu compañero propone algo que te parece injusto. En lugar de estallar, sueltas un argumento tan educado y bien construido que nadie puede ignorarlo, y lo consigues sin levantar la voz.",
-  "luz": "Defiendes lo justo con valentía y sabes negociar sin perder la pelea de vista. Tu energía convence más por la forma que por la fuerza.",
-  "sombra": "Cuando te sientes desequilibrado, te cuesta decidir y la rabia se queda dando vueltas dentro hasta que sale de golpe, como un vaso que se rebosa.",
-  "tip": "Antes de contestar a algo que te enfada, cuenta hasta tres y pregúntate qué quieres conseguir de verdad. Así tu energía va al objetivo y no a la discusión por la discusión."
- },
- "marte-piscis": {
-  "texto": "Marte es el planeta de la acción: es lo que te pone en marcha, lo que te hace enfadarte cuando algo no te gusta y lo que te empuja a ir a por lo que quieres. Es tu motor, el del coche que arranca cuando te pones el cinturón. Tener a Marte en Piscis significa que tu energía no va de frente, sino que se mueve como el agua: rodea, se adapta y a veces se cuela por donde menos te lo esperas. Tú peleas, pero prefieres hacerlo con sensibilidad y sin hacer ruido, como quien cocina a fuego lento y de pronto el plato sale buenísimo.",
-  "en_el_dia_a_dia": "Te molesta que alguien se aproveche de ti, pero en lugar de montar una escena en la reunión, lo dejas pasar y luego lo sueltas tranquilamente en el momento menos esperado, como una bomba de humor seco. O terminas haciendo el trabajo de tres personas sin quejarte, hasta que de repente te plantas y dices basta.",
-  "luz": "Tu fuerza está en la empatía combinada con la determinación: sabes cuándo empujar y cuándo esperar, y tu constancia silenciosa consigue cosas que otros no logran a base de gritos.",
-  "sombra": "Puedes acumular enfado en silencio hasta que explota, o perderte en la fantasía y postergar lo que tendrías que hacer. A veces tu energía se disuelve como azúcar en el agua, y cuesta verla.",
-  "tip": "Ponle forma física a tu impulso: haz deporte, camina o escribe lo que te molesta cuando lo sientas. Así tu Marte en Piscis canaliza su energía en vez de guardarla en el cajón de los enfados."
- },
- "marte-sagitario": {
-  "texto": "Marte es el planeta de la acción: lo que haces cuando te enfadas, cuando te apetece algo y cuando te lanzas a por ello sin pensarlo dos veces. Cuando está en Sagitario, esa energía se vuelve de exploración: necesitas espacio, libertad y un horizonte que te llame. Tu impulso no es de quedarte quieto, es de ir a ver qué hay más allá. Vas a por las cosas con entusiasmo y de frente, como quien sale de casa sin paraguas porque 'seguro que no llueve'. Y a veces llueve, pero tú ya vas por la mitad del camino.",
-  "en_el_dia_a_dia": "Te surge una idea de viaje o de un proyecto nuevo un martes por la tarde y, en vez de pensarlo una semana, a la noche ya tienes billetes comprados o has escrito el primer borrador. Tu entorno flipa; tú solo estabas aprovechando la ola.",
-  "luz": "Eres valiente, directo y muy honesto con lo que quieres. Contagias ganas de hacer cosas y no te paralizan los miedos tontos.",
-  "sombra": "A veces te lanzas antes de mirar el mapa, te impacientas con los que van más lentos y tu sinceridad puede sonar a sermón. Pasa mucho que el enfado te dure menos que el wifi del tren, pero también que se te escape una frase que no querías decir.",
-  "tip": "Antes de contestar en caliente, cuenta hasta tres y pregúntate: '¿esto lo digo para ayudar o para ganar?'. Y reserva ese impulso para tus metas grandes; te dará mucho más resultado."
- },
- "marte-tauro": {
-  "texto": "Marte es el planeta de la acción: es lo que te pone en marcha, lo que te hace enfadarte y lo que te lanza a por algo. Cuando está en Tauro, esa energía se vuelve más lenta, firme y terca, como un coche que arranca en primera y no tiene prisa, pero no hay quien lo pare cuando ya va. Tauro es el signo de lo estable, lo que se toca y lo que da seguridad, así que tu impulso busca resultados concretos y duraderos. Tú no atacas a lo loco: avanzas paso a paso, pero cuando decides algo, te cuesta un mundo cambiar de idea.",
-  "en_el_dia_a_dia": "Cuando alguien te toca algo que has organizado con cariño, como tu rutina, tus cosas o tu espacio, reaccionas despacio, pero firme: te plantas, no discutes a gritos y no sueltas el tema hasta que se arregla.",
-  "luz": "Tienes una constancia que impresiona: cuando te propones algo, lo sacas adelante con paciencia y sin depender de la motivación del momento.",
-  "sombra": "Esa misma terquedad puede convertirse en cabezonería: aguantar una postura aunque ya no tenga sentido, solo por no dar tu brazo a torcer.",
-  "tip": "Antes de clavarte en una decisión, pregúntate si lo que defiendes es lo que quieres o solo lo que ya tienes. Dar un paso atrás a veces también es avanzar."
- },
- "marte-virgo": {
-  "texto": "Marte es tu motor: la parte de ti que se pone en marcha cuando quieres algo, cuando te enfadas y cuando decides ir a por ello. En Virgo, ese motor funciona con un manual de instrucciones en la mano. Virgo es el signo de la precisión, del orden y del detalle que nadie más ha visto. Así que tú no arremetes a lo loco: analizas, afinas y atacas cuando sabes exactamente dónde está el fallo. Es como cocinar a fuego lento pero con un cuchillo muy afilado.",
-  "en_el_dia_a_dia": "Te toca un proyecto en el trabajo con diez pasos mal explicados. Mientras otros se quejan en el café, tú te pones a revisar, ordenar y arreglar cada punto, y al final todo sale impecable. Eso sí, si alguien te interrumpe con un 'bah, con eso vale', notarás cómo te hierve la sangre en silencio.",
-  "luz": "Eres constante, detallista y muy eficaz. Cuando te propones algo, lo llevas hasta el final con método y sin hacer ruido.",
-  "sombra": "Puedes ser tan exigente contigo y con los demás que la perfección se convierte en una trampa. A veces tu crítica sale más dura de lo que pretendías.",
-  "tip": "Antes de corregir a alguien, pregúntate si el detalle que te molesta cambia de verdad el resultado. Si no, suelta el bolígrafo rojo y deja respirar el proyecto."
- },
- "mercurio-acuario": {
-  "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, aprendes y conectas las ideas. Cuando cae en Acuario, tu cabeza va por libre, pero con brillo. Te interesan las ideas raras, los sistemas, lo que cambia el mundo, y no te conformas con la explicación de siempre. Eres de los que se preguntan por qué las cosas son así, aunque nadie les haya pedido opinión. Tu mente funciona como una app con muchas pestañas abiertas: alguna se cuelga, pero casi siempre trae algo útil.",
-  "en_el_dia_a_dia": "Estás en una cena y alguien dice algo muy típico. Tú sueltas una idea fuera de lo común sobre el tema, todo el mundo se queda pensando y alguien te pregunta de dónde la has sacado. Ese es tu Mercurio en Acuario trabajando.",
-  "luz": "Piensas de forma original y ves conexiones que otros no ven. Explicas ideas complejas de manera que cualquiera las entiende, y te adaptas a gente muy distinta sin perder tu forma de ser.",
-  "sombra": "A veces te encierras tanto en tu cabeza que tu opinión suena a manifiesto y no a conversación. Puedes ser tan independiente que te cueste pedir una explicación o aceptar que otros tienen razón.",
-  "tip": "Antes de defender tu idea, pregúntate: ¿la estoy compartiendo o la estoy imponiendo? Escucha la versión de la otra persona antes de contestar; tu mente va tan rápido que a veces ya tienes la respuesta cuando el otro aún no ha terminado."
- },
- "mercurio-aries": {
-  "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, aprendes y cuentas las cosas. Cuando está en Aries, tu cabeza va a toda velocidad, como un coche sin límite de velocidad en una autovía vacía. Piensas rápido, hablas directo y te aburre dar mil vueltas antes de llegar al grano. Eres de decir lo que piensas en el momento, y eso te hace espontáneo y valiente, aunque a veces tu boca llega antes que tu freno.",
-  "en_el_dia_a_dia": "Estás en una reunión y alguien propone un plan que te parece lento. Tú ya lo has dicho en voz alta antes de que termine de hablar, con ideas nuevas y una respuesta lista. Gana la rapidez, aunque alguien se quede con cara de 'espera, ¿qué?'.",
-  "luz": "Tienes una mente ágil, valiente y directa. Aprendes rápido, improvisas muy bien y te atreves a decir lo que otros callan.",
-  "sombra": "Puedes interrumpir sin darte cuenta o soltar una opinión antes de escuchar del todo. La prisa a veces te hace perder matices importantes.",
-  "tip": "Antes de contestar en una conversación importante, cuenta hasta dos. Esos dos segundos te ahorran muchas disculpas posteriores."
- },
- "mercurio-cancer": {
-  "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, aprendes y cuentas lo que te pasa. Cuando cae en Cáncer, tu pensamiento se vuelve más emocional y de memoria larga, como si tu cabeza guardara recuerdos en una caja de galletas de la abuela. Piensas con el corazón puesto, así que antes de decidir algo necesitas sentir que es seguro. Hablas con cariño y te acuerdas de detalles que otros ya olvidaron, aunque a veces te cuesta soltar un tema cuando te duele.",
-  "en_el_dia_a_dia": "Te escribe un amigo para pedirte consejo sobre una mudanza. Tú no le das una lista de pros y contras: le preguntas cómo se siente en su casa actual y le recuerdas el piso de tu primera vez viviendo sola. Acabas siendo el mejor consejero de la conversación, aunque tu mente ya esté dándole vueltas a tu propia mudanza pendiente.",
-  "luz": "Escuchas de verdad y tu forma de explicar las cosas hace que los demás se sientan acompañados, no juzgados.",
-  "sombra": "Te cuesta separar lo que piensas de lo que sientes, y una crítica pequeña puede quedarse dando vueltas en tu cabeza más de la cuenta.",
-  "tip": "Antes de tomar una decisión importante, escribe en un papel qué te preocupa y qué te ilusiona, y mira cuál de las dos cosas pesa más sin que tu miedo haga el resumen."
- },
- "mercurio-capricornio": {
-  "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas y aprendes. Cuando está en Capricornio, tu cabeza funciona como un buen arquitecto: no le gusta improvisar, prefiere planos antes de levantar la primera pared. Piensas con método, vas paso a paso y te sientes cómodo cuando hay estructura. Hablas poco, pero cuando lo haces, la gente suele tomarte en serio, porque lo que dices tiene peso y no sobra ni una palabra. Eso sí, tu cerebro también es un poco como un jefe de obra: quiere que todo quede bien terminado antes de enseñarlo.",
-  "en_el_dia_a_dia": "Te toca explicar un proyecto en una reunión. Mientras otros lanzan ideas al aire como palomitas, tú llevas una presentación con índice, cifras y un plan de tres fases. Al final, tu jefe dice 'esto sí se puede hacer', y tú te preguntas por qué el resto no lo había pensado así.",
-  "luz": "Piensas con orden, tienes paciencia para aprender cosas difíciles y tu palabra es sólida: la gente sabe que cumples lo que dices.",
-  "sombra": "A veces te tomas tan en serio la perfección que retrasas lo que podrías empezar ya. Tu mente puede volverse un poco rígida cuando algo no encaja en tu plan.",
-  "tip": "Antes de esperar a tener el plan perfecto, empieza con una versión pequeña y mejórala sobre la marcha. Un borrador imperfecto también te enseña cosas."
- },
- "mercurio-escorpio": {
-  "texto": "Mercurio es el planeta de la mente: cómo piensas, cómo hablas y cómo aprendes. Cuando está en Escorpio, tu cabeza no se conforma con lo de la superficie. Quieres saber qué hay debajo, como el que no para hasta descubrir quién dejó la última galleta. Pensar para ti es investigar, no solo opinar. Tu forma de hablar suele ser directa y con poco adorno, y tu memoria guarda lo que de verdad te importa, aunque olvides dónde dejaste las llaves.",
-  "en_el_dia_a_dia": "Estás en una reunión y todos dan por bueno un plan. Tú notas el detalle que nadie miró, lo preguntas sin rodeos y de repente todo el mundo se queda pensando. Eso es tu Mercurio en Escorpio trabajando: ver lo que se esconde bajo la mesa.",
-  "luz": "Tienes una capacidad enorme para ir al fondo de los temas, leer entre líneas y aprender cosas complejas de verdad. Tu análisis es agudo y difícil de engañar.",
-  "sombra": "A veces tu mente se obsesiona con una sospecha y da vueltas sin parar, como un disco rayado. Y puedes hablar con un filo que hiere sin querer, sobre todo cuando te sientes invadido.",
-  "tip": "Antes de sacar conclusiones sobre lo que oculta alguien, pregúntate si no es solo información incompleta. Y di lo que piensas con un poco más de suavidad: la verdad también se entrega con cuidado."
- },
- "mercurio-geminis": {
-  "texto": "Mercurio es el planeta de la mente, la conversación y el aprendizaje: cómo procesas lo que pasa, cómo lo cuentas y cómo lo entiendes. Cuando está en Géminis, tu mente va a toda velocidad, con curiosidad por todo y ganas de probar de todo. Géminis es el signo de la palabra, las ideas y los mil intereses, así que aquí tu cerebro funciona como una pestaña abierta detrás de otra. Eso te hace ágil, chistoso y buen conversador, aunque a veces parezcas un tren que no para en ninguna estación.",
-  "en_el_dia_a_dia": "Empiezas leyendo una receta, acabas viendo un documental sobre volcanes y terminas aprendiendo a tocar el ukelele a las dos de la madrugada.",
-  "luz": "Aprendes rápido, conectas ideas que a otros no se les ocurren y sabes explicar cosas complicadas con palabras sencillas.",
-  "sombra": "Te aburres pronto, saltas de un tema a otro sin cerrar nada y a veces prometes más de lo que puedes cumplir en la semana.",
-  "tip": "Antes de empezar algo nuevo, apunta en una libreta la idea que te emociona y dedica una hora fija a terminar una sola cosa. Tu mente corre más si le pones carriles."
- },
- "mercurio-leo": {
-  "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, escribes y aprendes. Cuando está en Leo, tu cabeza no se conforma con explicar las cosas a secas; quiere contarlas con gracia, con un poco de drama y con ganas de que alguien aplauda al final. Eres de los que hablan con seguridad y pueden tener al grupo entero escuchando. Eso sí, si nadie te presta atención, tu mente se pone un poco dramática, como un actor sin público. Dicho claro: tu forma de pensar brilla cuando puede expresarse con confianza.",
-  "en_el_dia_a_dia": "Te toca explicar algo en el trabajo o en un grupo de amigos. En vez de soltar datos secos, cuentas una historia, pones ejemplos vivos y haces que todos entiendan a la primera. Hasta el que estaba mirando el móvil acaba levantando la cabeza.",
-  "luz": "Comunicas con calidez y carisma. Sabes contar las ideas de forma que la gente las recuerde y se sienta incluida.",
-  "sombra": "A veces necesitas tanto ser el que brilla que dejas poco espacio para que los demás opinen. Un poco de escucha también cuenta como talento.",
-  "tip": "Antes de hablar en una conversación importante, cuenta hasta tres mentalmente y pregúntate: ¿esto aporta o solo quiero lucirme? Verás que tus ideas suenan igual de buenas y con más gente de tu lado."
- },
- "mercurio-libra": {
-  "texto": "Mercurio es el planeta que rige cómo piensas, hablas y aprendes: tu mente, tus conversaciones, tu forma de procesar lo que pasa. Cuando cae en Libra, tu mente funciona como una balanza: necesitas ver los dos lados antes de decidir, y te cuesta mucho elegir sin sopesar pros y contras. Hablas con diplomacia y con gracia, y sabes decir las cosas sin que suenen a golpe. Eso sí, si te piden una respuesta rápida en un restaurante, quizá te pases diez minutos mirando la carta como si fuera un examen final.",
-  "en_el_dia_a_dia": "Te preguntan a dónde quieres ir a cenar y sueltas: 'me da igual, lo que sea'. Pero por dentro ya estás comparando el sushi, la pizza y el menú del día, sopesando cuál queda mejor con todos. Al final, el que decide es el grupo, y tú sales contento porque al menos ha sido un debate bien argumentado.",
-  "luz": "Tienes un talento natural para entender puntos de vista distintos y para mediar en conflictos. Sabes escuchar, buscar el equilibrio y explicar las cosas con claridad y buen trato.",
-  "sombra": "Puedes quedarte atrapado en la duda y dar muchas vueltas antes de decidir, a veces hasta que la oportunidad se escapa. Y a veces prefieres quedar bien a decir lo que realmente piensas.",
-  "tip": "Prueba la regla de los cinco minutos: fija un tiempo límite para decidir, cuando se acabe, elige lo que tengas a mano aunque no sea perfecto. Mercurio en Libra agradece tener un marco, aunque sea un reloj de cocina."
- },
- "mercurio-piscis": {
-  "texto": "Mercurio es el planeta de cómo piensas, hablas y aprendes: tu mente, tu forma de contar las cosas y de captar lo que te explican. Cuando Mercurio cae en Piscis, tu cabeza funciona como una esponja con mucha sensibilidad: absorbes emociones, ambientes y matices que otros ni notan. Piensas por imágenes, intuiciones y sensaciones más que por listas perfectas. Es una mente soñadora, poética y un pelín despistada, como un wifi que pilla señal de todas partes menos de la que de verdad necesitas.",
-  "en_el_dia_a_dia": "Te pones a estudiar un tema técnico y, de pronto, acabas leyendo sobre la historia del tema, la gente que lo inventó y cómo se siente hacerlo. Tu cerebro se va de paseo por el significado antes de llegar al procedimiento.",
-  "luz": "Tienes una imaginación rica y una empatía que te deja entender a la gente antes de que hable del todo. Tus explicaciones pueden ser muy bonitas y llegar al corazón.",
-  "sombra": "Te cuesta separar lo que sientes de lo que es un hecho, y a veces te pierdes entre tantas ideas que no aterrizas ninguna. Un 'ya te contesto' puede durar más de lo que tu paciencia aguanta.",
-  "tip": "Antes de decidir algo importante, escribe los hechos en tres líneas, sin adjetivos ni sentimientos. Después, deja que tu intuición opine sobre esas tres líneas. Así disfrutas tu sensibilidad sin que te lleve a la deriva."
- },
- "mercurio-sagitario": {
-  "texto": "Mercurio es el planeta de la mente, la forma de pensar, hablar y aprender. Cuando cae en Sagitario, tu cerebro va en modo explorador: necesita horizontes amplios, preguntas grandes y ideas que le abran la ventana. Te aburres con los detalles sueltos si no ves hacia dónde van, un poco como un viajero que odia las paradas sin vistas. Piensas a lo grande, hablas con entusiasmo y aprendes mejor cuando el tema te lleva lejos, aunque a veces te pase de largo por el pueblo donde había que bajarse.",
-  "en_el_dia_a_dia": "Estás en una reunión y alguien te pide solo 'el dato concreto'. Tú ya estás pensando en tres ideas más grandes sobre el tema, y te cuesta bajar a la tierra. Mejor pide primero el contexto y luego el detalle.",
-  "luz": "Tienes una mente abierta, curiosa y contagiosa. Explicas ideas complejas con ganas y te encanta aprender cosas nuevas de cualquier sitio.",
-  "sombra": "Puedes prometer más de lo que cumples o saltar de un tema a otro sin cerrar ninguno. A veces hablas más rápido de lo que escuchas, y eso, la verdad, también es un poco de cariño mal repartido.",
-  "tip": "Antes de empezar un proyecto nuevo, apunta en una sola hoja los tres pasos concretos que lo harían real. Tu cabeza agradecerá tener el mapa además de la brújula."
- },
- "mercurio-tauro": {
-  "texto": "Mercurio es el planeta de la mente, la palabra y el aprendizaje: es lo que usas para pensar, hablar y entender cosas nuevas. Cuando está en Tauro, tu mente se vuelve de las que no se mueven con cualquier viento. Tú piensas despacio, con los pies en la tierra, y prefieres una idea que puedas tocar a una teoría que suene bonita pero no sirva para nada. Eso sí, cuando te convences de algo, te cuesta tanto soltarlo como cambiar de sofá después de cinco años de uso.",
-  "en_el_dia_a_dia": "Te pasan un plan nuevo en el trabajo y no lo cambias hasta que lo has probado con calma y lo ves funcionar. Mientras otros ya están discutiendo la siguiente idea, tú todavía estás pidiendo una prueba real antes de decir que sí.",
-  "luz": "Tu pensamiento es sólido y fiable. Aprendes de forma profunda, retienes lo que aprendes y tu palabra suele tener peso porque sabes de lo que hablas.",
-  "sombra": "Puedes aferrarte a tus ideas más de lo necesario y cerrarte a opiniones distintas. Esa terquedad, si no la vigilas, se convierte en un muro que no deja pasar ni una brisa.",
-  "tip": "Cada semana, elige una opinión tuya y pregúntate qué dato nuevo la haría cambiar. Si no se te ocurre ninguno, quizá sea hora de buscarlo."
- },
- "mercurio-virgo": {
-  "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, lees el mundo y aprendes cosas nuevas. Cuando cae en Virgo, tu cerebro funciona como un buen archivador: lo quiere todo ordenado, bien etiquetado y con su carpeta correspondiente. Eres de los que se fijan en el detalle que a los demás se les escapa, como la errata en el cartel o el ingrediente que sobra en la receta. Tu forma de hablar tiende a ser precisa y práctica, más de 'vamos al grano' que de discursos de tres horas, aunque tu paciencia a veces dure lo que la batería de un móvil viejo.",
-  "en_el_dia_a_dia": "Te toca explicar a tu compañero de piso cómo funciona la lavadora nueva, y lo haces con un manual mental de cinco pasos numerados, sin saltarte ni una tecla. Mientras tanto, tu amigo solo quería que le dijeras 'pon el programa de siempre'.",
-  "luz": "Aprendes rápido, analizas con claridad y conviertes el caos en algo útil. Eres de los que dan instrucciones que de verdad se entienden.",
-  "sombra": "Puedes caer en la trampa del detalle infinito: revisas tanto una cosa que se te pasa el tren. A veces criticas sin querer lo que no sale perfecto, y eso también te lo cobras tú.",
-  "tip": "Antes de corregir o analizar algo, pregúntate si el detalle que te molesta cambia de verdad el resultado. Si no lo cambia, déjalo estar y ahorra energía para lo importante."
- },
- "sol-acuario": {
-  "texto": "Cuando el Sol está en Acuario, tu esencia tiene la cabeza en el futuro y el corazón en la gente. Eres de los que piensan distinto y no les da vergüenza decirlo, aunque a veces lo digan en la reunión de familia en el peor momento. El Sol es el 'yo' más auténtico, y en Acuario ese yo es independiente, curioso y un poco rebelde, como quien se niega a seguir el mapa de la carretera solo porque 'siempre se ha hecho así'. Acuario está regido por Urano, el planeta de las sorpresas y las ideas que nadie vio venir.",
-  "en_el_dia_a_dia": "Estás en una cena y todos hablan de la misma serie de siempre. Tú propones una idea rara sobre cómo podría funcionar la ciudad dentro de cincuenta años, y de pronto la mesa entera está debatiendo contigo como si fuera la mejor tertulia del año.",
-  "luz": "Ves soluciones donde otros solo ven problemas, y tratas a cada persona como alguien interesante, no como un número más en la fila.",
-  "sombra": "A veces te encierras tanto en tu cabeza que te distancias de la gente que te quiere, y luego te preguntas por qué nadie te llama. La frialdad aparece cuando confundes la lógica con tener siempre la razón.",
-  "tip": "Antes de tener la última palabra en una discusión, pregúntate qué sentiría la otra persona. No pierdes nada por escucharla, y a veces te ahorras una pelea que no valía la pena."
- },
- "sol-aries": {
-  "texto": "Cuando el Sol está en Aries, tu esencia es la de alguien que se lanza primero y pregunta después. Eres el que levanta la mano antes de que el profe termine la pregunta, con la energía de quien se pide el café más rápido que el barista. Aries es el primer signo del zodiaco, regido por Marte, el planeta de la acción, así que la iniciativa te sale casi sin pensar. Quien eres de verdad aparece cuando actúas con valentía y sin esperar permiso.",
-  "en_el_dia_a_dia": "Ves un proyecto parado en el trabajo y, en lugar de esperar a que alguien se anime, das el primer paso y propones un plan para el lunes. Tus compañeros tardan en reaccionar, pero tú ya estás avanzando.",
-  "luz": "Valiente, directo y con una energía contagiosa. Enciendes a la gente cuando hay que empezar algo nuevo.",
-  "sombra": "A veces confundes rapidez con prisa y te impacientas si las cosas no salen a tu ritmo. Puedes pasar por encima de otros sin darte cuenta.",
-  "tip": "Antes de lanzarte, respira y cuenta hasta tres. Tu impulso es un motor potente, y con un poco de escucha lo llevas aún más lejos."
- },
- "sol-cancer": {
-  "texto": "Tu Sol en Cáncer dice que tu esencia es la de alguien que cuida, que siente hondo y que necesita un hogar emocional donde descansar. Eres tú cuando bajas la guardia: sensible, protector y con una memoria para los detalles que da un poco de miedo. Como el Sol, lo que tú irradias es calidez, pero el signo de Cáncer, regido por la Luna, hace que esa energía suba y baje con las emociones, como las mareas. Si alguien te trata bien, te enteras; si no, también. Y eso, aunque parezca dramático, es tu superpoder.",
-  "en_el_dia_a_dia": "Llegas a una reunión con un tupper de lentejas para la familia, te acuerdas del cumpleaños de la compañera de la oficina y te emocionas con una canción de la infancia. Sin darte cuenta, has convertido el grupo en tu casa.",
-  "luz": "Eres leal, generoso y capaz de crear un ambiente en el que la gente se siente segura y querida.",
-  "sombra": "Puedes cerrarte como una caracola cuando te hieren, y guardar rencor en silencio mientras finges que está todo bien.",
-  "tip": "Antes de reaccionar a algo que te dolió, pon nombre a la emoción en voz alta o por escrito. Así tu caparazón no decide por ti."
- },
- "sol-capricornio": {
-  "texto": "Cuando el Sol está en Capricornio, tu esencia es la de alguien que construye las cosas paso a paso, como quien sube una montaña con mochila llena de piedras y sin prisa. Eres de los que prefieren ganarse las cosas con esfuerzo antes que esperar a que caigan del cielo, y eso lo cuentas sin ponerte medallas. Capricornio es el signo de la responsabilidad y de la ambición con los pies en la tierra, y también de la paciencia de abuela que sabe que las buenas sopas se cocinan a fuego lento. Tu tiempo de brillar llega más tarde, pero cuando llega, dura.",
-  "en_el_dia_a_dia": "Te ofrecen un proyecto que lleva meses de trabajo y nadie quiere encargarse de los detalles aburridos. Tú te quedas con la hoja de cálculo, organizas las tareas y llegas a la entrega sin que nadie te lo pida, como el amigo que siempre trae el cargador cuando todos se quedan sin batería.",
-  "luz": "Eres constante, fiable y muy honesto con tus compromisos. La gente sabe que puede contar contigo cuando la cosa se pone seria.",
-  "sombra": "Puedes ser tan exigente contigo que te olvidas de descansar. A veces cargas con todo porque te cuesta pedir ayuda, y el cansancio se acumula sin que lo notes.",
-  "tip": "Apunta cada semana una cosa que hayas hecho bien, por pequeña que sea, y otra que vayas a dejar para otro día sin culpa. Tu cabeza agradecerá no ser sólo una lista de pendientes."
- },
- "sol-escorpio": {
-  "texto": "Tu Sol en Escorpio dice que eres de los que van a fondo. Si algo te importa, no lo tomas a la ligera: lo miras por dentro, le das vueltas y quieres entender de qué está hecho. Eres intenso, reservado y leal, y no sueltas fácil ni a las personas ni a las ideas. Escorpio es un signo de agua, así que tus emociones son profundas, aunque no siempre las enseñes. Y sí, tienes una fama de misterioso que te hace bastante gracia, aunque en realidad solo eres alguien que prefiere la verdad a la charla de ascensor.",
-  "en_el_dia_a_dia": "Te cuentan un plan a medias y, en vez de quedarte en la superficie, notas que algo no encaja y preguntas hasta que sale la verdad. Igual que el que revisa el contrato letra por letra antes de firmar, pero sin la cara de aburrimiento.",
-  "luz": "Eres leal de verdad, valiente para mirar lo incómodo y capaz de reinventarte cuando lo necesitas, como el ave fénix pero sin el drama de la ceniza.",
-  "sombra": "Puedes guardar rencor más de la cuenta o desconfiar de todos a la vez, como si cada persona nueva tuviera que pasar un control de seguridad antes de entrar.",
-  "tip": "Prueba a decir en voz alta lo que sientes antes de que se convierta en silencio. No hace falta contarlo todo, pero una frase honesta a tiempo ahorra muchas noches dando vueltas."
- },
- "sol-geminis": {
-  "texto": "Cuando el Sol está en Géminis, tu esencia es la curiosidad en estado puro. Eres de los que quieren saberlo todo, probar de todo y hablar con todo el mundo, como una pestaña del navegador que nunca se cierra. Tu energía viene de la mente, de las conversaciones y de los mil intereses que te pican a la vez. Es el signo del aire y de la comunicación, así que tu mejor herramienta es la palabra. Eso sí, tu aburrimiento dura menos que la batería de un móvil nuevo.",
-  "en_el_dia_a_dia": "Estás en una reunión aburrida, se hace un silencio incómodo y tú sueltas una pregunta que cambia de tema por completo. Todo el mundo se queda mirando, pero tú ya estás pensando en otra cosa.",
-  "luz": "Eres ingenioso, adaptable y capaz de explicar cosas complicadas con palabras sencillas. Llevas bien los cambios y haces amigos en cualquier sitio.",
-  "sombra": "Te cuesta quedarte con una sola cosa el tiempo suficiente para terminarla. A veces dices lo que piensas antes de pensarlo del todo, y luego toca arreglar el lío.",
-  "tip": "Antes de empezar algo nuevo, termina una cosa pendiente. Así tu curiosidad construye algo en vez de dejar proyectos a medias por el camino."
- },
- "sol-leo": {
-  "texto": "Cuando los astrólogos hablan del Sol en Leo, hablan de tu esencia: lo que sale de ti cuando dejas de hacer el papel de 'normal'. El Sol es el centro de tu carta, como el foco de un escenario. Con Leo ese foco brilla con ganas: te gusta expresarte, crear, dar calor a los demás y que se note que estás ahí. Leo es un signo de fuego, así que tu energía es de las que se contagian. Y sí, también puede que te guste que te miren un poquito. No pasa nada, es parte del paquete.",
-  "en_el_dia_a_dia": "Estás en una reunión de amigos y alguien cuenta una historia que se alarga. Tú, sin querer, la haces más divertida con una imitación o una frase que hace reír a todos. Se te nota la chispa, y la gente te busca cuando quiere pasarlo bien.",
-  "luz": "Generosidad de corazón grande, creatividad y una valentía natural para ser auténtico. Inspiras a otros a salir de su rincón.",
-  "sombra": "A veces necesitas tanto ser visto que te cuesta escuchar. Si no te aplauden, puede dolerte más de la cuenta, y el orgullo se te pone de pie antes que tú.",
-  "tip": "Antes de hablar en una conversación, cuenta hasta tres y pregúntale a la otra persona qué piensa. Brillar es más bonito cuando el otro también puede brillar contigo."
- },
- "sol-libra": {
-  "texto": "Cuando el Sol está en Libra, tu esencia gira alrededor del equilibrio y de las relaciones. Eres de los que necesitan sentir que hay armonía a su alrededor, como quien no puede dormir con un cuadro torcido en la pared. Tu forma de estar en el mundo pasa por el trato con los demás: escuchar, negociar, buscar el punto justo. El Sol es el centro de tu identidad, y en Libra ese centro se construye en pareja, en diálogo y en belleza. Eres tú, pero siempre con alguien al lado.",
-  "en_el_dia_a_dia": "Estás en una cafetería y te toca elegir entre dos pasteles. Pides medio de cada uno para que nadie se quede con el sabor de la duda, y de paso aprovechas para preguntarle a tu amigo qué le apetece a él.",
-  "luz": "Tienes un talento natural para mediar, para ver los dos lados de una historia y para hacer que la gente se sienta bien tratada. Tu sentido estético hace que cualquier espacio mejore cuando tú lo arreglas.",
-  "sombra": "A veces te cuesta tanto mantener la paz que acabas callando lo que piensas. Dices que sí cuando querías decir que no, y luego te pesa como una mochila llena de piedras.",
-  "tip": "Antes de decidir por los demás, pregúntate qué quieres tú de verdad. Decir tu opinión en voz baja también cuenta como equilibrio."
- },
- "sol-piscis": {
-  "texto": "Cuando el Sol está en Piscis, tu esencia se mueve como el agua: te adaptas, sientes muchísimo y lees el ambiente antes de que nadie abra la boca. Piscis es el último signo del zodiaco y está regido por Neptuno, el planeta de los sueños, la intuición y la imaginación. Eso te da una sensibilidad enorme y una mente que vuela, aunque a veces se te olvide dónde dejaste las llaves. Tu lado más auténtico aparece cuando te permites ser compasivo y creativo sin pedir perdón por ello.",
-  "en_el_dia_a_dia": "Entras a una reunión y, sin que nadie diga nada, ya sabes que el jefe está de mal humor y que Laura está incómoda. Te ajustas solo, cambias de tono y acabas siendo el que calma la tensión, aunque luego te quedes agotado como si hubieras cargado una nevera por las escaleras.",
-  "luz": "Empatía de verdad, creatividad a raudales y una intuición que acierta más de lo que te gustaría admitir.",
-  "sombra": "Te disuelves en los demás, evitas los conflictos como si fueran un atasco y a veces escapas a la fantasía cuando la realidad aprieta.",
-  "tip": "Antes de decir que sí a algo, pregúntate: ¿esto lo quiero yo o solo quiero que la gente esté contenta? Dedica cada semana un rato a algo creativo que sea solo tuyo."
- },
- "sol-sagitario": {
-  "texto": "Cuando el Sol está en Sagitario, tu esencia tiene brújula y ganas de ver mundo. Eres de los que necesitan un horizonte: viajar, aprender, preguntar por qué las cosas son como son. Sagitario es el signo del arquero, y su flecha apunta siempre lejos. Eres optimista por naturaleza, aunque a veces prometes más planes de los que caben en la agenda. Tu sello es la curiosidad y ese entusiasmo contagioso que te lleva a decir “¿y si probamos?” antes de pensarlo dos veces.",
-  "en_el_dia_a_dia": "Estás en una reunión aburrida y, en vez de quedarte callado, te sale una pregunta que cambia el rumbo del debate. O llevas un plan de fin de semana que empieza como una escapada cerca de casa y acaba con todos en otra ciudad.",
-  "luz": "Inspiras a otros a salir de su zona de confort, y tu honestidad hace que la gente confíe en lo que dices.",
-  "sombra": "Te cuesta quedarte quieto y comprometerte con los detalles pequeños. A veces tu sinceridad se pasa de frenada y suena a sermón.",
-  "tip": "Antes de decir que sí a un nuevo proyecto, escribe tres cosas que tendrías que dejar de lado para hacerlo. Así tu entusiasmo llega a buen puerto y no se queda en promesa de WhatsApp."
- },
- "sol-tauro": {
-  "texto": "Tu Sol en Tauro habla de la esencia: quién eres cuando te quitas el ruido. Tauro es el signo de la tierra firme, de lo que se puede tocar, saborear y mantener en el tiempo. Tú necesitas estabilidad, placer sencillo y raíces, y no te convence lo que cambia cada cinco minutos, como el tiempo en Galicia. Eres de los que construyen despacio, pero cuando algo es tuyo, lo cuidas como a una planta que no se toca sin permiso.",
-  "en_el_dia_a_dia": "Te compras una cafetera buena y la usas diez años, mientras tu amiga cambia de aparato cada temporada. Y cuando tienes que decidir algo importante, primero quieres sentirlo bien en el cuerpo, no solo pensarlo tres veces.",
-  "luz": "Eres leal, paciente y muy confiable: la gente sabe que cumples y que tu palabra pesa. Tienes un talento natural para disfrutar lo bueno de la vida sin culpa.",
-  "sombra": "A veces te aferras a lo conocido aunque ya no te haga bien, y el cambio te pesa más de lo que admites. La terquedad también viene con el paquete, y tu paciencia puede convertirse en inmovilidad.",
-  "tip": "Antes de decir 'no cambio', prueba a hacer una mini-novedad pequeña, como un camino distinto al trabajo. Tu estabilidad se fortalece cuando la pones a prueba con calma."
- },
- "sol-virgo": {
-  "texto": "Cuando alguien tiene el Sol en Virgo, su esencia es la de la persona que se fija en los detalles, ordena el caos y quiere que las cosas funcionen de verdad. Virgo es el signo del análisis y del servicio: tú miras lo que hace falta y lo arreglas sin que nadie te lo pida. Eso sí, a veces tu lista mental de defectos ajenos es más larga que la del supermercado un domingo. Es el Sol de quien prefiere ser útil antes que aparentar.",
-  "en_el_dia_a_dia": "Llegas a una reunión con las carpetas ya impresas, sabes dónde está el cargador de todos y notas que la factura tiene un cobro doble antes de que nadie lo vea.",
-  "luz": "Eres fiable, metódico y tienes una mirada práctica que resuelve problemas de verdad.",
-  "sombra": "Puedes ser muy autoexigente y criticar más de la cuenta, tanto a ti como a los demás, por no llegar a ese orden perfecto que imaginas.",
-  "tip": "Antes de corregir algo, pregúntate si de verdad importa o si solo te molesta. Y recuerda que tú también mereces un poco de desorden de vez en cuando."
- },
- "venus-acuario": {
-  "texto": "Venus es el planeta del amor, del gusto y de lo que te hace sentir bien. Cuando Venus cae en Acuario, tu forma de querer se parece a una tertulia con amigos: te atrae la libertad, la originalidad y las conexiones mentales tanto como el cariño de siempre. Eres de los que se enamoran de la cabeza antes que del bolsillo, y necesitas que te dejen respirar. Si te ponen en una jaula dorada, te escapas, aunque sea con cara de buena persona.",
-  "en_el_dia_a_dia": "Quedas con alguien que te gusta y, en vez de una cena de manual, proponéis ir a una exposición rara o a un concierto de una banda que no conoce nadie. Si la conversación fluye y cada uno puede ir a su rollo sin dar explicaciones, te sientes en tu salsa.",
-  "luz": "Eres leal a tu manera, respetas la independencia del otro y sabes ser amigo y pareja a la vez.",
-  "sombra": "A veces confundes distancia con libertad y te cuesta mostrar lo que sientes de forma directa, como si el corazón tuviera wifi intermitente.",
-  "tip": "Antes de ponerte en modo fantasma, di en voz alta qué necesitas de la otra persona. Una frase clara vale más que tres días de silencio."
- },
- "venus-aries": {
-  "texto": "Venus es el planeta del amor, el gusto y lo que te atrae de verdad. Cuando Venus cae en Aries, tu forma de querer es directa, apasionada y sin rodeos: te enamoras rápido, con chispa, y te cuesta fingir que no te interesa. Es como pedir el plato del día sin mirar la carta, porque ya sabes lo que quieres. Aries es el signo de la iniciativa, así que aquí el amor no espera turno: se va a por lo que quiere.",
-  "en_el_dia_a_dia": "Ves a alguien que te gusta en una fiesta y, en vez de dar mil vueltas, te acercas, te presentas y le propones un café. Si te dicen que no, te reponen en un rato y pasas a lo siguiente, como quien pierde el bus y no se queda llorando en la parada.",
-  "luz": "Eres valiente al querer, transmites entusiasmo de verdad y haces que la otra persona se sienta deseada y elegida.",
-  "sombra": "Puedes enamorarte de la emoción del principio y aburrirte cuando la chispa baja la intensidad. A veces confundes prisa con pasión.",
-  "tip": "Antes de decidir que alguien te encanta o que ya no te interesa, dale un poco de tiempo. Pregúntate qué te gusta de esa persona cuando no hay fuegos artificiales."
- },
- "venus-cancer": {
-  "texto": "Venus es el planeta del amor, el gusto y lo que te hace sentir bien. Cuando Venus está en Cáncer, tu forma de querer es como un tupper de la abuela: hecha con cariño, pensada para que nadie se quede con hambre emocional. Necesitas sentir seguridad y hogar para abrirte de verdad, y te enamoras despacio pero con raíces profundas. Lo que te gusta: lo familiar, lo cálido, los detalles que demuestran que alguien se acordó de ti.",
-  "en_el_dia_a_dia": "Llegas a casa un martes malo y tu pareja te deja una manta y la cena lista sin que se lo pidas. Eso es Venus en Cáncer haciendo su trabajo: el amor que se nota en lo práctico y en el cuidado.",
-  "luz": "Eres un refugio de verdad: lealtad, ternura y una memoria increíble para las cosas que importan a los demás.",
-  "sombra": "A veces confundes cariño con control o te cierras como una ostra si te sientes vulnerable. Y cuando te hieren, guardas el rencor en el congelador durante años.",
-  "tip": "Di en voz alta lo que necesitas de tu gente, sin esperar que lo adivinen. Te ahorrarás muchos días de morros silenciosos y mucho drama innecesario."
- },
- "venus-capricornio": {
-  "texto": "Venus es el planeta del amor, el gusto y lo que te atrae. Cuando está en Capricornio, tu forma de querer es seria y de largo plazo: no te enamoras de cualquiera ni a la primera. Te cuesta lanzarte, pero una vez que confías, eres de los que se quedan. Tu idea de un buen plan suele ser estable, con sentido y con algo que se pueda construir. Eso sí, si alguien te gusta de verdad, tendrás que bajar un poco la guardia, porque el romance también necesita ratos sin agenda.",
-  "en_el_dia_a_dia": "Es el típico que elige una cena tranquila y bien pensada antes que una fiesta ruidosa, y que prefiere una pareja a la que pueda ver crecer durante años, aunque al principio se le note algo reservado. Como ese restaurante de toda la vida que nunca cambia la carta pero que siempre está lleno.",
-  "luz": "Eres leal, paciente y muy sólido: cuando dices 'te quiero', lo cumples con hechos, no solo con palabras.",
-  "sombra": "Puedes parecer frío o demasiado cauteloso, y a veces guardas tanto las emociones que la otra persona no sabe si le interesas de verdad.",
-  "tip": "Prueba a expresar lo que sientes con frases simples y cercanas, aunque te suenen cursis. Tu pareja no necesita un plan maestro, necesita saber que estás ahí."
- },
- "venus-escorpio": {
-  "texto": "Venus es el planeta del amor y de lo que te gusta: cómo quieres, cómo te enamoras y qué te hace sentir bien. Cuando Venus cae en Escorpio, tu forma de querer va en serio, con intensidad y sin medias tintas. Aquí no hay amores de rebajas: o te entregas de verdad o no te entregas. Tú buscas conexión profunda, confianza y una mirada que lo diga todo, aunque a veces te cueste admitir cuánto te importa algo.",
-  "en_el_dia_a_dia": "Quedas con alguien que te gusta y, en vez de charlas superficiales de ascensor, te interesa saber qué le preocupa de verdad y qué le hace sentir vivo. Si esa persona te cuenta algo íntimo, lo guardas como si fuera una caja fuerte.",
-  "luz": "Eres leal, intuitivo y capaz de querer con una hondura que pocos igualan. Cuando confías, confías de verdad.",
-  "sombra": "Puedes ser desconfiado o celoso si sientes que te fallan, y a veces te cierras como un caracol cuando te duele. Cuesta bajarte del muro, aunque por dentro te mueras de ganas.",
-  "tip": "Antes de cerrar la puerta por una herida, di en voz alta qué te dolió. Decirlo con palabras suele ser más sano que guardar silencio y esperar que el otro adivine."
- },
- "venus-geminis": {
-  "texto": "Venus es el planeta del amor, el placer y lo que te hace sentir bien. Cuando Venus está en Géminis, amas con la curiosidad de quien quiere saberlo todo: te enamoras de la conversación, de las ideas y de quien te haga reír. Eres de los que se aburren si la charla se queda en el tiempo. Tu corazón es más de palabras que de silencios largos, como un grupo de WhatsApp que nunca duerme. Y sí, a veces te gustan varias cosas a la vez, así que la variedad es tu gran debilidad.",
-  "en_el_dia_a_dia": "Quedas con alguien y acabáis hablando de libros, de viajes y de una teoría absurda sobre los gatos hasta las dos de la mañana. Te das cuenta de que lo que más te gusta no es el plan caro, sino esa sensación de conectar mentalmente.",
-  "luz": "Eres ingenioso, cercano y muy divertido. Haces que la gente se sienta escuchada y te adaptas con gracia a casi cualquier ambiente.",
-  "sombra": "Puedes perder interés si la relación se vuelve rutinaria o se queda sin novedades. A veces confundes curiosidad con enamoramiento y te cuesta comprometerte cuando la emoción baja un poco.",
-  "tip": "Antes de cambiar de plan o de persona por aburrimiento, pregúntate si lo que falta es conversación nueva o simplemente un rato de calma. Probar algo nuevo juntos suele revivir el interés sin tener que empezar de cero."
- },
- "venus-leo": {
-  "texto": "Venus es el planeta del amor, el cariño y lo que te gusta en la vida. Cuando Venus cae en Leo, amas a lo grande, como quien hace una fiesta por un cumpleaños ajeno. Necesitas sentir calidez, admiración y que te miren con ganas. Y cuando das cariño, lo das con el corazón en la mano y sin medias tintas. Eso sí, te gusta brillar en la relación, y eso no es malo, solo hay que saberlo.",
-  "en_el_dia_a_dia": "Tu pareja te hace un detalle pequeño, como dejarte el café preparado o un mensaje que dice 'te vi hoy y pensé en ti'. Tú te emocionas, te sientes especial, y le devuelves el gesto con creces: una cena bonita o una frase que se queda grabada. Así funciona tu amor: se nota.",
-  "luz": "Eres generoso, leal y capaz de hacer que la persona que quieres se sienta la más importante del mundo. Tu cariño es cálido, sincero y alegre.",
-  "sombra": "A veces necesitas tanto aplauso que te cuesta conformarte con un amor tranquilo. Si no te sientes admirado, puedes ponerte dramático, como un actor al que no le dan el aplauso final.",
-  "tip": "Dile a la otra persona qué te hace sentir querido, con palabras concretas. Y pregúntale qué le hace sentir así a ella. Escuchar también es un gesto de amor, aunque no tenga tanto brillo como una dedicatoria en el escenario."
- },
- "venus-libra": {
-  "texto": "Venus es el planeta del amor, el placer y lo que te hace sentir bien con los demás. Cuando Venus está en Libra, amar es casi un deporte de equilibrio: buscas armonía, trato justo y una pareja con la que compartir la vida como si fuera un café a medias y sin peleas por la última cucharada. Libra es el signo de la balanza, así que te importa mucho que haya reciprocidad, belleza y buen rollo. Sí, también eres de los que tardan diez minutos en elegir una serie, pero cuando eliges a alguien lo haces con cuidado.",
-  "en_el_dia_a_dia": "Estás en una cena de amigos y hay que decidir restaurante. Tú propones tres opciones, preguntas qué le apetece a cada uno y terminas siendo el que une al grupo sin que nadie se sienta ignorado. Eso es Venus en Libra: buscar que todos queden contentos, incluido tú.",
-  "luz": "Eres detallista, diplomático y tienes un ojo muy fino para lo bonito y lo justo. Haces que la gente se sienta vista y querida.",
-  "sombra": "A veces cedes tanto para evitar conflictos que luego te quedas con el resentimiento guardado como si fuera un tupper olvidado en la nevera.",
-  "tip": "Antes de decir 'me da igual', pregúntate qué te apetece de verdad. Decir tu preferencia con amabilidad también es una forma de cuidar la relación."
- },
- "venus-piscis": {
-  "texto": "Venus es el planeta del amor, el cariño y lo que te gusta: cómo quieres, cómo te enamoras y qué te hace sentir bien. Cuando Venus cae en Piscis, tu forma de querer es suave, romántica y muy empática, como esa persona que llora con las películas y luego te recuerda que tiene que ser de un tono casi divino. Piscis es el signo de la sensibilidad y la imaginación, así que amas con el corazón abierto y con mucha intuición. Eres de los que entienden lo que el otro siente sin que lo diga, aunque a veces te pierdas en la nube del romance.",
-  "en_el_dia_a_dia": "Tu pareja tiene un mal día y no te dice nada, pero tú notas el silencio raro, le preparas su café favorito y le dejas una nota tonta en la nevera. Ese detalle, sin hacer ruido, es tu Venus en Piscis en acción.",
-  "luz": "Das ternura de verdad, sabes escuchar y haces que el otro se sienta comprendido y querido sin esfuerzo.",
-  "sombra": "Te puedes enamorar de la idea de la persona más que de la persona real, y a veces te cuesta poner límites cuando te dejas llevar por el sacrificio.",
-  "tip": "Antes de idealizar a alguien, pregúntate qué hace de verdad, no solo qué promete. Y recuerda que pedir lo que necesitas también es amar."
- },
- "venus-sagitario": {
-  "texto": "Venus es el planeta del amor y del gusto: marca cómo quieres a alguien y qué cosas te hacen sentir bien. Cuando Venus cae en Sagitario, tú amas con espacio, con humor y con ganas de descubrir mundo. Eres de los que no aguantan una relación de sofá y manta sin una aventura de por medio. Sagitario es el signo del viajero y del filósofo, así que buscas a alguien con quien charlar de todo, desde la política hasta por qué el café sabe distinto en cada país. Y sí, si la pareja se vuelve aburrida, tu corazón empieza a mirar el horizonte como quien mira el móvil en una reunión eterna.",
-  "en_el_dia_a_dia": "Quedas con alguien un jueves cualquiera y, en vez de ir al mismo bar de siempre, propones una ruta nueva: un mercado, una exposición o un mirador que no conocéis. Esa chispa de improvisar juntos es tu forma de decir 'me importas'.",
-  "luz": "Eres generoso, sincero y alegre. Das libertad de verdad, sin controlar, y haces que la otra persona se sienta curiosa y viva a tu lado.",
-  "sombra": "A veces confundes libertad con huida y te cuesta comprometerte cuando la rutina llama a la puerta. Tu franqueza puede sonar brusca, aunque casi nunca sea mala intención.",
-  "tip": "Cuando sientas ganas de salir corriendo, prueba a decir en voz alta qué te asusta del compromiso. Hablarlo suele desinflar el impulso de escapar y deja espacio para la aventura compartida."
- },
- "venus-tauro": {
-  "texto": "Venus es el planeta del amor, el placer y lo que te hace sentir bien. Cuando Venus cae en Tauro, tu forma de amar pide calma, tacto y cosas que se puedan tocar: una buena comida, un abrazo largo, una manta en el sofá. Tauro es el signo de la tierra y de la estabilidad, así que tú no te enamoras a lo loco de un día para otro, te enamoras como quien planta un árbol: despacio y para quedarte. Y si alguien te promete amor eterno pero no te cocina ni te llama, ya sabes que tu radar de lo auténtico suena más fuerte que una alarma de incendios.",
-  "en_el_dia_a_dia": "Llegas a casa después de un día horrible y lo que más te reconforta no es un mensaje bonito, sino que alguien te prepare tu comida favorita o te diga 'siéntate, yo me encargo'. Ese gesto concreto te dice más que mil palabras.",
-  "luz": "Eres leal, sensual en el mejor sentido y capaz de dar una estabilidad que hace que la gente se sienta en casa. Tu amor se nota en los detalles que se repiten.",
-  "sombra": "Puedes aferrarte a lo conocido aunque ya no te haga bien, y te cuesta soltar un vínculo o un hábito que ya no suma. Tu terquedad, a veces, parece amor, pero es miedo al cambio.",
-  "tip": "Antes de decidir si una relación te encaja, observa los actos durante varias semanas, no las promesas del primer mes. Y dedica un rato a algo que te dé placer sin prisas, como cocinar, pasear o escuchar música, porque tu Venus también se alimenta de eso."
- },
- "venus-virgo": {
-  "texto": "Venus es el planeta del amor, el placer y lo que te hace sentir bien. Cuando cae en Virgo, tu forma de querer tiene un toque de orden y detalle: quieres que el cariño se note en los hechos, no solo en las palabras. Eres de los que recuerdan que a alguien le gusta el café sin azúcar y aparecen con uno un día que está cansado. Virgo es el signo del cuidado y del \"a ver, esto cómo se arregla\", así que tu amor tiende a ser práctico, atento y bastante exigente contigo mismo. Ojo: no es frialdad, es que tu cariño viene con manual de instrucciones, y eso a veces asusta a quien no lo lee.",
-  "en_el_dia_a_dia": "Un amigo te cuenta que está agobiado con una mudanza. Tú no le mandas solo un \"ánimo\": le preparas una lista de cajas, pides el camión y le llevas la comida del sábado. Así es tu Venus en Virgo: el amor en forma de tareas bien hechas.",
-  "luz": "Tu cariño es fiable y detallista. Haces sentir a los demás que se les cuida de verdad, con gestos concretos que se notan y se agradecen.",
-  "sombra": "A veces confundes querer con corregir. Si cada detalle que no te gusta sale a la luz, la otra persona puede sentir que nunca es suficiente, aunque tú lo digas con buena intención.",
-  "tip": "Antes de arreglar algo de la otra persona, pregúntate si te lo ha pedido. Y de vez en cuando, dile \"me gusta esto de ti\" sin añadir ninguna mejora al final."
- }
+  "ascendente-acuario": {
+    "texto": "El Ascendente es la cara que pones antes de que te conozcan del todo: la primera impresión que deja tu energía en una habitación. Si lo tienes en Acuario, la gente te ve como alguien original, con ideas propias y un punto de rareza que llama la atención. Tú no vas de figurante: vas de protagonista de tu propia peli indie. Y aunque por fuera pareces algo distante o muy racional, en realidad eres curioso y bastante más cercano de lo que aparentas cuando alguien te da confianza.",
+    "en_el_dia_a_dia": "Llegas a una cena de amigos y en vez de hablar del tiempo sueltas una teoría sobre por qué los gatos nos miran fijo. Todos se quedan pensando, unos fascinados y otros un poco perdidos, pero nadie te olvida al final de la noche.",
+    "luz": "Pareces auténtico y con ideas frescas. La gente te percibe como alguien que piensa por sí mismo y que no sigue la corriente porque sí.",
+    "sombra": "A veces tu aire de 'no me pertenezco del todo' hace que parezcas frío o desconectado, aunque por dentro te importe más de lo que dejas ver.",
+    "tip": "Antes de sacar tu teoría más original, lanza una pregunta sobre la otra persona. Tu rareza brilla más cuando la gente siente que la invitas a entrar."
+  },
+  "ascendente-aries": {
+    "texto": "El Ascendente es la primera impresión que das antes de abrir la boca: es como la portada de tu libro. Si lo tienes en Aries, la gente te percibe como alguien directo, con energía y ganas de empezar cosas. Aries es el primer signo del zodiaco y lo rige Marte, el planeta de la acción, así que tu carta de presentación dice «aquí estoy, vamos». Ojo, no es que vayas gritando por la calle; es que entras en una habitación y se nota que tienes prisa por vivir.",
+    "en_el_dia_a_dia": "Estás en una reunión y nadie se decide a proponer nada. Tú dices: «Pues empiezo yo y que me corrijan». La gente te ve como el que mueve la pelota mientras los demás todavía están buscando el balón.",
+    "luz": "Eres valiente para arrancar, te lanzas sin esperar a tenerlo todo perfecto y contagias ganas de hacer cosas.",
+    "sombra": "A veces te lanzas tan rápido que te olvidas de mirar si hay suelo. Y la paciencia te dura lo que la batería de un móvil nuevo en el frío.",
+    "tip": "Antes de decir «yo me encargo», cuenta hasta tres. Tu entusiasmo gana puntos cuando va acompañado de un plan."
+  },
+  "ascendente-cancer": {
+    "texto": "El Ascendente es la primera impresión que das antes de abrir la boca, la cara que ve el mundo al cruzarse contigo. Cuando sale Cáncer, tu fachada es de calidez y cercanía: pareces el amigo que te trae sopa cuando estás malito. Por dentro puede que tengas una coraza más dura, pero la mayoría de la gente solo ve el abrazo. Es como una casa con la puerta siempre entreabierta y olor a bizcocho: la gente entra sin pensarlo. Eso sí, la fachada es un poco de caracol: se esconde rápido si notas que te atacan.",
+    "en_el_dia_a_dia": "Entras a una reunión nueva y, en diez minutos, alguien ya te está contando su mudanza. No lo buscaste: tu tono suave y tu sonrisa de abuela acogedora hacen que la gente se sienta en casa contigo.",
+    "luz": "Transmites seguridad emocional: la gente sabe que puede confiar en ti sin que tengas que pedir nada.",
+    "sombra": "A veces tu primera impresión parece más blanda de lo que eres, y te cuesta que te tomen en serio cuando hace falta firmeza.",
+    "tip": "Cuando quieras que te vean también con firmeza, di en voz alta lo que necesitas en frases cortas. Un 'esto me importa' dicho con calma cambia la imagen más que cualquier esfuerzo."
+  },
+  "ascendente-capricornio": {
+    "texto": "El Ascendente es la primera impresión que das antes de abrir la boca, la cara que ve el mundo al cruzarse contigo en el metro. Si tu Ascendente está en Capricornio, la gente te percibe como alguien serio, sensato y con los pies en la tierra, de los que no se van de fiesta sin un plan B. Tu aire es de adulto responsable, incluso si por dentro tienes ganas de hacer el tonto. Es como llevar traje a una boda: no es que no sepas divertirte, es que llegas con cara de querer que todo salga bien. Esa imagen de seriedad suele generar confianza casi al instante.",
+    "en_el_dia_a_dia": "Entras a una reunión de trabajo nueva y, sin decir nada, los demás asumen que eres el que sabe lo que hace. Te piden que lleves la lista de tareas aunque no te hayas ofrecido, porque tu cara dice 'este lo tiene controlado'.",
+    "luz": "Transmites solidez y fiabilidad. La gente siente que puede apoyarse en ti y eso te abre muchas puertas.",
+    "sombra": "A veces tu seriedad se confunde con frialdad o distancia, y la gente no ve lo cálido que eres hasta que te conoce bien.",
+    "tip": "Cuando conozcas a alguien, suelta una broma tonta o cuenta algo personal pronto. Así tu primera impresión se completa con lo que de verdad eres."
+  },
+  "ascendente-escorpio": {
+    "texto": "El Ascendente es la primera impresión que das antes de abrir la boca: la cara que pones, cómo entras en una sala, lo que la gente cree de ti en los primeros cinco minutos. Con Escorpio como Ascendente, esa impresión tiene peso y misterio, como si llegaras con una canción de fondo que nadie más oye. Escorpio se rige por Plutón y Marte, así que la energía es intensa, observadora y poco de hablar por hablar. Tú miras primero, juzgas despacio y no regalas confianza por cualquier cosa. La gente te percibe como alguien que ve más de lo que dice, y eso intriga bastante.",
+    "en_el_dia_a_dia": "Entras a una reunión nueva, te quedas un par de segundos en silencio observando quién manda y quién finge, y la gente acaba pensando que tienes un plan secreto. En realidad solo estabas escaneando el ambiente, como quien busca el enchufe antes de sentarse.",
+    "luz": "Transmites profundidad y lealtad. La gente sabe que contigo no se juega a medias y que tu palabra vale.",
+    "sombra": "A veces el silencio te sale de fábrica y los demás lo leen como frialdad o desconfianza. Tu intensidad puede imponerse antes de que te conozcan.",
+    "tip": "Cuando entres en un sitio nuevo, sonríe y di algo ligero en los primeros minutos. Tu intriga se mantiene, pero tu calidez se nota desde el principio."
+  },
+  "ascendente-geminis": {
+    "texto": "El Ascendente es la cara que pones al mundo antes de que abras la boca: la primera impresión que se llevan de ti en los cinco minutos que tardan en decidir si les caes bien. Con Géminis en el Ascendente, esa primera impresión es la de alguien vivaz, curioso y con conversación de sobra. Tú llegas y ya estás contando tres cosas a la vez, como una pestaña del navegador que nunca se cierra. La gente te ve como alguien fácil de hablar, ágil y con gracia, aunque por dentro quizá no estés tan seguro de tu sitio como pareces desde fuera.",
+    "en_el_dia_a_dia": "Entras a una reunión o a una fiesta con un amigo nuevo y, sin querer, ya eres el que hace que la conversación fluya: tienes una anécdota para cada tema y todos se quedan con la sensación de que eres muy simpático, aunque tú solo estabas tratando de romper el hielo.",
+    "luz": "Te ven como alguien ingenioso, cercano y capaz de conectar con casi cualquiera. Tu energía abre puertas.",
+    "sombra": "A veces tu chispa se confunde con dispersión: pasas de un tema a otro tan rápido que la gente no sabe si te interesa lo que te cuentan. Y cuidado con prometer más de lo que vas a cumplir.",
+    "tip": "Antes de una situación importante, elige una sola idea que quieras transmitir y repítela con calma. Así tu primera impresión será tan brillante como profunda, no solo rápida."
+  },
+  "ascendente-leo": {
+    "texto": "Tu Ascendente es el signo que sale por el horizonte en el momento exacto en que naciste. Es, en pocas palabras, la primera impresión que das antes de abrir la boca. Si tu Ascendente es Leo, la gente te nota de entrada: entras a un sitio y la energía se mueve un poco. No es que vayas con foco de teatro, pero sí tienes presencia, calidez y ganas de brillar. Como cuando llegas a una fiesta y, sin querer, todos se giran a ver quién es.",
+    "en_el_dia_a_dia": "Entras a una reunión de trabajo y, sin proponértelo, la gente te busca para opinar. Te dan la palabra primero porque transmites seguridad y entusiasmo, aunque por dentro estés tan nervioso como cualquiera al hablar en público.",
+    "luz": "Generosidad y carisma natural. Animas a los demás y contagias buen humor cuando el ambiente está apagado.",
+    "sombra": "Puedes necesitar demasiado aplauso, y si no llega, te cuesta disimular la decepción. A veces el drama se te cuela aunque no lo busques.",
+    "tip": "Antes de una situación importante, pregúntate qué quieres aportar, no solo cómo quieres que te vean. Así tu brillo sale auténtico y te cansas menos."
+  },
+  "ascendente-libra": {
+    "texto": "El Ascendente es la primera impresión que das antes de abrir la boca, la cara con la que entras a una sala. Si lo tienes en Libra, la gente te percibe como alguien amable, elegante y fácil de tratar, como el vecino que siempre tiene buena cara incluso un lunes a las ocho de la mañana. Tú pones armonía donde hay tensión y casi siempre sabes qué decir para que el ambiente se relaje. Eso sí, la gente tiende a verte como alguien encantador y equilibrado, aunque por dentro tengas dudas que no cuentas a cualquiera.",
+    "en_el_dia_a_dia": "Llegas a una reunión de trabajo donde dos compañeros discuten, y sin levantar la voz consigues que ambos se sientan escuchados. Tu primera impresión es de persona tranquila y justa, aunque por dentro estés pensando qué almorzar.",
+    "luz": "Sabes crear puentes entre personas distintas y dejas a la gente con buen sabor de boca.",
+    "sombra": "A veces cuesta tanto quedar bien con todos que te olvidas de decir lo que tú quieres de verdad.",
+    "tip": "Antes de decir que sí a algo, pregúntate en voz baja si lo quieres o solo quieres evitar un conflicto. Tu paz es importante, pero también tu opinión."
+  },
+  "ascendente-piscis": {
+    "texto": "El Ascendente es la primera impresión que das al mundo, esa cara que ven antes de que abras la boca. Si lo tienes en Piscis, la gente te percibe como alguien suave, empático y un poco soñador, como si llevaras una manta invisible encima. Tú no siempre te das cuenta de cuánto transmites calma, pero la gente se acerca a contarte cosas sin saber muy bien por qué. Es como el wifi de una cafetería buena: nadie lo nota hasta que lo necesita.",
+    "en_el_dia_a_dia": "Entras a una reunión nueva y, sin hablar mucho, alguien ya te cuenta su problema personal en cinco minutos. Tú piensas que solo fuiste amable, pero los demás te ven como esa persona de confianza con la que se desahogan.",
+    "luz": "Generas un espacio seguro donde otros se sienten comprendidos y acogidos sin juzgarles.",
+    "sombra": "A veces te disuelves tanto en el ambiente que te cuesta saber qué quieres tú, como un café que se queda con el sabor de la leche.",
+    "tip": "Antes de decir que sí a algo, haz una pausa de diez segundos y pregúntate qué sientes tú, no solo lo que el otro espera."
+  },
+  "ascendente-sagitario": {
+    "texto": "El Ascendente es la primera impresión que das antes de abrir la boca del todo: la cara que ponen los demás cuando te conocen. Si lo tienes en Sagitario, la gente te ve como alguien con energía de viajero, optimista y con ganas de aventura, como el amigo que propone irse a la playa un jueves sin avisar. Tu carta de presentación dice: \"tengo ganas de descubrir cosas\". No es mala señal, solo que tu entusiasmo llega antes que tus planes.",
+    "en_el_dia_a_dia": "Estás en una reunión tranquila y sueltas, sin pensarlo mucho, \"oye, ¿y si nos vamos el finde a la montaña?\". La gente te mira como si fueras el que siempre tiene un plan B, C y D, aunque tú solo quisieras charlar.",
+    "luz": "Transmites curiosidad, optimismo y franqueza. Haces que la gente se anime y se sienta con ganas de explorar algo nuevo.",
+    "sombra": "A veces prometes más de lo que cumples o hablas sin filtro. La franqueza es un regalo, pero también puede sonar a sermón si se pasa de frenada.",
+    "tip": "Antes de lanzar un plan épico, pregúntate si lo puedes sostener hasta el final. Tu entusiasmo gana puntos cuando va acompañado de un calendario que aguante la semana."
+  },
+  "ascendente-tauro": {
+    "texto": "El Ascendente es la primera impresión que das antes de abrir la boca: lo que la gente nota en tu forma de moverte, mirar y vestir. Con Tauro como Ascendente, tu primera impresión es la de alguien tranquilo, sólido y de fiar, como un sofá cómodo que aguanta bien las visitas. Tauro es el signo de la tierra y del placer sereno, así que los demás suelen sentir que contigo las cosas van a ir despacio, pero bien. Eso sí, no te vendas como alguien con prisa: la gente te ve como alguien que disfruta lo que tiene.",
+    "en_el_dia_a_dia": "Llegas a una reunión y, sin decir nada, pareces la persona que ya tiene el café pedido y el plan claro. Los compañeros se acercan a ti cuando algo se tuerce porque transmites calma, aunque por dentro estés hecho un lío.",
+    "luz": "Transmites estabilidad y calidez real. La gente se siente segura cerca de ti.",
+    "sombra": "A veces tu calma se confunde con terquedad o con que no te mueves ni por el wifi. Cuesta sacarte de tu sitio, y eso también tiene su precio.",
+    "tip": "Antes de decir que no a algo nuevo, dale tres días. Tu primera reacción es de sofá; tu segunda suele ser más abierta y te sorprenderá."
+  },
+  "ascendente-virgo": {
+    "texto": "El Ascendente es la primera impresión que das, la cara que ve el mundo antes de que te conozca de verdad. Cuando tienes Virgo ahí, la gente suele notar enseguida que eres ordenado, observador y que te fijas en los detalles. Puede que piensen que eres un poco serio o reservado al principio, como un libro bien encuadernado que no abres en la primera cena. Pero no te preocupes: es solo la portada. Por dentro hay alguien con muchísimo sentido práctico.",
+    "en_el_dia_a_dia": "Llegas a una reunión de amigos y, sin querer, ya has notado que la nevera está a medio vaciar y que alguien ha dejado la puerta mal cerrada. Te toca ayudar a recoger y acabas organizando la cocina sin que nadie te lo pida, mientras los demás te miran como si fueras el encargado del local.",
+    "luz": "Eres de fiar: cumples lo que prometes, te preocupas por lo que de verdad importa y la gente sabe que puede contar contigo para resolver algo.",
+    "sombra": "Tu ojo para los detalles a veces se pasa de rosca y te fijas en lo que sobra o falta antes que en lo bueno. Tu paciencia con los demás puede durar menos que el wifi del tren.",
+    "tip": "Antes de corregir algo a alguien, pregúntate si es un error de verdad o solo una manera distinta de hacerlo. Y deja que la gente vea también tu lado cálido, que es más grande de lo que aparenta."
+  },
+  "luna-acuario": {
+    "texto": "Vale, empecemos. La Luna en la carta natal habla de tus emociones y de lo que necesitas para sentirte a salvo, como tu manual de mantenimiento interno. Y tu Luna cae en Acuario, el signo del aire que va por libre. Eso significa que te sientes tranquilo cuando tienes espacio, ideas nuevas y gente que respeta tu independencia. Si alguien te exige pegarte a él todo el día, tu sistema emocional se pone a buscar la salida como un gato al que cierran la puerta. Y ojo, tú necesitas sentir que tu forma de pensar es libre.",
+    "en_el_dia_a_dia": "Te toca un plan de fin de semana con amigos, pero tú necesitas un rato a solas para recargar. Si te lo permites sin darle mil vueltas, llegas al grupo con buena energía. Si te obligas a quedarte, acabas contando los minutos como en una sala de espera.",
+    "luz": "Tienes una mente original y una enorme capacidad para aceptar a la gente tal como es. Dejas que cada cual sea como quiera, y eso genera confianza de verdad.",
+    "sombra": "A veces te distancias emocionalmente sin avisar, como quien se pone los auriculares en el metro. Puede dejar a los demás con la duda de si les quieres cerca.",
+    "tip": "Antes de cerrar la puerta, di en voz alta lo que necesitas: 'me voy un rato a mi bola, luego nos vemos'. Te ahorras malentendidos y tu espacio sigue siendo tuyo sin que nadie se sienta abandonado."
+  },
+  "luna-aries": {
+    "texto": "Vale, empecemos: la Luna es tu parte emocional, lo que te hace sentir en casa y a salvo. Cuando está en Aries, esa parte funciona a toda velocidad, como un café doble a las ocho de la mañana. Tú sientes rápido, reaccionas en caliente y necesitas claridad, acción y que las cosas se resuelvan ya. Quedarte dando vueltas a un sentimiento sin hacer nada te pone de los nervios, y eso también es parte de tu paz.",
+    "en_el_dia_a_dia": "Alguien te suelta una crítica en una reunión. Tu emoción sale primero, en un segundo, y ya estás pensando en qué contestar. Si después de un rato respiras y dices lo que sientes sin dramatizar, te quedas tranquilo. Si te lo guardas, te come por dentro como un mosquito en verano.",
+    "luz": "Eres valiente para decir lo que sientes y te recuperas rápido de los disgustos. Tu energía anima a otros a moverse.",
+    "sombra": "A veces saltas antes de mirar, y te enfadas más rápido de lo que te gustaría. Cuesta que pidas ayuda, porque preferirías arreglarlo solo.",
+    "tip": "Cuando notes que la emoción sube, cuenta hasta diez antes de responder. Y después di en voz alta qué necesitas, en una frase corta. Te ahorrará más de una discusión."
+  },
+  "luna-cancer": {
+    "texto": "Vale, la Luna es tu parte emocional: lo que sientes, lo que te hace sentir en casa y lo que necesitas para relajarte de verdad. Cuando está en Cáncer, tu mundo interior pide nido. Cáncer es un signo de agua, el de la casa, la familia y el cuidado, así que tu corazón funciona mejor cuando hay gente querida cerca y un sitio donde no tengas que fingir. Eso sí, tu sensibilidad va en modo radar: lo notas todo, aunque nadie te diga nada. Es como tener el wifi de las emociones siempre encendido, con buena cobertura y algún que otro corte.",
+    "en_el_dia_a_dia": "Llegas a casa después de un día largo y, sin saber por qué, te pesa el ánimo. Basta con que alguien te prepare algo caliente, te escuche diez minutos y te diga que no pasa nada, para que vuelvas a respirar. Ese alivio es tu Luna en Cáncer pidiendo refugio.",
+    "luz": "Eres de los que cuidan con todo el corazón: sabes crear un ambiente acogedor, recordar detalles importantes y ser ese amigo al que se acude cuando algo va mal. Tu intuición emocional es una brújula muy fina.",
+    "sombra": "A veces te guardas las cosas hasta que se te llena el depósito y explotan por un detalle tonto. También puedes ponerte a la defensiva si sientes que no te cuidan igual que tú cuidas a los demás.",
+    "tip": "Antes de decidir cómo te sientes, pon nombre a la emoción en voz alta o por escrito. Y cuando te sientas sobrepasado, date permiso para pedir un abrazo, un rato a solas o una conversación sincera. Pedir refugio también es cuidarte."
+  },
+  "luna-capricornio": {
+    "texto": "La Luna es tu parte emocional: lo que te hace sentir en casa y a salvo. Cuando está en Capricornio, tu paz llega con orden, planes claros y la sensación de que las cosas están bajo control. Tu corazón no se rinde al caos, así que necesitas estructura para relajarte. Es como un termo de café: caliente, sólido y bien cerrado, aunque al principio cueste abrirlo. Eso sí, quieres que la vida cumpla lo prometido, y te afecta más de lo que admites.",
+    "en_el_dia_a_dia": "Te sientes tranquilo cuando tienes la agenda de la semana medio organizada, la nevera llena y un plan para el fin de semana. Si todo se descontrola de golpe, tu cabeza entra en modo bombero y empiezas a hacer listas hasta para ir a por pan.",
+    "luz": "Eres de fiar. Cumples lo que dices, aguantas el tirón cuando otros se rinden y das seguridad a quienes te rodean.",
+    "sombra": "Puedes ser demasiado duro contigo y con los demás cuando algo no sale como esperabas. Cuesta que te muestres vulnerable, aunque por dentro lo necesites.",
+    "tip": "Antes de decidir si algo va bien o mal, escribe tres cosas que sí han salido bien esta semana. Tu parte práctica necesita pruebas, y esta es una buena."
+  },
+  "luna-escorpio": {
+    "texto": "La Luna en Escorpio es la parte de ti que siente hondo y no lo anuncia a los cuatro vientos. Tus emociones no son un charco, son un pozo: cuesta ver el fondo, pero hay mucho ahí abajo. Necesitas sentirte a salvo para bajar la guardia, y eso lo consigues con lealtad real, no con promesas bonitas. Si alguien te gana la confianza, se queda grabado como tatuaje, no como pegatina.",
+    "en_el_dia_a_dia": "Tu amiga te cuenta algo a medias y tú notas el tono antes que las palabras. No dices nada en el momento, pero dos días después le preguntas por eso con una precisión que la deja sin palabras. Tu radar emocional funciona como un GPS que nadie te pidió.",
+    "luz": "Eres de los que aguantan la tormenta sin hacer ruido y cuidan a los demás con una lealtad que da gusto. Tu intuición acierta más de lo que te gustaría admitir.",
+    "sombra": "A veces guardas tanto que tu cabeza se convierte en una olla a presión sin válvula. Y cuando desconfías, pones a prueba a la gente como quien revisa la cerradura tres veces antes de dormir.",
+    "tip": "Antes de cerrar una conversación difícil, di en voz alta lo que sientes en una frase corta. No hace falta contarlo todo; basta con dejar una puerta abierta para que el otro entre."
+  },
+  "luna-geminis": {
+    "texto": "Vale, empecemos. La Luna en tu carta natal es lo que sientes por dentro, lo que te calma y lo que necesitas para sentirte a salvo. Si está en Géminis, tu mundo emocional funciona como una radio con muchas emisoras a la vez: necesitas movimiento, conversación y mentes curiosas alrededor. Te calmas hablando, preguntando y aprendiendo algo nuevo, no encerrándote a sufrir en silencio. Eso sí, tus sentimientos pueden cambiar de canal más rápido que un mando a distancia con pilas nuevas.",
+    "en_el_dia_a_dia": "Tienes un mal día y, en vez de quedarte en el sofá dándole vueltas, llamas a una amiga, le cuentas todo en veinte mensajes de voz y acabas riéndote de algo que el lunes te parecía una tragedia.",
+    "luz": "Eres capaz de entender puntos de vista muy distintos y de explicar lo que sientes con palabras que ayudan a los demás.",
+    "sombra": "Puedes saltar de una emoción a otra sin darte cuenta y acabar agotado por tanto pensamiento que no termina de asentarse.",
+    "tip": "Cuando algo te remueva, ponlo por escrito o cuéntaselo a alguien de confianza antes de decidir cómo te sientes. Tus emociones necesitan salir por la boca para no quedarse dando vueltas."
+  },
+  "luna-leo": {
+    "texto": "La Luna en tu carta natal habla de tus emociones, de lo que te hace sentir en casa y a salvo. Si la tienes en Leo, tu corazón necesita calidez, reconocimiento y espacio para brillar un poco. Tu alma funciona como un buen anfitrión: quiere que los demás se sientan bienvenidos, pero también necesita que alguien le diga que lo está haciendo bien. No es vanidad, es sentirse visto. Eso sí, si no te dan ese aplauso, te sientes como el móvil sin cobertura: funciona, pero no conecta.",
+    "en_el_dia_a_dia": "Te cuesta un mundo que tu jefe o tu pareja no noten el esfuerzo que has hecho. Un simple 'gracias, esto te quedó genial' te alegra la semana, mientras que un trabajo perfecto pasado por alto te deja de mal humor toda la tarde.",
+    "luz": "Tu calidez es contagiosa: generas confianza, alegría y ganas de compartir. Eres de los que hacen que un grupo se sienta en familia.",
+    "sombra": "Puedes depender demasiado de la mirada ajena y sentirte herido cuando el aplauso tarda. A veces te cuesta aceptar un 'no' sin tomártelo como algo personal.",
+    "tip": "Aprende a darte tú mismo el reconocimiento: al final del día, anota una cosa que hiciste bien. Así tu seguridad no depende solo de que los demás te aplaudan."
+  },
+  "luna-libra": {
+    "texto": "Vale, empecemos: la Luna en tu carta natal es tu parte emocional, lo que necesitas para sentirte a salvo y en casa dentro de ti. Si tu Luna está en Libra, tu brújula interna busca equilibrio, armonía y que nadie se sienta fuera del grupo. Libra es el signo de la balanza, así que tu corazón funciona como un buen mediador: pesa, compara y quiere que todos queden bien. Eso sí, a veces te toca decidir y la balanza se te atasca como un ascensor en hora punta.",
+    "en_el_dia_a_dia": "Estás en una cena de amigos y hay que elegir restaurante. Tú ya tienes tres opciones en la cabeza, pero como lo que de verdad te calma es que todos estén a gusto, pasas veinte minutos buscando el sitio perfecto para el grupo, mientras la comida se enfría en el WhatsApp.",
+    "luz": "Tienes un don para leer el ambiente y hacer que la gente se sienta escuchada. Creas paz donde había tensión y sabes cuándo una broma alivia más que mil palabras.",
+    "sombra": "Te cuesta decir que no o expresar lo que quieres de verdad, porque el conflicto te pone nervioso. Acabas cediendo para evitar fricciones y luego te quedas con un poso de resentimiento.",
+    "tip": "Antes de decidir por los demás, pregúntate en voz alta: '¿qué quiero yo?'. Empieza por cosas pequeñas, como elegir la peli del viernes, y verás que la balanza se mueve sin drama."
+  },
+  "luna-piscis": {
+    "texto": "La Luna es tu parte emocional: lo que sientes por dentro y lo que necesitas para sentirte a salvo, como el sofá donde te refugias después de un día largo. Con la Luna en Piscis, tu mundo interior es amplio, sensible y muy imaginativo. Captas el ambiente de una habitación antes de que nadie diga nada, y eso es un superpoder, aunque a veces te cansa. Piscis es el signo que cierra el zodiaco, así que tu sensibilidad lleva mucha historia encima. Necesitas espacios suaves, afecto sin prisa y tiempo para soñar, porque tu corazón funciona mejor cuando no hay prisa.",
+    "en_el_dia_a_dia": "Llegas a casa tras una reunión tensa y no necesitas hablar de nada; te basta con una manta, una serie tranquila y alguien que te deje estar en silencio. Si te piden que te pongas a mil de golpe, te apagas como un móvil con el 5 %.",
+    "luz": "Empatía de verdad: entiendes a los demás sin que te lo expliquen y das consuelo que de verdad consuela.",
+    "sombra": "Puedes absorber los problemas ajenos como una esponja y olvidarte de lo que sientes tú, o refugiarte en la fantasía cuando la realidad aprieta.",
+    "tip": "Antes de decidir algo importante, pregúntate qué sentirías en paz, no solo qué te emociona. Y ponte un rato cada día para ti, sin nadie más alrededor."
+  },
+  "luna-sagitario": {
+    "texto": "Vale, empecemos: la Luna en tu carta natal es lo que sientes por dentro y lo que necesitas para sentirte a salvo, o sea, tu zona de confort emocional. Cuando está en Sagitario, esa zona huele a aire libre. Tu corazón necesita espacio, aventura y la sensación de que hay horizonte. Si te metes en una habitación sin ventanas, te sientes como un gato en una caja de zapatos. Sagitario es el signo del viajero, del filósofo despistado y del que cuenta chistes en el peor momento, así que tu paz llega cuando puedes preguntar, explorar y reírte un poco de todo.",
+    "en_el_dia_a_dia": "Tienes un domingo tranquilo, pero de pronto te entran ganas de cambiar de plan: coger el coche sin rumbo, apuntarte a un curso de algo raro o llamar a un amigo que vive en otra ciudad. Si sientes que la rutina te asfixia, no es capricho: es tu Luna pidiendo aire.",
+    "luz": "Eres de los que contagian optimismo cuando todo se tuerce. Ves salidas donde otros ven muros, y tu franqueza, bien usada, genera confianza. Tu emoción fluye cuando hay sentido y crecimiento.",
+    "sombra": "Puedes huir del malestar con planes nuevos antes de mirar lo que te pasa de verdad. Y a veces tu sinceridad llega sin filtro, como un chiste que nadie pidió. Ojo con confundir libertad con evasión.",
+    "tip": "Cuando te sientas inquieto, haz algo que te dé horizonte pero con raíz: una caminata larga sin el móvil, o una conversación honesta con alguien de confianza. Así tu Luna se calma sin que tengas que huir."
+  },
+  "luna-tauro": {
+    "texto": "La Luna en carta natal es tu mundo emocional: lo que te calma, lo que te hace sentir en casa. Cuando está en Tauro, tu paz llega por lo tangible: una comida rica, una manta buena, saber que hay un plan. Tauro es un signo de tierra, así que lo que te ancla es lo que se puede tocar y repetir. Si alguien te promete calma pero no te la demuestra, tu corazón lo nota antes que tú. Tu seguridad no se construye con palabras bonitas, sino con rutinas que se cumplen, como el café que siempre sale igual.",
+    "en_el_dia_a_dia": "Después de un día caótico en el trabajo, llegas a casa y lo que te baja las pulsaciones es preparar algo sencillo, sentarte con tu sofá favorito y oír tu playlist de siempre. No necesitas nada espectacular; necesitas que el entorno te responda como esperas.",
+    "luz": "Eres estable, leal y generoso con tu gente. Tu presencia tranquiliza a los demás porque cumples lo que dices.",
+    "sombra": "Puedes aferrarte a lo conocido más de la cuenta y cerrarte al cambio, como quien no se mueve del sofá aunque la casa se esté inundando. Recuerda que soltar también da calma.",
+    "tip": "Crea un pequeño ritual diario que te haga sentir a salvo, como un té a la misma hora o un paseo corto. Y cuando algo te inquiete, pregunta: ¿qué necesito de forma concreta? Tu Luna en Tauro agradece las respuestas prácticas."
+  },
+  "luna-virgo": {
+    "texto": "La Luna es la parte de tu carta que habla de tus emociones y de lo que necesitas para sentirte en casa. Cuando está en Virgo, tu tranquilidad depende de que las cosas tengan orden: que sepas qué va a pasar, que lo práctico esté resuelto y que nada quede a medio hacer. Eres de los que se fijan en los detalles que a otros se les escapan, y eso te da calma, aunque a veces te quite el sueño. Tu corazón no pide grandes gestos, pide coherencia: que la gente haga lo que dice. Y sí, un calcetín fuera de sitio puede arruinarte la tarde, así que no te sientas raro.",
+    "en_el_dia_a_dia": "Llegas a casa después de un día largo y lo primero que haces es ordenar la cocina y dejar lista la ropa de mañana. No es manía: así tu cabeza se apaga y puedes relajarte. Si alguien te cambia el plan a última hora, notas que se te tensa la mandíbula aunque no digas nada.",
+    "luz": "Eres cuidadoso, fiable y muy atento a lo que necesitan los demás. Cuando te comprometes, cumples, y la gente sabe que puede contar contigo.",
+    "sombra": "Puedes ser tu peor crítico: te fijas tanto en lo que sale mal que te cuesta disfrutar de lo que sale bien. A veces la perfección se convierte en una exigencia que te pesa, y eso también cansa.",
+    "tip": "Prueba a elegir cada día una cosa que no vas a revisar ni corregir. Un mensaje sin releer, una tarea sin acabar de pulir. Verás que el mundo sigue girando y que tu calma no depende de que todo esté impecable."
+  },
+  "marte-acuario": {
+    "texto": "Marte es el planeta de la acción: cómo empujas, cómo te enfadas y cómo vas a por lo que quieres. Cuando está en Acuario, tu energía no va de martillazos sino de ideas raras y brillantes. Tú no peleas por lo de siempre: peleas por lo que crees justo, por lo que tiene sentido para ti y para el grupo. Eres de los que se revientan a trabajar por una causa, pero odias que te den órdenes sin explicar el porqué. Un poco rebelde, sí, como el que cambia de canal justo cuando todos quieren ver lo mismo.",
+    "en_el_dia_a_dia": "Estás en una reunión de trabajo y todo el mundo acepta el plan de siempre sin rechistar. Tú levantas la mano y propones algo distinto, con un argumento claro. No lo haces para llevar la contraria: lo haces porque crees que se puede hacer mejor.",
+    "luz": "Tienes valentía para decir lo que piensas y ganas de mejorar las cosas en serio, sin quedarte de brazos cruzados.",
+    "sombra": "Puedes cerrarte en tu idea y pelear más por tener razón que por llegar a un acuerdo, como quien se empeña en no pedir indicaciones aunque se haya perdido.",
+    "tip": "Antes de defender tu idea, pregunta qué le preocupa a la otra persona. Escuchar primero te da más argumentos y menos discusiones innecesarias."
+  },
+  "marte-aries": {
+    "texto": "Marte es el planeta de la acción: la energía que te pone en marcha, la que sientes cuando te enfadas y la que te empuja a ir a por lo que quieres. Cuando Marte cae en Aries, esa energía va sin frenos de serie, como un coche que arranca en primera y ya va por la autopista. Aries es el signo de la iniciativa, así que tú no esperas turno: actúas primero y piensas después, y a veces ni eso. Tu enfado suele ser rápido, se enciende como una cerilla y se apaga parecido, sin rencores de película. Eso sí, si tu paciencia se mide en minutos, no te preocupes: no eres el único.",
+    "en_el_dia_a_dia": "Estás en una reunión y alguien propone una idea que ya se intentó y falló. Tú ya has levantado la mano y dicho 'hagámoslo ya' antes de que terminen la frase. Puede salir genial o acabar con un café en el suelo, pero seguro que nadie se aburre a tu lado.",
+    "luz": "Tienes un valor enorme para empezar cosas, defender lo tuyo y dar la cara. Donde otros dudan, tú das el primer paso.",
+    "sombra": "La prisa y el genio corto pueden hacerte chocar con gente que solo necesitaba un poco más de tiempo. Puedes sentir que todo tiene que pasar ya.",
+    "tip": "Antes de contestar al primer impulso, cuenta hasta tres. Tu energía no desaparece, solo llega un segundo después y con mejor puntería."
+  },
+  "marte-cancer": {
+    "texto": "Marte es el planeta de la acción: la energía de enfadarte, de ponerte en marcha y de ir a por lo que quieres. Cuando está en Cáncer, tu fuego se vuelve algo más de casa: actúas por lo que te importa y te proteges con uñas y dientes. Es como un bombero que solo sale a apagar incendios de su propia familia. Tu energía es intensa, pero sensible: te mueves con más fuerza cuando sientes que algo o alguien que quieres está en juego.",
+    "en_el_dia_a_dia": "Alguien en tu grupo de amigos cancela el plan por tercera vez y tú no dices nada en el momento. Pero al día siguiente te pones a organizar la siguiente quedada con una energía de general, porque lo que te mueve es que el grupo siga unido.",
+    "luz": "Defiendes a los tuyos con una lealtad feroz y tienes el valor de actuar cuando hace falta, sin esperar a que otro dé el primer paso.",
+    "sombra": "Puedes guardar un enfado en silencio durante días, como quien guarda un Tupper en la nevera, hasta que se abre de golpe y no sabes por qué ha explotado.",
+    "tip": "Cuando notes que te hierve la sangre, pon el foco en lo que de verdad te duele antes de actuar. Di en voz alta 'me siento así porque...' y verás que la acción sale más limpia y menos a golpes."
+  },
+  "marte-capricornio": {
+    "texto": "Marte es el planeta de la acción: es el que te pone en marcha, te da el empujón para ir a por lo que quieres y también la chispa del enfado. Cuando Marte está en Capricornio, la energía no sale a tirones como un petardo, sale como una máquina de hacer bizcochos: lenta al principio, pero constante y muy difícil de parar. Capricornio es el signo de la ambición, la disciplina y la paciencia de quien sabe que las cosas buenas no llegan en cinco minutos. Así que tú no te lanzas de cabeza sin mirar; primero planificas, calculas y luego vas a por todas. Y cuando te enfadas, no explotas: se te acumula y lo sueltas cuando ya tienes un plan.",
+    "en_el_dia_a_dia": "Te propones aprender a hacer una cosa nueva, por ejemplo un idioma. No te apuntas a la primera clase y ya: haces un calendario, buscas un método y te pones metas semanales. Al cabo de meses, mientras otros lo dejaron a la segunda semana, tú sigues ahí, con tu libreta y tu constancia de hormiga.",
+    "luz": "Tu fuerza tranquila: cumples lo que prometes y consigues metas largas que a otros se les escapan.",
+    "sombra": "Puedes guardar rencor en silencio más de la cuenta y cargar tú solo con todo porque te cuesta pedir ayuda, como si pedirla fuera perder puntos.",
+    "tip": "Cuando notes que algo te molesta, dilo pronto y en voz alta, aunque sea en una frase corta. Así la energía sale antes de convertirse en un nudo y tu paciencia no tendrá que aguantar tanto."
+  },
+  "marte-escorpio": {
+    "texto": "Marte es el planeta de la acción: es lo que te mueve, lo que te hace levantarte, enfadarte o ir a por algo. Cuando está en Escorpio, tu energía no va a la carrera, va en silencio y con mucha intensidad. Piensa en alguien que no grita pero que, cuando se propone algo, no hay quien lo pare. Tu fuego es más de brasas que de hoguera: tarda en encenderse, pero quema durante mucho tiempo. Y si alguien te ha fallado, te acuerdas. Como un buen cajón de memoria, que no olvida nada.",
+    "en_el_dia_a_dia": "Te han dicho algo que te sienta mal en una reunión. No dices nada en el momento, pero esa tarde preparas tu respuesta con calma y la sueltas en el momento justo, cuando nadie se lo espera.",
+    "luz": "Tienes una determinación enorme y una lealtad que no se compra. Cuando te comprometes, cumples hasta el final, incluso cuando los demás ya se han rendido.",
+    "sombra": "A veces guardas rencor más tiempo del que te conviene, y tu silencio puede parecer frialdad. Como un fuego que no se apaga del todo, a veces te quema también a ti.",
+    "tip": "Cuando algo te moleste, dilo el mismo día en lugar de dejarlo madurar. Una frase sincera a tiempo vale más que una larga factura guardada en el cajón."
+  },
+  "marte-geminis": {
+    "texto": "Marte es el planeta de la acción: la energía con la que te enfadas, te pones en marcha y vas a por lo que quieres, como el que sale corriendo cuando suena la alarma. Cuando Marte cae en Géminis, esa energía se vuelve rápida, curiosa y muy hablada. Tú no te enfadas en silencio: discutes, argumentas, cambias de frente y te aburres si la conversación no avanza. Géminis es el signo de la mente ágil, así que tu impulso va por la palabra, la idea y el movimiento constante, más que por la fuerza bruta.",
+    "en_el_dia_a_dia": "Te molesta un comentario en el grupo de WhatsApp y, en vez de dejarlo pasar, contestas en tres mensajes seguidos con argumentos, y luego te acuerdas de que querías estar en otra cosa. Tu enfado sale rápido, en forma de frase ingeniosa, y se te pasa casi tan rápido como llega.",
+    "luz": "Tienes una valentía verbal enorme: dices lo que piensas, improvisas bien bajo presión y sabes convencer con ingenio. Cuando algo te importa, te pones en modo acción y avanzas con chispa.",
+    "sombra": "Te cuesta sostener un mismo conflicto o una misma tarea mucho tiempo. Puedes empezar mil discusiones o proyectos y dejar la mitad a medias, como un tren que para en todas las estaciones sin llegar nunca.",
+    "tip": "Antes de contestar en caliente, escribe tu respuesta en el móvil y espera diez minutos. Si al releerla sigue pareciéndote buena, envíala; si no, verás que te quedaba más ingenio que razón."
+  },
+  "marte-leo": {
+    "texto": "Marte es el planeta de la acción: la energía que te pone en marcha, el impulso que hace que te enfades rápido o que vayas a por lo que quieres sin pensarlo dos veces. Cuando Marte cae en Leo, esa energía se viste de gala. Tú actúas con ganas de que te vean, de destacar y de dejar huella. Si te enfadas, lo haces con fuego, y si quieres algo, lo quieres con convicción. Es como tener un motor de deportivo con un volante de color llamativo: no pasas desapercibido.",
+    "en_el_dia_a_dia": "Estás en una reunión de equipo y el proyecto va a salir mal por un fallo que nadie quiere asumir. Tú te plantas, propones la solución y te pones al frente para sacarla adelante, aunque eso signifique que todos te miren. Quieres que se note tu esfuerzo, y lo defiendes con energía.",
+    "luz": "Tienes valentía, liderazgo y una generosidad enorme cuando te comprometes de corazón. Contagias entusiasmo y sabes tomar la iniciativa cuando hace falta.",
+    "sombra": "Puedes convertir un pequeño roce en un incendio, y necesitas reconocimiento más de lo que admites. Cuando no te ven, te frustras y el orgullo te puede jugar malas pasadas.",
+    "tip": "Antes de contestar en caliente, cuenta hasta tres y pregúntate si lo que te molesta es el asunto o que no te hayan dado la razón. Canalizar ese fuego en algo creativo o deportivo le sienta de maravilla."
+  },
+  "marte-libra": {
+    "texto": "Marte es el planeta de la acción: la energía que te pone en marcha, el impulso de discutir, competir y ir a por lo que quieres. Cuando está en Libra, ese empuje se mezcla con el deseo de equilibrio y de caer bien. Tú peleas, pero intentas que todos salgan con la sensación de que se ha hecho justicia. Es como un bombero que quiere apagar el fuego sin hacer ruido ni mojar a nadie. Tu acción llega con cortesía, aunque a veces te cueste ser amable cuando te hierven las venas.",
+    "en_el_dia_a_dia": "Estás en una reunión y tu compañero propone algo que te parece injusto. En lugar de estallar, sueltas un argumento tan educado y bien construido que nadie puede ignorarlo, y lo consigues sin levantar la voz.",
+    "luz": "Defiendes lo justo con valentía y sabes negociar sin perder la pelea de vista. Tu energía convence más por la forma que por la fuerza.",
+    "sombra": "Cuando te sientes desequilibrado, te cuesta decidir y la rabia se queda dando vueltas dentro hasta que sale de golpe, como un vaso que se rebosa.",
+    "tip": "Antes de contestar a algo que te enfada, cuenta hasta tres y pregúntate qué quieres conseguir de verdad. Así tu energía va al objetivo y no a la discusión por la discusión."
+  },
+  "marte-piscis": {
+    "texto": "Marte es el planeta de la acción: es lo que te pone en marcha, lo que te hace enfadarte cuando algo no te gusta y lo que te empuja a ir a por lo que quieres. Es tu motor, el del coche que arranca cuando te pones el cinturón. Tener a Marte en Piscis significa que tu energía no va de frente, sino que se mueve como el agua: rodea, se adapta y a veces se cuela por donde menos te lo esperas. Tú peleas, pero prefieres hacerlo con sensibilidad y sin hacer ruido, como quien cocina a fuego lento y de pronto el plato sale buenísimo.",
+    "en_el_dia_a_dia": "Te molesta que alguien se aproveche de ti, pero en lugar de montar una escena en la reunión, lo dejas pasar y luego lo sueltas tranquilamente en el momento menos esperado, como una bomba de humor seco. O terminas haciendo el trabajo de tres personas sin quejarte, hasta que de repente te plantas y dices basta.",
+    "luz": "Tu fuerza está en la empatía combinada con la determinación: sabes cuándo empujar y cuándo esperar, y tu constancia silenciosa consigue cosas que otros no logran a base de gritos.",
+    "sombra": "Puedes acumular enfado en silencio hasta que explota, o perderte en la fantasía y postergar lo que tendrías que hacer. A veces tu energía se disuelve como azúcar en el agua, y cuesta verla.",
+    "tip": "Ponle forma física a tu impulso: haz deporte, camina o escribe lo que te molesta cuando lo sientas. Así tu Marte en Piscis canaliza su energía en vez de guardarla en el cajón de los enfados."
+  },
+  "marte-sagitario": {
+    "texto": "Marte es el planeta de la acción: lo que haces cuando te enfadas, cuando te apetece algo y cuando te lanzas a por ello sin pensarlo dos veces. Cuando está en Sagitario, esa energía se vuelve de exploración: necesitas espacio, libertad y un horizonte que te llame. Tu impulso no es de quedarte quieto, es de ir a ver qué hay más allá. Vas a por las cosas con entusiasmo y de frente, como quien sale de casa sin paraguas porque 'seguro que no llueve'. Y a veces llueve, pero tú ya vas por la mitad del camino.",
+    "en_el_dia_a_dia": "Te surge una idea de viaje o de un proyecto nuevo un martes por la tarde y, en vez de pensarlo una semana, a la noche ya tienes billetes comprados o has escrito el primer borrador. Tu entorno flipa; tú solo estabas aprovechando la ola.",
+    "luz": "Eres valiente, directo y muy honesto con lo que quieres. Contagias ganas de hacer cosas y no te paralizan los miedos tontos.",
+    "sombra": "A veces te lanzas antes de mirar el mapa, te impacientas con los que van más lentos y tu sinceridad puede sonar a sermón. Pasa mucho que el enfado te dure menos que el wifi del tren, pero también que se te escape una frase que no querías decir.",
+    "tip": "Antes de contestar en caliente, cuenta hasta tres y pregúntate: '¿esto lo digo para ayudar o para ganar?'. Y reserva ese impulso para tus metas grandes; te dará mucho más resultado."
+  },
+  "marte-tauro": {
+    "texto": "Marte es el planeta de la acción: es lo que te pone en marcha, lo que te hace enfadarte y lo que te lanza a por algo. Cuando está en Tauro, esa energía se vuelve más lenta, firme y terca, como un coche que arranca en primera y no tiene prisa, pero no hay quien lo pare cuando ya va. Tauro es el signo de lo estable, lo que se toca y lo que da seguridad, así que tu impulso busca resultados concretos y duraderos. Tú no atacas a lo loco: avanzas paso a paso, pero cuando decides algo, te cuesta un mundo cambiar de idea.",
+    "en_el_dia_a_dia": "Cuando alguien te toca algo que has organizado con cariño, como tu rutina, tus cosas o tu espacio, reaccionas despacio, pero firme: te plantas, no discutes a gritos y no sueltas el tema hasta que se arregla.",
+    "luz": "Tienes una constancia que impresiona: cuando te propones algo, lo sacas adelante con paciencia y sin depender de la motivación del momento.",
+    "sombra": "Esa misma terquedad puede convertirse en cabezonería: aguantar una postura aunque ya no tenga sentido, solo por no dar tu brazo a torcer.",
+    "tip": "Antes de clavarte en una decisión, pregúntate si lo que defiendes es lo que quieres o solo lo que ya tienes. Dar un paso atrás a veces también es avanzar."
+  },
+  "marte-virgo": {
+    "texto": "Marte es tu motor: la parte de ti que se pone en marcha cuando quieres algo, cuando te enfadas y cuando decides ir a por ello. En Virgo, ese motor funciona con un manual de instrucciones en la mano. Virgo es el signo de la precisión, del orden y del detalle que nadie más ha visto. Así que tú no arremetes a lo loco: analizas, afinas y atacas cuando sabes exactamente dónde está el fallo. Es como cocinar a fuego lento pero con un cuchillo muy afilado.",
+    "en_el_dia_a_dia": "Te toca un proyecto en el trabajo con diez pasos mal explicados. Mientras otros se quejan en el café, tú te pones a revisar, ordenar y arreglar cada punto, y al final todo sale impecable. Eso sí, si alguien te interrumpe con un 'bah, con eso vale', notarás cómo te hierve la sangre en silencio.",
+    "luz": "Eres constante, detallista y muy eficaz. Cuando te propones algo, lo llevas hasta el final con método y sin hacer ruido.",
+    "sombra": "Puedes ser tan exigente contigo y con los demás que la perfección se convierte en una trampa. A veces tu crítica sale más dura de lo que pretendías.",
+    "tip": "Antes de corregir a alguien, pregúntate si el detalle que te molesta cambia de verdad el resultado. Si no, suelta el bolígrafo rojo y deja respirar el proyecto."
+  },
+  "mercurio-acuario": {
+    "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, aprendes y conectas las ideas. Cuando cae en Acuario, tu cabeza va por libre, pero con brillo. Te interesan las ideas raras, los sistemas, lo que cambia el mundo, y no te conformas con la explicación de siempre. Eres de los que se preguntan por qué las cosas son así, aunque nadie les haya pedido opinión. Tu mente funciona como una app con muchas pestañas abiertas: alguna se cuelga, pero casi siempre trae algo útil.",
+    "en_el_dia_a_dia": "Estás en una cena y alguien dice algo muy típico. Tú sueltas una idea fuera de lo común sobre el tema, todo el mundo se queda pensando y alguien te pregunta de dónde la has sacado. Ese es tu Mercurio en Acuario trabajando.",
+    "luz": "Piensas de forma original y ves conexiones que otros no ven. Explicas ideas complejas de manera que cualquiera las entiende, y te adaptas a gente muy distinta sin perder tu forma de ser.",
+    "sombra": "A veces te encierras tanto en tu cabeza que tu opinión suena a manifiesto y no a conversación. Puedes ser tan independiente que te cueste pedir una explicación o aceptar que otros tienen razón.",
+    "tip": "Antes de defender tu idea, pregúntate: ¿la estoy compartiendo o la estoy imponiendo? Escucha la versión de la otra persona antes de contestar; tu mente va tan rápido que a veces ya tienes la respuesta cuando el otro aún no ha terminado."
+  },
+  "mercurio-aries": {
+    "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, aprendes y cuentas las cosas. Cuando está en Aries, tu cabeza va a toda velocidad, como un coche sin límite de velocidad en una autovía vacía. Piensas rápido, hablas directo y te aburre dar mil vueltas antes de llegar al grano. Eres de decir lo que piensas en el momento, y eso te hace espontáneo y valiente, aunque a veces tu boca llega antes que tu freno.",
+    "en_el_dia_a_dia": "Estás en una reunión y alguien propone un plan que te parece lento. Tú ya lo has dicho en voz alta antes de que termine de hablar, con ideas nuevas y una respuesta lista. Gana la rapidez, aunque alguien se quede con cara de 'espera, ¿qué?'.",
+    "luz": "Tienes una mente ágil, valiente y directa. Aprendes rápido, improvisas muy bien y te atreves a decir lo que otros callan.",
+    "sombra": "Puedes interrumpir sin darte cuenta o soltar una opinión antes de escuchar del todo. La prisa a veces te hace perder matices importantes.",
+    "tip": "Antes de contestar en una conversación importante, cuenta hasta dos. Esos dos segundos te ahorran muchas disculpas posteriores."
+  },
+  "mercurio-cancer": {
+    "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, aprendes y cuentas lo que te pasa. Cuando cae en Cáncer, tu pensamiento se vuelve más emocional y de memoria larga, como si tu cabeza guardara recuerdos en una caja de galletas de la abuela. Piensas con el corazón puesto, así que antes de decidir algo necesitas sentir que es seguro. Hablas con cariño y te acuerdas de detalles que otros ya olvidaron, aunque a veces te cuesta soltar un tema cuando te duele.",
+    "en_el_dia_a_dia": "Te escribe un amigo para pedirte consejo sobre una mudanza. Tú no le das una lista de pros y contras: le preguntas cómo se siente en su casa actual y le recuerdas el piso de tu primera vez viviendo sola. Acabas siendo el mejor consejero de la conversación, aunque tu mente ya esté dándole vueltas a tu propia mudanza pendiente.",
+    "luz": "Escuchas de verdad y tu forma de explicar las cosas hace que los demás se sientan acompañados, no juzgados.",
+    "sombra": "Te cuesta separar lo que piensas de lo que sientes, y una crítica pequeña puede quedarse dando vueltas en tu cabeza más de la cuenta.",
+    "tip": "Antes de tomar una decisión importante, escribe en un papel qué te preocupa y qué te ilusiona, y mira cuál de las dos cosas pesa más sin que tu miedo haga el resumen."
+  },
+  "mercurio-capricornio": {
+    "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas y aprendes. Cuando está en Capricornio, tu cabeza funciona como un buen arquitecto: no le gusta improvisar, prefiere planos antes de levantar la primera pared. Piensas con método, vas paso a paso y te sientes cómodo cuando hay estructura. Hablas poco, pero cuando lo haces, la gente suele tomarte en serio, porque lo que dices tiene peso y no sobra ni una palabra. Eso sí, tu cerebro también es un poco como un jefe de obra: quiere que todo quede bien terminado antes de enseñarlo.",
+    "en_el_dia_a_dia": "Te toca explicar un proyecto en una reunión. Mientras otros lanzan ideas al aire como palomitas, tú llevas una presentación con índice, cifras y un plan de tres fases. Al final, tu jefe dice 'esto sí se puede hacer', y tú te preguntas por qué el resto no lo había pensado así.",
+    "luz": "Piensas con orden, tienes paciencia para aprender cosas difíciles y tu palabra es sólida: la gente sabe que cumples lo que dices.",
+    "sombra": "A veces te tomas tan en serio la perfección que retrasas lo que podrías empezar ya. Tu mente puede volverse un poco rígida cuando algo no encaja en tu plan.",
+    "tip": "Antes de esperar a tener el plan perfecto, empieza con una versión pequeña y mejórala sobre la marcha. Un borrador imperfecto también te enseña cosas."
+  },
+  "mercurio-escorpio": {
+    "texto": "Mercurio es el planeta de la mente: cómo piensas, cómo hablas y cómo aprendes. Cuando está en Escorpio, tu cabeza no se conforma con lo de la superficie. Quieres saber qué hay debajo, como el que no para hasta descubrir quién dejó la última galleta. Pensar para ti es investigar, no solo opinar. Tu forma de hablar suele ser directa y con poco adorno, y tu memoria guarda lo que de verdad te importa, aunque olvides dónde dejaste las llaves.",
+    "en_el_dia_a_dia": "Estás en una reunión y todos dan por bueno un plan. Tú notas el detalle que nadie miró, lo preguntas sin rodeos y de repente todo el mundo se queda pensando. Eso es tu Mercurio en Escorpio trabajando: ver lo que se esconde bajo la mesa.",
+    "luz": "Tienes una capacidad enorme para ir al fondo de los temas, leer entre líneas y aprender cosas complejas de verdad. Tu análisis es agudo y difícil de engañar.",
+    "sombra": "A veces tu mente se obsesiona con una sospecha y da vueltas sin parar, como un disco rayado. Y puedes hablar con un filo que hiere sin querer, sobre todo cuando te sientes invadido.",
+    "tip": "Antes de sacar conclusiones sobre lo que oculta alguien, pregúntate si no es solo información incompleta. Y di lo que piensas con un poco más de suavidad: la verdad también se entrega con cuidado."
+  },
+  "mercurio-geminis": {
+    "texto": "Mercurio es el planeta de la mente, la conversación y el aprendizaje: cómo procesas lo que pasa, cómo lo cuentas y cómo lo entiendes. Cuando está en Géminis, tu mente va a toda velocidad, con curiosidad por todo y ganas de probar de todo. Géminis es el signo de la palabra, las ideas y los mil intereses, así que aquí tu cerebro funciona como una pestaña abierta detrás de otra. Eso te hace ágil, chistoso y buen conversador, aunque a veces parezcas un tren que no para en ninguna estación.",
+    "en_el_dia_a_dia": "Empiezas leyendo una receta, acabas viendo un documental sobre volcanes y terminas aprendiendo a tocar el ukelele a las dos de la madrugada.",
+    "luz": "Aprendes rápido, conectas ideas que a otros no se les ocurren y sabes explicar cosas complicadas con palabras sencillas.",
+    "sombra": "Te aburres pronto, saltas de un tema a otro sin cerrar nada y a veces prometes más de lo que puedes cumplir en la semana.",
+    "tip": "Antes de empezar algo nuevo, apunta en una libreta la idea que te emociona y dedica una hora fija a terminar una sola cosa. Tu mente corre más si le pones carriles."
+  },
+  "mercurio-leo": {
+    "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, escribes y aprendes. Cuando está en Leo, tu cabeza no se conforma con explicar las cosas a secas; quiere contarlas con gracia, con un poco de drama y con ganas de que alguien aplauda al final. Eres de los que hablan con seguridad y pueden tener al grupo entero escuchando. Eso sí, si nadie te presta atención, tu mente se pone un poco dramática, como un actor sin público. Dicho claro: tu forma de pensar brilla cuando puede expresarse con confianza.",
+    "en_el_dia_a_dia": "Te toca explicar algo en el trabajo o en un grupo de amigos. En vez de soltar datos secos, cuentas una historia, pones ejemplos vivos y haces que todos entiendan a la primera. Hasta el que estaba mirando el móvil acaba levantando la cabeza.",
+    "luz": "Comunicas con calidez y carisma. Sabes contar las ideas de forma que la gente las recuerde y se sienta incluida.",
+    "sombra": "A veces necesitas tanto ser el que brilla que dejas poco espacio para que los demás opinen. Un poco de escucha también cuenta como talento.",
+    "tip": "Antes de hablar en una conversación importante, cuenta hasta tres mentalmente y pregúntate: ¿esto aporta o solo quiero lucirme? Verás que tus ideas suenan igual de buenas y con más gente de tu lado."
+  },
+  "mercurio-libra": {
+    "texto": "Mercurio es el planeta que rige cómo piensas, hablas y aprendes: tu mente, tus conversaciones, tu forma de procesar lo que pasa. Cuando cae en Libra, tu mente funciona como una balanza: necesitas ver los dos lados antes de decidir, y te cuesta mucho elegir sin sopesar pros y contras. Hablas con diplomacia y con gracia, y sabes decir las cosas sin que suenen a golpe. Eso sí, si te piden una respuesta rápida en un restaurante, quizá te pases diez minutos mirando la carta como si fuera un examen final.",
+    "en_el_dia_a_dia": "Te preguntan a dónde quieres ir a cenar y sueltas: 'me da igual, lo que sea'. Pero por dentro ya estás comparando el sushi, la pizza y el menú del día, sopesando cuál queda mejor con todos. Al final, el que decide es el grupo, y tú sales contento porque al menos ha sido un debate bien argumentado.",
+    "luz": "Tienes un talento natural para entender puntos de vista distintos y para mediar en conflictos. Sabes escuchar, buscar el equilibrio y explicar las cosas con claridad y buen trato.",
+    "sombra": "Puedes quedarte atrapado en la duda y dar muchas vueltas antes de decidir, a veces hasta que la oportunidad se escapa. Y a veces prefieres quedar bien a decir lo que realmente piensas.",
+    "tip": "Prueba la regla de los cinco minutos: fija un tiempo límite para decidir, cuando se acabe, elige lo que tengas a mano aunque no sea perfecto. Mercurio en Libra agradece tener un marco, aunque sea un reloj de cocina."
+  },
+  "mercurio-piscis": {
+    "texto": "Mercurio es el planeta de cómo piensas, hablas y aprendes: tu mente, tu forma de contar las cosas y de captar lo que te explican. Cuando Mercurio cae en Piscis, tu cabeza funciona como una esponja con mucha sensibilidad: absorbes emociones, ambientes y matices que otros ni notan. Piensas por imágenes, intuiciones y sensaciones más que por listas perfectas. Es una mente soñadora, poética y un pelín despistada, como un wifi que pilla señal de todas partes menos de la que de verdad necesitas.",
+    "en_el_dia_a_dia": "Te pones a estudiar un tema técnico y, de pronto, acabas leyendo sobre la historia del tema, la gente que lo inventó y cómo se siente hacerlo. Tu cerebro se va de paseo por el significado antes de llegar al procedimiento.",
+    "luz": "Tienes una imaginación rica y una empatía que te deja entender a la gente antes de que hable del todo. Tus explicaciones pueden ser muy bonitas y llegar al corazón.",
+    "sombra": "Te cuesta separar lo que sientes de lo que es un hecho, y a veces te pierdes entre tantas ideas que no aterrizas ninguna. Un 'ya te contesto' puede durar más de lo que tu paciencia aguanta.",
+    "tip": "Antes de decidir algo importante, escribe los hechos en tres líneas, sin adjetivos ni sentimientos. Después, deja que tu intuición opine sobre esas tres líneas. Así disfrutas tu sensibilidad sin que te lleve a la deriva."
+  },
+  "mercurio-sagitario": {
+    "texto": "Mercurio es el planeta de la mente, la forma de pensar, hablar y aprender. Cuando cae en Sagitario, tu cerebro va en modo explorador: necesita horizontes amplios, preguntas grandes y ideas que le abran la ventana. Te aburres con los detalles sueltos si no ves hacia dónde van, un poco como un viajero que odia las paradas sin vistas. Piensas a lo grande, hablas con entusiasmo y aprendes mejor cuando el tema te lleva lejos, aunque a veces te pase de largo por el pueblo donde había que bajarse.",
+    "en_el_dia_a_dia": "Estás en una reunión y alguien te pide solo 'el dato concreto'. Tú ya estás pensando en tres ideas más grandes sobre el tema, y te cuesta bajar a la tierra. Mejor pide primero el contexto y luego el detalle.",
+    "luz": "Tienes una mente abierta, curiosa y contagiosa. Explicas ideas complejas con ganas y te encanta aprender cosas nuevas de cualquier sitio.",
+    "sombra": "Puedes prometer más de lo que cumples o saltar de un tema a otro sin cerrar ninguno. A veces hablas más rápido de lo que escuchas, y eso, la verdad, también es un poco de cariño mal repartido.",
+    "tip": "Antes de empezar un proyecto nuevo, apunta en una sola hoja los tres pasos concretos que lo harían real. Tu cabeza agradecerá tener el mapa además de la brújula."
+  },
+  "mercurio-tauro": {
+    "texto": "Mercurio es el planeta de la mente, la palabra y el aprendizaje: es lo que usas para pensar, hablar y entender cosas nuevas. Cuando está en Tauro, tu mente se vuelve de las que no se mueven con cualquier viento. Tú piensas despacio, con los pies en la tierra, y prefieres una idea que puedas tocar a una teoría que suene bonita pero no sirva para nada. Eso sí, cuando te convences de algo, te cuesta tanto soltarlo como cambiar de sofá después de cinco años de uso.",
+    "en_el_dia_a_dia": "Te pasan un plan nuevo en el trabajo y no lo cambias hasta que lo has probado con calma y lo ves funcionar. Mientras otros ya están discutiendo la siguiente idea, tú todavía estás pidiendo una prueba real antes de decir que sí.",
+    "luz": "Tu pensamiento es sólido y fiable. Aprendes de forma profunda, retienes lo que aprendes y tu palabra suele tener peso porque sabes de lo que hablas.",
+    "sombra": "Puedes aferrarte a tus ideas más de lo necesario y cerrarte a opiniones distintas. Esa terquedad, si no la vigilas, se convierte en un muro que no deja pasar ni una brisa.",
+    "tip": "Cada semana, elige una opinión tuya y pregúntate qué dato nuevo la haría cambiar. Si no se te ocurre ninguno, quizá sea hora de buscarlo."
+  },
+  "mercurio-virgo": {
+    "texto": "Mercurio es el planeta de la mente: cómo piensas, hablas, lees el mundo y aprendes cosas nuevas. Cuando cae en Virgo, tu cerebro funciona como un buen archivador: lo quiere todo ordenado, bien etiquetado y con su carpeta correspondiente. Eres de los que se fijan en el detalle que a los demás se les escapa, como la errata en el cartel o el ingrediente que sobra en la receta. Tu forma de hablar tiende a ser precisa y práctica, más de 'vamos al grano' que de discursos de tres horas, aunque tu paciencia a veces dure lo que la batería de un móvil viejo.",
+    "en_el_dia_a_dia": "Te toca explicar a tu compañero de piso cómo funciona la lavadora nueva, y lo haces con un manual mental de cinco pasos numerados, sin saltarte ni una tecla. Mientras tanto, tu amigo solo quería que le dijeras 'pon el programa de siempre'.",
+    "luz": "Aprendes rápido, analizas con claridad y conviertes el caos en algo útil. Eres de los que dan instrucciones que de verdad se entienden.",
+    "sombra": "Puedes caer en la trampa del detalle infinito: revisas tanto una cosa que se te pasa el tren. A veces criticas sin querer lo que no sale perfecto, y eso también te lo cobras tú.",
+    "tip": "Antes de corregir o analizar algo, pregúntate si el detalle que te molesta cambia de verdad el resultado. Si no lo cambia, déjalo estar y ahorra energía para lo importante."
+  },
+  "sol-acuario": {
+    "texto": "Cuando el Sol está en Acuario, tu esencia tiene la cabeza en el futuro y el corazón en la gente. Eres de los que piensan distinto y no les da vergüenza decirlo, aunque a veces lo digan en la reunión de familia en el peor momento. El Sol es el 'yo' más auténtico, y en Acuario ese yo es independiente, curioso y un poco rebelde, como quien se niega a seguir el mapa de la carretera solo porque 'siempre se ha hecho así'. Acuario está regido por Urano, el planeta de las sorpresas y las ideas que nadie vio venir.",
+    "en_el_dia_a_dia": "Estás en una cena y todos hablan de la misma serie de siempre. Tú propones una idea rara sobre cómo podría funcionar la ciudad dentro de cincuenta años, y de pronto la mesa entera está debatiendo contigo como si fuera la mejor tertulia del año.",
+    "luz": "Ves soluciones donde otros solo ven problemas, y tratas a cada persona como alguien interesante, no como un número más en la fila.",
+    "sombra": "A veces te encierras tanto en tu cabeza que te distancias de la gente que te quiere, y luego te preguntas por qué nadie te llama. La frialdad aparece cuando confundes la lógica con tener siempre la razón.",
+    "tip": "Antes de tener la última palabra en una discusión, pregúntate qué sentiría la otra persona. No pierdes nada por escucharla, y a veces te ahorras una pelea que no valía la pena."
+  },
+  "sol-aries": {
+    "texto": "Cuando el Sol está en Aries, tu esencia es la de alguien que se lanza primero y pregunta después. Eres el que levanta la mano antes de que el profe termine la pregunta, con la energía de quien se pide el café más rápido que el barista. Aries es el primer signo del zodiaco, regido por Marte, el planeta de la acción, así que la iniciativa te sale casi sin pensar. Quien eres de verdad aparece cuando actúas con valentía y sin esperar permiso.",
+    "en_el_dia_a_dia": "Ves un proyecto parado en el trabajo y, en lugar de esperar a que alguien se anime, das el primer paso y propones un plan para el lunes. Tus compañeros tardan en reaccionar, pero tú ya estás avanzando.",
+    "luz": "Valiente, directo y con una energía contagiosa. Enciendes a la gente cuando hay que empezar algo nuevo.",
+    "sombra": "A veces confundes rapidez con prisa y te impacientas si las cosas no salen a tu ritmo. Puedes pasar por encima de otros sin darte cuenta.",
+    "tip": "Antes de lanzarte, respira y cuenta hasta tres. Tu impulso es un motor potente, y con un poco de escucha lo llevas aún más lejos."
+  },
+  "sol-cancer": {
+    "texto": "Tu Sol en Cáncer dice que tu esencia es la de alguien que cuida, que siente hondo y que necesita un hogar emocional donde descansar. Eres tú cuando bajas la guardia: sensible, protector y con una memoria para los detalles que da un poco de miedo. Como el Sol, lo que tú irradias es calidez, pero el signo de Cáncer, regido por la Luna, hace que esa energía suba y baje con las emociones, como las mareas. Si alguien te trata bien, te enteras; si no, también. Y eso, aunque parezca dramático, es tu superpoder.",
+    "en_el_dia_a_dia": "Llegas a una reunión con un tupper de lentejas para la familia, te acuerdas del cumpleaños de la compañera de la oficina y te emocionas con una canción de la infancia. Sin darte cuenta, has convertido el grupo en tu casa.",
+    "luz": "Eres leal, generoso y capaz de crear un ambiente en el que la gente se siente segura y querida.",
+    "sombra": "Puedes cerrarte como una caracola cuando te hieren, y guardar rencor en silencio mientras finges que está todo bien.",
+    "tip": "Antes de reaccionar a algo que te dolió, pon nombre a la emoción en voz alta o por escrito. Así tu caparazón no decide por ti."
+  },
+  "sol-capricornio": {
+    "texto": "Cuando el Sol está en Capricornio, tu esencia es la de alguien que construye las cosas paso a paso, como quien sube una montaña con mochila llena de piedras y sin prisa. Eres de los que prefieren ganarse las cosas con esfuerzo antes que esperar a que caigan del cielo, y eso lo cuentas sin ponerte medallas. Capricornio es el signo de la responsabilidad y de la ambición con los pies en la tierra, y también de la paciencia de abuela que sabe que las buenas sopas se cocinan a fuego lento. Tu tiempo de brillar llega más tarde, pero cuando llega, dura.",
+    "en_el_dia_a_dia": "Te ofrecen un proyecto que lleva meses de trabajo y nadie quiere encargarse de los detalles aburridos. Tú te quedas con la hoja de cálculo, organizas las tareas y llegas a la entrega sin que nadie te lo pida, como el amigo que siempre trae el cargador cuando todos se quedan sin batería.",
+    "luz": "Eres constante, fiable y muy honesto con tus compromisos. La gente sabe que puede contar contigo cuando la cosa se pone seria.",
+    "sombra": "Puedes ser tan exigente contigo que te olvidas de descansar. A veces cargas con todo porque te cuesta pedir ayuda, y el cansancio se acumula sin que lo notes.",
+    "tip": "Apunta cada semana una cosa que hayas hecho bien, por pequeña que sea, y otra que vayas a dejar para otro día sin culpa. Tu cabeza agradecerá no ser sólo una lista de pendientes."
+  },
+  "sol-escorpio": {
+    "texto": "Tu Sol en Escorpio dice que eres de los que van a fondo. Si algo te importa, no lo tomas a la ligera: lo miras por dentro, le das vueltas y quieres entender de qué está hecho. Eres intenso, reservado y leal, y no sueltas fácil ni a las personas ni a las ideas. Escorpio es un signo de agua, así que tus emociones son profundas, aunque no siempre las enseñes. Y sí, tienes una fama de misterioso que te hace bastante gracia, aunque en realidad solo eres alguien que prefiere la verdad a la charla de ascensor.",
+    "en_el_dia_a_dia": "Te cuentan un plan a medias y, en vez de quedarte en la superficie, notas que algo no encaja y preguntas hasta que sale la verdad. Igual que el que revisa el contrato letra por letra antes de firmar, pero sin la cara de aburrimiento.",
+    "luz": "Eres leal de verdad, valiente para mirar lo incómodo y capaz de reinventarte cuando lo necesitas, como el ave fénix pero sin el drama de la ceniza.",
+    "sombra": "Puedes guardar rencor más de la cuenta o desconfiar de todos a la vez, como si cada persona nueva tuviera que pasar un control de seguridad antes de entrar.",
+    "tip": "Prueba a decir en voz alta lo que sientes antes de que se convierta en silencio. No hace falta contarlo todo, pero una frase honesta a tiempo ahorra muchas noches dando vueltas."
+  },
+  "sol-geminis": {
+    "texto": "Cuando el Sol está en Géminis, tu esencia es la curiosidad en estado puro. Eres de los que quieren saberlo todo, probar de todo y hablar con todo el mundo, como una pestaña del navegador que nunca se cierra. Tu energía viene de la mente, de las conversaciones y de los mil intereses que te pican a la vez. Es el signo del aire y de la comunicación, así que tu mejor herramienta es la palabra. Eso sí, tu aburrimiento dura menos que la batería de un móvil nuevo.",
+    "en_el_dia_a_dia": "Estás en una reunión aburrida, se hace un silencio incómodo y tú sueltas una pregunta que cambia de tema por completo. Todo el mundo se queda mirando, pero tú ya estás pensando en otra cosa.",
+    "luz": "Eres ingenioso, adaptable y capaz de explicar cosas complicadas con palabras sencillas. Llevas bien los cambios y haces amigos en cualquier sitio.",
+    "sombra": "Te cuesta quedarte con una sola cosa el tiempo suficiente para terminarla. A veces dices lo que piensas antes de pensarlo del todo, y luego toca arreglar el lío.",
+    "tip": "Antes de empezar algo nuevo, termina una cosa pendiente. Así tu curiosidad construye algo en vez de dejar proyectos a medias por el camino."
+  },
+  "sol-leo": {
+    "texto": "Cuando los astrólogos hablan del Sol en Leo, hablan de tu esencia: lo que sale de ti cuando dejas de hacer el papel de 'normal'. El Sol es el centro de tu carta, como el foco de un escenario. Con Leo ese foco brilla con ganas: te gusta expresarte, crear, dar calor a los demás y que se note que estás ahí. Leo es un signo de fuego, así que tu energía es de las que se contagian. Y sí, también puede que te guste que te miren un poquito. No pasa nada, es parte del paquete.",
+    "en_el_dia_a_dia": "Estás en una reunión de amigos y alguien cuenta una historia que se alarga. Tú, sin querer, la haces más divertida con una imitación o una frase que hace reír a todos. Se te nota la chispa, y la gente te busca cuando quiere pasarlo bien.",
+    "luz": "Generosidad de corazón grande, creatividad y una valentía natural para ser auténtico. Inspiras a otros a salir de su rincón.",
+    "sombra": "A veces necesitas tanto ser visto que te cuesta escuchar. Si no te aplauden, puede dolerte más de la cuenta, y el orgullo se te pone de pie antes que tú.",
+    "tip": "Antes de hablar en una conversación, cuenta hasta tres y pregúntale a la otra persona qué piensa. Brillar es más bonito cuando el otro también puede brillar contigo."
+  },
+  "sol-libra": {
+    "texto": "Cuando el Sol está en Libra, tu esencia gira alrededor del equilibrio y de las relaciones. Eres de los que necesitan sentir que hay armonía a su alrededor, como quien no puede dormir con un cuadro torcido en la pared. Tu forma de estar en el mundo pasa por el trato con los demás: escuchar, negociar, buscar el punto justo. El Sol es el centro de tu identidad, y en Libra ese centro se construye en pareja, en diálogo y en belleza. Eres tú, pero siempre con alguien al lado.",
+    "en_el_dia_a_dia": "Estás en una cafetería y te toca elegir entre dos pasteles. Pides medio de cada uno para que nadie se quede con el sabor de la duda, y de paso aprovechas para preguntarle a tu amigo qué le apetece a él.",
+    "luz": "Tienes un talento natural para mediar, para ver los dos lados de una historia y para hacer que la gente se sienta bien tratada. Tu sentido estético hace que cualquier espacio mejore cuando tú lo arreglas.",
+    "sombra": "A veces te cuesta tanto mantener la paz que acabas callando lo que piensas. Dices que sí cuando querías decir que no, y luego te pesa como una mochila llena de piedras.",
+    "tip": "Antes de decidir por los demás, pregúntate qué quieres tú de verdad. Decir tu opinión en voz baja también cuenta como equilibrio."
+  },
+  "sol-piscis": {
+    "texto": "Cuando el Sol está en Piscis, tu esencia se mueve como el agua: te adaptas, sientes muchísimo y lees el ambiente antes de que nadie abra la boca. Piscis es el último signo del zodiaco y está regido por Neptuno, el planeta de los sueños, la intuición y la imaginación. Eso te da una sensibilidad enorme y una mente que vuela, aunque a veces se te olvide dónde dejaste las llaves. Tu lado más auténtico aparece cuando te permites ser compasivo y creativo sin pedir perdón por ello.",
+    "en_el_dia_a_dia": "Entras a una reunión y, sin que nadie diga nada, ya sabes que el jefe está de mal humor y que Laura está incómoda. Te ajustas solo, cambias de tono y acabas siendo el que calma la tensión, aunque luego te quedes agotado como si hubieras cargado una nevera por las escaleras.",
+    "luz": "Empatía de verdad, creatividad a raudales y una intuición que acierta más de lo que te gustaría admitir.",
+    "sombra": "Te disuelves en los demás, evitas los conflictos como si fueran un atasco y a veces escapas a la fantasía cuando la realidad aprieta.",
+    "tip": "Antes de decir que sí a algo, pregúntate: ¿esto lo quiero yo o solo quiero que la gente esté contenta? Dedica cada semana un rato a algo creativo que sea solo tuyo."
+  },
+  "sol-sagitario": {
+    "texto": "Cuando el Sol está en Sagitario, tu esencia tiene brújula y ganas de ver mundo. Eres de los que necesitan un horizonte: viajar, aprender, preguntar por qué las cosas son como son. Sagitario es el signo del arquero, y su flecha apunta siempre lejos. Eres optimista por naturaleza, aunque a veces prometes más planes de los que caben en la agenda. Tu sello es la curiosidad y ese entusiasmo contagioso que te lleva a decir “¿y si probamos?” antes de pensarlo dos veces.",
+    "en_el_dia_a_dia": "Estás en una reunión aburrida y, en vez de quedarte callado, te sale una pregunta que cambia el rumbo del debate. O llevas un plan de fin de semana que empieza como una escapada cerca de casa y acaba con todos en otra ciudad.",
+    "luz": "Inspiras a otros a salir de su zona de confort, y tu honestidad hace que la gente confíe en lo que dices.",
+    "sombra": "Te cuesta quedarte quieto y comprometerte con los detalles pequeños. A veces tu sinceridad se pasa de frenada y suena a sermón.",
+    "tip": "Antes de decir que sí a un nuevo proyecto, escribe tres cosas que tendrías que dejar de lado para hacerlo. Así tu entusiasmo llega a buen puerto y no se queda en promesa de WhatsApp."
+  },
+  "sol-tauro": {
+    "texto": "Tu Sol en Tauro habla de la esencia: quién eres cuando te quitas el ruido. Tauro es el signo de la tierra firme, de lo que se puede tocar, saborear y mantener en el tiempo. Tú necesitas estabilidad, placer sencillo y raíces, y no te convence lo que cambia cada cinco minutos, como el tiempo en Galicia. Eres de los que construyen despacio, pero cuando algo es tuyo, lo cuidas como a una planta que no se toca sin permiso.",
+    "en_el_dia_a_dia": "Te compras una cafetera buena y la usas diez años, mientras tu amiga cambia de aparato cada temporada. Y cuando tienes que decidir algo importante, primero quieres sentirlo bien en el cuerpo, no solo pensarlo tres veces.",
+    "luz": "Eres leal, paciente y muy confiable: la gente sabe que cumples y que tu palabra pesa. Tienes un talento natural para disfrutar lo bueno de la vida sin culpa.",
+    "sombra": "A veces te aferras a lo conocido aunque ya no te haga bien, y el cambio te pesa más de lo que admites. La terquedad también viene con el paquete, y tu paciencia puede convertirse en inmovilidad.",
+    "tip": "Antes de decir 'no cambio', prueba a hacer una mini-novedad pequeña, como un camino distinto al trabajo. Tu estabilidad se fortalece cuando la pones a prueba con calma."
+  },
+  "sol-virgo": {
+    "texto": "Cuando alguien tiene el Sol en Virgo, su esencia es la de la persona que se fija en los detalles, ordena el caos y quiere que las cosas funcionen de verdad. Virgo es el signo del análisis y del servicio: tú miras lo que hace falta y lo arreglas sin que nadie te lo pida. Eso sí, a veces tu lista mental de defectos ajenos es más larga que la del supermercado un domingo. Es el Sol de quien prefiere ser útil antes que aparentar.",
+    "en_el_dia_a_dia": "Llegas a una reunión con las carpetas ya impresas, sabes dónde está el cargador de todos y notas que la factura tiene un cobro doble antes de que nadie lo vea.",
+    "luz": "Eres fiable, metódico y tienes una mirada práctica que resuelve problemas de verdad.",
+    "sombra": "Puedes ser muy autoexigente y criticar más de la cuenta, tanto a ti como a los demás, por no llegar a ese orden perfecto que imaginas.",
+    "tip": "Antes de corregir algo, pregúntate si de verdad importa o si solo te molesta. Y recuerda que tú también mereces un poco de desorden de vez en cuando."
+  },
+  "venus-acuario": {
+    "texto": "Venus es el planeta del amor, del gusto y de lo que te hace sentir bien. Cuando Venus cae en Acuario, tu forma de querer se parece a una tertulia con amigos: te atrae la libertad, la originalidad y las conexiones mentales tanto como el cariño de siempre. Eres de los que se enamoran de la cabeza antes que del bolsillo, y necesitas que te dejen respirar. Si te ponen en una jaula dorada, te escapas, aunque sea con cara de buena persona.",
+    "en_el_dia_a_dia": "Quedas con alguien que te gusta y, en vez de una cena de manual, proponéis ir a una exposición rara o a un concierto de una banda que no conoce nadie. Si la conversación fluye y cada uno puede ir a su rollo sin dar explicaciones, te sientes en tu salsa.",
+    "luz": "Eres leal a tu manera, respetas la independencia del otro y sabes ser amigo y pareja a la vez.",
+    "sombra": "A veces confundes distancia con libertad y te cuesta mostrar lo que sientes de forma directa, como si el corazón tuviera wifi intermitente.",
+    "tip": "Antes de ponerte en modo fantasma, di en voz alta qué necesitas de la otra persona. Una frase clara vale más que tres días de silencio."
+  },
+  "venus-aries": {
+    "texto": "Venus es el planeta del amor, el gusto y lo que te atrae de verdad. Cuando Venus cae en Aries, tu forma de querer es directa, apasionada y sin rodeos: te enamoras rápido, con chispa, y te cuesta fingir que no te interesa. Es como pedir el plato del día sin mirar la carta, porque ya sabes lo que quieres. Aries es el signo de la iniciativa, así que aquí el amor no espera turno: se va a por lo que quiere.",
+    "en_el_dia_a_dia": "Ves a alguien que te gusta en una fiesta y, en vez de dar mil vueltas, te acercas, te presentas y le propones un café. Si te dicen que no, te reponen en un rato y pasas a lo siguiente, como quien pierde el bus y no se queda llorando en la parada.",
+    "luz": "Eres valiente al querer, transmites entusiasmo de verdad y haces que la otra persona se sienta deseada y elegida.",
+    "sombra": "Puedes enamorarte de la emoción del principio y aburrirte cuando la chispa baja la intensidad. A veces confundes prisa con pasión.",
+    "tip": "Antes de decidir que alguien te encanta o que ya no te interesa, dale un poco de tiempo. Pregúntate qué te gusta de esa persona cuando no hay fuegos artificiales."
+  },
+  "venus-cancer": {
+    "texto": "Venus es el planeta del amor, el gusto y lo que te hace sentir bien. Cuando Venus está en Cáncer, tu forma de querer es como un tupper de la abuela: hecha con cariño, pensada para que nadie se quede con hambre emocional. Necesitas sentir seguridad y hogar para abrirte de verdad, y te enamoras despacio pero con raíces profundas. Lo que te gusta: lo familiar, lo cálido, los detalles que demuestran que alguien se acordó de ti.",
+    "en_el_dia_a_dia": "Llegas a casa un martes malo y tu pareja te deja una manta y la cena lista sin que se lo pidas. Eso es Venus en Cáncer haciendo su trabajo: el amor que se nota en lo práctico y en el cuidado.",
+    "luz": "Eres un refugio de verdad: lealtad, ternura y una memoria increíble para las cosas que importan a los demás.",
+    "sombra": "A veces confundes cariño con control o te cierras como una ostra si te sientes vulnerable. Y cuando te hieren, guardas el rencor en el congelador durante años.",
+    "tip": "Di en voz alta lo que necesitas de tu gente, sin esperar que lo adivinen. Te ahorrarás muchos días de morros silenciosos y mucho drama innecesario."
+  },
+  "venus-capricornio": {
+    "texto": "Venus es el planeta del amor, el gusto y lo que te atrae. Cuando está en Capricornio, tu forma de querer es seria y de largo plazo: no te enamoras de cualquiera ni a la primera. Te cuesta lanzarte, pero una vez que confías, eres de los que se quedan. Tu idea de un buen plan suele ser estable, con sentido y con algo que se pueda construir. Eso sí, si alguien te gusta de verdad, tendrás que bajar un poco la guardia, porque el romance también necesita ratos sin agenda.",
+    "en_el_dia_a_dia": "Es el típico que elige una cena tranquila y bien pensada antes que una fiesta ruidosa, y que prefiere una pareja a la que pueda ver crecer durante años, aunque al principio se le note algo reservado. Como ese restaurante de toda la vida que nunca cambia la carta pero que siempre está lleno.",
+    "luz": "Eres leal, paciente y muy sólido: cuando dices 'te quiero', lo cumples con hechos, no solo con palabras.",
+    "sombra": "Puedes parecer frío o demasiado cauteloso, y a veces guardas tanto las emociones que la otra persona no sabe si le interesas de verdad.",
+    "tip": "Prueba a expresar lo que sientes con frases simples y cercanas, aunque te suenen cursis. Tu pareja no necesita un plan maestro, necesita saber que estás ahí."
+  },
+  "venus-escorpio": {
+    "texto": "Venus es el planeta del amor y de lo que te gusta: cómo quieres, cómo te enamoras y qué te hace sentir bien. Cuando Venus cae en Escorpio, tu forma de querer va en serio, con intensidad y sin medias tintas. Aquí no hay amores de rebajas: o te entregas de verdad o no te entregas. Tú buscas conexión profunda, confianza y una mirada que lo diga todo, aunque a veces te cueste admitir cuánto te importa algo.",
+    "en_el_dia_a_dia": "Quedas con alguien que te gusta y, en vez de charlas superficiales de ascensor, te interesa saber qué le preocupa de verdad y qué le hace sentir vivo. Si esa persona te cuenta algo íntimo, lo guardas como si fuera una caja fuerte.",
+    "luz": "Eres leal, intuitivo y capaz de querer con una hondura que pocos igualan. Cuando confías, confías de verdad.",
+    "sombra": "Puedes ser desconfiado o celoso si sientes que te fallan, y a veces te cierras como un caracol cuando te duele. Cuesta bajarte del muro, aunque por dentro te mueras de ganas.",
+    "tip": "Antes de cerrar la puerta por una herida, di en voz alta qué te dolió. Decirlo con palabras suele ser más sano que guardar silencio y esperar que el otro adivine."
+  },
+  "venus-geminis": {
+    "texto": "Venus es el planeta del amor, el placer y lo que te hace sentir bien. Cuando Venus está en Géminis, amas con la curiosidad de quien quiere saberlo todo: te enamoras de la conversación, de las ideas y de quien te haga reír. Eres de los que se aburren si la charla se queda en el tiempo. Tu corazón es más de palabras que de silencios largos, como un grupo de WhatsApp que nunca duerme. Y sí, a veces te gustan varias cosas a la vez, así que la variedad es tu gran debilidad.",
+    "en_el_dia_a_dia": "Quedas con alguien y acabáis hablando de libros, de viajes y de una teoría absurda sobre los gatos hasta las dos de la mañana. Te das cuenta de que lo que más te gusta no es el plan caro, sino esa sensación de conectar mentalmente.",
+    "luz": "Eres ingenioso, cercano y muy divertido. Haces que la gente se sienta escuchada y te adaptas con gracia a casi cualquier ambiente.",
+    "sombra": "Puedes perder interés si la relación se vuelve rutinaria o se queda sin novedades. A veces confundes curiosidad con enamoramiento y te cuesta comprometerte cuando la emoción baja un poco.",
+    "tip": "Antes de cambiar de plan o de persona por aburrimiento, pregúntate si lo que falta es conversación nueva o simplemente un rato de calma. Probar algo nuevo juntos suele revivir el interés sin tener que empezar de cero."
+  },
+  "venus-leo": {
+    "texto": "Venus es el planeta del amor, el cariño y lo que te gusta en la vida. Cuando Venus cae en Leo, amas a lo grande, como quien hace una fiesta por un cumpleaños ajeno. Necesitas sentir calidez, admiración y que te miren con ganas. Y cuando das cariño, lo das con el corazón en la mano y sin medias tintas. Eso sí, te gusta brillar en la relación, y eso no es malo, solo hay que saberlo.",
+    "en_el_dia_a_dia": "Tu pareja te hace un detalle pequeño, como dejarte el café preparado o un mensaje que dice 'te vi hoy y pensé en ti'. Tú te emocionas, te sientes especial, y le devuelves el gesto con creces: una cena bonita o una frase que se queda grabada. Así funciona tu amor: se nota.",
+    "luz": "Eres generoso, leal y capaz de hacer que la persona que quieres se sienta la más importante del mundo. Tu cariño es cálido, sincero y alegre.",
+    "sombra": "A veces necesitas tanto aplauso que te cuesta conformarte con un amor tranquilo. Si no te sientes admirado, puedes ponerte dramático, como un actor al que no le dan el aplauso final.",
+    "tip": "Dile a la otra persona qué te hace sentir querido, con palabras concretas. Y pregúntale qué le hace sentir así a ella. Escuchar también es un gesto de amor, aunque no tenga tanto brillo como una dedicatoria en el escenario."
+  },
+  "venus-libra": {
+    "texto": "Venus es el planeta del amor, el placer y lo que te hace sentir bien con los demás. Cuando Venus está en Libra, amar es casi un deporte de equilibrio: buscas armonía, trato justo y una pareja con la que compartir la vida como si fuera un café a medias y sin peleas por la última cucharada. Libra es el signo de la balanza, así que te importa mucho que haya reciprocidad, belleza y buen rollo. Sí, también eres de los que tardan diez minutos en elegir una serie, pero cuando eliges a alguien lo haces con cuidado.",
+    "en_el_dia_a_dia": "Estás en una cena de amigos y hay que decidir restaurante. Tú propones tres opciones, preguntas qué le apetece a cada uno y terminas siendo el que une al grupo sin que nadie se sienta ignorado. Eso es Venus en Libra: buscar que todos queden contentos, incluido tú.",
+    "luz": "Eres detallista, diplomático y tienes un ojo muy fino para lo bonito y lo justo. Haces que la gente se sienta vista y querida.",
+    "sombra": "A veces cedes tanto para evitar conflictos que luego te quedas con el resentimiento guardado como si fuera un tupper olvidado en la nevera.",
+    "tip": "Antes de decir 'me da igual', pregúntate qué te apetece de verdad. Decir tu preferencia con amabilidad también es una forma de cuidar la relación."
+  },
+  "venus-piscis": {
+    "texto": "Venus es el planeta del amor, el cariño y lo que te gusta: cómo quieres, cómo te enamoras y qué te hace sentir bien. Cuando Venus cae en Piscis, tu forma de querer es suave, romántica y muy empática, como esa persona que llora con las películas y luego te recuerda que tiene que ser de un tono casi divino. Piscis es el signo de la sensibilidad y la imaginación, así que amas con el corazón abierto y con mucha intuición. Eres de los que entienden lo que el otro siente sin que lo diga, aunque a veces te pierdas en la nube del romance.",
+    "en_el_dia_a_dia": "Tu pareja tiene un mal día y no te dice nada, pero tú notas el silencio raro, le preparas su café favorito y le dejas una nota tonta en la nevera. Ese detalle, sin hacer ruido, es tu Venus en Piscis en acción.",
+    "luz": "Das ternura de verdad, sabes escuchar y haces que el otro se sienta comprendido y querido sin esfuerzo.",
+    "sombra": "Te puedes enamorar de la idea de la persona más que de la persona real, y a veces te cuesta poner límites cuando te dejas llevar por el sacrificio.",
+    "tip": "Antes de idealizar a alguien, pregúntate qué hace de verdad, no solo qué promete. Y recuerda que pedir lo que necesitas también es amar."
+  },
+  "venus-sagitario": {
+    "texto": "Venus es el planeta del amor y del gusto: marca cómo quieres a alguien y qué cosas te hacen sentir bien. Cuando Venus cae en Sagitario, tú amas con espacio, con humor y con ganas de descubrir mundo. Eres de los que no aguantan una relación de sofá y manta sin una aventura de por medio. Sagitario es el signo del viajero y del filósofo, así que buscas a alguien con quien charlar de todo, desde la política hasta por qué el café sabe distinto en cada país. Y sí, si la pareja se vuelve aburrida, tu corazón empieza a mirar el horizonte como quien mira el móvil en una reunión eterna.",
+    "en_el_dia_a_dia": "Quedas con alguien un jueves cualquiera y, en vez de ir al mismo bar de siempre, propones una ruta nueva: un mercado, una exposición o un mirador que no conocéis. Esa chispa de improvisar juntos es tu forma de decir 'me importas'.",
+    "luz": "Eres generoso, sincero y alegre. Das libertad de verdad, sin controlar, y haces que la otra persona se sienta curiosa y viva a tu lado.",
+    "sombra": "A veces confundes libertad con huida y te cuesta comprometerte cuando la rutina llama a la puerta. Tu franqueza puede sonar brusca, aunque casi nunca sea mala intención.",
+    "tip": "Cuando sientas ganas de salir corriendo, prueba a decir en voz alta qué te asusta del compromiso. Hablarlo suele desinflar el impulso de escapar y deja espacio para la aventura compartida."
+  },
+  "venus-tauro": {
+    "texto": "Venus es el planeta del amor, el placer y lo que te hace sentir bien. Cuando Venus cae en Tauro, tu forma de amar pide calma, tacto y cosas que se puedan tocar: una buena comida, un abrazo largo, una manta en el sofá. Tauro es el signo de la tierra y de la estabilidad, así que tú no te enamoras a lo loco de un día para otro, te enamoras como quien planta un árbol: despacio y para quedarte. Y si alguien te promete amor eterno pero no te cocina ni te llama, ya sabes que tu radar de lo auténtico suena más fuerte que una alarma de incendios.",
+    "en_el_dia_a_dia": "Llegas a casa después de un día horrible y lo que más te reconforta no es un mensaje bonito, sino que alguien te prepare tu comida favorita o te diga 'siéntate, yo me encargo'. Ese gesto concreto te dice más que mil palabras.",
+    "luz": "Eres leal, sensual en el mejor sentido y capaz de dar una estabilidad que hace que la gente se sienta en casa. Tu amor se nota en los detalles que se repiten.",
+    "sombra": "Puedes aferrarte a lo conocido aunque ya no te haga bien, y te cuesta soltar un vínculo o un hábito que ya no suma. Tu terquedad, a veces, parece amor, pero es miedo al cambio.",
+    "tip": "Antes de decidir si una relación te encaja, observa los actos durante varias semanas, no las promesas del primer mes. Y dedica un rato a algo que te dé placer sin prisas, como cocinar, pasear o escuchar música, porque tu Venus también se alimenta de eso."
+  },
+  "venus-virgo": {
+    "texto": "Venus es el planeta del amor, el placer y lo que te hace sentir bien. Cuando cae en Virgo, tu forma de querer tiene un toque de orden y detalle: quieres que el cariño se note en los hechos, no solo en las palabras. Eres de los que recuerdan que a alguien le gusta el café sin azúcar y aparecen con uno un día que está cansado. Virgo es el signo del cuidado y del \"a ver, esto cómo se arregla\", así que tu amor tiende a ser práctico, atento y bastante exigente contigo mismo. Ojo: no es frialdad, es que tu cariño viene con manual de instrucciones, y eso a veces asusta a quien no lo lee.",
+    "en_el_dia_a_dia": "Un amigo te cuenta que está agobiado con una mudanza. Tú no le mandas solo un \"ánimo\": le preparas una lista de cajas, pides el camión y le llevas la comida del sábado. Así es tu Venus en Virgo: el amor en forma de tareas bien hechas.",
+    "luz": "Tu cariño es fiable y detallista. Haces sentir a los demás que se les cuida de verdad, con gestos concretos que se notan y se agradecen.",
+    "sombra": "A veces confundes querer con corregir. Si cada detalle que no te gusta sale a la luz, la otra persona puede sentir que nunca es suficiente, aunque tú lo digas con buena intención.",
+    "tip": "Antes de arreglar algo de la otra persona, pregúntate si te lo ha pedido. Y de vez en cuando, dile \"me gusta esto de ti\" sin añadir ninguna mejora al final."
+  }
 }

@@ -6,7 +6,7 @@
  */
 import Base from '@/layouts/Base.astro';
 import Button from '@/components/ui/Button.astro';
-import LegalLinks from '@/components/LegalLinks.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
 import AmbientVideo from '@/components/media/AmbientVideo.astro';
 import SongButton from '@/components/media/SongButton.astro';
 import { ZodiDemo } from '@/components/landing/ZodiDemo';
@@ -604,22 +604,7 @@ const FAQ = [
       </div>
     </section>
   </main>
-  <footer class="foot">
-    <nav aria-label="Horóscopo de hoy por signo">
-      <ul class="foot-signs">
-        {SIGN_INFO.map((s) => (
-          <li>
-            <a href={`/horoscopo/${s.slug}`}>Horóscopo {s.name}</a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-    <p class="disclaimer">
-      Las lecturas de ZODI son entretenimiento y guía simbólica. No sustituyen consejo médico,
-      legal, financiero ni psicológico.
-    </p>
-    <LegalLinks />
-  </footer>
+  <SiteFooter variant="full" />
 </Base>
 
 <style>
@@ -1134,38 +1119,6 @@ const FAQ = [
 
   .final {
     padding-bottom: var(--space-8);
-  }
-  .foot {
-    display: grid;
-    gap: var(--space-4);
-    justify-items: center;
-    padding: var(--space-6) var(--space-4) var(--space-7);
-    border-top: 1px solid var(--line);
-    text-align: center;
-  }
-  .foot-signs {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-1) var(--space-4);
-  }
-  .foot-signs a {
-    min-height: 32px;
-    display: inline-flex;
-    align-items: center;
-    color: var(--ink-soft);
-    font-size: var(--step--1);
-  }
-  .foot-signs a:hover {
-    color: var(--acid);
-  }
-  .disclaimer {
-    max-width: 60ch;
-    font-size: var(--step--1);
-    color: var(--ink-soft);
   }
   @media (prefers-reduced-motion: reduce) {
     .sign:hover {

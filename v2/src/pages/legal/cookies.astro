@@ -1,0 +1,120 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+---
+
+<LegalLayout title="Política de Cookies" updated="13 de octubre de 2026">
+  <p>
+    Versión corta: <strong>no usamos cookies de publicidad ni de rastreo</strong>. Solo guardamos lo
+    imprescindible para que entres, te quedes dentro y la web recuerde tus preferencias. Por eso no
+    verás un banner de cookies: la normativa (art. 22.2 LSSI y guía de la AEPD) exime del
+    consentimiento a las cookies estrictamente necesarias.
+  </p>
+
+  <h2>Qué guardamos en tu navegador</h2>
+  <div
+    class="table-wrap"
+    tabindex="0"
+    role="region"
+    aria-label="Tabla de cookies y almacenamiento (desplázala si no cabe)"
+  >
+    <table>
+      <caption class="visually-hidden">Cookies y almacenamiento local de ZODI</caption>
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Para qué</th>
+          <th scope="col">Cuánto dura</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">
+            <code>sb-…-auth-token</code>
+          </th>
+          <td>Cookie propia, necesaria (HttpOnly, Secure)</td>
+          <td>Mantener tu sesión iniciada de forma segura.</td>
+          <td>Sesión / hasta que cierres sesión</td>
+        </tr>
+        <tr>
+          <th scope="row">
+            <code>zodi:motion</code>
+          </th>
+          <td>Almacenamiento local, necesario</td>
+          <td>Recordar si prefieres reducir las animaciones.</td>
+          <td>Hasta que lo borres</td>
+        </tr>
+        <tr>
+          <th scope="row">
+            <code>zodi:bienvenida</code>
+          </th>
+          <td>Almacenamiento de sesión, necesario</td>
+          <td>No repetir la animación de bienvenida en la misma visita.</td>
+          <td>Hasta cerrar la pestaña</td>
+        </tr>
+        <tr>
+          <th scope="row">
+            <code>zodi:chat</code>
+          </th>
+          <td>Almacenamiento de sesión, necesario</td>
+          <td>Mantener la conversación del oráculo mientras la pestaña está abierta.</td>
+          <td>Hasta cerrar la pestaña</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Estadísticas sin cookies</h2>
+  <p>
+    Usamos Vercel Web Analytics y Speed Insights para saber qué páginas se visitan y cuánto tardan
+    en cargar. <strong>No usan cookies, no te identifican y no te siguen entre sitios web</strong>:
+    solo cuentan datos agregados (país, tipo de dispositivo, navegador).
+  </p>
+
+  <h2>Lo que NO hacemos</h2>
+  <ul>
+    <li>No usamos cookies de publicidad, de redes sociales ni de rastreo de terceros.</li>
+    <li>No vendemos ni cedemos datos de navegación.</li>
+  </ul>
+
+  <h2>Cómo controlarlas</h2>
+  <p>
+    Puedes borrar o bloquear cookies y almacenamiento desde los ajustes de tu navegador. Si bloqueas
+    las cookies de sesión, no podrás iniciar sesión en ZODI. Si en el futuro añadiéramos cookies que
+    no sean estrictamente necesarias, te pediremos permiso antes y actualizaremos esta página.
+  </p>
+
+  <h2>Más información</h2>
+  <p>
+    Consulta cómo tratamos tus datos en la <a href="/legal/privacidad">Política de Privacidad</a>.
+  </p>
+</LegalLayout>
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+  th,
+  td {
+    text-align: left;
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  thead th {
+    color: var(--ink);
+  }
+  tbody th {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+</style>

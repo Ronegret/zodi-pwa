@@ -1,269 +1,182 @@
 {
- "1": {
-  "titulo": "El Capitán Sin Descanso",
-  "frase": "Soy el 1: si no lidero el grupo, al menos lo organizo desde el primer minuto. ¿Y tú?",
-  "esencia": "El 1 es el número del inicio, el primer paso de cualquier cosa. Tú eres de los que arrancan proyectos antes de que los demás terminen de pensarlo. Tienes iniciativa, voluntad y ganas de abrir camino, como el primero que entra a una sala vacía y decide dónde va cada silla.",
-  "amor": "Amas con intensidad y quieres una pareja que te respete y te deje brillar. No te van los juegos largos: si te gusta alguien, lo dices. Buscas alguien que tenga su propia vida pero también ganas de construir algo juntos, sin que nadie se sienta de segundo plano.",
-  "trabajo": "Brillas cuando puedes tomar decisiones y ver resultados rápido. Eres buena o buen jefe de proyectos, emprendedor o la persona que empuja al equipo cuando todos están dudando. Te cuesta mucho trabajar bajo órdenes que no entiendes, así que mejor si te dan margen para proponer.",
-  "dinero": "Con el dinero eres decidido: prefieres invertir en tus ideas que ahorrar sin rumbo. Puedes ganar y gastar en proyectos con sentido, pero conviene que tengas un colchón, porque tu impulso a veces te lleva a apostar más de lo que tu cuenta bancaria aguanta.",
-  "salud": "Tienes mucha energía y tiendes a exigirte como si fueras una batería que nunca se acaba. Escucha las señales de cansancio y dale a tu cuerpo pausas de verdad. Tu motor funciona mejor con descanso, no solo con empuje.",
-  "sombra": "Tu cara difícil es que a veces quieres tener siempre la última palabra y te cuesta ceder. Puedes parecer terco o impaciente cuando las cosas no van a tu ritmo. Aun así, cuando reconoces que te equivocaste, lo haces con una honestidad que pocos tienen.",
-  "reto": "Tu lección es aprender que liderar también es escuchar. Un buen capitán no hace el viaje solo; sabe cuándo pedir ayuda y cuándo dejar que otro lleve el timón por un tramo.",
-  "consejo": "Hoy elige una decisión pendiente y pide la opinión de alguien antes de cerrarla.",
-  "compatibles": [
-   3,
-   5,
-   9
-  ],
-  "choca": [
-   4,
-   8
-  ],
-  "compat_texto": "Te encajan el 3 y el 5 porque les gusta la energía que tú pones, y con el 9 compartes visión grande. Chocas con el 4 y el 8 porque ellos piden ir despacio y con control, y tú quieres ir ya, y eso genera fricción constante en las decisiones."
- },
- "2": {
-  "titulo": "El diplomático del equipo",
-  "frase": "Dos manos sujetan mejor la taza que una. El número 2 lo sabe desde siempre.",
-  "esencia": "El 2 es el número de la dualidad, la pareja y el puente. Tú sientes lo que pasa entre las personas antes de que nadie lo diga en voz alta. Eres intuitivo, sensible y muy bueno para mediar. Tu lema es: si podemos estar en paz, mejor.",
-  "amor": "Tú amas con atención y ternura. Buscas una conexión profunda, de esas en las que hablas y te escuchan de verdad. Necesitas sentir que tu pareja es un equipo, no un rival. Eso sí, si algo te duele, a veces lo callas tanto que el wifi de tu relación se queda sin señal.",
-  "trabajo": "Brillas cuando hay que cooperar, negociar o cuidar detalles. Eres el que mantiene la calma en la reunión y el que nota que alguien no está bien. Tu punto fuerte es la paciencia y la capacidad de ver varios lados a la vez. Te cuesta menos un grupo que un jefe que grite.",
-  "dinero": "Con el dinero tiendes a ser prudente y a planear con calma. Prefieres ahorrar a lo loco y repartir gastos de forma justa. Tu punto débil es decidir por miedo a quedar mal con alguien, así que a veces pagas de más por no discutir.",
-  "salud": "Tu cuerpo suele pedirte equilibrio: descanso, rutina tranquila y espacios donde no te sientas presionado. Escuchas tus emociones, y eso es valioso, aunque a veces las guardas tanto que se te cargan los hombros. Si algo te preocupa de verdad, consúltalo con un profesional.",
-  "sombra": "Tu cara difícil aparece cuando dudas tanto que nada se decide. Puedes ser demasiado dependiente de la aprobación ajena o evitar el conflicto hasta que explota. Tu indecisión a veces parece un laberinto sin salida, aunque la salida está justo al lado de tu propia voz.",
-  "reto": "Aprender que decir lo que sientes no rompe la paz, la fortalece. Tu lección es confiar en tu propio criterio sin necesitar el permiso de los demás.",
-  "consejo": "Hoy di en voz alta una decisión pequeña que ya tienes tomada, sin pedir antes opinión a nadie.",
-  "compatibles": [
-   2,
-   4,
-   6,
-   8
-  ],
-  "choca": [
-   1,
-   5,
-   9
-  ],
-  "compat_texto": "El 2 y el 6 encajan porque los dos cuidan, escuchan y buscan armonía en casa. Chocan con el 1 y el 5 porque uno quiere mandar y el otro quiere cambiar de plan cada tres días, y el 2 acaba con dolor de cabeza y la taza fría."
- },
- "3": {
-  "titulo": "El Influencer del Universo",
-  "frase": "Tres es la fiesta que empieza sola: expresión, alegría y un poquito de drama bien servido.",
-  "esencia": "El 3 es el número de la expresión, la creatividad y la comunicación. Tú hablas, dibujas, cuentas historias y contagias buen humor, como si llevaras un altavoz invisible. Eres sociable, ocurrente y te aburres rápido de lo gris.",
-  "amor": "Te enamoras con los ojos, el oído y la risa. Buscas a alguien que conecte contigo con conversación de verdad, no solo con mensajes de buenas noches. Te cuesta quedarte callado cuando sientes algo, y eso es un regalo, aunque a veces lo digas en el peor momento.",
-  "trabajo": "Brillas en lo que tiene palabras, imagen o ideas: escritura, diseño, enseñanza, medios, eventos, ventas con alma. Te motiva el aplauso, pero también el proyecto que te deja expresarte. Lo rutinario te da sueño, como una reunión que pudo ser un correo.",
-  "dinero": "Gastas con entusiasmo cuando algo te emociona y te cuesta llevar cuentas, como quien olvida el ticket en el bolsillo. Tu fuerza está en generar ingresos con tu creatividad. Un presupuesto sencillo te salvará más de un susto de fin de mes.",
-  "salud": "Tu energía sube como un cohete y a veces se cae como un globo sin aire. Cuida el descanso, porque el cuerpo también necesita sus pausas. Mover el cuerpo con algo que disfrutes te sienta mejor que cualquier rutina aburrida.",
-  "sombra": "Puedes dispersarte como un bote de confeti en una fiesta, empezar veinte cosas y terminar dos. A veces exageras para llamar la atención o te afecta mucho la crítica. Aprender a escuchar con la misma pasión con la que hablas te haría todavía más querido.",
-  "reto": "Tu lección es poner profundidad a tu alegría: transformar tus ideas en obras terminadas y tu expresión en conexión real. Cuando eliges con foco, tu luz se vuelve faro y no solo destello.",
-  "consejo": "Hoy elige una sola idea que te emocione y termínala, aunque sea pequeña.",
-  "compatibles": [
-   1,
-   5,
-   6,
-   9
-  ],
-  "choca": [
-   4,
-   8
-  ],
-  "compat_texto": "Cuando un 3 se junta con un 1, 5, 6 o 9, hay chispa, plan y ganas de comerse el mundo a risotadas. Con un 4 o un 8, uno quiere volar y el otro quiere cimentar, y el choque de ritmos puede ser de los que hacen ruido en la cocina."
- },
- "4": {
-  "titulo": "El Arquitecto Terco",
-  "frase": "El 4 construye castillos con paciencia y cemento. Si lo apuras, te mira con cara de plano.",
-  "esencia": "El 4 es el número de la estructura, el orden y el trabajo bien hecho. Tú eres de los que pone bases firmes antes de levantar nada. Te gusta que las cosas tengan sentido, tengan método y aguanten el temporal. En la numerología pitagórica el 4 se asocia a la tierra, a lo sólido y a lo práctico.",
-  "amor": "Tú amas con hechos más que con discursos. Buscas una pareja estable, leal y con los pies en el suelo, alguien con quien construir una rutina que funcione. Te cuesta un poco soltar lo romántico y dejarte llevar. Si confías, te entregas entero, como quien hace una mudanza y se queda a vivir.",
-  "trabajo": "Brillas en lo organizado: planificar, ejecutar, poner orden donde reinaba el caos. Eres de fiar y de cumplir plazos, incluso cuando nadie te lo pide. Te va mejor con objetivos claros que con ideas vagas. Tu sello es la calidad y la constancia, esas cosas que otros prometen y tú entregas.",
-  "dinero": "Tú ahorras con criterio y no te gusta gastar por impulso. Prefieres invertir en cosas sólidas y a largo plazo antes que en modas. Tu riesgo es ser tan cauto que te pierdas alguna oportunidad buena. Un presupuesto ordenado es tu mejor amigo, aunque a veces lo trates como a un suegro.",
-  "salud": "Tu cuerpo agradece la rutina: horarios regulares, comida sencilla, algo de movimiento diario. Tiendes a cargar tensiones en los hombros y la espalda cuando te exiges de más. Descansar también forma parte del plan, aunque tu agenda diga lo contrario.",
-  "sombra": "Tu lado difícil es la rigidez. A veces te aferras a tu manera de hacer las cosas como si fuera la única válida. Puedes volverte demasiado crítico, contigo y con los demás. Y cuando algo se sale del plan, te cuesta adaptarte, como si el mundo se hubiera saltado una clase.",
-  "reto": "Tu lección es aprender que la vida también tiene espacio para lo imprevisto y lo flexible. Construir firme no significa construir encerrado. Tu reto es confiar en que no todo tiene que estar planificado para salir bien.",
-  "consejo": "Hoy elige una cosa que llevas postergando, divídela en pasos pequeños y da el primero sin esperar a sentirte perfecto.",
-  "compatibles": [
-   2,
-   6,
-   8
-  ],
-  "choca": [
-   5,
-   3
-  ],
-  "compat_texto": "Cuando un 4 se junta con un 2 o un 6, hay cariño, cuidado y ganas de construir juntos. El 5, en cambio, quiere cambio y aventura, y el 4 quiere planos y cimientos, así que chocan como un sofá en una puerta estrecha. Con el 3 pasa algo parecido: uno quiere orden y el otro quiere que todo sea fiesta."
- },
- "5": {
-  "titulo": "El aventurero inquieto",
-  "frase": "El 5 no se queda quieto: si la vida no lo sorprende, él se sale a buscarla.",
-  "esencia": "Tú eres el número de la libertad y el cambio, regido por Mercurio, el planeta de la mente rápida. Te aburres con la rutina igual que el móvil sin batería se apaga de golpe. Tienes curiosidad de sobra, hablas con soltura y te adaptas a casi cualquier lugar. Para ti, la vida es un viaje, no una sala de espera.",
-  "amor": "Tú amas con chispa y sin ataduras. Buscas a alguien que te siga el ritmo mental y que no te pida que te quedes quieto en un mismo sitio. La conversación te enamora tanto como el beso. Cuando te sientes encerrado, te cuesta más que a nadie decir lo que pasa, así que te conviene avisar antes de salir corriendo.",
-  "trabajo": "Tú brillas cuando hay variedad, retos nuevos y gente distinta. Vendes, negocias, viajas, improvisas y resuelves sobre la marcha. Lo que te cuesta es la tarea repetitiva día tras día, que te desespera más que una cola en Hacienda. Te va bien en lo que cambia a menudo.",
-  "dinero": "Tú ganas dinero con ideas y oportunidades, pero también se te escapa con la misma facilidad. Te gusta disfrutar hoy, y el ahorro te suena a plan para más adelante que nunca llega. Te conviene tener una cuenta aparte para lo imprevisto, porque tu impulso viajero no entiende de presupuestos.",
-  "salud": "Tú necesitas movimiento, cambios de aire y estímulos nuevos para sentirte bien. Te cuesta mantener horarios fijos y dormir lo suficiente cuando la mente no para. Cuidarte te sirve para que la energía no se te vaya en prisas. Lo de siempre: escucha a tu cuerpo, que también tiene opinión.",
-  "sombra": "Tu cara difícil es la dispersión: empiezas mil cosas y terminas pocas. Puedes huir del compromiso en cuanto se pone serio, como quien deja la maleta hecha por si acaso. A veces también confundes libertad con irresponsabilidad. Nada grave, pero conviene mirarlo de frente.",
-  "reto": "Tu lección es aprender a quedarte. Estar presente, sostener un proyecto y un vínculo hasta el final también es una forma de aventura. La libertad de verdad incluye elegir dónde echar raíces.",
-  "consejo": "Elige hoy una sola cosa pendiente y dale veinte minutos completos sin cambiar de tarea.",
-  "compatibles": [
-   1,
-   3,
-   6
-  ],
-  "choca": [
-   4,
-   8
-  ],
-  "compat_texto": "Cuando un 5 y un 1 se juntan, la energía de iniciativa y la de cambio se impulsan mutuamente. Con el 4 y el 8, la búsqueda de libertad choca de frente con la necesidad de orden y control, y hay que negociar mucho."
- },
- "6": {
-  "titulo": "El Guardián del Hogar",
-  "frase": "Soy el 6: si hay alguien que necesita cariño, ya estoy con el café y una manta.",
-  "esencia": "El 6 es el número del amor, la familia y la responsabilidad en la numerología pitagórica. Tú cuidas a los tuyos como si fueras el portero de un edificio entero: nadie se queda sin ayuda. Eres armonioso, justo y bastante creativo cuando te sientes en casa. Tu sello es hacer que los espacios se sientan acogedores.",
-  "amor": "Amas con entrega total y buscas un hogar de verdad, no solo una pareja. Quieres lealtad, cariño visible y planes de sofá compartido. Te cuesta mucho alejarte de alguien a quien quieres, incluso cuando ya no te conviene. Lo que necesitas es alguien que también cuide y que sepa dar las gracias.",
-  "trabajo": "Brillas en lo que implica cuidar, educar, asesorar o crear ambientes agradables. Eres la persona a la que todos piden ayuda porque tienes buen ojo para el detalle y el equilibrio. Funcionas mejor cuando tienes un equipo cálido y propósitos claros. Cuidado con cargar con todo el trabajo de los demás.",
-  "dinero": "Gastas con el corazón, sobre todo en tu casa y en quienes quieres. Te gusta la estabilidad y que tu dinero sirva para algo bonito y práctico. Te cuesta cobrar lo que vales cuando ayudas a otros. Necesitas un presupuesto familiar que te deje respirar sin culpas.",
-  "salud": "Tu cuerpo agradece rutinas tranquilas: comer en casa, dormir con horarios decentes y tomarte pausas de verdad. Tiendes a cuidar a todos menos a ti, así que tu descanso suele ser el primero que se sacrifica. Escucha las señales de cansancio antes de que te obliguen a parar.",
-  "sombra": "Tu cara difícil aparece cuando te entregas tanto que te vuelves mártir y luego te quejas en silencio. También puedes caer en el control de lo que hacen los demás porque crees que sabes mejor cómo cuidarlos. Un poco de sarcasmo bien dosificado también se te da de maravilla.",
-  "reto": "Aprender que cuidarte a ti también es amor, y que no eres responsable de la felicidad de todos. Tu lección es dar sin perderte y pedir ayuda sin sentir vergüenza.",
-  "consejo": "Hoy pide un favor a alguien que quieras y deja que te ayude, sin devolverlo en el acto.",
-  "compatibles": [
-   3,
-   9,
-   2
-  ],
-  "choca": [
-   8,
-   4
-  ],
-  "compat_texto": "El 6 y el 3 encajan porque los dos disfrutan del calor humano, la risa y los planes en familia. Con el 8 o el 4 suele haber choque: uno quiere poder y el otro orden rígido, y el 6 termina cargando con el ambiente."
- },
- "7": {
-  "titulo": "El Buscador de Verdades",
-  "frase": "Soy el 7: pienso mucho, sí, pero es que la vida tiene demasiados detalles como para no mirarlos.",
-  "esencia": "El 7 es el número del pensador y del buscador. Tú no te conformas con lo que se ve en la superficie: quieres entender por qué pasan las cosas. Eres más de silencio, de libros y de observar que de hacer ruido. En numerología pitagórica se te asocia con la introspección y la sabiduría interior.",
-  "amor": "Amas despacio y con profundidad. Necesitas una conexión de verdad, de esas en las que se puede hablar de todo y también quedarse callados sin incomodidad. Buscas a alguien que respete tu espacio, porque sin tiempo a solas te apagas como un móvil sin batería.",
-  "trabajo": "Brillas en lo que requiere análisis, investigación, estudio o pensar a fondo: ciencia, escritura, tecnología, terapia o cualquier cosa donde haya que descubrir lo que hay debajo. Te va mejor con tu propio ritmo que con prisas y reuniones eternas.",
-  "dinero": "Con el dinero tiendes a ser prudente y algo reservado. No te interesa tanto acumular como tener seguridad y coherencia con lo que valoras. A veces te cuesta confiar en otros para gestionar tus cuentas, así que conviene revisar con calma y sin paranoia.",
-  "salud": "Tu mente trabaja a todas horas, y el cuerpo lo nota. Cuidar el descanso, desconectar de pantallas antes de dormir y mover el cuerpo te sienta de maravilla. Este texto es solo simbólico: para tu salud, habla con un profesional.",
-  "sombra": "Puedes encerrarte tanto en tu cabeza que se te olvida salir. A veces te alejas de la gente por miedo a que no te entienda, y eso te deja más solo de lo que quisieras. También puedes ser demasiado crítico, contigo y con los demás.",
-  "reto": "Aprender que compartir lo que piensas también es sabiduría. Confiar en las personas, dejar que te vean tal como eres y aceptar que no todo se puede analizar hasta el final.",
-  "consejo": "Hoy, dedica una hora a algo que te guste sin pensar en cómo lo harás después, y cuéntale a alguien algo que te importe.",
-  "compatibles": [
-   2,
-   5,
-   9
-  ],
-  "choca": [
-   3,
-   8
-  ],
-  "compat_texto": "Cuando un 7 y un 2 se juntan, hay conversación y ternura: uno piensa y el otro siente, y se complementan bien. Con un 3 o un 8 el choque es fácil: uno vive en la fiesta y el otro en el plan de negocio, y se pelean por el ritmo de la vida."
- },
- "8": {
-  "titulo": "El Gestor de Imperios",
-  "frase": "El 8 no se conforma con llegar a fin de mes: quiere el mes entero, la cuenta y el mando.",
-  "esencia": "El 8 es el número del poder, el dinero y la ambición con los pies en la tierra. Tú sabes organizar, ejecutar y convertir una idea en resultados medibles. En la numerología pitagórica el 8 está ligado a Saturno, el planeta de la disciplina, así que tu energía es de largo plazo, no de fuegos artificiales. Eres como un buen contable del universo: nada se te escapa.",
-  "amor": "Amas con la misma seriedad que aplicas a tu carrera: cuando te comprometes, lo haces en serio. Buscas una pareja que tenga carácter y no se asuste de tu intensidad. Te cuesta mostrar vulnerabilidad, así que la gente a veces cree que estás más seguro de lo que de verdad estás. Lo que necesitas es alguien que te vea sin máscara y te quiera igual.",
-  "trabajo": "Brillas cuando hay que dirigir, negociar o levantar proyectos grandes. Eres de los que aguantan la presión sin desmayarse y saben delegar sin perder el control. Tu punto fuerte es la visión práctica: sabes qué funciona y qué es humo. Cuidado con confundir liderazgo con mandar a todos a la carrera.",
-  "dinero": "El dinero y tú tenéis una relación intensa: lo entiendes, lo multiplicas y lo respetas. Tienes buen ojo para las inversiones y para detectar oportunidades. Lo que te conviene es no obsesionarte con acumular por acumular, porque el dinero también sirve para vivir.",
-  "salud": "Tu cuerpo responde bien a las rutinas y a los horarios claros. El estrés se te acumula sin que lo notes, como un móvil con mil pestañas abiertas. Cuida los descansos y escucha las señales de cansancio antes de que te pidan un alto por la fuerza.",
-  "sombra": "Tu cara difícil es que puedes volverte controlador y exigente, hasta con quien te quiere. A veces mides el valor de las personas por lo que producen. También puedes cerrarte cuando algo se te escapa de las manos, y eso te hace parecer más frío de lo que eres.",
-  "reto": "Tu lección es aprender que el poder de verdad se comparte. Tienes que soltar el mando de vez en cuando y confiar en que otros también saben. El éxito que no deja espacio al afecto acaba pesando más de lo que parece.",
-  "consejo": "Hoy, delega una tarea que te cueste soltar y mira qué pasa sin tu supervisión.",
-  "compatibles": [
-   4,
-   6,
-   2
-  ],
-  "choca": [
-   5,
-   9
-  ],
-  "compat_texto": "Cuando un 8 se junta con un 4 o un 6, hay estructura, lealtad y ganas de construir algo sólido juntos. Con un 5 o un 9 la cosa es más movida: el 5 quiere libertad y el 8 quiere control, así que sale chispa, y de la mala."
- },
- "9": {
-  "titulo": "El sabio generoso",
-  "frase": "El 9 cierra ciclos y te deja más sabio, aunque sea con un bostezo de por medio. Eso es madurar.",
-  "esencia": "El 9 es el número de la compasión y el cierre. Sabe que todo termina, y por eso se entrega sin llevar la cuenta. Tiene mirada amplia, como quien ve el mapa completo mientras los demás miran solo su calle. Es el último dígito de la numerología y guarda la sabiduría de todos los anteriores.",
-  "amor": "Amas en grande, como quien regala el mejor sofá de la casa. Buscas a alguien que tenga alma propia y ganas de crecer contigo. Te cuesta enamorarte de lo superficial, y cuando das el corazón, lo das entero. Cuidado con dar tanto que te olvides de pedir algo a cambio.",
-  "trabajo": "Brillas en lo que tenga sentido: ayudar, enseñar, crear algo que deje huella. Te aburres con tareas vacías más rápido que un móvil sin batería. Eres buen líder cuando inspiras y no solo mandas. Te cuesta cerrar proyectos por querer hacerlos perfectos, y eso también es una forma de quedarte colgado.",
-  "dinero": "El dinero te interesa como medio, no como fin. Puedes ser generoso hasta el punto de quedarte sin margen, como quien invita a todo el bar. Te conviene tener un plan sencillo y guardar algo para ti. Ganar es bonito; también lo es no depender de la próxima paga para respirar.",
-  "salud": "Tu cuerpo agradece descanso real y momentos de calma, no solo cafés y agenda llena. Te va bien moverte en lo que disfrutes, sea bailar, caminar o nadar. Escucha las señales de cansancio antes de que te obliguen a parar. Y si algo te preocupa de verdad, consulta a un profesional.",
-  "sombra": "A veces te crees el cuidador de todos y terminas cargando mochilas que no son tuyas. Puedes caer en el drama de la víctima generosa: 'después de todo lo que hice…'. Tu lado más difícil aparece cuando te guardas el enfado en vez de decirlo. Ojo con eso, que el rencor también hace ruido.",
-  "reto": "Aprender que soltar también es amar. Tu lección es cerrar capítulos sin arrastrar cada página al siguiente. Cuando lo consigues, descubres que tu generosidad no se agota, solo se vuelve más inteligente.",
-  "consejo": "Hoy haz una lista de algo que ya no necesitas soltar y suéltalo con cariño.",
-  "compatibles": [
-   3,
-   6,
-   9
-  ],
-  "choca": [
-   4,
-   8
-  ],
-  "compat_texto": "Cuando un 9 y un 3 se juntan, la alegría sale a borbotones y se ríen de todo sin perder el fondo. Con un 4 o un 8, el 9 quiere cambiar el mundo y el otro quiere controlar la agenda, y chocan como dos coches en una rotonda."
- },
- "11": {
-  "titulo": "El soñador con antena",
-  "frase": "Número 11: intuición de radar y paciencia de wifi de tren. Tú sientes lo que otros tardan en entender.",
-  "esencia": "El 11 es un número maestro: vibra más alto que el 2 del que sale, y por eso tienes sensibilidad de sobra. Ves señales donde otros ven ruido, como quien oye la radio entre estaciones. Tu intuición es tu mejor herramienta, aunque a veces te pese como un radar que nunca se apaga.",
-  "amor": "Amas con profundidad y buscas una conexión que se sienta casi mágica, no un romance de catálogo. Necesitas alguien que entienda tus silencios y que no se asuste cuando hablas de tus ideas raras. Si te aburres, te vas; si te sientes visto, te entregas entero.",
-  "trabajo": "Brillas en lo que une ideas con personas: enseñar, escribir, asesorar, crear con sentido. Tu cabeza salta rápido y necesitas un entorno que respete tu ritmo creativo. Cuando logras bajar una idea a tierra, tu impacto es enorme.",
-  "dinero": "Tu relación con el dinero es intensa: a veces te entusiasmas con proyectos que aún no dan nada. Aprende a poner números al lado de tus sueños, porque la intuición sola no paga el alquiler. Un plan sencillo te da la libertad que buscas.",
-  "salud": "Tu sistema nervioso es muy sensible, así que la mente acelerada te pasa factura. Cuida el descanso, los momentos de silencio y el movimiento tranquilo. Si algo te preocupa de verdad, consulta a un profesional de la salud.",
-  "sombra": "Puedes caer en la duda constante, la hipersensibilidad o la sensación de no encajar en ningún sitio. A veces te aíslas tanto que pareces un faro en una isla sin barco. No es un defecto, es un patrón que puedes reconocer y soltar poco a poco.",
-  "reto": "Aprender a confiar en tu propia voz sin esperar la aprobación ajena. Tu lección es transformar la intuición en acción concreta, sin quedarte solo en el sentir.",
-  "consejo": "Anota hoy una intuición que tuviste y comprueba en una semana si se cumplió.",
-  "compatibles": [
-   2,
-   6,
-   9
-  ],
-  "choca": [
-   4,
-   8
-  ],
-  "compat_texto": "Con el 2 y el 6 hay una sensibilidad compartida y un cariño que sostiene. Con el 4 y el 8 la rigidez y la prisa chocan con tu forma de sentir, y termináis discutiendo por el ritmo de los días."
- },
- "22": {
-  "titulo": "El arquitecto de sueños",
-  "frase": "El 22 no sueña cosas pequeñas: construye catedrales con paciencia de hormiga y cafe de sobra.",
-  "esencia": "El 22 es el número maestro del constructor: toma ideas grandes y las convierte en cosas reales. Tiene la visión del 4 sumada a la intuición del 2, así que piensa a lo grande pero baja al suelo. Eres de los que quieren dejar algo que dure, no solo un buen rato.",
-  "amor": "En pareja buscas estabilidad con alma, alguien con quien construir un proyecto de vida. Te entregas mucho, pero te cuesta soltar el control cuando te preocupas. Necesitas a alguien que te diga que no hace falta cargar el mundo solo.",
-  "trabajo": "Brillas cuando hay un plan grande y muchas piezas que encajar: dirigir equipos, crear empresas, diseñar sistemas. Tu superpoder es hacer realidad lo que otros solo imaginan, sin perder el detalle de la factura del mes.",
-  "dinero": "Tiendes a pensar en plazos largos y en seguridad, como quien planta un árbol para la sombra de sus nietos. Puedes hacer crecer patrimonio si no te dejas llevar por la prisa. Eso sí, cuidado con meterte en proyectos gigantes sin reservas.",
-  "salud": "Tu cuerpo funciona bien cuando hay rutina, descanso y pausas reales. Es fácil que el estrés se te acumule en los hombros y en el sueño de tanto pensar en el siguiente paso. Tomarte el día libre no es perder tiempo, es mantener la obra en pie.",
-  "sombra": "Puedes volverte rígido, exigente contigo y con los demás, como el capataz que no suelta el plano. Te cuesta delegar y aceptar que algo salga distinto a como lo imaginaste. A veces olvidas disfrutar del camino mientras corres hacia la meta.",
-  "reto": "Aprender que construir grande no significa cargar todo solo. Tu lección es confiar en otros, aceptar lo imperfecto y entender que una obra vale más por las personas que la levantan que por el plano perfecto.",
-  "consejo": "Hoy elige una sola tarea que puedas delegar o soltar, y deja que alguien más la haga a su manera.",
-  "compatibles": [
-   4,
-   6,
-   8
-  ],
-  "choca": [
-   5,
-   7
-  ],
-  "compat_texto": "Cuando un 22 y un 4 se juntan, se entienden con la misma pasión por la estructura y la constancia. Con un 5 o un 7 el choque es de ritmos: uno quiere cambiar todo ya y el otro necesita pensarlo mil veces."
- },
- "33": {
-  "titulo": "El Maestro Sensible",
-  "frase": "Con el 33 no basta con brillar: también hay que cuidar a los demás sin quemarte en el intento.",
-  "esencia": "El 33 es un número maestro, el más generoso de la numerología pitagórica. Se le llama el Maestro Sensible o el Maestro Sanador: viene a enseñar con el ejemplo y a cuidar a quien lo necesita. Tú tienes una mezcla rara de visión amplia y corazón de abuelo que siempre guarda una manta extra. Lo tuyo no es solo ayudar, es inspirar.",
-  "amor": "Amas con profundidad y mucho cuidado, casi como si la relación fuera un proyecto que hay que mimar cada día. Buscas alguien con quien compartir una vida con sentido, no solo planes para el fin de semana. Pero ojo: a veces cargas con todo tú solo y luego te preguntas por qué nadie te cuida igual.",
-  "trabajo": "Brillas en lo que tiene propósito: enseñar, orientar, curar, crear algo que ayude a la gente. Te organizas bien cuando ves el impacto real de lo que haces. Lo que te agota es el trabajo vacío, de cumplir por cumplir, como ver una serie que no te interesa pero no puedes dejar.",
-  "dinero": "Con el dinero tienes una relación mixta: te gusta tener lo necesario para vivir con tranquilidad, pero te cuesta cobrar lo que vales. A veces das más de lo que puedes permitirte, como el amigo que siempre paga la ronda y luego no llega a fin de mes. Ponerle límites no te hace menos generoso.",
-  "salud": "Tu cuerpo funciona mejor con descanso de verdad, no con maratones de sueño de tres horas. El estrés se te acumula en los hombros y en el estómago, así que las pausas cortas durante el día marcan diferencia. Moverte, comer con calma y desconectar a una hora razonable te sientan mejor de lo que crees.",
-  "sombra": "Tu cara difícil es que a veces te exiges tanto que te conviertes en juez de ti mismo, como un entrenador que nunca da por buena la jugada. También puedes caer en la preocupación constante por los demás y olvidar tus propias necesidades. Y cuesta pedir ayuda: prefieres sostener la mesa entera antes que pedir que te pasen la sal.",
-  "reto": "Tu lección es aprender que cuidar a otros no te obliga a sacrificarte. Ser un maestro de verdad también incluye ser alumno de ti mismo: aceptar apoyo, descansar sin culpa y confiar en que el mundo sigue girando aunque tú pares un rato.",
-  "consejo": "Hoy haz una sola cosa solo por ti, sin justificarla ante nadie.",
-  "compatibles": [
-   6,
-   9,
-   2
-  ],
-  "choca": [
-   4,
-   8
-  ],
-  "compat_texto": "Con el 6 y el 9 hay una conexión de cuidado mutuo y sentido compartido, como dos cocineros que se pasan los ingredientes sin decir nada. Con el 4 y el 8, en cambio, uno quiere método y el otro resultados, y la discusión sobre quién lleva el timón puede durar más que una serie entera."
- }
+  "1": {
+    "titulo": "El Capitán Sin Descanso",
+    "frase": "Soy el 1: si no lidero el grupo, al menos lo organizo desde el primer minuto. ¿Y tú?",
+    "esencia": "El 1 es el número del inicio, el primer paso de cualquier cosa. Tú eres de los que arrancan proyectos antes de que los demás terminen de pensarlo. Tienes iniciativa, voluntad y ganas de abrir camino, como el primero que entra a una sala vacía y decide dónde va cada silla.",
+    "amor": "Amas con intensidad y quieres una pareja que te respete y te deje brillar. No te van los juegos largos: si te gusta alguien, lo dices. Buscas alguien que tenga su propia vida pero también ganas de construir algo juntos, sin que nadie se sienta de segundo plano.",
+    "trabajo": "Brillas cuando puedes tomar decisiones y ver resultados rápido. Eres buena o buen jefe de proyectos, emprendedor o la persona que empuja al equipo cuando todos están dudando. Te cuesta mucho trabajar bajo órdenes que no entiendes, así que mejor si te dan margen para proponer.",
+    "dinero": "Con el dinero eres decidido: prefieres invertir en tus ideas que ahorrar sin rumbo. Puedes ganar y gastar en proyectos con sentido, pero conviene que tengas un colchón, porque tu impulso a veces te lleva a apostar más de lo que tu cuenta bancaria aguanta.",
+    "salud": "Tienes mucha energía y tiendes a exigirte como si fueras una batería que nunca se acaba. Escucha las señales de cansancio y dale a tu cuerpo pausas de verdad. Tu motor funciona mejor con descanso, no solo con empuje.",
+    "sombra": "Tu cara difícil es que a veces quieres tener siempre la última palabra y te cuesta ceder. Puedes parecer terco o impaciente cuando las cosas no van a tu ritmo. Aun así, cuando reconoces que te equivocaste, lo haces con una honestidad que pocos tienen.",
+    "reto": "Tu lección es aprender que liderar también es escuchar. Un buen capitán no hace el viaje solo; sabe cuándo pedir ayuda y cuándo dejar que otro lleve el timón por un tramo.",
+    "consejo": "Hoy elige una decisión pendiente y pide la opinión de alguien antes de cerrarla.",
+    "compatibles": [3, 5, 9],
+    "choca": [4, 8],
+    "compat_texto": "Te encajan el 3 y el 5 porque les gusta la energía que tú pones, y con el 9 compartes visión grande. Chocas con el 4 y el 8 porque ellos piden ir despacio y con control, y tú quieres ir ya, y eso genera fricción constante en las decisiones."
+  },
+  "2": {
+    "titulo": "El diplomático del equipo",
+    "frase": "Dos manos sujetan mejor la taza que una. El número 2 lo sabe desde siempre.",
+    "esencia": "El 2 es el número de la dualidad, la pareja y el puente. Tú sientes lo que pasa entre las personas antes de que nadie lo diga en voz alta. Eres intuitivo, sensible y muy bueno para mediar. Tu lema es: si podemos estar en paz, mejor.",
+    "amor": "Tú amas con atención y ternura. Buscas una conexión profunda, de esas en las que hablas y te escuchan de verdad. Necesitas sentir que tu pareja es un equipo, no un rival. Eso sí, si algo te duele, a veces lo callas tanto que el wifi de tu relación se queda sin señal.",
+    "trabajo": "Brillas cuando hay que cooperar, negociar o cuidar detalles. Eres el que mantiene la calma en la reunión y el que nota que alguien no está bien. Tu punto fuerte es la paciencia y la capacidad de ver varios lados a la vez. Te cuesta menos un grupo que un jefe que grite.",
+    "dinero": "Con el dinero tiendes a ser prudente y a planear con calma. Prefieres ahorrar a lo loco y repartir gastos de forma justa. Tu punto débil es decidir por miedo a quedar mal con alguien, así que a veces pagas de más por no discutir.",
+    "salud": "Tu cuerpo suele pedirte equilibrio: descanso, rutina tranquila y espacios donde no te sientas presionado. Escuchas tus emociones, y eso es valioso, aunque a veces las guardas tanto que se te cargan los hombros. Si algo te preocupa de verdad, consúltalo con un profesional.",
+    "sombra": "Tu cara difícil aparece cuando dudas tanto que nada se decide. Puedes ser demasiado dependiente de la aprobación ajena o evitar el conflicto hasta que explota. Tu indecisión a veces parece un laberinto sin salida, aunque la salida está justo al lado de tu propia voz.",
+    "reto": "Aprender que decir lo que sientes no rompe la paz, la fortalece. Tu lección es confiar en tu propio criterio sin necesitar el permiso de los demás.",
+    "consejo": "Hoy di en voz alta una decisión pequeña que ya tienes tomada, sin pedir antes opinión a nadie.",
+    "compatibles": [2, 4, 6, 8],
+    "choca": [1, 5, 9],
+    "compat_texto": "El 2 y el 6 encajan porque los dos cuidan, escuchan y buscan armonía en casa. Chocan con el 1 y el 5 porque uno quiere mandar y el otro quiere cambiar de plan cada tres días, y el 2 acaba con dolor de cabeza y la taza fría."
+  },
+  "3": {
+    "titulo": "El Influencer del Universo",
+    "frase": "Tres es la fiesta que empieza sola: expresión, alegría y un poquito de drama bien servido.",
+    "esencia": "El 3 es el número de la expresión, la creatividad y la comunicación. Tú hablas, dibujas, cuentas historias y contagias buen humor, como si llevaras un altavoz invisible. Eres sociable, ocurrente y te aburres rápido de lo gris.",
+    "amor": "Te enamoras con los ojos, el oído y la risa. Buscas a alguien que conecte contigo con conversación de verdad, no solo con mensajes de buenas noches. Te cuesta quedarte callado cuando sientes algo, y eso es un regalo, aunque a veces lo digas en el peor momento.",
+    "trabajo": "Brillas en lo que tiene palabras, imagen o ideas: escritura, diseño, enseñanza, medios, eventos, ventas con alma. Te motiva el aplauso, pero también el proyecto que te deja expresarte. Lo rutinario te da sueño, como una reunión que pudo ser un correo.",
+    "dinero": "Gastas con entusiasmo cuando algo te emociona y te cuesta llevar cuentas, como quien olvida el ticket en el bolsillo. Tu fuerza está en generar ingresos con tu creatividad. Un presupuesto sencillo te salvará más de un susto de fin de mes.",
+    "salud": "Tu energía sube como un cohete y a veces se cae como un globo sin aire. Cuida el descanso, porque el cuerpo también necesita sus pausas. Mover el cuerpo con algo que disfrutes te sienta mejor que cualquier rutina aburrida.",
+    "sombra": "Puedes dispersarte como un bote de confeti en una fiesta, empezar veinte cosas y terminar dos. A veces exageras para llamar la atención o te afecta mucho la crítica. Aprender a escuchar con la misma pasión con la que hablas te haría todavía más querido.",
+    "reto": "Tu lección es poner profundidad a tu alegría: transformar tus ideas en obras terminadas y tu expresión en conexión real. Cuando eliges con foco, tu luz se vuelve faro y no solo destello.",
+    "consejo": "Hoy elige una sola idea que te emocione y termínala, aunque sea pequeña.",
+    "compatibles": [1, 5, 6, 9],
+    "choca": [4, 8],
+    "compat_texto": "Cuando un 3 se junta con un 1, 5, 6 o 9, hay chispa, plan y ganas de comerse el mundo a risotadas. Con un 4 o un 8, uno quiere volar y el otro quiere cimentar, y el choque de ritmos puede ser de los que hacen ruido en la cocina."
+  },
+  "4": {
+    "titulo": "El Arquitecto Terco",
+    "frase": "El 4 construye castillos con paciencia y cemento. Si lo apuras, te mira con cara de plano.",
+    "esencia": "El 4 es el número de la estructura, el orden y el trabajo bien hecho. Tú eres de los que pone bases firmes antes de levantar nada. Te gusta que las cosas tengan sentido, tengan método y aguanten el temporal. En la numerología pitagórica el 4 se asocia a la tierra, a lo sólido y a lo práctico.",
+    "amor": "Tú amas con hechos más que con discursos. Buscas una pareja estable, leal y con los pies en el suelo, alguien con quien construir una rutina que funcione. Te cuesta un poco soltar lo romántico y dejarte llevar. Si confías, te entregas entero, como quien hace una mudanza y se queda a vivir.",
+    "trabajo": "Brillas en lo organizado: planificar, ejecutar, poner orden donde reinaba el caos. Eres de fiar y de cumplir plazos, incluso cuando nadie te lo pide. Te va mejor con objetivos claros que con ideas vagas. Tu sello es la calidad y la constancia, esas cosas que otros prometen y tú entregas.",
+    "dinero": "Tú ahorras con criterio y no te gusta gastar por impulso. Prefieres invertir en cosas sólidas y a largo plazo antes que en modas. Tu riesgo es ser tan cauto que te pierdas alguna oportunidad buena. Un presupuesto ordenado es tu mejor amigo, aunque a veces lo trates como a un suegro.",
+    "salud": "Tu cuerpo agradece la rutina: horarios regulares, comida sencilla, algo de movimiento diario. Tiendes a cargar tensiones en los hombros y la espalda cuando te exiges de más. Descansar también forma parte del plan, aunque tu agenda diga lo contrario.",
+    "sombra": "Tu lado difícil es la rigidez. A veces te aferras a tu manera de hacer las cosas como si fuera la única válida. Puedes volverte demasiado crítico, contigo y con los demás. Y cuando algo se sale del plan, te cuesta adaptarte, como si el mundo se hubiera saltado una clase.",
+    "reto": "Tu lección es aprender que la vida también tiene espacio para lo imprevisto y lo flexible. Construir firme no significa construir encerrado. Tu reto es confiar en que no todo tiene que estar planificado para salir bien.",
+    "consejo": "Hoy elige una cosa que llevas postergando, divídela en pasos pequeños y da el primero sin esperar a sentirte perfecto.",
+    "compatibles": [2, 6, 8],
+    "choca": [5, 3],
+    "compat_texto": "Cuando un 4 se junta con un 2 o un 6, hay cariño, cuidado y ganas de construir juntos. El 5, en cambio, quiere cambio y aventura, y el 4 quiere planos y cimientos, así que chocan como un sofá en una puerta estrecha. Con el 3 pasa algo parecido: uno quiere orden y el otro quiere que todo sea fiesta."
+  },
+  "5": {
+    "titulo": "El aventurero inquieto",
+    "frase": "El 5 no se queda quieto: si la vida no lo sorprende, él se sale a buscarla.",
+    "esencia": "Tú eres el número de la libertad y el cambio, regido por Mercurio, el planeta de la mente rápida. Te aburres con la rutina igual que el móvil sin batería se apaga de golpe. Tienes curiosidad de sobra, hablas con soltura y te adaptas a casi cualquier lugar. Para ti, la vida es un viaje, no una sala de espera.",
+    "amor": "Tú amas con chispa y sin ataduras. Buscas a alguien que te siga el ritmo mental y que no te pida que te quedes quieto en un mismo sitio. La conversación te enamora tanto como el beso. Cuando te sientes encerrado, te cuesta más que a nadie decir lo que pasa, así que te conviene avisar antes de salir corriendo.",
+    "trabajo": "Tú brillas cuando hay variedad, retos nuevos y gente distinta. Vendes, negocias, viajas, improvisas y resuelves sobre la marcha. Lo que te cuesta es la tarea repetitiva día tras día, que te desespera más que una cola en Hacienda. Te va bien en lo que cambia a menudo.",
+    "dinero": "Tú ganas dinero con ideas y oportunidades, pero también se te escapa con la misma facilidad. Te gusta disfrutar hoy, y el ahorro te suena a plan para más adelante que nunca llega. Te conviene tener una cuenta aparte para lo imprevisto, porque tu impulso viajero no entiende de presupuestos.",
+    "salud": "Tú necesitas movimiento, cambios de aire y estímulos nuevos para sentirte bien. Te cuesta mantener horarios fijos y dormir lo suficiente cuando la mente no para. Cuidarte te sirve para que la energía no se te vaya en prisas. Lo de siempre: escucha a tu cuerpo, que también tiene opinión.",
+    "sombra": "Tu cara difícil es la dispersión: empiezas mil cosas y terminas pocas. Puedes huir del compromiso en cuanto se pone serio, como quien deja la maleta hecha por si acaso. A veces también confundes libertad con irresponsabilidad. Nada grave, pero conviene mirarlo de frente.",
+    "reto": "Tu lección es aprender a quedarte. Estar presente, sostener un proyecto y un vínculo hasta el final también es una forma de aventura. La libertad de verdad incluye elegir dónde echar raíces.",
+    "consejo": "Elige hoy una sola cosa pendiente y dale veinte minutos completos sin cambiar de tarea.",
+    "compatibles": [1, 3, 6],
+    "choca": [4, 8],
+    "compat_texto": "Cuando un 5 y un 1 se juntan, la energía de iniciativa y la de cambio se impulsan mutuamente. Con el 4 y el 8, la búsqueda de libertad choca de frente con la necesidad de orden y control, y hay que negociar mucho."
+  },
+  "6": {
+    "titulo": "El Guardián del Hogar",
+    "frase": "Soy el 6: si hay alguien que necesita cariño, ya estoy con el café y una manta.",
+    "esencia": "El 6 es el número del amor, la familia y la responsabilidad en la numerología pitagórica. Tú cuidas a los tuyos como si fueras el portero de un edificio entero: nadie se queda sin ayuda. Eres armonioso, justo y bastante creativo cuando te sientes en casa. Tu sello es hacer que los espacios se sientan acogedores.",
+    "amor": "Amas con entrega total y buscas un hogar de verdad, no solo una pareja. Quieres lealtad, cariño visible y planes de sofá compartido. Te cuesta mucho alejarte de alguien a quien quieres, incluso cuando ya no te conviene. Lo que necesitas es alguien que también cuide y que sepa dar las gracias.",
+    "trabajo": "Brillas en lo que implica cuidar, educar, asesorar o crear ambientes agradables. Eres la persona a la que todos piden ayuda porque tienes buen ojo para el detalle y el equilibrio. Funcionas mejor cuando tienes un equipo cálido y propósitos claros. Cuidado con cargar con todo el trabajo de los demás.",
+    "dinero": "Gastas con el corazón, sobre todo en tu casa y en quienes quieres. Te gusta la estabilidad y que tu dinero sirva para algo bonito y práctico. Te cuesta cobrar lo que vales cuando ayudas a otros. Necesitas un presupuesto familiar que te deje respirar sin culpas.",
+    "salud": "Tu cuerpo agradece rutinas tranquilas: comer en casa, dormir con horarios decentes y tomarte pausas de verdad. Tiendes a cuidar a todos menos a ti, así que tu descanso suele ser el primero que se sacrifica. Escucha las señales de cansancio antes de que te obliguen a parar.",
+    "sombra": "Tu cara difícil aparece cuando te entregas tanto que te vuelves mártir y luego te quejas en silencio. También puedes caer en el control de lo que hacen los demás porque crees que sabes mejor cómo cuidarlos. Un poco de sarcasmo bien dosificado también se te da de maravilla.",
+    "reto": "Aprender que cuidarte a ti también es amor, y que no eres responsable de la felicidad de todos. Tu lección es dar sin perderte y pedir ayuda sin sentir vergüenza.",
+    "consejo": "Hoy pide un favor a alguien que quieras y deja que te ayude, sin devolverlo en el acto.",
+    "compatibles": [3, 9, 2],
+    "choca": [8, 4],
+    "compat_texto": "El 6 y el 3 encajan porque los dos disfrutan del calor humano, la risa y los planes en familia. Con el 8 o el 4 suele haber choque: uno quiere poder y el otro orden rígido, y el 6 termina cargando con el ambiente."
+  },
+  "7": {
+    "titulo": "El Buscador de Verdades",
+    "frase": "Soy el 7: pienso mucho, sí, pero es que la vida tiene demasiados detalles como para no mirarlos.",
+    "esencia": "El 7 es el número del pensador y del buscador. Tú no te conformas con lo que se ve en la superficie: quieres entender por qué pasan las cosas. Eres más de silencio, de libros y de observar que de hacer ruido. En numerología pitagórica se te asocia con la introspección y la sabiduría interior.",
+    "amor": "Amas despacio y con profundidad. Necesitas una conexión de verdad, de esas en las que se puede hablar de todo y también quedarse callados sin incomodidad. Buscas a alguien que respete tu espacio, porque sin tiempo a solas te apagas como un móvil sin batería.",
+    "trabajo": "Brillas en lo que requiere análisis, investigación, estudio o pensar a fondo: ciencia, escritura, tecnología, terapia o cualquier cosa donde haya que descubrir lo que hay debajo. Te va mejor con tu propio ritmo que con prisas y reuniones eternas.",
+    "dinero": "Con el dinero tiendes a ser prudente y algo reservado. No te interesa tanto acumular como tener seguridad y coherencia con lo que valoras. A veces te cuesta confiar en otros para gestionar tus cuentas, así que conviene revisar con calma y sin paranoia.",
+    "salud": "Tu mente trabaja a todas horas, y el cuerpo lo nota. Cuidar el descanso, desconectar de pantallas antes de dormir y mover el cuerpo te sienta de maravilla. Este texto es solo simbólico: para tu salud, habla con un profesional.",
+    "sombra": "Puedes encerrarte tanto en tu cabeza que se te olvida salir. A veces te alejas de la gente por miedo a que no te entienda, y eso te deja más solo de lo que quisieras. También puedes ser demasiado crítico, contigo y con los demás.",
+    "reto": "Aprender que compartir lo que piensas también es sabiduría. Confiar en las personas, dejar que te vean tal como eres y aceptar que no todo se puede analizar hasta el final.",
+    "consejo": "Hoy, dedica una hora a algo que te guste sin pensar en cómo lo harás después, y cuéntale a alguien algo que te importe.",
+    "compatibles": [2, 5, 9],
+    "choca": [3, 8],
+    "compat_texto": "Cuando un 7 y un 2 se juntan, hay conversación y ternura: uno piensa y el otro siente, y se complementan bien. Con un 3 o un 8 el choque es fácil: uno vive en la fiesta y el otro en el plan de negocio, y se pelean por el ritmo de la vida."
+  },
+  "8": {
+    "titulo": "El Gestor de Imperios",
+    "frase": "El 8 no se conforma con llegar a fin de mes: quiere el mes entero, la cuenta y el mando.",
+    "esencia": "El 8 es el número del poder, el dinero y la ambición con los pies en la tierra. Tú sabes organizar, ejecutar y convertir una idea en resultados medibles. En la numerología pitagórica el 8 está ligado a Saturno, el planeta de la disciplina, así que tu energía es de largo plazo, no de fuegos artificiales. Eres como un buen contable del universo: nada se te escapa.",
+    "amor": "Amas con la misma seriedad que aplicas a tu carrera: cuando te comprometes, lo haces en serio. Buscas una pareja que tenga carácter y no se asuste de tu intensidad. Te cuesta mostrar vulnerabilidad, así que la gente a veces cree que estás más seguro de lo que de verdad estás. Lo que necesitas es alguien que te vea sin máscara y te quiera igual.",
+    "trabajo": "Brillas cuando hay que dirigir, negociar o levantar proyectos grandes. Eres de los que aguantan la presión sin desmayarse y saben delegar sin perder el control. Tu punto fuerte es la visión práctica: sabes qué funciona y qué es humo. Cuidado con confundir liderazgo con mandar a todos a la carrera.",
+    "dinero": "El dinero y tú tenéis una relación intensa: lo entiendes, lo multiplicas y lo respetas. Tienes buen ojo para las inversiones y para detectar oportunidades. Lo que te conviene es no obsesionarte con acumular por acumular, porque el dinero también sirve para vivir.",
+    "salud": "Tu cuerpo responde bien a las rutinas y a los horarios claros. El estrés se te acumula sin que lo notes, como un móvil con mil pestañas abiertas. Cuida los descansos y escucha las señales de cansancio antes de que te pidan un alto por la fuerza.",
+    "sombra": "Tu cara difícil es que puedes volverte controlador y exigente, hasta con quien te quiere. A veces mides el valor de las personas por lo que producen. También puedes cerrarte cuando algo se te escapa de las manos, y eso te hace parecer más frío de lo que eres.",
+    "reto": "Tu lección es aprender que el poder de verdad se comparte. Tienes que soltar el mando de vez en cuando y confiar en que otros también saben. El éxito que no deja espacio al afecto acaba pesando más de lo que parece.",
+    "consejo": "Hoy, delega una tarea que te cueste soltar y mira qué pasa sin tu supervisión.",
+    "compatibles": [4, 6, 2],
+    "choca": [5, 9],
+    "compat_texto": "Cuando un 8 se junta con un 4 o un 6, hay estructura, lealtad y ganas de construir algo sólido juntos. Con un 5 o un 9 la cosa es más movida: el 5 quiere libertad y el 8 quiere control, así que sale chispa, y de la mala."
+  },
+  "9": {
+    "titulo": "El sabio generoso",
+    "frase": "El 9 cierra ciclos y te deja más sabio, aunque sea con un bostezo de por medio. Eso es madurar.",
+    "esencia": "El 9 es el número de la compasión y el cierre. Sabe que todo termina, y por eso se entrega sin llevar la cuenta. Tiene mirada amplia, como quien ve el mapa completo mientras los demás miran solo su calle. Es el último dígito de la numerología y guarda la sabiduría de todos los anteriores.",
+    "amor": "Amas en grande, como quien regala el mejor sofá de la casa. Buscas a alguien que tenga alma propia y ganas de crecer contigo. Te cuesta enamorarte de lo superficial, y cuando das el corazón, lo das entero. Cuidado con dar tanto que te olvides de pedir algo a cambio.",
+    "trabajo": "Brillas en lo que tenga sentido: ayudar, enseñar, crear algo que deje huella. Te aburres con tareas vacías más rápido que un móvil sin batería. Eres buen líder cuando inspiras y no solo mandas. Te cuesta cerrar proyectos por querer hacerlos perfectos, y eso también es una forma de quedarte colgado.",
+    "dinero": "El dinero te interesa como medio, no como fin. Puedes ser generoso hasta el punto de quedarte sin margen, como quien invita a todo el bar. Te conviene tener un plan sencillo y guardar algo para ti. Ganar es bonito; también lo es no depender de la próxima paga para respirar.",
+    "salud": "Tu cuerpo agradece descanso real y momentos de calma, no solo cafés y agenda llena. Te va bien moverte en lo que disfrutes, sea bailar, caminar o nadar. Escucha las señales de cansancio antes de que te obliguen a parar. Y si algo te preocupa de verdad, consulta a un profesional.",
+    "sombra": "A veces te crees el cuidador de todos y terminas cargando mochilas que no son tuyas. Puedes caer en el drama de la víctima generosa: 'después de todo lo que hice…'. Tu lado más difícil aparece cuando te guardas el enfado en vez de decirlo. Ojo con eso, que el rencor también hace ruido.",
+    "reto": "Aprender que soltar también es amar. Tu lección es cerrar capítulos sin arrastrar cada página al siguiente. Cuando lo consigues, descubres que tu generosidad no se agota, solo se vuelve más inteligente.",
+    "consejo": "Hoy haz una lista de algo que ya no necesitas soltar y suéltalo con cariño.",
+    "compatibles": [3, 6, 9],
+    "choca": [4, 8],
+    "compat_texto": "Cuando un 9 y un 3 se juntan, la alegría sale a borbotones y se ríen de todo sin perder el fondo. Con un 4 o un 8, el 9 quiere cambiar el mundo y el otro quiere controlar la agenda, y chocan como dos coches en una rotonda."
+  },
+  "11": {
+    "titulo": "El soñador con antena",
+    "frase": "Número 11: intuición de radar y paciencia de wifi de tren. Tú sientes lo que otros tardan en entender.",
+    "esencia": "El 11 es un número maestro: vibra más alto que el 2 del que sale, y por eso tienes sensibilidad de sobra. Ves señales donde otros ven ruido, como quien oye la radio entre estaciones. Tu intuición es tu mejor herramienta, aunque a veces te pese como un radar que nunca se apaga.",
+    "amor": "Amas con profundidad y buscas una conexión que se sienta casi mágica, no un romance de catálogo. Necesitas alguien que entienda tus silencios y que no se asuste cuando hablas de tus ideas raras. Si te aburres, te vas; si te sientes visto, te entregas entero.",
+    "trabajo": "Brillas en lo que une ideas con personas: enseñar, escribir, asesorar, crear con sentido. Tu cabeza salta rápido y necesitas un entorno que respete tu ritmo creativo. Cuando logras bajar una idea a tierra, tu impacto es enorme.",
+    "dinero": "Tu relación con el dinero es intensa: a veces te entusiasmas con proyectos que aún no dan nada. Aprende a poner números al lado de tus sueños, porque la intuición sola no paga el alquiler. Un plan sencillo te da la libertad que buscas.",
+    "salud": "Tu sistema nervioso es muy sensible, así que la mente acelerada te pasa factura. Cuida el descanso, los momentos de silencio y el movimiento tranquilo. Si algo te preocupa de verdad, consulta a un profesional de la salud.",
+    "sombra": "Puedes caer en la duda constante, la hipersensibilidad o la sensación de no encajar en ningún sitio. A veces te aíslas tanto que pareces un faro en una isla sin barco. No es un defecto, es un patrón que puedes reconocer y soltar poco a poco.",
+    "reto": "Aprender a confiar en tu propia voz sin esperar la aprobación ajena. Tu lección es transformar la intuición en acción concreta, sin quedarte solo en el sentir.",
+    "consejo": "Anota hoy una intuición que tuviste y comprueba en una semana si se cumplió.",
+    "compatibles": [2, 6, 9],
+    "choca": [4, 8],
+    "compat_texto": "Con el 2 y el 6 hay una sensibilidad compartida y un cariño que sostiene. Con el 4 y el 8 la rigidez y la prisa chocan con tu forma de sentir, y termináis discutiendo por el ritmo de los días."
+  },
+  "22": {
+    "titulo": "El arquitecto de sueños",
+    "frase": "El 22 no sueña cosas pequeñas: construye catedrales con paciencia de hormiga y cafe de sobra.",
+    "esencia": "El 22 es el número maestro del constructor: toma ideas grandes y las convierte en cosas reales. Tiene la visión del 4 sumada a la intuición del 2, así que piensa a lo grande pero baja al suelo. Eres de los que quieren dejar algo que dure, no solo un buen rato.",
+    "amor": "En pareja buscas estabilidad con alma, alguien con quien construir un proyecto de vida. Te entregas mucho, pero te cuesta soltar el control cuando te preocupas. Necesitas a alguien que te diga que no hace falta cargar el mundo solo.",
+    "trabajo": "Brillas cuando hay un plan grande y muchas piezas que encajar: dirigir equipos, crear empresas, diseñar sistemas. Tu superpoder es hacer realidad lo que otros solo imaginan, sin perder el detalle de la factura del mes.",
+    "dinero": "Tiendes a pensar en plazos largos y en seguridad, como quien planta un árbol para la sombra de sus nietos. Puedes hacer crecer patrimonio si no te dejas llevar por la prisa. Eso sí, cuidado con meterte en proyectos gigantes sin reservas.",
+    "salud": "Tu cuerpo funciona bien cuando hay rutina, descanso y pausas reales. Es fácil que el estrés se te acumule en los hombros y en el sueño de tanto pensar en el siguiente paso. Tomarte el día libre no es perder tiempo, es mantener la obra en pie.",
+    "sombra": "Puedes volverte rígido, exigente contigo y con los demás, como el capataz que no suelta el plano. Te cuesta delegar y aceptar que algo salga distinto a como lo imaginaste. A veces olvidas disfrutar del camino mientras corres hacia la meta.",
+    "reto": "Aprender que construir grande no significa cargar todo solo. Tu lección es confiar en otros, aceptar lo imperfecto y entender que una obra vale más por las personas que la levantan que por el plano perfecto.",
+    "consejo": "Hoy elige una sola tarea que puedas delegar o soltar, y deja que alguien más la haga a su manera.",
+    "compatibles": [4, 6, 8],
+    "choca": [5, 7],
+    "compat_texto": "Cuando un 22 y un 4 se juntan, se entienden con la misma pasión por la estructura y la constancia. Con un 5 o un 7 el choque es de ritmos: uno quiere cambiar todo ya y el otro necesita pensarlo mil veces."
+  },
+  "33": {
+    "titulo": "El Maestro Sensible",
+    "frase": "Con el 33 no basta con brillar: también hay que cuidar a los demás sin quemarte en el intento.",
+    "esencia": "El 33 es un número maestro, el más generoso de la numerología pitagórica. Se le llama el Maestro Sensible o el Maestro Sanador: viene a enseñar con el ejemplo y a cuidar a quien lo necesita. Tú tienes una mezcla rara de visión amplia y corazón de abuelo que siempre guarda una manta extra. Lo tuyo no es solo ayudar, es inspirar.",
+    "amor": "Amas con profundidad y mucho cuidado, casi como si la relación fuera un proyecto que hay que mimar cada día. Buscas alguien con quien compartir una vida con sentido, no solo planes para el fin de semana. Pero ojo: a veces cargas con todo tú solo y luego te preguntas por qué nadie te cuida igual.",
+    "trabajo": "Brillas en lo que tiene propósito: enseñar, orientar, curar, crear algo que ayude a la gente. Te organizas bien cuando ves el impacto real de lo que haces. Lo que te agota es el trabajo vacío, de cumplir por cumplir, como ver una serie que no te interesa pero no puedes dejar.",
+    "dinero": "Con el dinero tienes una relación mixta: te gusta tener lo necesario para vivir con tranquilidad, pero te cuesta cobrar lo que vales. A veces das más de lo que puedes permitirte, como el amigo que siempre paga la ronda y luego no llega a fin de mes. Ponerle límites no te hace menos generoso.",
+    "salud": "Tu cuerpo funciona mejor con descanso de verdad, no con maratones de sueño de tres horas. El estrés se te acumula en los hombros y en el estómago, así que las pausas cortas durante el día marcan diferencia. Moverte, comer con calma y desconectar a una hora razonable te sientan mejor de lo que crees.",
+    "sombra": "Tu cara difícil es que a veces te exiges tanto que te conviertes en juez de ti mismo, como un entrenador que nunca da por buena la jugada. También puedes caer en la preocupación constante por los demás y olvidar tus propias necesidades. Y cuesta pedir ayuda: prefieres sostener la mesa entera antes que pedir que te pasen la sal.",
+    "reto": "Tu lección es aprender que cuidar a otros no te obliga a sacrificarte. Ser un maestro de verdad también incluye ser alumno de ti mismo: aceptar apoyo, descansar sin culpa y confiar en que el mundo sigue girando aunque tú pares un rato.",
+    "consejo": "Hoy haz una sola cosa solo por ti, sin justificarla ante nadie.",
+    "compatibles": [6, 9, 2],
+    "choca": [4, 8],
+    "compat_texto": "Con el 6 y el 9 hay una conexión de cuidado mutuo y sentido compartido, como dos cocineros que se pasan los ingredientes sin decir nada. Con el 4 y el 8, en cambio, uno quiere método y el otro resultados, y la discusión sobre quién lleva el timón puede durar más que una serie entera."
+  }
 }

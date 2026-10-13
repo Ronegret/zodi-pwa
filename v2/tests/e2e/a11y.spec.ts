@@ -25,6 +25,8 @@ const PUBLIC = [
   '/horoscopo/escorpio',
   '/compatibilidad',
   '/compatibilidad/aries-y-leo',
+  '/legal/cookies',
+  '/legal/aviso-legal',
 ];
 const PRIVATE = [
   '/app',
@@ -37,6 +39,8 @@ const PRIVATE = [
   '/app/carta',
   '/app/carta/significado',
   '/app/gente',
+  '/app/yo',
+  '/app/yo/informe',
   '/app/ajustes',
   '/app/horoscopo',
   '/app/compatibilidad',

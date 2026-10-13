@@ -1,0 +1,982 @@
+---
+/**
+ * Informe cósmico: todo lo que ZODI sabe de ti en un PDF (se guarda desde el
+ * cuadro de impresión). Portada con el logo, hojas con marca de agua y pie en
+ * cada página, y el crédito final. Pensado para A4 en móvil y escritorio.
+ */
+import Base from '@/layouts/Base.astro';
+import BirthSky from '@/components/chart/BirthSky.astro';
+import NatalWheel from '@/components/chart/NatalWheel.astro';
+import ElementsDonut from '@/components/dashboard/ElementsDonut.astro';
+import {
+  elementBalance,
+  formatPosition,
+  PLANET_GLYPHS,
+  PLANET_NAMES,
+  signSlug,
+  SIGN_GLYPHS,
+} from '@/lib/astro-engine/labels';
+import { HOUSES, PLANET_ROLE, plainPlanet } from '@/lib/chart/plain';
+import { RELATIONS } from '@/lib/people/relations';
+import { buildReport } from '@/lib/report/build';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+// El nombre completo puede llegar desde "El significado" (POST) y se guarda.
+let typed: string | undefined;
+if (Astro.request.method === 'POST') {
+  const v = String((await Astro.request.formData()).get('nombre') ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .slice(0, 80);
+  if (v) {
+    typed = v;
+    await supabase.from('profiles').update({ full_name: v }).eq('id', profile.id);
+  }
+}
+
+const r = await buildReport({ supabase, profile, fullName: typed, lookupNames: true });
+if (!r) return Astro.redirect('/app/carta', 303);
+
+const { chart, timeKnown, born } = r;
+const place = profile.birth_place ?? '';
+const city = place.split(',')[0]?.trim() || 'tu ciudad';
+const fmtDate = (d: string) =>
+  new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: 'UTC' }).format(
+    new Date(`${d}T12:00:00Z`),
+  );
+const birth = fmtDate(r.stored.input.date);
+const today = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' }).format(new Date());
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+const n = (x: number) => new Intl.NumberFormat('es-ES', { useGrouping: 'always' }).format(x);
+const when = (d: Date | null) =>
+  d ? new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: r.timeZone }).format(d) : '—';
+const MOON_EMOJI: Record<string, string> = {
+  'Luna nueva': '🌑',
+  Creciente: '🌒',
+  'Cuarto creciente': '🌓',
+  'Gibosa creciente': '🌔',
+  'Luna llena': '🌕',
+  'Gibosa menguante': '🌖',
+  'Cuarto menguante': '🌗',
+  Menguante: '🌘',
+};
+
+// Chistes de ZODI entre secciones (para que el informe no parezca una multa).
+const JOKES = [
+  'Nota de ZODI: si algo de lo que viene te ofende, échale la culpa a Mercurio. Siempre funciona.',
+  'Aviso: los astros no se hacen responsables de decisiones tomadas a las 3 de la mañana.',
+  'ZODI no cobra por decirte lo que ya sabías. Solo por decírtelo bonito.',
+  'Spoiler: nadie tiene el cielo perfecto. Ni tu ex, ni tu jefa, ni el influencer que sigues.',
+  'Esto es guía simbólica y entretenimiento. Para el resto, existen los profesionales (y el café).',
+];
+const sections = r.meaning;
+const index = [
+  ['Tu ficha cósmica', 'lo esencial, de un vistazo'],
+  ['El día que naciste', 'el cielo sobre tu ciudad, minuto a minuto'],
+  ['Tu rueda del cielo', 'la carta natal, explicada de verdad'],
+  ['Tus planetas y tus casas', 'cada parte de ti, una a una'],
+  ['El significado de tu carta', 'amor, trabajo, números, animal chino y más'],
+  ['Con quién encajas', 'los signos que te suben y los que te suben la tensión'],
+  ['Lo que significa tu nombre', 'nombre y apellidos, con su historia'],
+  ...(r.people.length ? [['Tu gente', 'afinidad con quien más te importa']] : []),
+];
+---
+
+<Base title={`Informe cósmico de ${r.firstName}`} description="Tu informe cósmico completo en PDF.">
+  <main id="main" class="report">
+    <div class="toolbar no-print">
+      <a href="/app/yo" class="btn btn-ghost">
+        Volver
+      </a>
+      <button type="button" class="btn btn-primary" data-print>
+        Guardar como PDF
+      </button>
+      <p class="muted small">
+        En el cuadro de impresión elige «Guardar como PDF», tamaño A4 y, si te lo pregunta,
+        «Gráficos de fondo» activado. En el móvil: compartir → imprimir.
+      </p>
+    </div>
+
+    <!-- Se repiten en cada hoja al imprimir -->
+    <img class="wm" src="/brand/logo-480.webp" alt="" width="480" height="320" aria-hidden="true" />
+    <p class="running" aria-hidden="true">
+      ZODI · Informe cósmico de {r.firstName} · Creado por rodrigonegrete.es
+    </p>
+
+    <!-- PORTADA -->
+    <section class="cover" aria-labelledby="portada">
+      <img class="cover-logo" src="/brand/logo-480.webp" alt="ZODI" width="480" height="320" />
+      <img
+        class="cover-art"
+        src={`/signos/${signSlug(r.big3.sun as 'Aries')}-1024.webp`}
+        alt={`${r.big3.sun} según ZODI`}
+        width="1024"
+        height="1024"
+      />
+      <p class="cover-kicker">Informe cósmico</p>
+      <h1 id="portada">{r.fullName}</h1>
+      <p class="cover-data">
+        {birth}
+        {timeKnown ? ` · ${r.stored.input.time}` : ' · hora desconocida'}
+        {place && (
+          <>
+            <br />
+            {place}
+          </>
+        )}
+      </p>
+      <ul class="cover-chips" aria-label="Tus tres pilares">
+        <li>☉ Sol en {r.big3.sun}</li>
+        <li>☽ Luna en {r.big3.moon}</li>
+        {r.big3.asc && <li>↑ Asc. en {r.big3.asc}</li>}
+      </ul>
+      <p class="cover-joke">
+        Documento confidencial. Léelo con una mano en el corazón y la otra en el café.
+      </p>
+      <p class="cover-by">Creado por rodrigonegrete.es</p>
+    </section>
+
+    <!-- ÍNDICE Y FICHA -->
+    <section class="page" aria-labelledby="ficha">
+      <h2 id="ficha">Lo que vas a descubrir</h2>
+      <p class="lead">
+        Hola, {r.firstName}. Esto es todo lo que se puede saber de ti con tu fecha de nacimiento, tu
+        nombre y un cielo calculado con efemérides reales. Sin humo (el justo).
+      </p>
+      <ol class="toc">
+        {index.map(([t, d]) => (
+          <li>
+            <strong>{t}</strong>
+            <span>{d}</span>
+          </li>
+        ))}
+      </ol>
+      <h2>Tu ficha cósmica</h2>
+      <ul class="cards">
+        {r.cards.map((c) => (
+          <li>
+            <span class="card-k">{c.label}</span>
+            <strong>{c.value}</strong>
+            <span class="card-l">{c.line}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="joke">{JOKES[0]}</p>
+    </section>
+
+    <!-- EL DÍA QUE NACISTE -->
+    <section class="page" aria-labelledby="nacimiento">
+      <h2 id="nacimiento">El día que naciste</h2>
+      <p class="lead">
+        Un {born.weekday.day} de {born.season.name} en {city}. Así estaba el cielo.
+      </p>
+      <div class="sky-row">
+        <div class="sky">
+          <BirthSky
+            sky={born.sky}
+            isDay={born.daylight?.isDay ?? null}
+            place={city}
+            seed={r.stored.input.date}
+          />
+        </div>
+        <div class="sky-text">
+          <p>
+            Naciste en {born.weekday.day}, {born.weekday.text}.
+          </p>
+          <p>
+            <span aria-hidden="true">{MOON_EMOJI[born.moon.name]}</span> {born.moon.text}(
+            {born.moon.name}, {Math.round(born.moon.illumination * 100)} % iluminada).
+          </p>
+          {born.daylight ? (
+            <p>
+              {born.daylight.isDay ? 'Naciste de día' : 'Naciste de noche'}.
+              {born.daylight.sunrise &&
+                born.daylight.sunset &&
+                ` Ese día el Sol salió a las ${born.daylight.sunrise} y se puso a las ${born.daylight.sunset}.`}
+            </p>
+          ) : (
+            <p>Sin tu hora no sé si era de día o de noche: el mapa muestra el cielo a mediodía.</p>
+          )}
+          <p>
+            Era {born.season.name}: {born.season.text}.
+          </p>
+        </div>
+      </div>
+      <ul class="cards four">
+        <li>
+          <span class="card-k">Días vividos</span>
+          <strong>{n(born.life.days)}</strong>
+        </li>
+        <li>
+          <span class="card-k">Lunas llenas</span>
+          <strong>{n(born.life.fullMoons)}</strong>
+        </li>
+        <li>
+          <span class="card-k">Millones de km alrededor del Sol</span>
+          <strong>{n(born.life.kmAroundSun)}</strong>
+        </li>
+        <li>
+          <span class="card-k">Millones de latidos</span>
+          <strong>{n(born.life.heartbeats)}</strong>
+        </li>
+      </ul>
+      <h3>Tus próximas citas con el cielo</h3>
+      <ul class="dates">
+        {born.nextSolarReturn && (
+          <li>
+            <strong>Retorno solar · {when(born.nextSolarReturn)}</strong> El minuto exacto en que el
+            Sol vuelve a donde estaba cuando naciste: tu cumpleaños astrológico.
+          </li>
+        )}
+        {born.jupiterReturn && (
+          <li>
+            <strong>Retorno de Júpiter · {when(born.jupiterReturn)}</strong> Cada doce años, año de
+            crecer y decir que sí.
+          </li>
+        )}
+        {born.saturn.next && (
+          <li>
+            <strong>Retorno de Saturno · {when(born.saturn.next)}</strong> La gran prueba de
+            madurez, hacia los 29 y los 58.
+          </li>
+        )}
+      </ul>
+      <p class="joke">{JOKES[1]}</p>
+    </section>
+
+    <!-- RUEDA Y ELEMENTOS -->
+    <section class="page" aria-labelledby="rueda">
+      <h2 id="rueda">Tu rueda del cielo</h2>
+      <p class="lead">
+        El círculo son los 12 signos; cada símbolo, un planeta en el signo donde estaba cuando
+        naciste; las líneas unen planetas que se influyen (azules: se llevan bien; rosas: chocan y
+        te hacen crecer).
+      </p>
+      <div class="wheel">
+        <NatalWheel chart={chart} timeKnown={timeKnown} id="wheel-pdf" />
+      </div>
+      <div class="keep">
+        <h3>Tus elementos</h3>
+        <p class="lead small">
+          Fuego es acción, tierra lo práctico, aire las ideas y agua las emociones. El que más pesa
+          dice mucho de cómo eres.
+        </p>
+        <div class="donut">
+          <ElementsDonut balance={elementBalance(chart.planets)} />
+        </div>
+      </div>
+    </section>
+
+    <!-- PLANETAS Y CASAS -->
+    <section class="page" aria-labelledby="planetas">
+      <h2 id="planetas">Tus planetas, uno a uno</h2>
+      <p class="lead small">
+        Cada planeta es una parte de ti; el signo, cómo la vives; la casa, en qué área de tu vida se
+        nota más.
+      </p>
+      <ul class="planets">
+        {chart.planets.map((p) => (
+          <li>
+            <span class="pg" aria-hidden="true">
+              {PLANET_GLYPHS[p.id]}
+            </span>
+            <span>
+              <strong>{PLANET_NAMES[p.id]}</strong>
+              <span class="what"> · {PLANET_ROLE[p.id].short}</span>
+              <span class="where">
+                <span aria-hidden="true">{SIGN_GLYPHS[p.sign]}</span> {formatPosition(p)}
+                {timeKnown && ` · Casa ${p.house} (${HOUSES[p.house - 1]!.name})`}
+                {p.retrograde && p.id !== 'northNode' && ' · retrógrado'}
+              </span>
+              <span class="plain">{plainPlanet(p.id, p.sign, timeKnown ? p.house : null)}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {timeKnown && (
+      <section class="page" aria-labelledby="casas">
+        <h2 id="casas">Tus 12 casas</h2>
+        <p class="lead small">Las 12 áreas de tu vida y el signo con el que empieza cada una.</p>
+        <ol class="houses">
+          {chart.houses.map((h, i) => (
+            <li>
+              <strong>
+                Casa {i + 1} · {HOUSES[i]!.name}
+              </strong>
+              <span>
+                {HOUSES[i]!.area}. Empieza en {formatPosition(h)}.
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p class="joke">{JOKES[2]}</p>
+      </section>
+    )}
+
+    <!-- SIGNIFICADO (fluye en varias hojas) -->
+    <section class="page flow" aria-labelledby="significado">
+      <h2 id="significado">El significado de tu carta</h2>
+      <p class="lead">Todo lo que dice tu nacimiento, explicado por ZODI en palabras normales.</p>
+      {sections.map((s, i) => (
+        <article class="mean">
+          <p class="mean-kicker">{s.kicker}</p>
+          <h3>{s.title}</h3>
+          {s.paragraphs.map((t) => (
+            <p>{t}</p>
+          ))}
+          {s.facts && (
+            <dl class="facts">
+              {s.facts.map((f) => (
+                <div>
+                  <dt>{f.label}</dt>
+                  <dd>{f.text}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {s.numbers && (
+            <ul class="nums">
+              {s.numbers.map((x) => (
+                <li>
+                  <strong>{x.n}</strong>
+                  <span>
+                    <b>{x.label}.</b> {x.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {(i + 1) % 6 === 0 && <p class="joke">{JOKES[(i / 6 + 2) % JOKES.length]}</p>}
+        </article>
+      ))}
+    </section>
+
+    <!-- NOMBRE -->
+    <section class="page" aria-labelledby="nombre">
+      <h2 id="nombre">Lo que significa tu nombre</h2>
+      <p class="lead">«{r.fullName}»: de dónde viene cada parte.</p>
+      <ul class="name-list">
+        {r.nameParts.map((part) => (
+          <li>
+            <strong>{part.word}</strong>
+            <span class="where">
+              {part.kind}
+              {part.entry && ` · ${part.entry.origin}`}
+            </span>
+            {part.entry ? (
+              <>
+                <span class="plain">
+                  <b>{cap(part.entry.meaning)}.</b>
+                </span>
+                {part.entry.detail && <span class="plain">{part.entry.detail}</span>}
+                {part.entry.note && <span class="plain muted">{part.entry.note}</span>}
+              </>
+            ) : (
+              <span class="plain">
+                Este no está todavía en el libro de ZODI. Pregúntaselo al oráculo.
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {r.people.length > 0 && (
+      <section class="page" aria-labelledby="gente">
+        <h2 id="gente">Tu gente</h2>
+        <p class="lead small">
+          La afinidad con quien más te importa (o te desespera). Se calcula con el Sol, la Luna,
+          Venus y Marte, el animal chino y los números.
+        </p>
+        <ul class="people">
+          {r.people.map((x) => (
+            <li>
+              <strong>{x.person.name}</strong>
+              <span class="where">
+                {RELATIONS[x.person.relation].label} · {x.sky.sun}
+                {x.sky.moon && ` · Luna en ${x.sky.moon}`}
+              </span>
+              <span class="score">{x.affinity.score}%</span>
+              <span class="plain">{x.affinity.verdict}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <!-- CIERRE -->
+    <section class="page end" aria-labelledby="cierre">
+      <h2 id="cierre">Y hasta aquí lo que sabemos de ti</h2>
+      <p class="lead">
+        Si has llegado hasta aquí, ya sabes más de ti que tu horóscopo del periódico. Úsalo para
+        conocerte mejor, para reírte un poco y para pedir perdón a quien le toca.
+      </p>
+      <p class="joke">{JOKES[4]}</p>
+      <p class="legal">
+        Informe generado el {today} para uso personal. Calculado con efemérides astronómicas. Es
+        guía simbólica y entretenimiento: no sustituye consejo médico, legal, financiero ni
+        psicológico. Contiene tus datos personales: guárdalo con cuidado y no lo compartas con quien
+        no quieras que sepa cuándo naciste.
+      </p>
+      <div class="signature">
+        <img src="/brand/isotipo-96.webp" alt="" width="96" height="96" />
+        <p>
+          <strong>ZODI</strong> · astrología con carácter
+          <br />
+          Creado por <strong>rodrigonegrete.es</strong>
+        </p>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script>
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+</script>
+
+<style>
+  /* ---------- Pantalla: las hojas se ven como papel ---------- */
+  .report {
+    --paper: #ffffff;
+    --p-ink: #17142a;
+    --p-soft: #4b4763;
+    --p-violet: #5b21b6;
+    --p-line: #e4dcf5;
+    --p-acid: #b8ff17;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-3) var(--space-8);
+    display: grid;
+    gap: var(--space-4);
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .toolbar .small {
+    flex-basis: 100%;
+    margin: 0;
+  }
+  .wm,
+  .running {
+    display: none;
+  }
+
+  .cover,
+  .page {
+    background: var(--paper);
+    color: var(--p-ink);
+    border-radius: 6px;
+    box-shadow: 0 10px 40px rgb(0 0 0 / 45%);
+    padding: clamp(1.25rem, 5vw, 14mm);
+    /* Paleta de papel para los componentes (rueda, donut, etc.). */
+    --ink: #17142a;
+    --ink-soft: #4b4763;
+    --surface: #f6f2ff;
+    --acid: #5b21b6;
+    --line-acid: #7c3aed;
+    --line: #e4dcf5;
+    --hot: #be185d;
+    --cyan: #0e7490;
+    --violet-text: #5b21b6;
+  }
+  .cover {
+    --ink: #f4f1ff;
+    --ink-soft: #c6bde4;
+    background:
+      radial-gradient(circle at 20% 15%, rgb(155 77 255 / 45%), transparent 55%),
+      radial-gradient(circle at 85% 90%, rgb(184 255 23 / 22%), transparent 50%), #07060d;
+    color: #f4f1ff;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--space-3);
+    text-align: center;
+    min-height: min(100%, 297mm);
+    padding-block: clamp(2rem, 8vw, 18mm);
+  }
+  .cover-logo {
+    width: 11rem;
+    height: auto;
+    filter: drop-shadow(0 0 22px rgb(184 255 23 / 40%));
+  }
+  .cover-art {
+    width: min(100%, 16rem);
+    height: auto;
+    border-radius: 24px;
+    border: 2px solid var(--p-acid);
+    box-shadow: 0 0 40px rgb(184 255 23 / 30%);
+  }
+  .cover-kicker {
+    margin: 0;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--p-acid);
+    font-size: 0.8rem;
+  }
+  .cover h1 {
+    margin: 0;
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    color: #fff;
+    hyphens: manual;
+    overflow-wrap: anywhere;
+  }
+  .cover-data {
+    margin: 0;
+    color: #c6bde4;
+  }
+  .cover-chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+  .cover-chips li {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgb(184 255 23 / 60%);
+    background: rgb(184 255 23 / 10%);
+    font-weight: 700;
+  }
+  .cover-joke {
+    margin: var(--space-3) 0 0;
+    font-style: italic;
+    color: #c6bde4;
+    max-width: 28rem;
+  }
+  .cover-by {
+    margin: 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    color: var(--p-acid);
+  }
+
+  .page h2 {
+    font-size: 1.6rem;
+    color: var(--p-violet);
+    margin: 0 0 var(--space-2);
+    break-after: avoid;
+    hyphens: manual;
+    border-bottom: 3px solid var(--p-acid);
+    padding-bottom: 0.25rem;
+    display: inline-block;
+  }
+  .page h3 {
+    margin: var(--space-4) 0 var(--space-1);
+    font-size: 1.1rem;
+    color: var(--p-ink);
+    break-after: avoid;
+    hyphens: manual;
+  }
+  .page p {
+    margin: 0 0 var(--space-2);
+    line-height: 1.55;
+  }
+  .lead {
+    color: var(--p-soft);
+    margin-bottom: var(--space-3) !important;
+  }
+  .small {
+    font-size: 0.9rem;
+  }
+  .joke {
+    margin-top: var(--space-4) !important;
+    padding: 0.7rem 1rem;
+    border-radius: 12px;
+    background: var(--p-acid);
+    color: #0b0b12;
+    font-weight: 700;
+    break-inside: avoid;
+  }
+  .toc,
+  .cards,
+  .planets,
+  .name-list,
+  .people,
+  .dates,
+  .nums,
+  .houses {
+    list-style: none;
+    margin: 0 0 var(--space-3);
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .toc li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    align-items: baseline;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px dashed var(--p-line);
+  }
+  .toc span {
+    color: var(--p-soft);
+    font-size: 0.9rem;
+  }
+  .cards {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  }
+  .cards li {
+    display: grid;
+    gap: 2px;
+    align-content: start;
+    padding: 0.7rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid var(--p-line);
+    background: #faf7ff;
+    break-inside: avoid;
+  }
+  .cards strong {
+    font-size: 1.05rem;
+    color: var(--p-violet);
+  }
+  .card-k,
+  .mean-kicker {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--p-soft);
+    font-weight: 700;
+  }
+  .card-l {
+    font-size: 0.82rem;
+    color: var(--p-soft);
+  }
+  .sky-row {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  .sky {
+    max-width: 17rem;
+    width: 100%;
+    margin-inline: auto;
+    background: #0c0a1a;
+    border-radius: 16px;
+    padding: 0.5rem;
+  }
+  .sky :global(figcaption),
+  .sky :global(figcaption .muted) {
+    color: #e8e3ff;
+  }
+  .wheel {
+    max-width: 30rem;
+    margin: 0 auto var(--space-3);
+    width: 100%;
+    break-inside: avoid;
+  }
+  .donut {
+    max-width: 22rem;
+    break-inside: avoid;
+  }
+  .dates li,
+  .houses li,
+  .name-list li,
+  .people li {
+    display: grid;
+    gap: 2px;
+    break-inside: avoid;
+    padding: 0.55rem 0.8rem;
+    border-left: 4px solid var(--p-acid);
+    background: #faf7ff;
+    border-radius: 0 10px 10px 0;
+  }
+  .planets li {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: var(--space-2);
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--p-line);
+    border-radius: 10px;
+    break-inside: avoid;
+  }
+  .pg {
+    font-size: 1.4rem;
+    color: var(--p-violet);
+    text-align: center;
+  }
+  .planets span,
+  .name-list span {
+    display: block;
+  }
+  .what,
+  .where,
+  .plain.muted {
+    color: var(--p-soft);
+    font-size: 0.85rem;
+  }
+  .where {
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--p-violet);
+  }
+  .people li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .people .score {
+    grid-row: 1 / span 3;
+    grid-column: 2;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--p-violet);
+    align-self: center;
+  }
+  .mean {
+    padding: 0 0 var(--space-3);
+    margin: 0 0 var(--space-3);
+    border-bottom: 1px solid var(--p-line);
+  }
+  .mean h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: var(--p-violet);
+  }
+  .facts {
+    margin: var(--space-2) 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .facts > div {
+    padding: 0.45rem 0.8rem;
+    border-left: 4px solid var(--p-violet);
+    background: #faf7ff;
+    border-radius: 0 10px 10px 0;
+    break-inside: avoid;
+  }
+  .facts dt {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--p-violet);
+    font-weight: 800;
+  }
+  .facts dd {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--p-ink);
+  }
+  .nums li {
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: var(--space-2);
+    align-items: start;
+    break-inside: avoid;
+  }
+  .nums strong {
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--p-violet);
+  }
+  .end .legal {
+    font-size: 0.82rem;
+    color: var(--p-soft);
+  }
+  .signature {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    padding-top: var(--space-3);
+    border-top: 3px solid var(--p-acid);
+  }
+  .signature img {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+  }
+  .signature p {
+    margin: 0;
+  }
+
+  @media (min-width: 640px) {
+    .sky-row {
+      grid-template-columns: 17rem minmax(0, 1fr);
+    }
+  }
+
+  /* ---------- Impresión: A4 de verdad, en móvil y en escritorio ---------- */
+  @page {
+    size: A4;
+    margin: 17mm 15mm 21mm;
+  }
+  @page :first {
+    margin: 0;
+  }
+  /* Pie de cada hoja (menos la portada): márgenes de página, con número. */
+  @page {
+    @bottom-left {
+      content: 'ZODI · Informe cósmico';
+      font: 700 7.5pt sans-serif;
+      color: #5b21b6;
+      vertical-align: top;
+      padding-top: 4mm;
+    }
+    @bottom-center {
+      content: 'Creado por rodrigonegrete.es';
+      font: 7.5pt sans-serif;
+      color: #4b4763;
+      vertical-align: top;
+      padding-top: 4mm;
+    }
+    @bottom-right {
+      content: 'Hoja ' counter(page);
+      font: 700 7.5pt sans-serif;
+      color: #5b21b6;
+      vertical-align: top;
+      padding-top: 4mm;
+    }
+  }
+  @media print {
+    :global(html),
+    :global(body) {
+      background: #fff !important;
+      color: #17142a;
+    }
+    /* Los halos y la rejilla del fondo de la web no se imprimen. */
+    :global(body)::before,
+    :global(body)::after {
+      display: none !important;
+    }
+    :global(*) {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      /* Sin sombras ni animaciones en papel. */
+      box-shadow: none !important;
+      animation: none !important;
+      transition: none !important;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .report {
+      display: block;
+      max-width: none;
+      width: auto;
+      margin: 0;
+      padding: 0;
+    }
+    .report > * {
+      margin: 0;
+    }
+    .cover,
+    .page {
+      border-radius: 0;
+      width: auto;
+      padding: 0;
+      background: transparent;
+    }
+    .cover {
+      /* Portada a sangre, una hoja entera (un pelín menos para no crear una hoja en blanco). */
+      width: 210mm;
+      height: 296mm;
+      box-sizing: border-box;
+      padding: 18mm 15mm;
+      overflow: hidden;
+      break-after: page;
+      position: relative;
+      z-index: 3;
+      background:
+        radial-gradient(circle at 20% 12%, rgb(155 77 255 / 55%), transparent 55%),
+        radial-gradient(circle at 85% 92%, rgb(184 255 23 / 25%), transparent 50%), #07060d;
+      align-content: center;
+    }
+    .cover-art {
+      width: 78mm;
+    }
+    .cover-logo {
+      width: 52mm;
+    }
+    .page {
+      break-before: page;
+      position: relative;
+      z-index: 1;
+    }
+    .page.flow {
+      break-before: page;
+    }
+    /* Marca de agua y pie: position fixed se repite en cada hoja al imprimir. */
+    .wm {
+      display: block;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: 125mm;
+      height: auto;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      opacity: 0.07;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .running {
+      display: none !important;
+    }
+    :global(main#main.report) {
+      background: transparent !important;
+    }
+    .page h2 {
+      font-size: 19pt;
+    }
+    .page h3 {
+      font-size: 12.5pt;
+    }
+    .page p,
+    .page li,
+    .page dd {
+      font-size: 10pt;
+      orphans: 3;
+      widows: 3;
+    }
+    .cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .cards.four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .sky-row {
+      grid-template-columns: 62mm minmax(0, 1fr);
+    }
+    .sky {
+      max-width: 62mm;
+    }
+    .wheel {
+      max-width: 100mm;
+    }
+    .donut {
+      max-width: 46mm;
+    }
+    .keep {
+      break-inside: avoid;
+    }
+    /* Nada se corta: imágenes y bloques caben en la hoja. */
+    img,
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+    .mean,
+    .cards li,
+    .planets li,
+    .houses li,
+    .facts > div,
+    .name-list li,
+    .people li,
+    .dates li,
+    .joke,
+    .nums li {
+      break-inside: avoid;
+    }
+  }
+</style>

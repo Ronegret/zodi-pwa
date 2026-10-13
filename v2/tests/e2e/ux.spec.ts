@@ -149,7 +149,7 @@ test.describe('carta en palabras normales', () => {
     await expect(page.getByRole('table', { name: 'Planetas' })).toBeHidden();
     await page.getByText('Datos técnicos (para quien sabe de astrología)').click();
     await expect(page.getByRole('table', { name: 'Planetas' })).toBeVisible();
-    await expect(page.getByText('ZODI está creado por')).toBeVisible();
+    await expect(page.locator('.site-foot').getByText(/Creado por/)).toBeVisible();
     await expectNoViolations(page);
   });
 });
@@ -195,7 +195,7 @@ test.describe('el significado de tu carta', () => {
     await expectNoViolations(page);
     // El PDF lleva todo, con el nombre completo que se escribió.
     await page.getByRole('button', { name: 'Descargar todo en PDF' }).click();
-    await expect(page).toHaveURL(/\/app\/carta\/imprimir$/);
+    await expect(page).toHaveURL(/\/app\/yo\/informe$/);
     await expect(
       page.getByText('«Ana Calfuleo Quispilema Zorblax»: de dónde viene cada parte.'),
     ).toBeVisible();
@@ -241,6 +241,8 @@ test.describe('sobre ti: pareja e hijos a tu gente', () => {
     request,
   }) => {
     await login(page, await createTestUser(request, true));
+    // Sin animaciones: axe no mide el contraste a mitad de un desplegable.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/app/ajustes#sobre-ti');
     const partnerDate = page.getByLabel('Su fecha de nacimiento');
     // Con "Prefiero no decirlo" no se pregunta nada más.
@@ -324,25 +326,122 @@ test.describe('tu gente', () => {
   });
 });
 
-test.describe('carta en PDF', () => {
-  test('página lista para guardar como PDF, accesible', async ({ page, request }) => {
+test.describe('todo sobre mí y el informe en PDF', () => {
+  test('el hub reúne todo y lleva al informe', async ({ page, request }) => {
     await login(page, await createTestUser(request, true));
-    await page.goto('/app/carta');
-    await page.getByRole('link', { name: 'Descargar en PDF' }).click();
-    await expect(page).toHaveURL(/\/app\/carta\/imprimir$/);
+    await page.goto('/app/yo');
+    await expect(page.getByRole('heading', { level: 1, name: 'Todo sobre mí' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Tu ficha cósmica' })).toBeVisible();
+    for (const label of ['Tu Sol', 'Camino de vida', 'Animal chino', 'Sello maya']) {
+      await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
+    }
+    await expect(page.getByRole('link', { name: 'Descargar mis datos (JSON)' })).toHaveAttribute(
+      'href',
+      '/api/mis-datos',
+    );
+    await expectNoViolations(page);
+    await page.getByRole('link', { name: 'Ver y descargar mi informe' }).click();
+    await expect(page).toHaveURL(/\/app\/yo\/informe$/);
+  });
+
+  test('el informe tiene portada, todas las secciones y el crédito', async ({ page, request }) => {
+    await login(page, await createTestUser(request, true));
+    await page.goto('/app/carta/imprimir'); // la ruta antigua redirige
+    await expect(page).toHaveURL(/\/app\/yo\/informe$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Ana Estrella' })).toBeVisible();
     for (const h of [
+      'Lo que vas a descubrir',
+      'El día que naciste',
       'Tu rueda del cielo',
-      'Tus elementos',
       'Tus planetas, uno a uno',
       'Tus 12 casas',
       'El significado de tu carta',
       'Lo que significa tu nombre',
+      'Y hasta aquí lo que sabemos de ti',
     ]) {
       await expect(page.getByRole('heading', { level: 2, name: h })).toBeVisible();
     }
     await expect(page.getByRole('button', { name: 'Guardar como PDF' })).toBeVisible();
-    await expect(page.getByText(/Creado por Rodrigo Negrete/)).toBeVisible();
+    await expect(page.locator('.cover-by')).toBeVisible();
+    await expect(page.locator('.signature')).toContainText('rodrigonegrete.es');
     await expectNoViolations(page);
+  });
+
+  test('en papel: A4, varias hojas y nada sobresale', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'Basta con un tamaño');
+    await login(page, await createTestUser(request, true));
+    await page.goto('/app/yo/informe');
+    // Un papel A4 a 96 dpi: 794 x 1123 px (menos los márgenes de la hoja).
+    await page.setViewportSize({ width: 794 - 113, height: 1123 });
+    await page.emulateMedia({ media: 'print' });
+    const pdf = await page.pdf({ format: 'A4', printBackground: true, preferCSSPageSize: true });
+    const text = pdf.toString('latin1');
+    expect(text.startsWith('%PDF')).toBe(true);
+    const pages = [...text.matchAll(/\/Type\s*\/Page[^s]/g)].length;
+    expect(pages).toBeGreaterThan(8);
+    expect(text).toMatch(/\/MediaBox\s*\[\s*0\s+0\s+59\d(\.\d+)?\s+8[34]\d(\.\d+)?\s*\]/);
+    // Nada sobresale por la derecha de la hoja (A4 = 794 px a 96 dpi).
+    const over = await page.evaluate(() => {
+      const limit = 794 - 113 + 2;
+      return [...document.querySelectorAll('.report .page *, .report .cover *')]
+        .filter((el) => el.getBoundingClientRect().right > limit)
+        .map((el) => `${el.tagName}.${[...el.classList].join('.')}`);
+    });
+    expect(over).toEqual([]);
+  });
+});
+
+test.describe('pie de página y páginas legales', () => {
+  test('el pie lleva legal, crédito y proyectos del creador', async ({ page }) => {
+    await page.goto('/');
+    const foot = page.getByRole('contentinfo');
+    for (const name of ['Privacidad', 'Términos', 'Cookies', 'Aviso legal']) {
+      await expect(foot.getByRole('link', { name })).toBeVisible();
+    }
+    await expect(foot.getByRole('link', { name: /rodrigonegrete\.es/ }).first()).toHaveAttribute(
+      'href',
+      'https://rodrigonegrete.es',
+    );
+    await expect(foot.getByText(/© \d{4} Rodrigo Negrete Aros/)).toBeVisible();
+  });
+
+  test('cookies, aviso legal y privacidad dicen lo que tienen que decir', async ({ page }) => {
+    await page.goto('/legal/cookies');
+    await expect(page.getByRole('table')).toContainText('sb-');
+    await expect(page.getByText(/no usamos cookies de publicidad/)).toBeVisible();
+    await page.goto('/legal/aviso-legal');
+    await expect(page.getByRole('heading', { name: '1. Titular del sitio' })).toBeVisible();
+    await page.goto('/legal/privacidad');
+    for (const h of [
+      '1. Quién es el responsable',
+      '4. Inteligencia artificial: qué se envía y a quién',
+      '8. Tus derechos',
+    ]) {
+      await expect(page.getByRole('heading', { name: h })).toBeVisible();
+    }
+  });
+
+  test('robots, sitemap y security.txt', async ({ request }) => {
+    expect(await (await request.get('/robots.txt')).text()).toContain('Disallow: /app/');
+    const sitemap = await (await request.get('/sitemap.xml')).text();
+    expect(sitemap).toContain('/compatibilidad/aries-y-leo');
+    expect(sitemap).not.toContain('/app/');
+    expect(await (await request.get('/.well-known/security.txt')).text()).toContain('Contact:');
+  });
+});
+
+test.describe('tus datos', () => {
+  test('descargar mis datos: solo lo mío, en JSON y sin caché', async ({ page, request }) => {
+    await login(page, await createTestUser(request, true));
+    const res = await page.request.get('/api/mis-datos');
+    expect(res.status()).toBe(200);
+    expect(res.headers()['content-disposition']).toMatch(/attachment; filename="zodi-mis-datos-/);
+    expect(res.headers()['cache-control']).toContain('no-store');
+    const data = await res.json();
+    expect(data.perfil.display_name).toBe('Ana Estrella');
+    expect(data.cartas).toHaveLength(1);
+    expect(JSON.stringify(data)).not.toMatch(/password|service_role/i);
+    const anon = await request.get('/api/mis-datos');
+    expect(anon.status()).toBe(401);
   });
 });

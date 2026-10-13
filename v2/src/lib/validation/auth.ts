@@ -27,6 +27,10 @@ export const registerSchema = z
     email: emailSchema,
     password: passwordSchema,
     confirm: z.string({ error: 'Repite la contraseña.' }),
+    // Casilla de consentimiento (RGPD): sin marcar no se crea la cuenta.
+    terms: z
+      .string({ error: 'Marca la casilla para poder crear tu cuenta.' })
+      .refine((v) => v === 'on', 'Marca la casilla para poder crear tu cuenta.'),
   })
   .refine((d) => d.password === d.confirm, {
     path: ['confirm'],
