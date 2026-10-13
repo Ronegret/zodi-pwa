@@ -20,15 +20,25 @@ import { getLatestSelfChart } from '@/lib/server/charts';
 const { supabase, profile } = Astro.locals;
 if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
 
-// El nombre completo (con los dos apellidos) se puede escribir aquí: no se guarda.
-let fullName = profile.display_name.trim();
+// El nombre completo (con los apellidos): se guarda para que ZODI lo recuerde.
+let fullName = (profile.full_name ?? profile.display_name).trim();
+let savedName = false;
 if (Astro.request.method === 'POST') {
   const typed = String((await Astro.request.formData()).get('nombre') ?? '')
     .trim()
     .replace(/\s+/g, ' ')
     .slice(0, 80);
-  if (typed) fullName = typed;
+  if (typed) {
+    fullName = typed;
+    const { error } = await supabase
+      .from('profiles')
+      .update({ full_name: typed })
+      .eq('id', profile.id);
+    savedName = !error;
+  }
 }
+// Con un solo nombre (sin apellidos) invitamos a completarlo.
+const needsSurnames = fullName.split(/\s+/).length < 2;
 const nameParts = nameMeaning(fullName);
 const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const fmt = (x: number) => new Intl.NumberFormat('es-ES', { useGrouping: 'always' }).format(x);
@@ -181,7 +191,10 @@ const ficha = sections
                         </p>
                         {part.entry ? (
                           <>
-                            <p>{cap(part.entry.meaning)}.</p>
+                            <p>
+                              <strong>{cap(part.entry.meaning)}.</strong>
+                            </p>
+                            {part.entry.detail && <p>{part.entry.detail}</p>}
                             {part.entry.note && <p class="muted">{part.entry.note}</p>}
                           </>
                         ) : (
@@ -190,11 +203,20 @@ const ficha = sections
                       </li>
                     ))}
                   </ul>
+                  {needsSurnames && (
+                    <p class="name-nudge">
+                      Solo tengo tu nombre de pila. Escribe también tus <strong>apellidos</strong> y
+                      te cuento la historia de cada uno.
+                    </p>
+                  )}
+                  {savedName && (
+                    <p class="name-saved">Guardado: ZODI ya se acuerda de tu nombre completo.</p>
+                  )}
                   <form method="post" action="/app/carta/significado#nombre" class="name-form">
                     <Field
                       name="nombre"
                       label="Tu nombre completo"
-                      hint="Como en tu carnet o DNI, con los dos apellidos. No lo guardamos: también cambia tus números."
+                      hint="Como en tu carnet, con los dos apellidos. ZODI lo guarda para recordarlo; también afina tus números."
                       value={fullName}
                       maxlength="80"
                       autocomplete="name"
@@ -204,6 +226,26 @@ const ficha = sections
                     </Button>
                   </form>
                 </>
+              )}
+              {s.facts && (
+                <dl class="facts">
+                  {s.facts.map((f) => (
+                    <div>
+                      <dt>{f.label}</dt>
+                      <dd>
+                        {f.text}
+                        {f.href && (
+                          <>
+                            {' '}
+                            <a class="fact-link" href={f.href}>
+                              Ver la pareja completa
+                            </a>
+                          </>
+                        )}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
               )}
               {s.numbers && (
                 <ul class="numbers">
@@ -512,5 +554,44 @@ const ficha = sections
     font-size: 0.75rem;
     color: var(--acid);
     letter-spacing: 0.04em;
+  }
+  .name-nudge {
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--acid);
+    color: var(--ink);
+  }
+  .name-saved {
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .facts {
+    margin: var(--space-2) 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .facts > div {
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+    display: grid;
+    gap: 2px;
+  }
+  .facts dt {
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .facts dd {
+    margin: 0;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .fact-link {
+    color: var(--acid);
+    font-weight: 700;
   }
 </style>

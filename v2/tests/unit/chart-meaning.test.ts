@@ -65,6 +65,7 @@ describe('chartMeaning', () => {
       'modalidad',
       'casas',
       'aspectos',
+      'compat',
       'numeros',
       'chino',
       'maya',
@@ -103,7 +104,9 @@ describe('chartMeaning', () => {
   });
 
   it('con un solo nombre aún da los números del nombre', () => {
-    const numeros = chartMeaning({ ...base, displayName: 'Rodrigo' }).find((s) => s.id === 'numeros')!;
+    const numeros = chartMeaning({ ...base, displayName: 'Rodrigo' }).find(
+      (s) => s.id === 'numeros',
+    )!;
     expect(numeros.numbers).toHaveLength(6);
   });
 

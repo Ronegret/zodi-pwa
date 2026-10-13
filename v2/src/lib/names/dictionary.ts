@@ -9,6 +9,8 @@ export interface NameEntry {
   meaning: string;
   /** Un dato curioso, si lo hay. */
   note?: string;
+  /** Descripción larga y cercana (3-4 frases). */
+  detail?: string;
 }
 
 const e = (origin: string, meaning: string, note?: string): NameEntry =>

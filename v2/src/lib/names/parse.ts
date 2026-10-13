@@ -16,7 +16,8 @@ export function parseEntry(text: string): NameEntry | null {
     const meaning = clean(json.m, 200);
     if (!origin || !meaning || origin === 'desconocido' || meaning === 'desconocido') return null;
     const note = clean(json.n, 200);
-    return note ? { origin, meaning, note } : { origin, meaning };
+    const detail = clean(json.d, 420);
+    return { origin, meaning, ...(note ? { note } : {}), ...(detail ? { detail } : {}) };
   } catch {
     return null;
   }

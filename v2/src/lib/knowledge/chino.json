@@ -1,0 +1,357 @@
+{
+ "_elementos": {
+  "Madera": "Madera le pone raíces y ganas de crecer: más curioso, más paciente y con ideas que brotan solas. Tu animal se vuelve el que plantea proyectos a largo plazo, aunque a veces se le olvida regar lo que empezó. Asociado al Este y a la primavera.",
+  "Fuego": "Fuego le mete chispa y pasión: más expresivo, intenso y dispuesto a brillar. Tu animal habla con las manos, se entusiasma rápido y se aburre igual de rápido. Ojo, que el Fuego calienta, pero también quema. Asociado al Sur y al verano.",
+  "Tierra": "Tierra le da estabilidad y sentido práctico: más sereno, cuidadoso y de fiar. Tu animal es el que siempre tiene un tupper en la nevera para los amigos. Puede ser un poco terco, como una mula con buena memoria. Asociado al centro y al final del verano.",
+  "Metal": "Metal le da carácter firme y disciplina: más preciso, justo y decidido. Tu animal dice las cosas claras y cumple lo que promete, aunque a veces se pone algo rígido, como un cajón bien cerrado. Asociado al Oeste y al otoño.",
+  "Agua": "Agua le aporta profundidad e intuición: más reflexivo, flexible y observador. Tu animal fluye con las situaciones y lo capta todo, aunque a veces se mete tanto en sus pensamientos que parece que vive en otro canal. Asociado al Norte y al invierno."
+ },
+ "Buey": {
+  "titulo": "El tractor con corazón",
+  "frase": "Soy Buey: avanzo despacio, pero no hay campo que se me resista. ¿Y tú, vas a la carrera o te tomas tu tiempo?",
+  "esencia": "Eres de los que trabajan en silencio y terminan la tarea cuando otros siguen debatiendo cómo empezar. Tienes una paciencia de santo, aunque a veces la pones a prueba tu propia cabeza. Eres honesto hasta cuando no conviene, y eso te da una fama de roca firme que te encanta y te pesa a partes iguales.",
+  "amor": "Amas como cuidas una casa: con constancia, sin hacer ruido y con detalles que solo notan los que te conocen. No eres de declaraciones de película, pero cuando te comprometes, es para toda la vida. Te cuesta mostrar lo que sientes, así que tu pareja tiene que aprender a leer tus gestos, como si tu cara fuera un libro escrito en letra pequeña.",
+  "trabajo": "Brillas en lo que exige método, responsabilidad y ganas de sacar adelante lo que empezaste. Te va bien en la gestión, la construcción, la medicina, la educación o cualquier oficio donde la calidad importe más que el aplauso. Tu talento es la fiabilidad: eres el compañero al que se le encarga algo porque se sabe que va a salir bien.",
+  "dinero": "Con el dinero eres prudente, casi ahorrador de tradición. Prefieres construir un colchón poco a poco que jugarte algo a una carta. Ojo con cargar con los gastos de todos por no saber decir que no, porque tu generosidad a veces se convierte en una mochila que nadie te pidió llevar.",
+  "salud": "Tu cuerpo agradece las rutinas: horarios parecidos, comidas sin prisas y algo de movimiento diario, aunque sea caminar. Tiendes a aguantar el cansancio como quien aguanta la lluvia sin paraguas, y eso conviene revisarlo de vez en cuando. Escucha las señales de tu cuerpo antes de que se pongan a gritar.",
+  "sombra": "Tu punto difícil es la terquedad: cuando decides algo, lo sostienes aunque el mundo te haga señas de que cambies de rumbo. También te cuesta pedir ayuda, y así cargas solo con cosas que podrían repartirse. Recuerda que flexibilidad no es rendirse, y que incluso el buey más fuerte agradece que alguien le quite un peso del lomo.",
+  "consejo": "Hoy pide ayuda en algo pequeño, aunque creas que puedes solo. Verás que el mundo no se cae y que tu carga pesa un poco menos.",
+  "aliados": [
+   "Serpiente",
+   "Gallo"
+  ],
+  "amigo_secreto": "Rata",
+  "choque": "Cabra",
+  "compat_texto": "Cuando un Buey se junta con una Serpiente o un Gallo, la cosa fluye: se entienden sin tanto discurso y construyen algo sólido. Con una Cabra, en cambio, chocan como dos puertas que quieren abrirse en direcciones distintas, y hace falta mucha paciencia para no acabar sin hablarse.",
+  "suerte": {
+   "numeros": [
+    1,
+    4,
+    9
+   ],
+   "colores": [
+    "blanco",
+    "amarillo"
+   ]
+  }
+ },
+ "Caballo": {
+  "titulo": "El galope con GPS",
+  "frase": "Si el Caballo no se mueve, algo va mal: tú nunca paras quieto, ni cuando deberías.",
+  "esencia": "Tú eres energía pura: libre, rápido y con ganas de comerte el mundo a bocados. Eres de los que aceptan un plan, se apuntan a todo y lo resuelven sobre la marcha. Tu gran fuerza es la chispa social: caes bien casi al instante y la gente te sigue. Lo que pesa es que a veces galopas tanto que se te olvida mirar a dónde vas.",
+  "amor": "Tú amas con intensidad y con mucha independencia. Te atrae quien tiene su propio ritmo y no te pide que te quedes en casa a esperar. Necesitas espacio para respirar y que tu pareja también tenga aventuras propias. Si te sientes encerrado, sales corriendo, y eso no siempre se entiende bien.",
+  "trabajo": "Tú brillas en lo que requiere iniciativa, contacto con gente y cambio constante. Vendes, negocias, viajas, enseñas o lideras proyectos nuevos con mucha energía. La rutina de oficina de ocho horas idénticas te aburre como una sopa sin sal. Tu talento es empezar cosas; el reto es terminarlas con la misma ilusión.",
+  "dinero": "Tú ganas con ganas y gastas con ganas. Te gustan las experiencias más que las cosas guardadas, y tu cuenta de ahorro a veces pide auxilio. Funcionas mejor cuando tienes un objetivo claro a la vista, como un viaje o un proyecto. Un presupuesto sencillo te ayudará más de lo que crees.",
+  "salud": "Tú necesitas moverte: caminar, bailar, hacer deporte al aire libre te sienta de maravilla. Tu cuerpo se queja cuando pasas demasiadas horas quieto. Procura también dormir bien, porque tu mente no descansa sola. Escucha tus señales de cansancio antes de que te obliguen a parar.",
+  "sombra": "Tu cara difícil es la impaciencia. Te cansas rápido de lo que no te emociona y puedes dejar a medias cosas importantes. A veces tomas decisiones a toda velocidad y luego te cuesta asumirlas. Y cuando te sientes atrapado, puedes ser brusco sin querer. Un poco de pausa te haría ganar mucho.",
+  "consejo": "Hoy elige una sola cosa que llevas a medias y termínala antes de empezar otra. Verás lo bien que sienta cerrar un galope.",
+  "aliados": [
+   "Tigre",
+   "Perro"
+  ],
+  "amigo_secreto": "Cabra",
+  "choque": "Rata",
+  "compat_texto": "Cuando un Caballo y un Tigre se juntan, la aventura está garantizada y se entienden sin hablar mucho. Con una Rata, en cambio, la chispa choca con la calma calculadora y terminan discutiendo por el ritmo del día.",
+  "suerte": {
+   "numeros": [
+    2,
+    3,
+    7
+   ],
+   "colores": [
+    "rojo",
+    "amarillo"
+   ]
+  }
+ },
+ "Cabra": {
+  "titulo": "La Cabra Artista Sensible",
+  "frase": "Tu alma de cabra necesita un sofá, un buen plato y alguien que no le pida prisa. Eso ya es sabiduría.",
+  "esencia": "Tú eres la cabra: sensible, creativa y con un ojo especial para lo bonito. Te gusta la calma, las cosas hechas con cuidado y los espacios que huelen a hogar. Cuando te sientes segura, sacas una dulzura y una imaginación que sorprenden a más de uno. Eso sí, tu ánimo cambia como el clima de primavera en Madrid: sol, nubes y chaparrón en la misma tarde.",
+  "amor": "Tú amas con ternura y mucho detalle: recuerdas la comida favorita, el cumpleaños y la canción que os unió. Buscas una pareja que te cuide sin agobiar, porque te cierras como una caracola si sientes presión. Necesitas que te digan lo que sienten, aunque sea con un mensaje tonto a media tarde. Si encuentras esa mezcla de cariño y espacio, tu corazón se queda para siempre.",
+  "trabajo": "Tú brillas en lo creativo, lo artístico y todo lo que requiera empatía: diseño, cuidado de personas, cocina, escritura o cualquier cosa donde se note tu gusto. Te cuesta trabajar en ambientes fríos y muy competitivos, como una planta en un sótano. Te va mejor cuando tienes un equipo amable y un proyecto con sentido. Tu talento está en hacer que las cosas se vean bien y se sientan bien.",
+  "dinero": "Tú gastas en belleza, comodidad y regalos a quien quieres, y a veces te cuesta decir que no a un capricho. Tu relación con el dinero es más emocional que de hoja de cálculo: ahorras cuando te sientes tranquila y te descuidas cuando estás agobiada. Te ayuda tener un plan sencillo, como guardar una cantidad fija el día de cobro. Piensa en tu colchón como en tu sofá favorito: cómodo, pero que no se quede vacío.",
+  "salud": "Tú necesitas descanso, paseos al aire libre y un ritmo de vida que no vaya siempre a toda velocidad. Cuidar tu entorno, tu cama y tus rutinas de calma te sienta muy bien. Si te pasas días enteros encerrada con preocupaciones, notas el cansancio en el cuerpo. Tu energía va mejor cuando la repartes entre gente, naturaleza y silencio.",
+  "sombra": "Tu cara difícil es que te preocupas tanto por los demás que te olvidas de ti, y luego te quejas en silencio. También tiendes a dar vueltas a un mismo pensamiento como un hámster en su rueda. Cuando algo te duele, te cierras y esperas que el otro adivine. Te quiero decir, con cariño, que pedir ayuda no te hace menos cabra, te hace más lista.",
+  "consejo": "Hoy pide lo que necesitas en voz alta, aunque sea algo pequeño, como una tarde tranquila o un abrazo. Ya verás cómo la gente que te quiere se alegra de poder ayudarte.",
+  "aliados": [
+   "Conejo",
+   "Cerdo"
+  ],
+  "amigo_secreto": "Caballo",
+  "choque": "Buey",
+  "compat_texto": "Cuando una Cabra y un Caballo se juntan, hay complicidad, risas y muchas ganas de vivir la vida con ligereza. Cuando una Cabra y un Buey se cruzan, el choque de ritmos suele dar guerra, como intentar bailar salsa con un tango.",
+  "suerte": {
+   "numeros": [
+    2,
+    7,
+    8
+   ],
+   "colores": [
+    "marrón",
+    "rojo"
+   ]
+  }
+ },
+ "Cerdo": {
+  "titulo": "El Cerdo Bonachón",
+  "frase": "Tu corazón es tan grande como tu apetito: si algo te gusta, lo disfrutas de verdad. ¡Que no te quiten el plato!",
+  "esencia": "Tú eres el animal más generoso y sincero del zodiaco chino. Vas de frente, sin tanto disimulo, y la gente se siente cómoda contigo al instante. Te gustan los placeres sencillos: buena comida, buena charla y buen descanso. Tu paciencia es enorme, pero cuando alguien te toma por tonto, puedes ponerte firme como un muro.",
+  "amor": "Tú amas con todo el cuerpo y el alma. Eres detallista, cariñoso y leal, de los que recuerdan la fecha de aniversario sin apuntarla en ninguna agenda. Te cuesta menos dar que pedir, así que a veces callas lo que necesitas hasta que explotas en silencio. Busca a alguien que te pregunte cómo estás de verdad, porque tú siempre estás dispuesto a escuchar.",
+  "trabajo": "Tú brillas en lo que requiere confianza, buen trato y constancia. Se te da bien mediar, ayudar a equipos y crear ambientes en los que la gente rinde. Eres honesto y eso te abre puertas, aunque a veces te cuesta decir que no a más tareas de las que puedes cargar. Te va mejor en proyectos que tengan sentido para ti que en los que solo cumplen un trámite.",
+  "dinero": "Tú no eres tacaño, pero tampoco eres de los que guardan para el futuro con lupa. Disfrutas gastar en lo que te hace feliz y en quienes quieres, y eso es bonito, aunque a veces tu cartera se queda igual de vacía que tu plato en una cena de amigos. Un poco de orden, aunque sea sencillo, te ahorrará sustos.",
+  "salud": "Tú tiendes a disfrutar la mesa y el sofá con mucha entrega. Te sienta bien tener rutinas simples, moverte un poco cada día y dormir con calma, como quien se duerme sin pelearse con el móvil. Escucha a tu cuerpo, que suele avisarte antes de que lo ignores.",
+  "sombra": "Tu cara difícil aparece cuando te aguantas demasiado. Dices que todo está bien cuando por dentro hierve, y luego te ofendes porque nadie lo notó. También te cuesta soltar el pasado y te aferras a viejas heridas como quien guarda una bufanda en pleno agosto. Recuerda que decir lo que sientes también es un acto de cariño.",
+  "consejo": "Hoy pide ayuda o di en voz alta lo que necesitas, aunque sea algo pequeño. Tu gente te querrá más cuando sepa cómo estás de verdad.",
+  "aliados": [
+   "Conejo",
+   "Cabra"
+  ],
+  "amigo_secreto": "Tigre",
+  "choque": "Serpiente",
+  "compat_texto": "Cuando un Cerdo y un Conejo se juntan, la casa huele a buena comida y a risas tranquilas. Con la Serpiente, en cambio, la convivencia se vuelve un duelo de silencios y desconfianzas, como dos vecinos que se miran de reojo en el ascensor.",
+  "suerte": {
+   "numeros": [
+    2,
+    5,
+    8
+   ],
+   "colores": [
+    "amarillo",
+    "dorado"
+   ]
+  }
+ },
+ "Conejo": {
+  "titulo": "El Conejo Sigiloso",
+  "frase": "Tu superpoder no es correr, es salir de la sala sin que nadie note que te fuiste. Conejo al poder.",
+  "esencia": "Tú eres el animal de la diplomacia y la calma. Prefieres evitar el drama antes que pelearte, como quien rodea un charco en vez de saltar dentro. Eres sensible, observador y con un gusto fino para lo bonito. Tu mejor arma es la paciencia, aunque a veces se confunda con miedo.",
+  "amor": "Amas con ternura y detalles pequeños: un mensaje a tiempo, un plan tranquilo, un sofá compartido. Necesitas sentir paz para abrirte del todo. Si hay gritos, te escondes. Si hay respeto, eres un compañero leal y cariñoso que cuida cada detalle de la relación.",
+  "trabajo": "Brillas en lo que pide tacto, mediación, creatividad o cuidar a otros: diseño, educación, humanidades, atención al público o gestión de equipos sin dramas. Tienes olfato para ver el ambiente de una sala antes que nadie. Tu talento es hacer que las cosas fluyan sin que parezca que tú las empujas.",
+  "dinero": "Tiendes a ahorrar con cabeza y a gastar en lo que te da comodidad y belleza. No eres de apuestas arriesgadas, prefieres inversiones tranquilas. Eso te protege, aunque a veces te quedas con miedo a moverte cuando de verdad toca dar un paso. Un poco de valentía financiera te vendría bien.",
+  "salud": "Tu cuerpo agradece rutinas suaves, paseos, estirar y dormir bien. El estrés te afecta más de lo que admites, así que los descansos reales son importantes. Para cualquier tema de salud, consulta a un profesional; aquí solo hablamos de hábitos y bienestar general.",
+  "sombra": "Puedes ser tan evasivo que los problemas se te acumulan debajo de la alfombra. A veces dices que sí cuando quieres decir no, y luego te resientes en silencio. Cuidado con convertir la paz en excusa para no decidir nada. Tu reto es hablar claro sin salir corriendo.",
+  "consejo": "Hoy di en voz alta una cosa que necesitas, aunque sea pequeña. Tu paz no se rompe por decir lo que piensas.",
+  "aliados": [
+   "Cabra",
+   "Cerdo"
+  ],
+  "amigo_secreto": "Perro",
+  "choque": "Gallo",
+  "compat_texto": "Cuando un Conejo y una Cabra se juntan, la cosa fluye como una tarde de sofá y buen café. Con el Gallo, en cambio, chocan como dos vecinos con ruido distinto: uno pide orden y el otro quiere hablar alto.",
+  "suerte": {
+   "numeros": [
+    3,
+    4,
+    9
+   ],
+   "colores": [
+    "azul",
+    "rojo"
+   ]
+  }
+ },
+ "Dragón": {
+  "titulo": "El Dragón con capa",
+  "frase": "Tú no entras en una sala, la sala se entera de que llegaste. Y tú sabes que sí.",
+  "esencia": "Tú eres de los que llenan el ambiente sin pedir permiso. Tienes carisma, energía y una manía de querer que las cosas salgan grandes. Eres generoso cuando quieres y muy orgulloso cuando te sientes ignorado. Tu signo se rige por el elemento Yang, así que vas siempre de frente y casi nunca de puntillas.",
+  "amor": "Amas con intensidad, como si cada relación fuera una película épica con banda sonora. Te gusta impresionar y te gusta más todavía que te admiren de vuelta. Cuando te enamoras, te entregas entero, pero necesitas alguien que no se achique cuando tú hablas fuerte. Si te aburres, lo notas al instante, como quien detecta un wifi caído en pleno partido.",
+  "trabajo": "Tienes talento para liderar, convencer y arrancar proyectos que otros solo sueñan. Te van bien los retos grandes, los escenarios y las decisiones importantes. Lo que peor llevas es la rutina sin sentido, esa que te aplasta la chispa. Donde brillas más es en lo que te deja ser protagonista sin ser un tirano.",
+  "dinero": "Con el dinero tiendes a invertir en lo que te hace sentir vivo y en lo que te da estatus. Puedes ganar bien y también gastar rápido si te emociona algo. Te conviene llevar un poco de orden, porque tu ambición es buena compañera pero mala contable. Piensa en grande, pero mira también el saldo de vez en cuando.",
+  "salud": "Tiendes a vivir a toda marcha, así que a veces te olvidas de descansar hasta que el cuerpo te pone el aviso en rojo. Lo que te ayuda es moverte con gusto, dormir lo suficiente y no llevar todo el peso del mundo en la mochila. Escuchar tus señales vale más que cualquier empujón de ego.",
+  "sombra": "Tu cara difícil es que te cuesta pedir ayuda y bajar del pedestal, y a veces te vuelves exigente hasta con los que más te quieren. Cuando te sientes herido, puedes responder con orgullo en vez de con palabras claras. Aprender a reconocer tus errores te hará todavía más grande, y eso lo sabes tú, aunque te cueste admitirlo.",
+  "consejo": "Hoy escucha a alguien sin interrumpir ni corregirle. Verás que tu fuerza también se nota en el silencio.",
+  "aliados": [
+   "Rata",
+   "Mono"
+  ],
+  "amigo_secreto": "Gallo",
+  "choque": "Perro",
+  "compat_texto": "Cuando un Dragón y una Rata se juntan, hay química de planes y de risas. Cuando un Dragón y un Perro se cruzan, chocan más que dos coches en una rotonda sin señales, porque sus formas de ver el mundo casi nunca coinciden.",
+  "suerte": {
+   "numeros": [
+    1,
+    6,
+    7
+   ],
+   "colores": [
+    "dorado",
+    "plata"
+   ]
+  }
+ },
+ "Gallo": {
+  "titulo": "El Gallo madrugador",
+  "frase": "Tú no necesitas despertador: tu propia cresta ya te avisa que el día empieza. Hoy brilla con cuidado.",
+  "esencia": "Tú eres puntual, detallista y tienes un ojo clínico para lo que está mal colocado. Te gusta que las cosas tengan orden, y sueles ser quien las pone en marcha. Hablas claro, a veces demasiado claro, y eso te da fama de sincero. Eres de los que llegan antes y se quedan a recoger.",
+  "amor": "Amas con atención y con detalles prácticos: te acuerdas de la cita del dentista y del café que no le gusta a la otra persona. Quieres que te valoren por tu lealtad y no solo por tu cara bonita. Cuando te sientes ignorado, te vuelves más crítico de lo que pretendes. Lo mejor que puedes hacer es decir lo que sientes antes de que se convierta en un sermón.",
+  "trabajo": "Tienes talento para organizar, planificar y vigilar los detalles que a otros se les escapan. Sirves para liderar proyectos, revisar cuentas o presentar ideas con brillo. Te cuesta delegar porque piensas que nadie lo hará igual que tú. Aprender a soltar un poco te haría todavía más eficaz.",
+  "dinero": "Eres ahorrador y bastante ordenado con las cuentas, de los que apuntan hasta el café. Te gusta tener un colchón y tomar decisiones meditadas. A veces te cuesta gastar en ti mismo, como si te diera pena darte un capricho. Un poco de disfrute también forma parte del buen manejo del dinero.",
+  "salud": "Tiendes a ser muy disciplinado con tus rutinas y a tener horarios fijos. Te conviene cuidar el descanso, porque te gusta exigirte demasiado y eso te pasa factura. Mantener un ritmo constante te sienta mejor que los maratones de última hora.",
+  "sombra": "Tu cara difícil es que puedes ser un poco perfeccionista, y eso te hace criticar a los demás y a ti mismo más de la cuenta. A veces hablas antes de pensar y tu sinceridad se convierte en una navaja. Tu paciencia dura menos que el wifi del tren cuando algo no sale como esperabas.",
+  "consejo": "Hoy elige una cosa que no tenga que salir perfecta y disfrútala sin revisarla tres veces.",
+  "aliados": [
+   "Buey",
+   "Serpiente"
+  ],
+  "amigo_secreto": "Dragón",
+  "choque": "Conejo",
+  "compat_texto": "Cuando un Gallo y un Buey se juntan, suele haber respeto y trabajo bien hecho en equipo. Cuando un Gallo y un Conejo se cruzan, las diferencias de ritmo y de forma de decir las cosas pueden chocar bastante.",
+  "suerte": {
+   "numeros": [
+    5,
+    7,
+    8
+   ],
+   "colores": [
+    "dorado",
+    "blanco"
+   ]
+  }
+ },
+ "Mono": {
+  "titulo": "El Mono Ingenioso Imparable",
+  "frase": "Eres el mono: si hay un problema, tú ya tienes tres ideas y un plan B para el plan B.",
+  "esencia": "Tú eres listo, rápido y con mucha chispa. Aprendes casi todo en un par de intentos y te aburres si las cosas se repiten demasiado. Tienes un humor que hace reír incluso en reuniones aburridas. Tu mente funciona como una caja de herramientas: siempre encuentras la pieza que hace falta.",
+  "amor": "Tú ligas con intensidad y con mucho humor. Al principio parece que todo es un juego, pero cuando te enamoras de verdad te entregas con ganas. Te cuesta quedarte quieto con una sola persona si la rutina se vuelve gris. Necesitas alguien que te siga el ritmo y que se ría de tus ocurrencias.",
+  "trabajo": "Tú brillas donde hay creatividad, negociación, resolver problemas raros o trabajar en equipo. Eres de los que improvisan una solución cuando el resto sigue discutiendo. Te va bien en ventas, comunicación, tecnología o cualquier cosa que cambie cada semana. Lo que te cuesta es la tarea repetitiva; ahí tu motivación se apaga como una vela en el metro.",
+  "dinero": "Tú tienes buen ojo para las oportunidades y sabes ganar dinero rápido. El problema es que también lo gastas con la misma rapidez, sobre todo en cosas que te hacen gracia. Te conviene tener un colchón para los imprevistos, aunque te parezca aburrido. Piensa en el dinero como en un juego: mejor no apostar todo a una sola jugada.",
+  "salud": "Tú tienes mucha energía, pero a veces la usas de más y luego te quedas agotado. Te distraes fácil y eso puede hacer que descuides las rutinas, como dormir a horas parecidas o comer con calma. Ayuda mucho buscar actividades que te muevan y que te diviertan, como deportes en grupo o bailar.",
+  "sombra": "Tú puedes ser demasiado escurridizo: cambias de tema, de plan o de persona antes de terminar lo que empezaste. A veces usas el humor para no hablar de lo que de verdad te duele. Puedes parecer frívolo cuando en realidad estás nervioso. Aprender a quedarte en la conversación incómoda será tu mayor reto.",
+  "consejo": "Hoy termina una sola cosa pendiente antes de empezar otra. Te sentirá raro, pero te sentará muy bien.",
+  "aliados": [
+   "Rata",
+   "Dragón"
+  ],
+  "amigo_secreto": "Serpiente",
+  "choque": "Tigre",
+  "compat_texto": "Cuando un Mono y una Rata se juntan, se ríen, se entienden y se apoyan sin esfuerzo. Cuando un Mono y un Tigre se cruzan, chocan por ritmo y por ganas de llevar la contraria, así que hace falta mucha paciencia para no acabar discutiendo por tonterías.",
+  "suerte": {
+   "numeros": [
+    1,
+    7,
+    8
+   ],
+   "colores": [
+    "blanco",
+    "dorado"
+   ]
+  }
+ },
+ "Perro": {
+  "titulo": "El guardián leal del barrio",
+  "frase": "Tú eres el Perro: si te quieren, te quedas; si te fallan, te acuerdas. Un guardián con corazón de peluche.",
+  "esencia": "Tú eres honesto hasta cuando duele, y eso la gente lo nota enseguida. Tienes sentido de la justicia tan fino que detectas una trampa a tres calles. Eres de los que da la cara por los suyos aunque nadie se lo pida. Por dentro eres más sensible de lo que aparentas.",
+  "amor": "Tú amas con lealtad de sofá compartido y mantita. Necesitas confianza antes que fuegos artificiales, porque una vez que te fallan, te cuesta volver a abrir la puerta. Cuando te comprometes, lo haces de verdad, sin medias tintas. Lo que más te calma es una pareja que te diga las cosas claras.",
+  "trabajo": "Tú brillas cuando hay una causa que te importa o un equipo que se apoya de verdad. Tienes olfato para detectar lo que no cuadra y buen corazón para ayudar a quien lo necesita. Te va mejor en lugares donde tu palabra valga algo. Lo que te quita energía son los jefes que mienten o las injusticias repetidas.",
+  "dinero": "Tú eres más de cuidar lo que tienes que de jugártelo todo en una apuesta loca. Te gusta ayudar a los tuyos, y a veces lo haces sin mirar mucho la cuenta. Un presupuesto sencillo te da más paz que cualquier inversión de moda. Ojo con prestar sin pensar, que la lealtad no siempre viene con garantía.",
+  "salud": "Tú necesitas descanso de verdad y no solo cuando ya estás agotado. Caminar con calma, hablar con alguien de confianza y dormir a horas razonables te sientan de maravilla. Cuando te preocupas demasiado, tu cuerpo lo nota antes que tú. Conviene desconectar de las noticias de noche, que el móvil no duerme contigo.",
+  "sombra": "Tú puedes ser demasiado desconfiado, como un guardia que ve ladrones hasta en la sombra de una farola. A veces te quedas con la herida de una traición y dejas de dar oportunidades. También te cuesta pedir ayuda, porque te gusta protegerlo todo tú solo. Tu pesimismo puede aparecer justo cuando más falta te hace la esperanza.",
+  "consejo": "Hoy haz una cosa buena por alguien sin contárselo a nadie, y deja que alguien te haga a ti un favor sin pelear por devolverlo.",
+  "aliados": [
+   "Tigre",
+   "Caballo"
+  ],
+  "amigo_secreto": "Conejo",
+  "choque": "Dragón",
+  "compat_texto": "Cuando un Perro y un Tigre se juntan, se entienden con una lealtad a prueba de todo. Cuando un Perro y un Dragón se cruzan, las diferencias de carácter chocan como dos trenes en la misma vía.",
+  "suerte": {
+   "numeros": [
+    3,
+    4,
+    9
+   ],
+   "colores": [
+    "verde",
+    "rojo"
+   ]
+  }
+ },
+ "Rata": {
+  "titulo": "La Rata Lista de Barrio",
+  "frase": "Eres la Rata: ves la oportunidad antes que nadie y sabes cuándo moverte. Hoy, aprovecha tu olfato.",
+  "esencia": "Tú eres la primera del zodiaco chino, así que llegas con ganas y con ingenio. Observas todo, ahorras energía y encuentras atajos donde otros ven muros. Eres sociable, simpática y muy despierta, como un wifi de primera fila. Tu mente va más rápido que tu agenda.",
+  "amor": "Tú amas con atención y detalle: te fijas en lo que la otra persona necesita antes de que lo diga. Eres encantadora y algo coqueta, pero te cuesta mostrar la parte más vulnerable. Si confías, eres una pareja leal, generosa y muy divertida para cualquier plan.",
+  "trabajo": "Tú brillas en lo que requiere ingenio, negociación, redes de contactos y análisis rápido. Se te dan bien las ventas, la gestión, el periodismo o la investigación. Tienes olfato para detectar tendencias y para caer de pie cuando cambian las cosas.",
+  "dinero": "Tú sabes hacer que el dinero rinda y tienes buen ojo para las oportunidades. Eso sí, a veces gastas en caprichos o te dejas llevar por la novedad. Tu regla de oro: separa lo que necesitas de lo que solo te entusiasma un rato.",
+  "salud": "Tú tiendes a comer deprisa y a dormir menos de lo que tu cuerpo pide, porque tu mente nunca apaga la luz. Un poco de rutina y pausas para respirar te sientan de maravilla. Este texto es entretenimiento simbólico, no consejo médico.",
+  "sombra": "Tú puedes ser demasiado desconfiada y guardar cartas bajo la manga por si acaso. A veces te preocupas por lo que podría pasar y te cuesta soltar el control. Recuerda que no todo el mundo quiere aprovecharse de ti.",
+  "consejo": "Hoy, elige una cosa que de verdad te importe y dedícale tu atención completa, sin pestañas abiertas de por medio.",
+  "aliados": [
+   "Dragón",
+   "Mono"
+  ],
+  "amigo_secreto": "Buey",
+  "choque": "Caballo",
+  "compat_texto": "Cuando una Rata y un Buey se juntan, hay calma, lealtad y mucho sentido común compartido. En cambio, la Rata y el Caballo tienden a chocar por ritmos y prioridades distintas, como un tren de cercanías y un coche de carreras.",
+  "suerte": {
+   "numeros": [
+    2,
+    3,
+    9
+   ],
+   "colores": [
+    "azul",
+    "dorado"
+   ]
+  }
+ },
+ "Serpiente": {
+  "titulo": "La Serpiente Sabia",
+  "frase": "Tú no hablas mucho, pero cuando lo haces, todos escuchan. Tu silencio tiene plan.",
+  "esencia": "Tú eres la Serpiente: elegante, observadora y con una intuición que parece magia. Analizas antes de actuar y rara vez haces algo sin saber por qué. Por fuera pareces tranquila, pero por dentro tienes un radar que detecta mentiras como un detector de humo detecta una tostada quemada. Eres reservada, profunda y con un sentido estético de quien sabe vestirse incluso para ir a comprar pan.",
+  "amor": "Tú amas despacio y con intensidad. No te interesa el flechazo de cinco minutos; buscas una conexión que tenga fondo, como un buen vino que pide tiempo. Cuando confías, te entregas de verdad, pero necesitas espacio para pensar y no te gusta que te presionen. Tu pareja ideal es alguien que respete tus silencios y sepa leer tus miradas, porque tú ya estás notando lo que no dices.",
+  "trabajo": "Tú brillas en lo que requiere estrategia, análisis e intuición: investigación, psicología, diseño, finanzas, escritura o cualquier campo donde haya que ver lo que otros no ven. Te cuesta trabajar en equipos caóticos, pero en un proyecto bien pensado eres imparable. Tu talento está en encontrar el punto exacto donde las cosas encajan, como quien resuelve un crucigrama sin mirar las pistas dos veces.",
+  "dinero": "Tú tiendes a ser prudente con el dinero y a planificar a largo plazo. Prefieres invertir con calma antes que apostar a lo loco, y sabes distinguir entre lo que necesitas y lo que solo te tienta. Puedes llegar a acumular bastante si confías en tu instinto, aunque a veces te pasas de cautela y te quedas esperando el momento perfecto que nunca llega.",
+  "salud": "Tú funcionas mejor con rutinas tranquilas, descanso suficiente y momentos de calma para pensar. Tu mente trabaja mucho, así que te sienta bien desconectar con algo que te relaje, como leer, caminar o simplemente no hacer nada sin culpa. Escucha las señales de cansancio que tu cuerpo te manda, porque tiendes a ignorarlas.",
+  "sombra": "Tu cara difícil es que puedes volverte desconfiada y guardarte demasiado. A veces te cuesta pedir ayuda y prefieres cargar sola con tus cosas antes que mostrar vulnerabilidad. También puedes caer en el rumor silencioso o en el rencor que no sueltas, y eso te come por dentro más de lo que crees. Recuerda que no todo el mundo quiere hacerte daño, aunque tu radar a veces diga lo contrario.",
+  "consejo": "Hoy dile a alguien cercano algo sincero que llevas tiempo guardando. No hace falta un discurso; basta con una frase honesta y valiente.",
+  "aliados": [
+   "Buey",
+   "Gallo"
+  ],
+  "amigo_secreto": "Mono",
+  "choque": "Cerdo",
+  "compat_texto": "Cuando una Serpiente y un Buey se juntan, la calma se une a la sabiduría y se entienden sin hablar demasiado. Con el Cerdo, en cambio, la Serpiente suele chocar porque uno vive de la intuición y el otro de la impulsividad, y eso genera tensiones como un cajón atascado que no cierra.",
+  "suerte": {
+   "numeros": [
+    2,
+    8,
+    9
+   ],
+   "colores": [
+    "rojo",
+    "negro"
+   ]
+  }
+ },
+ "Tigre": {
+  "titulo": "El jefe de la selva",
+  "frase": "Tigre: valiente como un lunes a las 8 y dispuesto a todo, menos a esperar turno.",
+  "esencia": "Tú eres el animal valiente del zodiaco chino, de los que se lanzan antes de mirar el suelo. Tienes carácter fuerte, mucha energía y un sentido de la justicia que te hace saltar cuando ves algo injusto. Eres el primero en levantar la mano y el último en rendirte.",
+  "amor": "Tú amas con intensidad, como si cada relación fuera una aventura de película. Eres leal y protector con quien quieres, pero a veces te cuesta bajar la guardia y mostrar lo vulnerable. Necesitas alguien que respete tu independencia y que no se asuste cuando tu voz sube de volumen.",
+  "trabajo": "Tú brillas en lo que requiere valor, liderazgo y decisiones rápidas. Te van bien los retos, emprender, negociar o defender causas. Te aburre la rutina repetitiva, así que busca un trabajo donde puedas moverte, proponer ideas y ver resultados.",
+  "dinero": "Tú arriesgas con cabeza, pero a veces con más pasión que cálculo. Te gusta invertir en lo que te emociona, y a veces eso te hace gastar en impulsos. Te conviene tener un plan claro, como un mapa antes de salir de excursión.",
+  "salud": "Tú tienes mucha energía, pero la gastas como si no tuviera fondo. Cuida los ritmos: alterna esfuerzo con descanso real, porque el cuerpo también necesita hacer la siesta. Mantener rutinas de movimiento y buen sueño te ayuda a sostener ese motor.",
+  "sombra": "Tu cara difícil es la impaciencia y la tendencia a imponer tu ritmo. Cuando algo no sale como quieres, puedes ponerte brusco o tajante, y a veces discutir por el gusto de ganar. Aprender a escuchar sin preparar la réplica te haría todavía más temible, pero en el buen sentido.",
+  "consejo": "Hoy elige una sola cosa importante y dedícale tu fuerza, sin dispersarte. Y escucha a alguien antes de contestar.",
+  "aliados": [
+   "Caballo",
+   "Perro"
+  ],
+  "amigo_secreto": "Cerdo",
+  "choque": "Mono",
+  "compat_texto": "Cuando un Tigre y un Caballo se juntan, la chispa salta y el plan avanza a todo galope. Cuando un Tigre y un Mono se cruzan, es como dos gatos en el mismo tejado: mucha tensión y pocas tregua.",
+  "suerte": {
+   "numeros": [
+    1,
+    3,
+    4
+   ],
+   "colores": [
+    "azul",
+    "naranja"
+   ]
+  }
+ }
+}

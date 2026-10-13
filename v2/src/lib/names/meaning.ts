@@ -8,7 +8,7 @@ import APELLIDOS from './data/apellidos.json';
 import NOMBRES from './data/nombres.json';
 import { FIRST_NAMES, MAPUCHE, PATRONYMIC, SURNAMES, type NameEntry } from './dictionary';
 
-type Generated = Record<string, { w: string; o: string; m: string; n?: string }>;
+type Generated = Record<string, { w: string; o: string; m: string; n?: string; d?: string }>;
 const GEN: Record<'nombre' | 'apellido', Generated> = {
   nombre: NOMBRES as Generated,
   apellido: APELLIDOS as Generated,
@@ -16,7 +16,12 @@ const GEN: Record<'nombre' | 'apellido', Generated> = {
 const fromGen = (kind: 'nombre' | 'apellido', key: string): NameEntry | null => {
   const g = GEN[kind][key];
   if (!g) return null;
-  return g.n ? { origin: g.o, meaning: g.m, note: g.n } : { origin: g.o, meaning: g.m };
+  return {
+    origin: g.o,
+    meaning: g.m,
+    ...(g.n ? { note: g.n } : {}),
+    ...(g.d ? { detail: g.d } : {}),
+  };
 };
 
 /** Cuántos trae ZODI de serie (para enseñarlo). */

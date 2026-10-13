@@ -187,7 +187,7 @@ test.describe('el significado de tu carta', () => {
     await page.getByRole('button', { name: 'Ver lo que significa' }).click();
     await expect(page.getByText('Calfu = azul · leo = río.')).toBeVisible();
     // La investigación arranca al verse en pantalla.
-    await page.locator('.name-parts').scrollIntoViewIfNeeded();
+    await page.locator('.name-parts li').last().scrollIntoViewIfNeeded();
     // Lo que no está de serie lo investiga la IA (y lo inventado no se inventa).
     await expect(page.getByText('Significado de prueba de Quispilema.')).toBeVisible();
     await expect(page.getByText('✦ Investigado por ZODI')).toBeVisible();

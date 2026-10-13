@@ -210,6 +210,17 @@ const pillars = [
           {s.paragraphs.map((t) => (
             <p>{t}</p>
           ))}
+          {s.facts && (
+            <ul class="name-list">
+              {s.facts.map((f) => (
+                <li>
+                  <span>
+                    <b>{f.label}.</b> {f.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
           {s.numbers && (
             <ul class="nums">
               {s.numbers.map((n) => (

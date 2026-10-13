@@ -5,6 +5,7 @@
  * Venus, Marte…) está en "Tu gente". Puro.
  */
 import { SIGNS, type Sign } from '@/lib/astro-engine/types';
+import { pairKnowledge, type PairKnowledge } from '@/lib/knowledge';
 import { signMatch, type SignMatch } from '@/lib/people/affinity';
 import { SIGN_INFO, type SignInfo } from './signs';
 
@@ -70,6 +71,8 @@ export interface CompatPage {
   wheel: string;
   rhythm: string;
   areas: { id: 'amor' | 'amistad' | 'trabajo'; title: string; text: string }[];
+  /** Textos específicos de esta pareja (base de conocimiento), si existen. */
+  kb: PairKnowledge | null;
 }
 
 const bySlug = new Map(SIGN_INFO.map((s) => [s.slug, s]));
@@ -92,6 +95,7 @@ export function canonicalPair(a: SignInfo, b: SignInfo): string {
 
 export function compatPage(a: SignInfo, b: SignInfo): CompatPage {
   const match = signMatch(a.name as Sign, b.name as Sign);
+  const kb = pairKnowledge(a.name as Sign, b.name as Sign);
   const mods = [a.modality, b.modality].sort((x, y) => MOD_ORDER.indexOf(x) - MOD_ORDER.indexOf(y));
   return {
     a,
@@ -101,10 +105,19 @@ export function compatPage(a: SignInfo, b: SignInfo): CompatPage {
     wheel: WHEEL[match.distance]!,
     rhythm: RHYTHM[mods.join('-')]!,
     areas: [
-      { id: 'amor', title: 'En el amor', text: AREAS.amor[match.distance]! },
-      { id: 'amistad', title: 'En la amistad', text: AREAS.amistad[match.distance]! },
-      { id: 'trabajo', title: 'En el trabajo', text: AREAS.trabajo[match.distance]! },
+      { id: 'amor', title: 'En el amor', text: kb?.amor ?? AREAS.amor[match.distance]! },
+      {
+        id: 'amistad',
+        title: 'En la amistad',
+        text: kb?.amistad ?? AREAS.amistad[match.distance]!,
+      },
+      {
+        id: 'trabajo',
+        title: 'En el trabajo',
+        text: kb?.trabajo ?? AREAS.trabajo[match.distance]!,
+      },
     ],
+    kb,
   };
 }
 

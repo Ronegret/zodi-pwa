@@ -139,6 +139,41 @@ const wheelAspects = (chart?.aspects ?? []).map(({ a, b, type }) => ({ a, b, typ
           ))}
         </ul>
       </section>
+      <section class="more-chart" aria-labelledby="mas-carta">
+        <h2 id="mas-carta">Más cosas que dice tu nacimiento</h2>
+        <ul>
+          <li>
+            <a href="/app/carta/significado#compat">
+              <strong>Con quién encajas</strong>
+              <span>Tus mejores y peores signos, con truco incluido.</span>
+            </a>
+          </li>
+          <li>
+            <a href="/app/carta/significado#numeros">
+              <strong>Tu numerología</strong>
+              <span>Camino de vida, año personal y los números de tu nombre.</span>
+            </a>
+          </li>
+          <li>
+            <a href="/app/carta/significado#chino">
+              <strong>Tu animal chino</strong>
+              <span>Cómo eres, cómo amas y quién es tu amigo secreto.</span>
+            </a>
+          </li>
+          <li>
+            <a href="/app/carta/significado#nombre">
+              <strong>Tu nombre y apellidos</strong>
+              <span>De dónde vienen y qué historia cuentan.</span>
+            </a>
+          </li>
+          <li>
+            <a href="/app/gente">
+              <strong>Compatibilidad con tu gente</strong>
+              <span>Pareja, familia y amistades, con su signo y la afinidad.</span>
+            </a>
+          </li>
+        </ul>
+      </section>
       <div class="layout">
         <Card
           title="Tu rueda del cielo"
@@ -573,5 +608,41 @@ const wheelAspects = (chart?.aspects ?? []).map(({ a, b, type }) => ({ a, b, typ
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--acid);
+  }
+  .more-chart {
+    margin: var(--space-5) 0;
+  }
+  .more-chart h2 {
+    font-size: var(--step-1);
+    margin: 0 0 var(--space-3);
+  }
+  .more-chart ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+  .more-chart a {
+    display: grid;
+    gap: 2px;
+    height: 100%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: linear-gradient(135deg, rgb(155 77 255 / 14%), rgb(184 255 23 / 5%));
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .more-chart a:hover {
+    border-color: var(--acid);
+  }
+  .more-chart strong {
+    color: var(--acid);
+  }
+  .more-chart span {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
   }
 </style>

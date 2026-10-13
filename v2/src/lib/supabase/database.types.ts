@@ -30,6 +30,8 @@ export type Database = {
         Row: Timestamps & {
           id: string;
           display_name: string;
+          /** Nombre completo con apellidos (para el significado del nombre). */
+          full_name: string | null;
           username: string | null;
           avatar_url: string | null;
           birth_date: string | null;
@@ -65,6 +67,7 @@ export type Database = {
         Insert: {
           id: string;
           display_name?: string;
+          full_name?: string | null;
           username?: string | null;
           avatar_url?: string | null;
           birth_date?: string | null;
@@ -117,6 +120,7 @@ export type Database = {
           origin: string;
           meaning: string;
           note: string | null;
+          detail: string | null;
           created_at: string;
         };
         Insert: {
@@ -126,6 +130,7 @@ export type Database = {
           origin: string;
           meaning: string;
           note?: string | null;
+          detail?: string | null;
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['name_meanings']['Insert']>;

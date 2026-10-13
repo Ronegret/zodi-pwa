@@ -9,6 +9,16 @@ import { SIGNS, type AspectType, type NatalChart, type PlanetId } from '@/lib/as
 import { chineseZodiac, lifePathNumber, personalYear } from '@/lib/ai/numerology';
 import { mayanSign } from '@/lib/divination/maya';
 import { nameNumbers } from '@/lib/divination/name';
+import {
+  bestAndWorst,
+  chineseElement,
+  chineseKnowledge,
+  numberKnowledge,
+  pairKnowledge,
+  planetKnowledge,
+  type PlanetKey,
+} from '@/lib/knowledge';
+import { SIGN_BY_SLUG } from '@/lib/public/signs';
 import { birthCard } from '@/lib/public/teaser';
 import { HOUSES, PLANET_ROLE, SIGN_HOW } from './plain';
 import {
@@ -34,6 +44,13 @@ export interface NumberCard {
   text: string;
 }
 
+export interface Fact {
+  label: string;
+  text: string;
+  /** Enlace opcional (p. ej. a la página de esa pareja de signos). */
+  href?: string;
+}
+
 export interface MeaningSection {
   id: string;
   kicker: string;
@@ -43,6 +60,8 @@ export interface MeaningSection {
   paragraphs: string[];
   /** Números con su imagen (solo en la sección de numerología). */
   numbers?: NumberCard[];
+  /** Datos sueltos de la base de conocimiento (amor, trabajo, retos…). */
+  facts?: Fact[];
   /** Pregunta lista para el oráculo. */
   ask: string;
 }
@@ -110,14 +129,39 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
       ? `Cae en tu casa ${p(id).house} (${HOUSES[p(id).house - 1]!.name.toLowerCase()}): se nota sobre todo en ${HOUSES[p(id).house - 1]!.area}.`
       : '';
   const houseAsk = (id: PlanetId) => (timeKnown ? ` en la casa ${p(id).house}` : '');
-  const personal = (id: PlanetId, kicker: string, title: string, text: string, image: string) => ({
-    id,
-    kicker,
-    title: `${title} en ${p(id).sign}`,
-    image,
-    paragraphs: [text, houseLine(id)].filter(Boolean),
-    ask: `Explícame mi ${title.replace('Tu ', '')} en ${p(id).sign}${houseAsk(id)} y cómo me afecta en el día a día.`,
-  });
+  const KEY: Partial<Record<PlanetId, PlanetKey>> = {
+    sun: 'sol',
+    moon: 'luna',
+    mercury: 'mercurio',
+    venus: 'venus',
+    mars: 'marte',
+  };
+  /** Texto largo de la base (voz ZODI) y, si falta, el corto de siempre. */
+  const body = (id: PlanetId, short: string, sign = p(id).sign) => {
+    const k = KEY[id] ? planetKnowledge(KEY[id]!, sign) : null;
+    if (!k) return { paragraphs: [short, houseLine(id)].filter(Boolean), facts: undefined };
+    return {
+      paragraphs: [k.texto, houseLine(id)].filter(Boolean),
+      facts: [
+        { label: 'En el día a día', text: k.en_el_dia_a_dia },
+        { label: 'Tu mejor versión', text: k.luz },
+        { label: 'Tu lado difícil', text: k.sombra },
+        { label: 'Consejo de ZODI', text: k.tip },
+      ],
+    };
+  };
+  const personal = (id: PlanetId, kicker: string, title: string, text: string, image: string) => {
+    const b = body(id, text);
+    return {
+      id,
+      kicker,
+      title: `${title} en ${p(id).sign}`,
+      image,
+      paragraphs: b.paragraphs,
+      ...(b.facts ? { facts: b.facts } : {}),
+      ask: `Explícame mi ${title.replace('Tu ', '')} en ${p(id).sign}${houseAsk(id)} y cómo me afecta en el día a día.`,
+    };
+  };
 
   const sections: MeaningSection[] = [];
   const sun = p('sun').sign;
@@ -126,7 +170,10 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
     kicker: 'Quién eres',
     title: `Tu Sol en ${sun}`,
     image: `/signos/${signSlug(sun)}-640.webp`,
-    paragraphs: [SUN[sun], houseLine('sun')].filter(Boolean),
+    ...(() => {
+      const b = body('sun', SUN[sun]);
+      return { paragraphs: b.paragraphs, ...(b.facts ? { facts: b.facts } : {}) };
+    })(),
     ask: `Explícame mi Sol en ${sun}${houseAsk('sun')}: cómo se nota en mi personalidad y qué potencia tengo.`,
   });
   sections.push(
@@ -146,9 +193,22 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
       title: `Tu Ascendente en ${asc}`,
       image: '/art/zodi-senalando-640.webp',
       paragraphs: [
-        ASC[asc],
+        planetKnowledge('ascendente', asc)?.texto ?? ASC[asc],
         'El Ascendente es el signo que asomaba por el horizonte cuando naciste: tu primera impresión y tu forma de empezar las cosas.',
       ],
+      ...(planetKnowledge('ascendente', asc)
+        ? {
+            facts: [
+              {
+                label: 'En el día a día',
+                text: planetKnowledge('ascendente', asc)!.en_el_dia_a_dia,
+              },
+              { label: 'Lo que ve la gente', text: planetKnowledge('ascendente', asc)!.luz },
+              { label: 'Lo que se te escapa', text: planetKnowledge('ascendente', asc)!.sombra },
+              { label: 'Consejo de ZODI', text: planetKnowledge('ascendente', asc)!.tip },
+            ],
+          }
+        : {}),
       ask: `¿Qué significa mi Ascendente en ${asc} junto a mi Sol en ${sun}?`,
     });
   } else {
@@ -291,6 +351,49 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
     });
   }
 
+  // Con quién encajas: del Sol, con la base de compatibilidades.
+  {
+    const { best, worst } = bestAndWorst(sun);
+    const link = (b: string) => {
+      const a = SIGN_BY_SLUG.get(signSlug(sun));
+      const o = SIGN_BY_SLUG.get(signSlug(b as typeof sun));
+      if (!a || !o) return undefined;
+      return `/compatibilidad/${a.index <= o.index ? `${a.slug}-y-${o.slug}` : `${o.slug}-y-${a.slug}`}`;
+    };
+    const facts: Fact[] = [];
+    for (const b of best) {
+      const k = pairKnowledge(sun, b);
+      if (!k) continue;
+      const href = link(b);
+      facts.push({
+        label: `${sun} + ${b}: de lo mejor`,
+        text: `${k.resumen} En el amor: ${k.amor} Truco: ${k.truco}`,
+        ...(href ? { href } : {}),
+      });
+    }
+    for (const b of worst) {
+      const k = pairKnowledge(sun, b);
+      if (!k) continue;
+      const href = link(b);
+      facts.push({
+        label: `${sun} + ${b}: con retos`,
+        text: `${k.resumen} Dónde chocan: ${k.choque} Truco: ${k.truco}`,
+        ...(href ? { href } : {}),
+      });
+    }
+    sections.push({
+      id: 'compat',
+      kicker: 'Con quién encajas',
+      title: `${sun} con el resto del zodiaco`,
+      image: '/art/compatibilidad-640.webp',
+      paragraphs: [
+        `Tus mejores apuestas son ${best.join(', ')}; con ${worst.join(' y ')} toca currárselo un poco más. Ojo: esto es solo el Sol. La química de verdad también depende de la Luna, Venus y Marte, y eso lo ves en «Tu gente», con la fecha de cada persona.`,
+      ],
+      ...(facts.length ? { facts } : {}),
+      ask: `Soy ${sun}: ¿con qué signos me llevo mejor, con cuáles chocaré y cómo lo arreglo?`,
+    });
+  }
+
   // Numerología: fecha y nombre.
   const life = lifePathNumber(birthDate);
   const year = personalYear(birthDate, today);
@@ -325,28 +428,77 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
       },
     );
   }
+  const lifeK = numberKnowledge(life);
+  const nameK = name ? numberKnowledge(name.expression) : null;
+  const numFacts: Fact[] = lifeK
+    ? [
+        { label: 'Tu esencia', text: lifeK.esencia },
+        { label: 'En el amor', text: lifeK.amor },
+        { label: 'En el trabajo', text: lifeK.trabajo },
+        { label: 'Con el dinero', text: lifeK.dinero },
+        { label: 'Tu cuerpo', text: lifeK.salud },
+        { label: 'Tu lado difícil', text: lifeK.sombra },
+        { label: 'Tu lección de vida', text: lifeK.reto },
+        {
+          label: `Con qué números encajas (${lifeK.compatibles.join(', ')}) y con cuáles chocas (${lifeK.choca.join(', ')})`,
+          text: lifeK.compat_texto,
+        },
+        { label: 'Consejo de ZODI', text: lifeK.consejo },
+      ]
+    : [];
+  if (nameK && name) {
+    numFacts.push({
+      label: `Tu nombre (${name.expression}): «${nameK.titulo}»`,
+      text: `${nameK.esencia} ${nameK.frase}`,
+    });
+  }
   sections.push({
     id: 'numeros',
     kicker: 'Numerología',
-    title: 'Tus números',
+    title: lifeK ? `Tus números: camino ${life}, «${lifeK.titulo}»` : 'Tus números',
     image: '/art/numerologia-card-640.webp',
     paragraphs: [
       'Cada número del 1 al 9 (y los maestros 11, 22 y 33) tiene su vibración. Los tuyos salen de tu fecha de nacimiento y de tu nombre.',
     ],
     numbers,
+    ...(numFacts.length ? { facts: numFacts } : {}),
     ask: `Mi camino de vida es el ${life} y estoy en año personal ${year}: ¿qué me toca este año?`,
   });
 
   const chinese = chineseZodiac(birthDate);
+  const cK = chineseKnowledge(chinese.animal);
+  const elK = chineseElement(chinese.element);
+  const chineseFacts: Fact[] = cK
+    ? [
+        { label: 'En el amor', text: cK.amor },
+        { label: 'En el trabajo', text: cK.trabajo },
+        { label: 'Con el dinero', text: cK.dinero },
+        { label: 'Tu cuerpo', text: cK.salud },
+        { label: 'Tu lado difícil', text: cK.sombra },
+        ...(elK ? [{ label: `Tu elemento: ${chinese.element}`, text: elK }] : []),
+        {
+          label: `Aliados: ${cK.aliados.join(' y ')} · Amigo secreto: ${cK.amigo_secreto} · Choque: ${cK.choque}`,
+          text: cK.compat_texto,
+        },
+        {
+          label: 'Suerte tradicional',
+          text: `Números ${cK.suerte.numeros.join(', ')} y colores ${cK.suerte.colores.join(' y ')}.`,
+        },
+        { label: 'Consejo de ZODI', text: cK.consejo },
+      ]
+    : [];
   sections.push({
     id: 'chino',
     kicker: 'Horóscopo chino',
-    title: `${chinese.animal} de ${chinese.element}`,
+    title: cK
+      ? `${chinese.animal} de ${chinese.element}: «${cK.titulo}»`
+      : `${chinese.animal} de ${chinese.element}`,
     image: '/art/chino-640.webp',
     paragraphs: [
-      CHINESE[chinese.animal] ?? '',
+      cK?.esencia ?? CHINESE[chinese.animal] ?? '',
       `Tu elemento chino es ${chinese.element.toLowerCase()} (año lunar ${chinese.year}). Si naciste en enero o febrero, tu animal es el del año anterior: lo calculamos con la luna nueva real.`,
     ],
+    ...(chineseFacts.length ? { facts: chineseFacts } : {}),
     ask: `Soy ${chinese.animal} de ${chinese.element} en el horóscopo chino: ¿qué me depara este año?`,
   });
 

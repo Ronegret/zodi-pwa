@@ -17,7 +17,7 @@ const c = compatPage(a, b);
 Astro.response.headers.set('Cache-Control', publicCacheControl());
 
 const title = `Compatibilidad ${a.name} y ${b.name}: amor, amistad y trabajo`;
-const description = `${a.name} y ${b.name}: ${c.match.score} % de afinidad. ${c.match.text}`;
+const description = `${a.name} y ${b.name}: ${c.match.score} % de afinidad. ${c.kb?.resumen ?? c.match.text}`;
 ---
 
 <PublicLayout
@@ -80,7 +80,8 @@ const description = `${a.name} y ${b.name}: ${c.match.score} % de afinidad. ${c.
       <section class="card" aria-labelledby="rueda">
         <h2 id="rueda">Su vínculo en la rueda</h2>
         <p>{c.wheel}</p>
-        <p>{c.match.text}</p>
+        <p>{c.kb?.resumen ?? c.match.text}</p>
+        {c.kb && <p class="muted">{c.kb.por_que}</p>}
       </section>
       <section class="card" aria-labelledby="elementos">
         <h2 id="elementos">
@@ -109,6 +110,19 @@ const description = `${a.name} y ${b.name}: ${c.match.score} % de afinidad. ${c.
         </section>
       ))}
     </div>
+
+    {c.kb && (
+      <div class="grid">
+        <section class="card" aria-labelledby="choque">
+          <h2 id="choque">Dónde chocan</h2>
+          <p>{c.kb.choque}</p>
+        </section>
+        <section class="card" aria-labelledby="truco">
+          <h2 id="truco">El truco para que funcione</h2>
+          <p>{c.kb.truco}</p>
+        </section>
+      </div>
+    )}
 
     <section class="cta card" aria-labelledby="completa">
       <h2 id="completa">¿Y con su carta completa?</h2>
