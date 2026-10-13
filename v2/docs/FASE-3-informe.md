@@ -2,19 +2,21 @@
 
 Commits en `astro-v2`, sin push:
 
-| Commit | Contenido |
-|---|---|
-| `d012e56` | Cúspides Placidus |
-| `0821c5e` | Sistema visual |
-| `90f5314` | Componentes |
-| `e39e5df` | Lógica del dashboard |
+| Commit    | Contenido                |
+| --------- | ------------------------ |
+| `d012e56` | Cúspides Placidus        |
+| `0821c5e` | Sistema visual           |
+| `90f5314` | Componentes              |
+| `e39e5df` | Lógica del dashboard     |
 | `25c48a2` | Shell, dashboard y carta |
-| `a4d22ba` | Onboarding y ajustes |
-| `fb96337` | e2e |
-| `72a6536` | Fixture |
+| `a4d22ba` | Onboarding y ajustes     |
+| `fb96337` | e2e                      |
+| `72a6536` | Fixture                  |
 
 ## Decisión de diseño (corregida a mitad de fase)
+
 **El estilo visual es el de Zodi**, el de la app actual (`app/globals.css`):
+
 - **Colores:** negro neón, ácido `#b8ff17`, violeta, rosa, cian y oro.
 - **Superficies:** paneles de cristal oscuro.
 - **Fondo:** halos de color y rejilla de 40 px.
@@ -24,6 +26,7 @@ Commits en `astro-v2`, sin push:
 De AEM Planner solo se toma la **estructura**: sidebar de 264 px, título grande, rejilla bento, línea con KPIs, donut con leyenda y botón flotante. Los tokens marfil/índigo de la Fase 0 se han sustituido.
 
 Para cumplir AA sin cambiar la paleta:
+
 - El texto secundario es sólido `#9a9a99` (6,8:1).
 - El violeta para texto es `#b98aff` (7,4:1).
 - Los bordes de los controles son `#6e6e85` (3,9:1).
@@ -32,6 +35,7 @@ Para cumplir AA sin cambiar la paleta:
 ## Hecho
 
 ### Sistema de diseño (`src/styles/`, `src/components/ui/`)
+
 - **Tokens** (`tokens.css`): escala fluida con `clamp`, espaciado, radios de la app actual, brillos y colores de gráfico. Las fuentes están autoalojadas con `@fontsource`, así que la CSP mantiene `font-src 'self'`.
 - **Primitivas por clase** (`components.css`): las comparten los componentes Astro y las islas React. Todas tienen estados hover, focus, active, disabled y, donde aplica, loading.
 - **Componentes:**
@@ -49,6 +53,7 @@ Para cumplir AA sin cambiar la paleta:
 - **Galería** en `/dev/componentes`: solo existe en desarrollo y en producción da 404. La usan los e2e de axe y de teclado.
 
 ### Layout y dashboard
+
 - **AppShell:**
   - Escritorio (≥ 1100 px): sidebar con logo, navegación con `aria-current`, usuario con plan y gemas, y cerrar sesión.
   - Tablet: rail con icono y etiqueta.
@@ -71,6 +76,7 @@ Para cumplir AA sin cambiar la paleta:
 - **Páginas aún vacías:** Horóscopo, Match y Asistente muestran un estado vacío con el personaje de Zodi hasta la Fase 7.
 
 ### Onboarding (`/app/onboarding`)
+
 - **Cinco pasos:** Tú → Nacimiento → Lugar → Tu Zodi → Avisos.
 - **Progreso:** barra (`<progress>`) y lista de pasos con `aria-current="step"`.
 - **Guardado parcial:** cada paso guarda en el perfil y no se pueden saltar los pasos obligatorios.
@@ -83,18 +89,21 @@ Para cumplir AA sin cambiar la paleta:
 - **Nueva columna `birth_time_known`:** distingue "no sé la hora" de "aún no contestado". Hay migración y test de RLS.
 
 ### Motor
+
 - **Cúspides Placidus contrastadas con Swiss Ephemeris** (valores de Astrotheme, mismos datos que Astro.com): Einstein (48°N), Marilyn Monroe (34°N, longitud oeste) y Kylie Minogue (37°S). Las 36 cúspides coinciden con un margen menor de 2′ y quedan como test.
 
 ## Verificado (desde `v2/`)
-| Comando | Resultado |
-|---|---|
-| `npm run check` | 0 errores (109 ficheros) |
-| `npm run lint` | limpio |
-| `npm test` | **127/127** |
-| `npm run build` | OK |
+
+| Comando            | Resultado                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| `npm run check`    | 0 errores (109 ficheros)                                                                        |
+| `npm run lint`     | limpio                                                                                          |
+| `npm test`         | **127/127**                                                                                     |
+| `npm run build`    | OK                                                                                              |
 | `npm run test:e2e` | **85/85** en móvil, tablet y escritorio (2 omitidos: la prueba sin JS solo corre en escritorio) |
 
 Qué cubren los e2e:
+
 - Onboarding completo con teclado, incluido el combobox.
 - Onboarding sin JS y sin hora de nacimiento.
 - Que no se pueden saltar pasos.
@@ -106,6 +115,7 @@ Qué cubren los e2e:
 Sobre el build de producción también comprobé que la CSP no lleva `unsafe-inline`, que no hay atributos `style=""` y que `/dev/componentes` da 404.
 
 ## Riesgos y pendientes
+
 - **Licencia de Open-Meteo:** el plan gratuito es para uso **no comercial** y Zodi tiene planes de pago. Antes de producción hay que contratar su plan comercial o cambiar de proveedor (GeoNames, Mapbox…). El proveedor está aislado en `lib/geo/places.ts` y `GEOCODING_API_URL`.
 - **Supabase sigue sin conectar:** faltan las migraciones en el proyecto real, incluida `20261011100000_profile_birth_time_known.sql`. Todo lo de esta fase está probado contra el mock.
 - **WebKit sin probar** (Safari): no arranca en Windows. Queda para CI en Linux.

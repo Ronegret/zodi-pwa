@@ -7,13 +7,19 @@ import type { ProfileForReading } from '@/lib/ai/context';
 import { chineseZodiac, lifePathNumber } from '@/lib/ai/numerology';
 import { civilDate } from '@/lib/daily/biorhythm';
 import type { Person } from '@/lib/server/people';
-import { personSky } from './affinity';
+import { personSky, type PersonSky } from './affinity';
 import { RELATIONS } from './relations';
 import { personView } from './view';
 
 const MAX = 12;
 
-export function peopleContext(people: Person[], profile: ProfileForReading, now: Date): string {
+export function peopleContext(
+  people: Person[],
+  profile: ProfileForReading,
+  now: Date,
+  /** Tu cielo, de tu carta guardada (mejor que recalcularlo). */
+  ownSky?: PersonSky,
+): string {
   if (!people.length || !profile.birth_date) return '';
   const timeZone = profile.time_zone ?? 'Europe/Madrid';
   const today = civilDate(now, timeZone);
@@ -21,7 +27,7 @@ export function peopleContext(people: Person[], profile: ProfileForReading, now:
     profile.birth_time_known && profile.birth_time ? profile.birth_time.slice(0, 5) : null;
   const me = {
     birthDate: profile.birth_date,
-    sky: personSky(profile.birth_date, myTime, timeZone),
+    sky: ownSky ?? personSky(profile.birth_date, myTime, timeZone),
   };
   const lines = people.slice(0, MAX).map((p) => {
     const x = personView(p, me, { timeZone, today, now });

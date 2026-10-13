@@ -445,3 +445,31 @@ test.describe('tus datos', () => {
     expect(anon.status()).toBe(401);
   });
 });
+
+test.describe('zona horaria', () => {
+  test.use({ timezoneId: 'Asia/Tokyo' });
+
+  test('la zona del perfil se sincroniza con la del navegador (no la del nacimiento)', async ({
+    page,
+    request,
+  }) => {
+    await login(page, await createTestUser(request, true));
+    await expect(page).toHaveURL(/\/app$/);
+    // Se guarda sola y la página se recarga una vez con el valor correcto.
+    await expect(page.locator('[data-tz]')).toHaveAttribute('data-tz', 'Asia/Tokyo');
+    const mine = await (await page.request.get('/api/mis-datos')).json();
+    expect(mine.perfil.time_zone).toBe('Asia/Tokyo');
+    // Datos no válidos, no.
+    const bad = await page.evaluate(
+      async () =>
+        (
+          await fetch('/api/zona-horaria', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ timeZone: 'Marte/Olimpo' }),
+          })
+        ).status,
+    );
+    expect(bad).toBe(422);
+  });
+});

@@ -49,6 +49,30 @@ const RELATIONSHIP: Record<string, string> = {
   divorced: 'divorciado/a o separado/a',
 };
 
+/** País donde vive la persona, por su zona horaria ACTUAL (para elegir la jerga). */
+export function countryFromTimeZone(tz: string): string | null {
+  if (tz.startsWith('Europe/Madrid') || tz === 'Atlantic/Canary' || tz === 'Africa/Ceuta')
+    return 'España';
+  const byZone: Record<string, string> = {
+    'America/Santiago': 'Chile',
+    'America/Mexico_City': 'México',
+    'America/Bogota': 'Colombia',
+    'America/Lima': 'Perú',
+    'America/Caracas': 'Venezuela',
+    'America/Guayaquil': 'Ecuador',
+    'America/Montevideo': 'Uruguay',
+    'America/Asuncion': 'Paraguay',
+    'America/La_Paz': 'Bolivia',
+    'America/Costa_Rica': 'Costa Rica',
+    'America/Panama': 'Panamá',
+    'America/Santo_Domingo': 'República Dominicana',
+    'America/Puerto_Rico': 'Puerto Rico',
+    'America/Havana': 'Cuba',
+  };
+  if (tz.startsWith('America/Argentina/') || tz === 'America/Buenos_Aires') return 'Argentina';
+  return byZone[tz] ?? null;
+}
+
 function timeOfDay(hour: number): string {
   if (hour < 5)
     return 'de madrugada (no puede dormir: trátalo con verdad, no con positividad vacía)';
@@ -95,6 +119,9 @@ export function buildReadingContext(
   const lines: string[] = [];
 
   lines.push('## Quién es');
+  const country = countryFromTimeZone(timeZone);
+  if (country)
+    lines.push(`- Vive en: ${country}. Usa la jerga de ahí, no la del lugar donde nació.`);
   lines.push(`- Nombre: ${firstName} (llámalo por su nombre al menos una vez).`);
   if (profile.birth_date) {
     const birthday = profile.birth_date.slice(5) === today.slice(5);

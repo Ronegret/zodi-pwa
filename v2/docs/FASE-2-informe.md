@@ -10,25 +10,28 @@ conectarlo al proyecto real (`mdtgjgfeoudiyotgcxsy`), ver "Para conectar el proy
 ## Hecho
 
 ### Esquema (`supabase/migrations/`, 6 ficheros, idempotentes)
-| Tabla | Quién lee | Quién escribe |
-|---|---|---|
-| `profiles` (1:1 con `auth.users`, trigger al registrarse) | el propio usuario | usuario: solo columnas editables · `plan`, `gems`, `xp`, `level`, `streak`, referidos: solo service role |
-| `natal_charts` (input, carta JSON, `engine_version`) | el propio | el propio (insertar/borrar; inmutables) |
-| `readings` (19 `reading_kind`, modelo, tokens) | el propio | solo service role (tras consumir cuota) |
-| `usage_limits` (free 5 · premium 40 · vip 150 al día) | público | service role |
-| `usage_events` | el propio | solo vía `consume_ai_quota()` |
-| `community_posts`, `comments` | publicados: público · los propios: autor | autor (solo `body`); moderación (`status`): service role |
-| `friendships` | las dos partes | pide el emisor; acepta o bloquea solo el destinatario |
-| `subscriptions`, `gem_transactions` | el propio | service role |
-| `stripe_events` (idempotencia de webhooks) | nadie | service role |
+
+| Tabla                                                     | Quién lee                                | Quién escribe                                                                                            |
+| --------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `profiles` (1:1 con `auth.users`, trigger al registrarse) | el propio usuario                        | usuario: solo columnas editables · `plan`, `gems`, `xp`, `level`, `streak`, referidos: solo service role |
+| `natal_charts` (input, carta JSON, `engine_version`)      | el propio                                | el propio (insertar/borrar; inmutables)                                                                  |
+| `readings` (19 `reading_kind`, modelo, tokens)            | el propio                                | solo service role (tras consumir cuota)                                                                  |
+| `usage_limits` (free 5 · premium 40 · vip 150 al día)     | público                                  | service role                                                                                             |
+| `usage_events`                                            | el propio                                | solo vía `consume_ai_quota()`                                                                            |
+| `community_posts`, `comments`                             | publicados: público · los propios: autor | autor (solo `body`); moderación (`status`): service role                                                 |
+| `friendships`                                             | las dos partes                           | pide el emisor; acepta o bloquea solo el destinatario                                                    |
+| `subscriptions`, `gem_transactions`                       | el propio                                | service role                                                                                             |
+| `stripe_events` (idempotencia de webhooks)                | nadie                                    | service role                                                                                             |
 
 Funciones:
+
 - `consume_ai_quota(kind)`: atómica, con bloqueo de fila. Cuenta por día natural en la zona horaria del usuario y, si la zona no es válida, usa UTC.
 - `ai_quota_status()`: devuelve el estado de la cuota sin consumirla.
 - `apply_gem_transaction(...)`: idempotente por `(reason, reference)` y nunca deja saldo negativo. Solo la puede ejecutar el service role.
 - `profile_cards(ids)`: tarjeta pública de un usuario (nombre, usuario, avatar, nivel) sin exponer su fecha de nacimiento.
 
 ### Código (`src/`)
+
 - **`lib/supabase/`**:
   - Clientes `browser.ts`, `server.ts` (con `@supabase/ssr`) y `admin.ts`. `admin.ts` importa de `astro:env/server`, así que el build falla si alguien lo usa desde código de navegador.
   - `database.types.ts`, escrito a mano en el formato de `supabase gen types`.
@@ -61,13 +64,14 @@ Funciones:
   - Las directivas están en `lib/security/policy.ts`.
 
 ## Verificado (desde `v2/`)
-| Comando | Resultado |
-|---|---|
-| `npm run check` | 0 errores, 0 avisos (62 ficheros) |
-| `npm run lint` | limpio |
-| `npm test` | **107/107**: 30 de RLS en PGlite, 55 nuevos de validación/rutas/cuota/seguridad y 22 previos (21 del motor + 1 smoke) |
-| `npm run build` | OK |
-| `npm run test:e2e` | **54/54** en móvil, tablet y escritorio |
+
+| Comando            | Resultado                                                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `npm run check`    | 0 errores, 0 avisos (62 ficheros)                                                                                     |
+| `npm run lint`     | limpio                                                                                                                |
+| `npm test`         | **107/107**: 30 de RLS en PGlite, 55 nuevos de validación/rutas/cuota/seguridad y 22 previos (21 del motor + 1 smoke) |
+| `npm run build`    | OK                                                                                                                    |
+| `npm run test:e2e` | **54/54** en móvil, tablet y escritorio                                                                               |
 
 - **Tests de RLS**:
   - Aplican las migraciones dos veces para comprobar que son idempotentes.
@@ -82,6 +86,7 @@ Funciones:
 - **CSP**: ejecuté la función de Vercel compilada en local. `/auth/login` devuelve `content-security-policy` con hashes y sin `unsafe-inline`, y las redirecciones y el JSON llevan HSTS, `X-Frame-Options` y `no-store`.
 
 ## Para conectar el proyecto real (pendiente, requiere tus credenciales)
+
 1. Crea **`v2/.env.local`** (Supabase → Settings → API) con:
    - `PUBLIC_SUPABASE_URL=https://mdtgjgfeoudiyotgcxsy.supabase.co`
    - `PUBLIC_SUPABASE_ANON_KEY=` con la clave anon o publishable (`sb_publishable_…`)
@@ -101,6 +106,7 @@ Funciones:
 8. **Comprobación final**: ejecutar los Security y Performance Advisors de Supabase y probar a mano: registrarse, confirmar el correo, completar el onboarding, cerrar sesión, recuperar la contraseña y entrar con Google.
 
 ## Secretos y rotación
+
 - Solo en `v2/.env.local` (ignorado por git) y en las variables de entorno de Vercel, nunca en el chat ni en commits.
 - `SUPABASE_SERVICE_ROLE_KEY` solo se lee en `admin.ts`.
 - **Rotación** (si una clave se filtra, o cada 6 meses):
@@ -112,6 +118,7 @@ Funciones:
 - La clave anon/publishable es pública por diseño: la protección la da la RLS, no el secreto de esa clave.
 
 ## Riesgos y limitaciones
+
 - **La RLS está probada en PGlite** con una réplica de los roles de Supabase (`tests/db/supabase-shim.sql`), no contra Supabase. Hay que repetirla con los Advisors en cuanto se apliquen las migraciones.
 - **Los tipos están escritos a mano** hasta que se ejecute `supabase gen types`.
 - **La CSP no actúa en `astro dev`**, así que los e2e no la cubren. Está verificada sobre el build; falta confirmarla en un preview de Vercel, sobre todo `form-action` en el flujo de Google.
@@ -129,7 +136,9 @@ Funciones:
 - **Sigue pendiente de antes**: contrastar las cúspides Placidus con Astro.com (Fase 3).
 
 ## Conexión con el proyecto real (11/10/2026)
+
 Hecho en `mdtgjgfeoudiyotgcxsy` (West EU, Postgres 17.11):
+
 - **Base de datos.** Contraseña regenerada desde el panel (generada por Supabase). `SUPABASE_DB_URL` (pooler de sesión `aws-0-eu-west-1`) está en `v2/.env.local`.
 - **Migraciones.** 9 aplicadas con `node scripts/db/migrate.mjs`, que las registra en `supabase_migrations.schema_migrations`, el mismo historial que usa la CLI.
 - **Lugares.** 236.041 y 91.636 alias cargados con `node scripts/places/import.mjs`.
@@ -147,6 +156,7 @@ Hecho en `mdtgjgfeoudiyotgcxsy` (West EU, Postgres 17.11):
 - **Smoke test local contra el proyecto real.** Las páginas públicas responden 200, `/app/**` redirige al login con `next` y la API privada devuelve 401.
 
 Pendiente (requiere al usuario):
+
 1. **SMTP propio**: sin él, Supabase solo envía correos a miembros del equipo y 2 por hora, así que los usuarios reales no recibirían la confirmación. Además, sin SMTP las plantillas no se pueden editar.
    - **Recomendado: Resend** (gratis 3.000/mes y 100/día). Servirá también para los emails de la Fase 7.
    - Necesita crear la cuenta y verificar el dominio `aibueno.es` con registros DNS.

@@ -11,12 +11,14 @@ Estado y decisiones en `v2/docs/PROMPT-CONTINUACION.md`.
 Actúa como Arquitecto de Software y experto integral en UX/UI, Motion Design, interacciones web, Frontend/Backend y Astrología.
 
 Proyecto: **Zodi**, app de astrología personal con IA en https://zodi.aibueno.es/ (Vercel). Repo `Ronegret/zodi-pwa`, local `C:\Users\rodri\Desktop\Zodi_Ultimate`.
+
 - Producción (raíz): Next.js 16 + Firebase + Stripe + IA multiproveedor. **No tocar** hasta la Fase 8.
 - Nueva versión: carpeta `v2/`, rama `astro-v2`. Astro + TypeScript estricto (islas React), Supabase (proyecto nuevo y limpio, sin migrar usuarios de Firebase), Three.js por escenas, cálculo astrológico real.
 - Referencia de diseño: dashboard de AEM Planner (`C:\Users\rodri\Desktop\AEM-Planner`; captura `RN_porfolio_2026\public\assets\aem\screens\desktop-dashboard.webp`): sidebar fija 264 px, topbar con título serif grande, rejilla bento de tarjetas, una paleta, radios grandes, sombra suave, botón flotante de asistente.
 - Todo en español (UI y copy). WCAG 2.2 AA obligatorio. Responsive móvil/tablet/escritorio, pixel perfect.
 
 Reglas de trabajo:
+
 - Rama `astro-v2`, commits pequeños por tarea, mensaje `feat(v2): …`. Sin push ni deploy sin mi confirmación.
 - Ejecuta y verifica antes de afirmar: `npm run check`, `npm run lint`, `npm test`, `npm run build`, `npm run test:e2e` (desde `v2/`). Si algo falla, muéstralo con su salida.
 - Versiones fijadas: TypeScript `~5.9`, ESLint `^9`. No registres `jsx-a11y` dos veces.
@@ -31,6 +33,7 @@ Reglas de trabajo:
 
 **Prompt:**
 Crea en `v2/` un proyecto Astro + TypeScript estricto desplegable en Vercel, sin tocar la app Next de la raíz.
+
 1. Rama `astro-v2`. Dependencias: `astro`, `@astrojs/react`, `@astrojs/vercel`, `@astrojs/check`, `react`, `react-dom`, `typescript@~5.9`, `three`; dev: tipos, `eslint@^9`, `@eslint/js@^9`, `typescript-eslint`, `eslint-plugin-astro`, `prettier` + plugin astro, `vitest`, `@playwright/test`, `@axe-core/playwright`.
 2. `astro.config.mjs`: `site`, `output: 'server'`, adaptador Vercel, React, prefetch, `security.checkOrigin`. `tsconfig` extiende `astro/tsconfigs/strictest` con alias `@/*`.
 3. Estructura: `src/{pages,layouts,components/ui,scenes,lib/astro-engine,lib/supabase,styles}`, `supabase/migrations`, `tests/{unit,e2e}`, `docs`.
@@ -47,6 +50,7 @@ Crea en `v2/` un proyecto Astro + TypeScript estricto desplegable en Vercel, sin
 
 **Prompt:**
 Implementa en `v2/src/lib/astro-engine/` un motor de carta natal con efemérides reales (dep `astronomy-engine`), puro y testeable, que sustituya el cálculo falso de `lib/astral.ts` de la app antigua (Luna y Ascendente salían de la longitud del nombre de la ciudad).
+
 1. API: `computeNatalChart({ date, time, timeZone, latitude, longitude, houseSystem? })` y `computeNatalChartAt(utc, lat, lon, system)`.
 2. Planetas (Sol…Plutón + nodo norte medio): longitud eclíptica tropical aparente de la fecha, signo/grado/minuto, retrogradación (diferencia de longitud ±6 h), casa.
 3. Ascendente y MC desde tiempo sidéreo aparente + oblicuidad verdadera. Casas Placidus por iteración (11/12 por arco diurno, 2/3 por arco nocturno, resto por oposición) y signos enteros; |lat| > 66° cae a signos enteros con `houseSystemNote`.
@@ -63,6 +67,7 @@ Implementa en `v2/src/lib/astro-engine/` un motor de carta natal con efemérides
 
 **Prompt:**
 Construye el backend de v2 sobre Supabase (proyecto nuevo y limpio) con seguridad real.
+
 1. **Esquema** en `v2/supabase/migrations/` (SQL versionado, idempotente donde proceda):
    - `profiles` (id = `auth.users.id`, nombre, usuario único, avatar, fecha/hora/lugar de nacimiento, lat/lon, `time_zone`, idioma `es|en|ca`, tono de lectura, temas favoritos, plan `free|premium|vip`, gems, xp, nivel, racha, referral).
    - `natal_charts` (user_id, input, JSON de la carta, versión del motor, `created_at`).
@@ -87,6 +92,7 @@ Construye el backend de v2 sobre Supabase (proyecto nuevo y limpio) con segurida
 
 **Prompt:**
 Lleva el shell de `v2` a producto: sistema de diseño, dashboard estilo AEM y onboarding con datos reales.
+
 1. **Tokens y componentes** (`src/components/ui/`): Button, Card, Badge/Chip, Tabs, Dialog (con trampa de foco y `Esc`), Tooltip, Toast con `aria-live`, Form fields (Input, Select, DatePicker, TimePicker), Skeleton, ProgressBar, Avatar, EmptyState. Estados hover/focus/active/disabled/loading en todos. Tipografía: display serif + cuerpo sans, escala fluida con `clamp`.
 2. **Dashboard** (`/app`): sidebar de secciones con iconos y `aria-current`, topbar con saludo y acciones, rejilla bento: "Hoy" (horóscopo + tránsito del día), "Tu carta" (resumen Sol/Luna/ASC), "Compatibilidad", "Racha y XP", "Rituales", gráfico de energía/biorritmo con KPIs y donut accesible (tablas alternativas `<table class="sr-only">`), botón flotante del asistente IA. Móvil: nav inferior; tablet: sidebar colapsada con iconos.
 3. **Onboarding** (`/app/onboarding`): pasos con barra de progreso y guardado parcial: nombre y usuario, fecha/hora de nacimiento, **ciudad con geocodificación** (Open-Meteo Geocoding, devuelve lat/lon y zona IANA; debounce, lista accesible `role="listbox"`), tono de lectura, temas, notificaciones. Al terminar calcula y guarda la carta con `astro-engine` y crea el perfil.
@@ -103,6 +109,7 @@ Lleva el shell de `v2` a producto: sistema de diseño, dashboard estilo AEM y on
 
 **Prompt:**
 Añade una capa de movimiento coherente y accesible a `v2`.
+
 1. **Sistema de movimiento**: tokens de duración/easing (`--dur`, `--ease`) y presets (entrada, salida, énfasis, resorte) en un único módulo `src/lib/motion/`. Todo respeta `prefers-reduced-motion` (animaciones esenciales reducidas a fundidos instantáneos, nada que parpadee más de 3 veces por segundo).
 2. **Transiciones de página**: View Transitions API de Astro con `transition:name` en elementos compartidos (título, tarjeta → detalle) y fallback sin animación.
 3. **Scroll**: smooth scroll (Lenis) y revelados al hacer scroll (GSAP ScrollTrigger o `animation-timeline: view()` con fallback). Parallax sutil solo en landing. No romper el foco ni la navegación con teclado; el scroll suave se desactiva con reduced-motion.
@@ -119,6 +126,7 @@ Añade una capa de movimiento coherente y accesible a `v2`.
 
 **Prompt:**
 Implementa la experiencia 3D lúdica de Zodi con Three.js, modular por escenas.
+
 1. **Arquitectura** `src/scenes/`: `core/` (renderer, loop con `requestAnimationFrame` pausado fuera de pantalla con `IntersectionObserver`, resize, DPR máximo 2, dispose completo de geometrías/materiales/texturas), `materials/toon.ts` (MeshToonMaterial con gradient map de 3–4 tonos), `effects/outline.ts` (`OutlineEffect` de `three/examples/jsm/effects`), `geometry/` (`RoundedBoxGeometry` de `three/examples/jsm/geometries`), y una carpeta por escena con interfaz común `{ mount(canvas), update(dt), dispose() }`.
 2. **Escenas**: (a) `hero` — constelación/zodiaco lúdico con signos como cajas redondeadas toon; (b) `natal-wheel` — rueda con planetas posicionados con los datos del motor (longitudes reales), rotación suave y foco al seleccionar un planeta; (c) `tarot` — cartas RoundedBox que se voltean; (d) `sign-of-day` — personaje/objeto del signo del día. Paleta tomada de los tokens CSS.
 3. **Carga perezosa**: `client:visible` en la isla, import dinámico de `three`, chunk aparte, fallback estático (imagen/SVG) mientras carga y cuando no hay WebGL o hay `prefers-reduced-motion`/ahorro de datos.
@@ -135,6 +143,7 @@ Implementa la experiencia 3D lúdica de Zodi con Three.js, modular por escenas.
 
 **Prompt:**
 Crea la exportación a PDF del perfil astrológico y las lecturas, con diseño editorial que se adapta a cada persona.
+
 1. **Pipeline**: ruta servidor `/api/pdf/[tipo]` (autenticada, con límite de uso) que renderiza una plantilla HTML/CSS de impresión (`@page`, CSS Paged Media) a PDF con Playwright/Chromium (o `@react-pdf/renderer` si Chromium no cabe en el plan de Vercel; justifica la elección). Resultado en streaming y opción de guardar en Supabase Storage con URL firmada.
 2. **Plantilla editorial**: portada por signo solar (color y motivo del signo, nombre, fecha/lugar de nacimiento), índice, secciones: resumen (Sol/Luna/ASC), rueda natal en **SVG generado** con las posiciones reales, tabla de planetas y casas, aspectos principales con interpretación, numerología/camino de vida, lectura personalizada de IA (tono elegido), recomendaciones. Cabeceras/pies con número de página, márgenes de sangrado, tipografías embebidas, cuidado de viudas/huérfanas y saltos de página.
 3. **Adaptación a datos**: la maquetación cambia según los datos (signo → paleta/ornamento, número de aspectos → una o dos columnas, ausencia de hora de nacimiento → omite casas/ASC y lo explica, idioma es/en/ca).
@@ -150,6 +159,7 @@ Crea la exportación a PDF del perfil astrológico y las lecturas, con diseño e
 
 **Prompt:**
 Lleva a v2 la paridad funcional con la app Next antigua, reescribiendo en módulos pequeños (nada de ficheros de miles de líneas). Referencias: `components/dashboard/SectionSpecificUI.tsx`, `lib/ai/prompts.ts`, `lib/ai/personalization.ts`, `lib/ai/providers.ts`, `lib/dashboard-sections.ts`, `app/api/**`.
+
 1. **Lecturas IA** (19 `ReadingKind`): un servicio `src/lib/ai/` con prompts por tipo, personalización por perfil/carta real y tono; proveedor principal Claude (modelo configurable por variable), con respaldo opcional; streaming; guardado en `readings`; límites por plan. Los datos astrológicos del prompt salen del `astro-engine`, no de la IA.
 2. **Horóscopos** diario/semanal/mensual y **SEO por signo** (`/horoscopo/[signo]`, `/horoscopo-diario/[sign]`): páginas SSR/ISR con metadatos, JSON-LD, `sitemap.xml`, `robots.txt`.
 3. **Secciones del dashboard**: tarot (simple y celta), compatibilidad (sinastría con dos cartas reales), sueños, tránsitos (calculados con el motor), numerología, nombre, palma, biorritmo (fórmula real: ciclos 23/28/33 días desde el nacimiento), horóscopo chino (con Año Nuevo Lunar correcto) y maya, runas, cristales, roast, asistente.
@@ -167,6 +177,7 @@ Lleva a v2 la paridad funcional con la app Next antigua, reescribiendo en módul
 
 **Prompt:**
 Prepara y ejecuta el lanzamiento de v2 en `zodi.aibueno.es`.
+
 1. **Calidad**: Lighthouse móvil y escritorio ≥ 95 en Rendimiento, Accesibilidad, Buenas prácticas y SEO en landing, dashboard y una escena 3D; Core Web Vitals en verde (LCP < 2,5 s, INP < 200 ms, CLS < 0,1). axe 0 violaciones en mobile/tablet/desktop; prueba manual con NVDA/VoiceOver, navegación solo teclado y zoom 200 %.
 2. **Seguridad**: revisión de RLS, de claves expuestas (grep de secretos), CSP sin `unsafe-inline` si es posible, dependencias (`npm audit`), rate limiting, cookies `Secure/HttpOnly/SameSite`, política de privacidad/cookies/RGPD y borrado de cuenta que elimina datos de verdad.
 3. **Infra**: proyecto de Vercel para `v2/` (Root Directory `v2`), variables de entorno de producción, previews por PR, monitor (Vercel Analytics/Speed Insights), backups de Supabase.

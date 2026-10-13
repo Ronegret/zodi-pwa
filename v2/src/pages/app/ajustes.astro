@@ -392,7 +392,7 @@ const planLabel = { free: 'Gratis', premium: 'Premium', vip: 'VIP' }[profile.pla
           </div>
           <div>
             <dt>Zona horaria</dt>
-            <dd>{profile.time_zone?.replace('_', ' ') ?? '—'}</dd>
+            <dd>{(stored?.input.timeZone ?? profile.time_zone)?.replace('_', ' ') ?? '—'}</dd>
           </div>
           {stored && (
             <div>

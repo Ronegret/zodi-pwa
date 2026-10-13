@@ -7,6 +7,7 @@
 import AppShell from '@/layouts/AppShell.astro';
 import Button from '@/components/ui/Button.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
+import Meteors from '@/components/fx/Meteors.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { bestAndWorst } from '@/lib/knowledge';
 import { buildReport } from '@/lib/report/build';
@@ -59,11 +60,14 @@ const SECTIONS = [
     </EmptyState>
   ) : (
     <>
-      <section class="hero card" aria-labelledby="informe">
+      <section class="hero card fx-host fx-beam" aria-labelledby="informe">
+        <Meteors count={12} />
         <img src={art} alt="" width="640" height="640" />
         <div>
           <p class="kicker">Para llevarte (o presumir)</p>
-          <h2 id="informe">Tu informe cósmico en PDF</h2>
+          <h2 id="informe">
+            Tu informe <span class="fx-shiny">cósmico</span> en PDF
+          </h2>
           <p>
             Todo en un documento bonito: tu carta, el día que naciste, tus números, tu animal chino,
             tu nombre, con quién encajas y tu gente. Con portada, marca de agua y humor incluido.

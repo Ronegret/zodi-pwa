@@ -278,6 +278,33 @@ describe('stream de una lectura', () => {
   });
 });
 
+describe('la hora de la consulta', () => {
+  const at = (timeZone: string, iso: string) =>
+    buildReadingContext(
+      { ...PROFILE, time_zone: timeZone },
+      { chart: FIXTURE.chart, timeKnown: true },
+      new Date(iso),
+    ).text;
+
+  it('las 9:00 de Madrid son por la mañana, no de madrugada', () => {
+    // 7:00 UTC = 9:00 en Madrid (verano) = 4:00 en Santiago de Chile.
+    expect(at('Europe/Madrid', '2026-10-13T07:00:00Z')).toContain('consulta por la mañana');
+    expect(at('Europe/Madrid', '2026-10-13T07:00:00Z')).not.toContain('madrugada');
+    // Con la zona equivocada (la de nacimiento) pasaba esto: por eso se sincroniza la actual.
+    expect(at('America/Santiago', '2026-10-13T07:00:00Z')).toContain('de madrugada');
+  });
+
+  it('la jerga sigue al país donde vive, no al de nacimiento', () => {
+    expect(at('Europe/Madrid', '2026-10-13T07:00:00Z')).toContain('Vive en: España');
+    expect(at('America/Santiago', '2026-10-13T07:00:00Z')).toContain('Vive en: Chile');
+    expect(ZODI_SYSTEM).toMatch(/donde VIVE la persona/);
+  });
+
+  it('ZODI tiene prohibido comentar la hora', () => {
+    expect(ZODI_SYSTEM).toMatch(/Comentar la hora del día/);
+  });
+});
+
 describe('ahorro de tokens', () => {
   it('Haiku sin razonamiento; Sonnet sin pensar antes y con esfuerzo bajo', () => {
     expect(costParams('claude-haiku-5-5')).toEqual({ thinking: { type: 'disabled' } });

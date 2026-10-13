@@ -31,7 +31,8 @@ export default defineConfig({
   // El servidor de desarrollo compila en frío y con tres proyectos a la vez va justo.
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  use: { baseURL: APP_URL },
+  // Misma zona en tu máquina y en CI: la web sincroniza la zona del perfil con la del navegador.
+  use: { baseURL: APP_URL, timezoneId: 'Europe/Madrid' },
   // En CI, un segundo intento absorbe los fallos puntuales por carga (sin avisos falsos).
   retries: process.env.CI ? 1 : 0,
   projects: [

@@ -3,6 +3,7 @@
 Rama `astro-v2`. Commits al final de este documento.
 
 ## Hecho
+
 - **Arquitectura** en `src/scenes/`:
   - `core/`:
     - `stage.ts`: renderer, contorno, tamaño con ResizeObserver y DPR ≤ 2. Destruye el contexto WebGL al desmontar.
@@ -39,27 +40,29 @@ Rama `astro-v2`. Commits al final de este documento.
   - El canvas usa `touch-action: pan-y` para no atrapar el scroll.
 
 ## Verificado (desde `v2/`)
-| Comando | Resultado |
-|---|---|
-| `npm run check` | 0 errores (143 ficheros) |
-| `npm run lint` | limpio |
-| `npm test` | **155/155**. 21 nuevos: geometría de escenas (también contra three), paleta = tokens.css, carta del día. |
-| `npm run build` | OK. Portada compilada: CSP sin `unsafe-inline`, 0 `style=""`, isla con sus 12 controles en el HTML y three fuera del HTML inicial. |
-| `npm run test:e2e` | **139/139** en los tres tamaños (2 omitidos por diseño), 3 ejecuciones completas seguidas en verde. |
+
+| Comando            | Resultado                                                                                                                          |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run check`    | 0 errores (143 ficheros)                                                                                                           |
+| `npm run lint`     | limpio                                                                                                                             |
+| `npm test`         | **155/155**. 21 nuevos: geometría de escenas (también contra three), paleta = tokens.css, carta del día.                           |
+| `npm run build`    | OK. Portada compilada: CSP sin `unsafe-inline`, 0 `style=""`, isla con sus 12 controles en el HTML y three fuera del HTML inicial. |
+| `npm run test:e2e` | **139/139** en los tres tamaños (2 omitidos por diseño), 3 ejecuciones completas seguidas en verde.                                |
 
 Presupuesto medido con `renderer.info`, frame completo con las dos pasadas del contorno, a 1280 px:
 
-| Escena | Draw calls (≤ 150) | Triángulos | Texturas |
-|---|---|---|---|
-| hero | 40 | 23,5 k | 13 (glifos de 256²) |
-| tarot | 4 | 1,9 k | 3 (cara de 512×820) |
-| natal-wheel | 86 | 47,5 k | 24 (256²) |
-| sign-of-day | 7 | 14 k | 2 |
+| Escena      | Draw calls (≤ 150) | Triángulos | Texturas            |
+| ----------- | ------------------ | ---------- | ------------------- |
+| hero        | 40                 | 23,5 k     | 13 (glifos de 256²) |
+| tarot       | 4                  | 1,9 k      | 3 (cara de 512×820) |
+| natal-wheel | 86                 | 47,5 k     | 24 (256²)           |
+| sign-of-day | 7                  | 14 k       | 2                   |
 
 - **JS de la escena** (gzip): three tree-shaken más el código compartido suman 134,5 kB. Cada escena añade entre 1,1 y 1,5 kB y cada isla entre 0,6 y 1,3 kB. La escena más pesada cuesta unos 137 kB, por debajo del límite de 250 kB.
 - Las islas no importan three de forma estática: se carga con `import()` al montar.
 
 Qué cubren los e2e (`tests/e2e/scenes.spec.ts`):
+
 - Las 4 escenas llegan a "lista" y están dentro de presupuesto.
 - La pausa usa `aria-pressed`.
 - Signos y planetas se eligen con teclado y se anuncian.
@@ -71,6 +74,7 @@ Qué cubren los e2e (`tests/e2e/scenes.spec.ts`):
 - El foco se conserva aunque la isla hidrate con un control enfocado.
 
 ## Errores encontrados y corregidos
+
 - `.scene-fallback { display: grid }` anulaba el atributo `hidden`, así que la imagen tapaba el canvas. Se añadió `[hidden] { display: none }`.
 - Al remontar se reutilizaba un canvas con el contexto ya liberado (`forceContextLoss`) y three fallaba con `precision of null`. Ahora el canvas lleva `key` por generación.
 - Los controles que solo se pintaban tras hidratar hacían perder el foco (la carta del día cambiaba `<details>` por `<button>`) y movían el diseño. Ahora vienen del servidor y se ocultan sin JS.
@@ -81,6 +85,7 @@ Qué cubren los e2e (`tests/e2e/scenes.spec.ts`):
 - E2e intermitente del recorrido con Tab: con el servidor de dev en frío el HTML llega por partes y el test pulsaba Tab antes de que llegara el final. Ahora espera a `load`. En producción no ocurre porque no se compila nada al vuelo.
 
 ## Riesgos y pendientes
+
 - **60 fps en móvil medio:** no se ha medido en dispositivo real. En headless (SwiftShader, CPU) hay 60 fps en todas las escenas salvo la rueda natal en el perfil móvil (≈ 47). Medir en un Android de gama media en la Fase 8 y, si hace falta, bajar DPR o segmentos de RoundedBox en esa escena.
 - **Instancing:** solo en las chispas. Las cajas de signos y planetas son mallas sueltas porque OutlineEffect no contornea bien `InstancedMesh`. Aun así están muy por debajo del límite de draw calls.
 - **Giroscopio:** no implementado (era opcional). Solo hay parallax por puntero.
@@ -89,6 +94,7 @@ Qué cubren los e2e (`tests/e2e/scenes.spec.ts`):
 - **Antes de hidratar** (unos ms con `client:load` o `client:visible`), pulsar un control no hace nada.
 
 ## Despliegue (11/10/2026)
+
 - `astro-v2` subido a GitHub (`Ronegret/zodi-pwa`).
 - En Vercel, el proyecto existente `zodi-pwa` crea un preview de Next para cada push a `astro-v2` (último en estado Ready). Producción (`main`) no se ha tocado.
 - Nuevo proyecto de Vercel **`zodi-v2`** para la v2, que ya importa el repositorio:
@@ -108,11 +114,14 @@ Qué cubren los e2e (`tests/e2e/scenes.spec.ts`):
 - **Variables de entorno en `zodi-v2`:** `PUBLIC_SUPABASE_URL` (la puse yo) y las dos claves (las pegó Rodrigo). Están las tres.
 
 ## Cambio de dominio a la v2 (decisión de Rodrigo, 11/10/2026)
+
 Rodrigo decidió servir ya la v2 en `zodi.aibueno.es`, antes de la Fase 8, sabiendo que:
+
 - faltan las lecturas con IA, Stripe y gemas, la comunidad y los emails (Fase 7);
 - los usuarios de Firebase no se migran.
 
 **Preparado en el código:**
+
 - Páginas legales `/legal/privacidad` y `/legal/terminos`, con el mismo texto que la app actual y enlazadas desde la portada y las pantallas de acceso.
 - Redirecciones desde las rutas antiguas:
   - `/auth/register` → `/auth/registro`
@@ -123,6 +132,7 @@ Rodrigo decidió servir ya la v2 en `zodi.aibueno.es`, antes de la Fase 8, sabie
 - `public/sw.js` y `public/firebase-messaging-sw.js` de retirada. Quien tenga instalada la PWA anterior recibe estos workers: borran sus cachés, se desinstalan y recargan la página.
 
 **Supabase Auth:**
+
 - Site URL: `https://zodi.aibueno.es`.
 - Redirect URLs: `localhost:4321`, `zodi.aibueno.es` y `zodi-v2.vercel.app`.
 - **Confirmación por correo desactivada** de forma temporal. Sin SMTP propio, Supabase solo envía 2 correos por hora y solo a miembros del equipo. **Volver a activarla** cuando Resend esté verificado.
@@ -130,6 +140,7 @@ Rodrigo decidió servir ya la v2 en `zodi.aibueno.es`, antes de la Fase 8, sabie
 **El cambio:** el dominio pasa del proyecto `zodi-pwa` al `zodi-v2` dentro de Vercel. El DNS de Hostinger no cambia (`zodi` sigue siendo CNAME a `cname.vercel-dns.com`). Para deshacerlo, se devuelve el dominio a `zodi-pwa`.
 
 **Pendiente tras el cambio:**
+
 - Los webhooks de Stripe apuntan a la API de la app anterior: habrá que revisarlos en la Fase 7.
 - **Resend:** el dominio `zodi.aibueno.es` está creado en la región de Irlanda. Faltan sus 3 registros DNS en Hostinger, que no se pudieron añadir desde el navegador con la ventana oculta:
   - CNAME `send.zodi` → `send.forge.rmta.net`
@@ -137,6 +148,7 @@ Rodrigo decidió servir ya la v2 en `zodi.aibueno.es`, antes de la Fase 8, sabie
   - TXT `resend._domainkey.zodi` → la clave DKIM que muestra Resend
 
   Después: verificar el dominio, conectar Resend con Supabase desde la integración de Resend y volver a activar la confirmación por correo.
+
 - **Google OAuth:**
   - En `zodi-2`, añadir el dominio autorizado `mdtgjgfeoudiyotgcxsy.supabase.co` y el email de contacto del desarrollador.
   - Crear el cliente web con el callback `https://mdtgjgfeoudiyotgcxsy.supabase.co/auth/v1/callback`.

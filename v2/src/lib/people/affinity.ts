@@ -8,7 +8,7 @@
 import { computeNatalChart } from '@/lib/astro-engine';
 import { elementOf, type Element } from '@/lib/astro-engine/labels';
 import { skyAt } from '@/lib/astro-engine/sky';
-import { SIGNS, type PlanetId, type Sign } from '@/lib/astro-engine/types';
+import { SIGNS, type NatalChart, type PlanetId, type Sign } from '@/lib/astro-engine/types';
 import { CHINESE_ANIMALS, chineseZodiac, lifePathNumber } from '@/lib/ai/numerology';
 import { biorhythmOn, daysBetween } from '@/lib/daily/biorhythm';
 import type { Relation } from './relations';
@@ -32,6 +32,31 @@ export interface PersonSky {
  * Sin lugar de nacimiento los planetas salen igual (las casas no). Sin hora se
  * mira la Luna al empezar y al acabar el día: si no cambió de signo, es fiable.
  */
+/**
+ * Tu propio cielo, sacado de tu carta guardada (con tu hora y tu zona de
+ * nacimiento reales). Sin carta o sin hora, se calcula como el de cualquier
+ * persona: la zona del perfil es la ACTUAL, no la de nacimiento.
+ */
+export function mySky(
+  chart: NatalChart | null | undefined,
+  timeKnown: boolean | undefined,
+  birthDate: string,
+  fallbackTimeZone: string,
+): PersonSky {
+  if (chart && timeKnown) {
+    const sign = (id: PlanetId) => chart.planets.find((p) => p.id === id)!.sign;
+    return {
+      sun: sign('sun'),
+      moon: sign('moon'),
+      moonOptions: [sign('moon')],
+      mercury: sign('mercury'),
+      venus: sign('venus'),
+      mars: sign('mars'),
+    };
+  }
+  return personSky(birthDate, null, fallbackTimeZone);
+}
+
 export function personSky(
   birthDate: string,
   birthTime: string | null,

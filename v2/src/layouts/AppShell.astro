@@ -72,7 +72,7 @@ const today = new Intl.DateTimeFormat('es-ES', {
 ---
 
 <Base title={title}>
-  <div class="shell">
+  <div class="shell" data-tz={profile?.time_zone ?? 'Europe/Madrid'}>
     {/* La hoja "Más" va antes que su botón: con el HTML en streaming, el botón nunca
         apunta a algo que aún no ha llegado. Al ser popover, se pinta en la capa superior. */}
     <div id="mas-menu" class="more-sheet" popover>
@@ -210,6 +210,11 @@ const today = new Intl.DateTimeFormat('es-ES', {
     <WelcomeSplash />
   </div>
 </Base>
+
+<script>
+  import { syncTimeZone } from '@/lib/timezone-sync';
+  syncTimeZone(document.querySelector<HTMLElement>('[data-tz]'));
+</script>
 
 <style>
   .shell {

@@ -3,6 +3,7 @@
 Commits en `astro-v2`: `e7b2d38` (sistema), `cc53103` (interfaz), `1d42c73` (tests). Sin push.
 
 ## Hecho
+
 - **Sistema de movimiento** (`src/lib/motion/`):
   - `tokens.ts` con duraciones (160/320/640 ms) y easings: out, in, inOut y resorte con `linear()`. Son los mismos valores que las variables CSS `--dur-*` y `--ease-*`; un test comprueba que no se desincronizan.
   - Presets `enter`, `exit`, `emphasis` y `spring`, que solo animan transform y opacity, y `play()`.
@@ -35,15 +36,17 @@ Commits en `astro-v2`: `e7b2d38` (sistema), `cc53103` (interfaz), `1d42c73` (tes
   - Se precargan Syne y Plus Jakarta Sans (latin): el cambio de fuente provocaba un CLS de 0,18 en el dashboard.
 
 ## Verificado (desde `v2/`)
-| Comando | Resultado |
-|---|---|
-| `npm run check` | 0 errores (114 ficheros) |
-| `npm run lint` | limpio |
-| `npm test` | **134/134** (7 nuevos de movimiento) |
-| `npm run build` | OK. CSP sin `unsafe-inline` y sin `style=""` en el HTML. |
+
+| Comando            | Resultado                                                |
+| ------------------ | -------------------------------------------------------- |
+| `npm run check`    | 0 errores (114 ficheros)                                 |
+| `npm run lint`     | limpio                                                   |
+| `npm test`         | **134/134** (7 nuevos de movimiento)                     |
+| `npm run build`    | OK. CSP sin `unsafe-inline` y sin `style=""` en el HTML. |
 | `npm run test:e2e` | **106/106** en los tres tamaños (2 omitidos por diseño). |
 
 Qué cubren los e2e:
+
 - **Con `reducedMotion: 'reduce'`:** ninguna animación en marcha, sin Lenis, sin confeti, el contador muestra el valor final desde el principio y los revelados no desplazan nada.
 - **Con movimiento:** Lenis activo, el contador llega a su valor y los revelados terminan en su sitio.
 - **Confeti:** aparece al llegar tras el onboarding y se retira solo.
@@ -54,6 +57,7 @@ Qué cubren los e2e:
 - **Accesibilidad:** axe sigue sin violaciones en todas las páginas.
 
 ## Riesgos y pendientes
+
 - **Lighthouse** queda para la Fase 8, sobre un preview de Vercel. El adaptador no admite `astro preview` y medir sobre `astro dev` no es representativo. Por ahora CLS e INP se miden con PerformanceObserver en Playwright.
 - **Preferencia de movimiento de Ajustes:** el script de la página es un módulo diferido, así que en la primera pintura puede verse un instante de animación aunque se haya elegido reducir. La preferencia del sistema no tiene este problema porque va por CSS.
 - **Revelados y título compartido** dependen de navegadores modernos (`animation-timeline`, View Transitions entre documentos). En Firefox y Safari antiguos no hay animación, que es el comportamiento de respaldo previsto.

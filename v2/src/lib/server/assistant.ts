@@ -10,6 +10,7 @@ import { buildReadingContext, type ProfileForReading } from '@/lib/ai/context';
 import { TONES, ZODI_CHAT_MODE, ZODI_VOICE } from '@/lib/ai/prompts';
 import { oracleSnippet } from '@/lib/knowledge';
 import { chineseZodiac, lifePathNumber } from '@/lib/ai/numerology';
+import { mySky } from '@/lib/people/affinity';
 import { peopleContext } from '@/lib/people/context';
 import type { Person } from './people';
 import type { PreparedReading } from './readings';
@@ -43,7 +44,19 @@ export function prepareChat(
   people: Person[] = [],
 ): PreparedReading {
   const context = buildReadingContext(profile, stored, now);
-  const gente = peopleContext(people, profile, now);
+  const gente = peopleContext(
+    people,
+    profile,
+    now,
+    stored && profile.birth_date
+      ? mySky(
+          stored.chart,
+          stored.timeKnown,
+          profile.birth_date,
+          profile.time_zone ?? 'Europe/Madrid',
+        )
+      : undefined,
+  );
   // Fragmento de la base de conocimiento (número, animal chino y compatibilidades del Sol).
   const sunSign = stored?.chart.planets.find((p) => p.id === 'sun')?.sign;
   const saber =

@@ -11,7 +11,7 @@ import { todayFor } from '@/lib/ai/context';
 import { chineseZodiac, lifePathNumber } from '@/lib/ai/numerology';
 import { numberImage } from '@/lib/chart/meaning';
 import { LIFE_PATH } from '@/lib/chart/texts';
-import { personSky } from '@/lib/people/affinity';
+import { mySky } from '@/lib/people/affinity';
 import { RELATIONS } from '@/lib/people/relations';
 import { birthdayLabel, personView, signAvatar } from '@/lib/people/view';
 import { SIGN_INFO } from '@/lib/public/signs';
@@ -40,7 +40,7 @@ const myBirth = stored?.input.date ?? profile.birth_date;
 if (!myBirth) return Astro.redirect('/app/gente', 303);
 const me = {
   birthDate: myBirth,
-  sky: personSky(myBirth, stored?.input.timeKnown ? stored.input.time : null, tz),
+  sky: mySky(stored?.chart, stored?.input.timeKnown, myBirth, tz),
 };
 const x = personView(person, me, { timeZone: tz, today, now });
 const info = SIGN_INFO.find((s) => s.name === x.sky.sun)!;

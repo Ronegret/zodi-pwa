@@ -11,7 +11,7 @@ import Field from '@/components/ui/Field.astro';
 import Icon from '@/components/ui/Icon.astro';
 import SelectField from '@/components/ui/SelectField.astro';
 import { todayFor } from '@/lib/ai/context';
-import { personSky } from '@/lib/people/affinity';
+import { mySky } from '@/lib/people/affinity';
 import { RELATION_IDS, RELATIONS } from '@/lib/people/relations';
 import { birthdayLabel, personView } from '@/lib/people/view';
 import { getLatestSelfChart } from '@/lib/server/charts';
@@ -55,7 +55,7 @@ const myBirth = stored?.input.date ?? profile.birth_date;
 const me = myBirth
   ? {
       birthDate: myBirth,
-      sky: personSky(myBirth, stored?.input.timeKnown ? stored.input.time : null, tz),
+      sky: mySky(stored?.chart, stored?.input.timeKnown, myBirth, tz),
     }
   : null;
 const views = me ? people.map((p) => personView(p, me, { timeZone: tz, today, now })) : [];

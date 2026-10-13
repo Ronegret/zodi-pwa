@@ -6,6 +6,7 @@
  */
 import Base from '@/layouts/Base.astro';
 import Button from '@/components/ui/Button.astro';
+import Meteors from '@/components/fx/Meteors.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import AmbientVideo from '@/components/media/AmbientVideo.astro';
 import SongButton from '@/components/media/SongButton.astro';
@@ -129,7 +130,8 @@ const FAQ = [
     </nav>
   </header>
   <main id="main">
-    <div class="hero" data-cursor-glow>
+    <div class="hero fx-host" data-cursor-glow>
+      <Meteors />
       <div class="copy">
         <p class="kicker">Astrología con carácter</p>
         <h1>

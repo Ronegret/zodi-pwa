@@ -14,7 +14,7 @@ import { birthDay, type BirthDay } from '@/lib/chart/birth-day';
 import { chartMeaning, type MeaningSection } from '@/lib/chart/meaning';
 import { chineseKnowledge, numberKnowledge } from '@/lib/knowledge';
 import { nameMeaning, type NamePart } from '@/lib/names/meaning';
-import { personSky } from '@/lib/people/affinity';
+import { mySky } from '@/lib/people/affinity';
 import { personView, type PersonView } from '@/lib/people/view';
 import { birthCard } from '@/lib/public/teaser';
 import { getLatestSelfChart, type StoredChart } from '@/lib/server/charts';
@@ -95,8 +95,7 @@ export async function buildReport(opts: BuildOptions): Promise<PersonalReport | 
     );
   }
 
-  const myTime = timeKnown ? stored.input.time : null;
-  const me = { birthDate, sky: personSky(birthDate, myTime, timeZone) };
+  const me = { birthDate, sky: mySky(chart, timeKnown, birthDate, timeZone) };
   const people = (await listPeople(supabase).catch(() => [])).map((p) =>
     personView(p, me, { timeZone, today, now }),
   );

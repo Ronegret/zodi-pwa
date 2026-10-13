@@ -7,6 +7,7 @@ Prioridad marcada por Rodrigo: **lecturas con IA y comunidad**, mucho mejor que 
 ## Hecho
 
 ### Lecturas con IA (`src/lib/ai/`, `src/lib/server/readings.ts`)
+
 - **Contexto real por persona** (`context.ts`), calculado de verdad. En la app anterior la Luna y el Ascendente eran pseudoaleatorios. Incluye:
   - carta natal con efemérides: Sol, Luna, Ascendente y Medio Cielo (solo si hay hora), el resto de planetas, elemento dominante y aspectos fuertes;
   - tránsitos de hoy a su carta, Luna del día y retrógrados;
@@ -42,6 +43,7 @@ Prioridad marcada por Rodrigo: **lecturas con IA y comunidad**, mucho mejor que 
   - Cada respuesta cuenta como una lectura.
 
 ### Comunidad (`/app/comunidad`)
+
 - **Migración `20261012110000_community_v2.sql`**, aplicada al Supabase real y verificada con `node scripts/db/verify-community.mjs`:
   - temas en los posts;
   - reacciones (🔥 ✨ 💀 💜) con RLS;
@@ -59,25 +61,29 @@ Prioridad marcada por Rodrigo: **lecturas con IA y comunidad**, mucho mejor que 
 - El autor del post modera los comentarios de su post (lo hace la RLS).
 
 ### Navegación
+
 - El menú pasa a: Inicio · Lecturas · Comunidad · Carta · Horóscopo · Match · Ajustes.
 - En la barra inferior del móvil van 5 (Horóscopo y Match se abren desde Lecturas).
 - Página 404 con estilo Zodi.
 
 ## Verificado (desde `v2/`)
-| Comando | Resultado |
-|---|---|
-| `npm run check` | 0 errores |
-| `npm run lint` | limpio |
-| `npm test` | **182/182**, incluidos 42 de RLS con la migración nueva, reaplicada dos veces. |
-| `npm run build` | OK. Función compilada probada aislada con `node --no-experimental-detect-module`: el SDK de Anthropic carga bien. |
-| `npm run test:e2e` | **211/211** en los 3 tamaños (2 omitidos por diseño), 3 ejecuciones seguidas. |
+
+| Comando            | Resultado                                                                                                         |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `npm run check`    | 0 errores                                                                                                         |
+| `npm run lint`     | limpio                                                                                                            |
+| `npm test`         | **182/182**, incluidos 42 de RLS con la migración nueva, reaplicada dos veces.                                    |
+| `npm run build`    | OK. Función compilada probada aislada con `node --no-experimental-detect-module`: el SDK de Anthropic carga bien. |
+| `npm run test:e2e` | **211/211** en los 3 tamaños (2 omitidos por diseño), 3 ejecuciones seguidas.                                     |
 
 **Cómo se prueba la IA en los e2e:** no se llama a la IA real. El servidor falso responde en `/v1/messages` como Anthropic, en streaming SSE, y repite el nombre y las cartas que recibe. Así los tests comprueban que:
+
 - el prompt lleva los datos de la persona;
 - el system prompt va cacheado;
 - las cartas que interpreta la IA son las que se tiraron.
 
 ## Estado del pendiente (12/10/2026)
+
 - `ANTHROPIC_API_KEY`: puesta por Rodrigo en Vercel y en `v2/.env.local`. ✅
 - Horóscopos públicos por signo (SEO): hechos en la Fase 8B (`/horoscopo/[signo]`). ✅
 - Moderación: hecha (`/app/moderacion`, migración `moderation`, `scripts/db/make-moderator.mjs`; Rodrigo es moderador). ✅
