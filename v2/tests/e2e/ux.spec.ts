@@ -30,7 +30,7 @@ test.describe('primera vez y cuenta', () => {
     await login(page, await createTestUser(request, true));
     await page.goto('/app/ajustes#sobre-ti');
     await page.getByLabel('Situación sentimental').selectOption('complicated');
-    await page.getByLabel(/Nombre de tu pareja/).fill('Leo');
+    await page.getByLabel('Su nombre').fill('Leo');
     await page.getByRole('radio', { name: 'Sí' }).check();
     await page.getByLabel('¿Cuántos?').fill('2');
     await page.getByLabel('Cuéntale a ZODI de ti').fill('Trabajo en diseño y no duermo.');
@@ -38,9 +38,9 @@ test.describe('primera vez y cuenta', () => {
     await expect(page).toHaveURL(/guardado=1/);
     await expect(page.getByLabel('Situación sentimental')).toHaveValue('complicated');
     await expect(page.getByLabel('¿Cuántos?')).toHaveValue('2');
-    await page.getByLabel(/Nombre de tu pareja/).fill('');
+    await page.getByLabel('Su nombre').fill('');
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
-    await expect(page.getByLabel(/Nombre de tu pareja/)).toHaveValue('');
+    await expect(page.getByLabel('Su nombre')).toHaveValue('');
     // El tono enseña un ejemplo de cómo habla ZODI.
     await expect(page.getByText(/Mercurio no tiene la culpa/)).toBeVisible();
     await expectNoViolations(page);
@@ -232,6 +232,46 @@ test.describe('móvil: barra inferior y hoja Más', () => {
     await bar.getByRole('button', { name: 'Más' }).click();
     await more.getByRole('link', { name: 'Ajustes' }).click();
     await expect(page).toHaveURL(/\/app\/ajustes$/);
+  });
+});
+
+test.describe('sobre ti: pareja e hijos a tu gente', () => {
+  test('los campos aparecen cuando tocan y pasan a Tu gente con favoritos', async ({
+    page,
+    request,
+  }) => {
+    await login(page, await createTestUser(request, true));
+    await page.goto('/app/ajustes#sobre-ti');
+    const partnerDate = page.getByLabel('Su fecha de nacimiento');
+    // Con "Prefiero no decirlo" no se pregunta nada más.
+    await expect(partnerDate).toBeHidden();
+    await expect(page.getByLabel('Hijo/a 1: nombre')).toBeHidden();
+    await page.getByLabel('Situación sentimental').selectOption('relationship');
+    await expect(partnerDate).toBeVisible();
+    await page.getByLabel('Su nombre').fill('Leo');
+    await partnerDate.fill('1992-08-03');
+    await page.getByRole('radio', { name: 'Sí' }).check();
+    await page.getByLabel('Hijo/a 1: nombre').fill('Lía');
+    await page.getByLabel('Hijo/a 1: fecha de nacimiento').fill('2015-03-01');
+    await expectNoViolations(page);
+    await page.getByRole('button', { name: 'Guardar cambios' }).click();
+    await expect(page).toHaveURL(/guardado=1/);
+    // Vuelven rellenos.
+    await expect(page.getByLabel('Su fecha de nacimiento')).toHaveValue('1992-08-03');
+
+    await page.goto('/app/gente');
+    const list = page.getByRole('list').filter({ has: page.getByRole('link', { name: 'Leo' }) });
+    await expect(list.getByRole('link', { name: 'Leo' })).toBeVisible();
+    await expect(list.getByRole('link', { name: 'Lía' })).toBeVisible();
+    await expect(page.getByText(/Hijo\/a · Piscis/)).toBeVisible();
+    // ⭐ La hija, favorita: pasa a ser la primera.
+    await page.getByRole('button', { name: 'Favorita: Lía' }).click();
+    await expect(page.getByRole('button', { name: 'Favorita: Lía' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(page.locator('.person h3').first()).toHaveText('Lía');
+    await expectNoViolations(page);
   });
 });
 

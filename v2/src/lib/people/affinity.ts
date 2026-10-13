@@ -408,6 +408,11 @@ const TIPS: Record<Relation, Record<DayWith['tone'], string>> = {
     normal: 'Un detalle pequeño hoy luce más que uno grande otro día.',
     cuidado: 'Hoy no es día de discutir lo importante: escucha primero.',
   },
+  hijo: {
+    fluye: 'Buen día para un plan juntos: hoy os entendéis a la primera.',
+    normal: 'Pregúntale cómo le fue de verdad, y escucha la respuesta entera.',
+    cuidado: 'Hoy las normas, con calma: más ejemplo y menos sermón.',
+  },
   familia: {
     fluye: 'Buen día para llamar, quedar o pedir ese favor.',
     normal: 'Un mensaje corto basta para que se sienta en tu radar.',

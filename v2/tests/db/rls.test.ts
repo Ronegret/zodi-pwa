@@ -796,3 +796,19 @@ describe('registro de nombres', () => {
     await denied(B, 'select id from public.name_lookups');
   });
 });
+
+describe('tu gente: favoritos e hijos', () => {
+  it('se marca favorito y "hijo" es una relación válida; solo en lo propio', async () => {
+    const [kid] = await q<{ id: string }>(
+      A,
+      `insert into public.people (name, relation, birth_date) values ('Lía', 'hijo', '2015-03-01') returning id`,
+    );
+    await q(A, `update public.people set favorite = true where id = $1`, [kid!.id]);
+    expect(await q(A, `select favorite from public.people where id = $1`, [kid!.id])).toEqual([
+      { favorite: true },
+    ]);
+    expect(
+      await q(B, `update public.people set favorite = false where id = $1 returning id`, [kid!.id]),
+    ).toEqual([]);
+  });
+});

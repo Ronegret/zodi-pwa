@@ -15,7 +15,7 @@ import { personSky } from '@/lib/people/affinity';
 import { RELATION_IDS, RELATIONS } from '@/lib/people/relations';
 import { birthdayLabel, personView } from '@/lib/people/view';
 import { getLatestSelfChart } from '@/lib/server/charts';
-import { addPerson, listPeople } from '@/lib/server/people';
+import { addPerson, listPeople, setFavorite } from '@/lib/server/people';
 import { fieldErrors, formToObject } from '@/lib/validation/common';
 import { personSchema } from '@/lib/validation/people';
 
@@ -26,6 +26,11 @@ let errors: Record<string, string> = {};
 let raw: Record<string, unknown> = {};
 if (Astro.request.method === 'POST') {
   raw = formToObject(await Astro.request.formData());
+  // ⭐ Favorita: sale primero aquí y en el panel.
+  if (raw.accion === 'favorito' && typeof raw.id === 'string') {
+    await setFavorite(supabase, raw.id, raw.valor === '1').catch(() => {});
+    return Astro.redirect(`/app/gente#p-${raw.id}`, 303);
+  }
   const parsed = personSchema.safeParse(raw);
   if (!parsed.success) {
     errors = fieldErrors(parsed.error);
@@ -100,7 +105,7 @@ const deleted = Astro.url.searchParams.get('borrado') === '1';
         ) : (
           <ul class="people-list">
             {views.map((x) => (
-              <li class={`person card tone-${x.day.tone}`}>
+              <li id={`p-${x.person.id}`} class={`person card tone-${x.day.tone}`}>
                 <img class="person-avatar" src={x.avatar} alt="" width="240" height="240" />
                 <div class="person-main">
                   <h3>
@@ -117,10 +122,25 @@ const deleted = Astro.url.searchParams.get('borrado') === '1';
                     <p class="person-bday">🎂 {birthdayLabel(x.day.birthdayIn)}</p>
                   )}
                 </div>
-                <p class="person-score">
-                  <strong>{x.affinity.score}%</strong>
-                  <span>afinidad</span>
-                </p>
+                <div class="person-side">
+                  <form method="post" class="fav-form">
+                    <input type="hidden" name="accion" value="favorito" />
+                    <input type="hidden" name="id" value={x.person.id} />
+                    <input type="hidden" name="valor" value={x.person.favorite ? '0' : '1'} />
+                    <button
+                      type="submit"
+                      class:list={['fav', { on: x.person.favorite }]}
+                      aria-pressed={x.person.favorite ? 'true' : 'false'}
+                      aria-label={`Favorita: ${x.person.name}`}
+                    >
+                      <Icon name="star" size={20} />
+                    </button>
+                  </form>
+                  <p class="person-score">
+                    <strong>{x.affinity.score}%</strong>
+                    <span>afinidad</span>
+                  </p>
+                </div>
               </li>
             ))}
           </ul>
@@ -313,5 +333,41 @@ const deleted = Astro.url.searchParams.get('borrado') === '1';
     align-items: center;
     font-size: var(--step--1);
     margin: 0;
+  }
+  .person-side {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-1);
+  }
+  /* Por encima del enlace que cubre la tarjeta. */
+  .fav-form {
+    position: relative;
+    z-index: 1;
+  }
+  .fav {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 4%);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition:
+      transform var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  .fav:hover {
+    color: var(--acid);
+    transform: scale(1.08);
+  }
+  .fav.on {
+    color: #ffd84d;
+    border-color: #ffd84d;
+    background: rgb(255 216 77 / 12%);
+  }
+  .fav.on :global(svg) {
+    fill: currentColor;
   }
 </style>

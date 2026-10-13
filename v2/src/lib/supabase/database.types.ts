@@ -139,6 +139,7 @@ export type Database = {
           relation: string;
           birth_date: string;
           birth_time: string | null;
+          favorite: boolean;
           created_at: string;
         };
         Insert: {
@@ -148,6 +149,7 @@ export type Database = {
           relation: string;
           birth_date: string;
           birth_time?: string | null;
+          favorite?: boolean;
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['people']['Insert']>;

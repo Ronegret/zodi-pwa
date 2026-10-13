@@ -293,10 +293,15 @@ function applyFilters(rows, params) {
   }
   const order = params.get('order');
   if (order) {
-    const [col, dir] = order.split('.');
-    out = [...out].sort(
-      (a, b) => (dir === 'desc' ? -1 : 1) * String(a[col]).localeCompare(String(b[col])),
-    );
+    // Varias columnas: "favorite.desc,created_at.asc".
+    const keys = order.split(',').map((o) => o.split('.'));
+    out = [...out].sort((a, b) => {
+      for (const [col, dir] of keys) {
+        const c = String(a[col]).localeCompare(String(b[col]));
+        if (c) return (dir === 'desc' ? -1 : 1) * c;
+      }
+      return 0;
+    });
   }
   const limit = params.get('limit');
   return limit ? out.slice(0, Number(limit)) : out;
@@ -566,6 +571,7 @@ async function handleRest(req, res, url) {
         id: randomUUID(),
         user_id: u.id,
         birth_time: null,
+        favorite: false,
         created_at: new Date().toISOString(),
         ...(await readBody(req)),
       };
@@ -575,6 +581,12 @@ async function handleRest(req, res, url) {
     if (req.method === 'DELETE') {
       for (const row of applyFilters(own, url.searchParams)) people.splice(people.indexOf(row), 1);
       return send(res, 204);
+    }
+    if (req.method === 'PATCH') {
+      const body = await readBody(req);
+      const target = applyFilters(own, url.searchParams);
+      for (const row of target) Object.assign(row, body);
+      return respondRows(req, res, target);
     }
   }
   const community = await handleCommunity(req, res, url, u, resource, fn);

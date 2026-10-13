@@ -1,6 +1,7 @@
 /** Qué es cada persona para ti. */
 export const RELATIONS = {
   pareja: { label: 'Pareja', emoji: '❤️' },
+  hijo: { label: 'Hijo/a', emoji: '🧸' },
   familia: { label: 'Familia', emoji: '🏠' },
   amistad: { label: 'Amistad', emoji: '🤝' },
   trabajo: { label: 'Trabajo', emoji: '💼' },

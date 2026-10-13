@@ -343,6 +343,9 @@
 }
 .input,
 .select {
+  /* Nunca más anchos que su hueco (los de fecha y hora traen un mínimo propio). */
+  min-width: 0;
+  max-width: 100%;
   color: var(--ink);
   background: var(--surface-2);
   border: 1px solid var(--line-strong);
@@ -970,7 +973,8 @@ fieldset.group > legend {
 .studio-row {
   display: grid;
   gap: var(--space-3);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  /* En el móvil, una columna: los campos de fecha tienen un ancho mínimo propio. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
 }
 .studio-options {
   border-top: 1px solid var(--line);

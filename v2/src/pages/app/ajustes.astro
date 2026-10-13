@@ -13,6 +13,8 @@ import { fieldErrors, formToObject } from '@/lib/validation/common';
 import { readingDate } from '@/lib/readings/format';
 import { trialDaysLeft } from '@/lib/server/quota';
 import { RELATIONSHIP_OPTIONS, settingsSchema, SETTINGS_ARRAYS } from '@/lib/validation/settings';
+import { KID_SLOTS, parseFamily } from '@/lib/validation/family';
+import { listPeople, syncFamily } from '@/lib/server/people';
 
 const { supabase, user } = Astro.locals;
 let profile = Astro.locals.profile;
@@ -24,11 +26,19 @@ let raw: Record<string, unknown> = {};
 if (Astro.request.method === 'POST') {
   raw = formToObject(await Astro.request.formData(), SETTINGS_ARRAYS);
   const parsed = settingsSchema.safeParse(raw);
-  if (!parsed.success) {
-    errors = fieldErrors(parsed.error);
+  const family = parseFamily(raw);
+  if (!parsed.success || !family.ok) {
+    errors = {
+      ...(parsed.success ? {} : fieldErrors(parsed.error)),
+      ...(family.ok ? {} : family.errors),
+    };
   } else {
     try {
       profile = await updateOwnProfile(supabase, user.id, parsed.data);
+      // La pareja y los hijos con fecha pasan a Tu gente (signo y afinidad).
+      await syncFamily(supabase, family.family).catch((e: unknown) =>
+        console.error('[ajustes] tu gente', e),
+      );
       return Astro.redirect('/app/ajustes?guardado=1', 303);
     } catch (error) {
       if (error instanceof UsernameTakenError)
@@ -42,7 +52,19 @@ if (Astro.request.method === 'POST') {
   Astro.response.status = 422;
 }
 
-const stored = await getLatestSelfChart(supabase);
+const [stored, people] = await Promise.all([
+  getLatestSelfChart(supabase),
+  listPeople(supabase).catch(() => []),
+]);
+// Para rellenar: la pareja y los hijos que ya están en Tu gente.
+const partnerPerson =
+  people.find(
+    (x) =>
+      x.relation === 'pareja' &&
+      profile.partner_name &&
+      x.name.toLowerCase() === profile.partner_name.toLowerCase(),
+  ) ?? people.filter((x) => x.relation === 'pareja')[0];
+const kidsPeople = people.filter((x) => x.relation === 'hijo');
 const v = (key: string, saved: unknown) => String(raw[key] ?? saved ?? '');
 const topics = (raw.favorite_topics as string[] | undefined) ?? profile.favorite_topics;
 const notifs = (raw.notification_prefs as string[] | undefined) ?? profile.notification_prefs;
@@ -128,15 +150,26 @@ const planLabel = { free: 'Gratis', premium: 'Premium', vip: 'VIP' }[profile.pla
               ))}
             </select>
           </div>
-          <Field
-            name="partner_name"
-            label="Nombre de tu pareja o de quien te quita el sueño"
-            hint="Opcional. ZODI lo usará en las lecturas de amor."
-            autocomplete="off"
-            maxlength={60}
-            value={v('partner_name', profile.partner_name)}
-            error={errors.partner_name}
-          />
+          <div class="reveal-block partner-block">
+            <p class="reveal-title">Tu pareja (o quien te quita el sueño)</p>
+            <Field
+              name="partner_name"
+              label="Su nombre"
+              hint="ZODI lo usará en las lecturas de amor."
+              autocomplete="off"
+              maxlength={60}
+              value={v('partner_name', profile.partner_name)}
+              error={errors.partner_name}
+            />
+            <Field
+              name="partner_birth_date"
+              type="date"
+              label="Su fecha de nacimiento"
+              hint="Si la pones, se añade a Tu gente: verás su signo y vuestra afinidad."
+              value={v('partner_birth_date', partnerPerson?.birthDate)}
+              error={errors.partner_birth_date}
+            />
+          </div>
           <fieldset class="group">
             <legend>¿Tienes hijos?</legend>
             <div class="chip-group">
@@ -154,17 +187,41 @@ const planLabel = { free: 'Gratis', premium: 'Premium', vip: 'VIP' }[profile.pla
               </label>
             </div>
           </fieldset>
-          <Field
-            name="kids_count"
-            label="¿Cuántos?"
-            type="number"
-            inputmode="numeric"
-            min="0"
-            max="20"
-            hint="Solo si has dicho que sí."
-            value={v('kids_count', profile.kids_count)}
-            error={errors.kids_count}
-          />
+          <div class="reveal-block kids-block">
+            <Field
+              name="kids_count"
+              label="¿Cuántos?"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="20"
+              value={v('kids_count', profile.kids_count)}
+              error={errors.kids_count}
+            />
+            <p class="reveal-title">Sus fechas, para saber su signo (opcional)</p>
+            {Array.from({ length: KID_SLOTS }, (_, i) => (
+              <div class="kid-row">
+                <Field
+                  name={`kid_name_${i + 1}`}
+                  label={`Hijo/a ${i + 1}: nombre`}
+                  autocomplete="off"
+                  maxlength={60}
+                  value={v(`kid_name_${i + 1}`, kidsPeople[i]?.name)}
+                  error={errors[`kid_name_${i + 1}`]}
+                />
+                <Field
+                  name={`kid_date_${i + 1}`}
+                  type="date"
+                  label={`Hijo/a ${i + 1}: fecha de nacimiento`}
+                  value={v(`kid_date_${i + 1}`, kidsPeople[i]?.birthDate)}
+                  error={errors[`kid_date_${i + 1}`]}
+                />
+              </div>
+            ))}
+            <p class="muted small">
+              Se añaden a <a href="/app/gente">Tu gente</a>. ¿Más? Añádelos allí.
+            </p>
+          </div>
           <div class="field">
             <label class="field-label" for="f-personal_bio">
               Cuéntale a ZODI de ti
@@ -473,5 +530,59 @@ const planLabel = { free: 'Gratis', premium: 'Premium', vip: 'VIP' }[profile.pla
   .mod-link {
     color: var(--acid);
     font-weight: 700;
+  }
+  /* Sobre ti: lo de la pareja y los hijos se despliega solo cuando toca. */
+  .reveal-block {
+    display: none;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 7%);
+  }
+  #sobre-ti:has(
+      #f-relationship_status
+        option:checked:is(
+          [value='single'],
+          [value='relationship'],
+          [value='married'],
+          [value='complicated']
+        )
+    )
+    .partner-block,
+  #sobre-ti:has(input[name='has_kids'][value='si']:checked) .kids-block {
+    display: grid;
+    animation: reveal 0.3s var(--ease);
+  }
+  @supports not selector(:has(*)) {
+    .reveal-block {
+      display: grid;
+    }
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #sobre-ti .reveal-block {
+      animation: none;
+    }
+  }
+  .reveal-title {
+    margin: 0;
+    font-weight: 700;
+    color: var(--acid);
+  }
+  .kid-row {
+    display: grid;
+    gap: var(--space-2);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--line);
+  }
+  .small {
+    font-size: var(--step--1);
   }
 </style>

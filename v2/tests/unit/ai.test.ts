@@ -314,7 +314,16 @@ describe('el oráculo conoce a su gente', () => {
       PROFILE,
       { chart: FIXTURE.chart, timeKnown: true },
       NOW,
-      [{ id: 'x', name: 'Mamá', relation: 'familia', birthDate: '1965-08-03', birthTime: null }],
+      [
+        {
+          id: 'x',
+          name: 'Mamá',
+          relation: 'familia',
+          birthDate: '1965-08-03',
+          birthTime: null,
+          favorite: false,
+        },
+      ],
     );
     expect(p.system[1]).toContain('## Su gente');
     expect(p.system[1]).toMatch(/- Mamá \(familia, nació el 1965-08-03\): Sol en Leo/);

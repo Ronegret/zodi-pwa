@@ -195,7 +195,11 @@ const today = new Intl.DateTimeFormat('es-ES', {
     </div>
 
     {current !== 'oraculo' && (
-      <a class="fab" href="/app/oraculo" aria-label="Consultar al oráculo de ZODI">
+      <a
+        class:list={['fab', { 'fab-home': current === 'inicio' }]}
+        href="/app/oraculo"
+        aria-label="Consultar al oráculo de ZODI"
+      >
         <img src="/brand/isotipo-96.webp" alt="" width="64" height="64" />
         <span class="fab-label" aria-hidden="true">
           Pregúntale a ZODI
@@ -545,6 +549,10 @@ const today = new Intl.DateTimeFormat('es-ES', {
     }
     .fab {
       bottom: calc(var(--nav-h) + var(--space-3) + var(--sab));
+    }
+    /* En el móvil tapaba botones de los formularios: solo en Inicio (el oráculo está en "Más"). */
+    .fab:not(.fab-home) {
+      display: none;
     }
     .fab img {
       width: 56px;
