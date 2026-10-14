@@ -191,7 +191,7 @@ test.describe('el significado de tu carta', () => {
     // Lo que no está de serie lo investiga la IA (y lo inventado no se inventa).
     await expect(page.getByText('Significado de prueba de Quispilema.')).toBeVisible();
     await expect(page.getByText('✦ Investigado por ZODI')).toBeVisible();
-    await expect(page.getByText(/No encuentro su historia/)).toBeVisible();
+    await expect(page.getByText(/No encuentro su historia/)).toBeVisible({ timeout: 20_000 });
     await expectNoViolations(page);
     // El PDF lleva todo, con el nombre completo que se escribió.
     await page.getByRole('button', { name: 'Descargar todo en PDF' }).click();

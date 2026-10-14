@@ -90,7 +90,10 @@ describe('contexto de la lectura', () => {
     expect(ctx.text).toContain('Nombre: Ana');
     expect(ctx.text).toMatch(/Sol en \w+ \d+°/);
     expect(ctx.text).toMatch(/Ascendente en/);
-    expect(ctx.text).toContain('Tránsitos de hoy');
+    expect(ctx.text).toContain('Lo que pasa hoy en el cielo, ya traducido');
+    // Sin jerga técnica que la IA repita: nada de aspectos con nombre ni orbes.
+    expect(ctx.text).not.toMatch(/trígono|cuadratura|sextil|oposición|conjunción|orbe|\d+\.\d°/i);
+    expect(ctx.text).not.toMatch(/Biorritmo hoy|físico \d/);
     expect(ctx.text).toMatch(/Luna: .+ en \w+/);
     expect(ctx.text).toContain('Camino de vida: 11');
     expect(ctx.text).toContain('Zodiaco chino: Caballo de Metal');
@@ -117,6 +120,15 @@ describe('contexto de la lectura', () => {
 });
 
 describe('prompts', () => {
+  it('lenguaje sencillo, humor negro con límites y formato en tarjetas', () => {
+    expect(ZODI_SYSTEM).toMatch(/LENGUAJE SENCILLO/);
+    expect(ZODI_SYSTEM).toMatch(/PROHIBIDO usar palabras técnicas: trígono/);
+    expect(ZODI_SYSTEM).toMatch(/HUMOR NEGRO/);
+    expect(ZODI_SYSTEM).toMatch(/JAMÁS humor sobre suicidio/);
+    expect(ZODI_SYSTEM).toMatch(/PRIMERA LÍNEA: una sola frase/);
+    expect(ZODI_SYSTEM).toMatch(/\*\*Hoy haz esto:\*\*/);
+  });
+
   it('el system prompt fija la voz y las reglas de Rodrigo', () => {
     expect(ZODI_SYSTEM).toContain('ZODI');
     expect(ZODI_SYSTEM).toMatch(/Llámala por su nombre/);
@@ -137,7 +149,7 @@ describe('prompts', () => {
     expect(msg).toContain('HORÓSCOPO DE HOY');
     expect(msg).toContain('[Enfócate especialmente en el área de: amor]');
     expect(msg).toContain('TONO BRUTAL');
-    expect(msg).toContain('EXTENSIÓN MÁXIMA: 130 palabras');
+    expect(msg).toContain('EXTENSIÓN MÁXIMA: 90 palabras');
   });
 
   it('cada tipo de lectura tiene slug único e instrucciones', () => {

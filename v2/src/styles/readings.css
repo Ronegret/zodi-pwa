@@ -420,3 +420,197 @@
   content: counter(how) '. ';
   color: var(--acid);
 }
+
+/* ---------- Lectura en tarjetas ---------- */
+.rcards {
+  display: grid;
+  gap: var(--space-5);
+}
+.rcards-summary {
+  margin: 0;
+  max-width: 34ch;
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.rcards-summary strong {
+  color: var(--acid);
+}
+.rcards-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .rcards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.rcard {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.rcard p {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  color: var(--ink);
+}
+.rcard strong {
+  color: var(--acid-soft);
+}
+.rcard-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  color: var(--violet-text);
+}
+.rcards-action {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--acid);
+  color: var(--brand-ink);
+}
+.rcards-action-label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  font-weight: 800;
+}
+.rcards-action-text {
+  margin: 0;
+  max-width: 48ch;
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+.rcards-action strong {
+  color: inherit;
+}
+.rcards-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-top: var(--space-2);
+  padding: 0 var(--space-4);
+  border: 2px solid var(--brand-ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--brand-ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    transform 0.15s;
+}
+.rcards-action-btn:hover {
+  background: var(--brand-ink);
+  color: var(--acid);
+}
+.rcards-action-btn:active {
+  transform: scale(0.97);
+}
+.rcards-action-btn:focus-visible {
+  outline: 3px solid var(--brand-ink);
+  outline-offset: 3px;
+}
+.rcards-action[data-done] .rcards-action-btn {
+  background: var(--brand-ink);
+  color: var(--acid);
+}
+.rcards-action[data-done] .rcards-action-btn svg {
+  animation: rcard-check 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes rcard-check {
+  from {
+    transform: scale(0.2) rotate(-25deg);
+  }
+}
+
+/* Entrada: el cielo "destapa" cada tarjeta en orden (una sola vez, al montarse). */
+@keyframes rcard-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+}
+@keyframes rcard-pulse {
+  50% {
+    box-shadow: 0 0 0 10px rgb(184 255 23 / 0%);
+  }
+  0% {
+    box-shadow: 0 0 0 0 rgb(184 255 23 / 45%);
+  }
+}
+.rcards-summary,
+.rcard,
+.rcards-action {
+  animation: rcard-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.rcard:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.rcard:nth-child(2) {
+  animation-delay: 0.17s;
+}
+.rcard:nth-child(3) {
+  animation-delay: 0.24s;
+}
+.rcard:nth-child(4) {
+  animation-delay: 0.31s;
+}
+.rcards-action {
+  animation:
+    rcard-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.35s backwards,
+    rcard-pulse 1.2s ease-out 0.9s 1;
+}
+.reading-paper[data-streaming] .rcards > :last-child::after,
+.reading-paper[data-streaming] .rcard:last-child p:last-child::after {
+  content: '▍';
+  margin-left: 2px;
+  color: var(--acid);
+  animation: caret 0.9s steps(2) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rcards-summary,
+  .rcard,
+  .rcards-action {
+    animation: rcard-fade 0.2s linear backwards;
+  }
+  .rcards-action {
+    animation-delay: 0s;
+  }
+  .rcards-action[data-done] .rcards-action-btn svg {
+    animation: none;
+  }
+  .reading-paper[data-streaming] .rcards > :last-child::after,
+  .reading-paper[data-streaming] .rcard:last-child p:last-child::after {
+    animation: none;
+  }
+}
+@keyframes rcard-fade {
+  from {
+    opacity: 0;
+  }
+}
