@@ -1,0 +1,350 @@
+---
+/**
+ * Pie de página de ZODI. `full`: portada y páginas públicas (marca, enlaces,
+ * signos, legal y crédito). `compact`: acceso y app (legal y crédito).
+ * Animaciones sutiles (ticker y brillo del crédito) que se paran con
+ * "reducir movimiento".
+ */
+import { SIGN_INFO } from '@/lib/public/signs';
+
+interface Props {
+  variant?: 'full' | 'compact';
+}
+const { variant = 'full' } = Astro.props;
+const year = new Date().getFullYear();
+const TICKER = [
+  'Mercurio retrógrado: no firmes nada',
+  'Tu ex no es tu Luna',
+  'Los astros no devuelven dinero',
+  'Hoy toca decir la verdad (con cariño)',
+  'Pregúntale al cielo, no a tu grupo de WhatsApp',
+  'Sagitario, te hemos visto',
+];
+const LEGAL = [
+  ['Privacidad', '/legal/privacidad'],
+  ['Términos', '/legal/terminos'],
+  ['Cookies', '/legal/cookies'],
+  ['Aviso legal', '/legal/aviso-legal'],
+] as const;
+---
+
+<footer class:list={['site-foot', variant]}>
+  {variant === 'full' && (
+    <>
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+          {[0, 1].map(() => (
+            <ul>
+              {TICKER.map((t) => (
+                <li>
+                  <span class="star">✦</span> {t}
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="brand">
+          <a href="/" class="logo" aria-label="ZODI, ir a la portada">
+            <img src="/brand/logo-240.webp" alt="" width="240" height="160" loading="lazy" />
+          </a>
+          <p>
+            Astrología con carácter. Tu carta real, tu cielo de hoy y un oráculo que no te da la
+            razón por darte la razón.
+          </p>
+        </div>
+        <nav aria-label="Explora ZODI">
+          <h2>Explora</h2>
+          <ul>
+            <li>
+              <a href="/horoscopo">Horóscopo de hoy</a>
+            </li>
+            <li>
+              <a href="/compatibilidad">Compatibilidad de signos</a>
+            </li>
+            <li>
+              <a href="/auth/registro">Crear cuenta gratis</a>
+            </li>
+            <li>
+              <a href="/auth/login">Entrar</a>
+            </li>
+          </ul>
+        </nav>
+        <nav aria-label="Horóscopo por signo">
+          <h2>Tu signo</h2>
+          <ul class="signs">
+            {SIGN_INFO.map((s) => (
+              <li>
+                <a href={`/horoscopo/${s.slug}`}>
+                  <span aria-hidden="true">{s.glyph}</span> {s.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <nav aria-label="Información legal">
+          <h2>Legal</h2>
+          <ul>
+            {LEGAL.map(([t, h]) => (
+              <li>
+                <a href={h}>{t}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <nav aria-label="Proyectos del creador">
+          <h2>Del creador</h2>
+          <ul>
+            <li>
+              <a href="https://rodrigonegrete.es" target="_blank" rel="author noopener">
+                <span class="mark" aria-hidden="true">
+                  ✦
+                </span>{' '}
+                rodrigonegrete.es
+                <span aria-hidden="true">↗</span>
+                <span class="visually-hidden"> (se abre en otra pestaña)</span>
+              </a>
+            </li>
+            <li>
+              <a href="https://rodd.es" target="_blank" rel="noopener">
+                <span class="mark" aria-hidden="true">
+                  ✦
+                </span>{' '}
+                rodd.es
+                <span aria-hidden="true">↗</span>
+                <span class="visually-hidden"> (se abre en otra pestaña)</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      <p class="disclaimer">
+        Las lecturas de ZODI son entretenimiento y guía simbólica, y las genera una inteligencia
+        artificial. No sustituyen consejo médico, legal, financiero ni psicológico.
+      </p>
+    </>
+  )}
+  {variant === 'compact' && (
+    <nav class="legal-row" aria-label="Información legal">
+      {LEGAL.map(([t, h], i) => (
+        <>
+          {i > 0 && <span aria-hidden="true">·</span>}
+          <a href={h}>{t}</a>
+        </>
+      ))}
+    </nav>
+  )}
+  <div class="bottom">
+    <p class="copy">© {year} Rodrigo Negrete Aros</p>
+    <p class="credit">
+      Creado por
+      <a href="https://rodrigonegrete.es" target="_blank" rel="author noopener">
+        <span class="shine">rodrigonegrete.es</span>
+        <span class="visually-hidden"> (se abre en otra pestaña)</span>
+      </a>
+    </p>
+    {variant === 'full' && (
+      <a class="top" href="#main">
+        Volver arriba <span aria-hidden="true">↑</span>
+      </a>
+    )}
+  </div>
+</footer>
+
+<style>
+  .site-foot {
+    margin-top: var(--space-8);
+    border-top: 1px solid var(--line);
+    background: linear-gradient(180deg, transparent, rgb(8 8 16 / 85%));
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .site-foot.compact {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    background: none;
+    display: grid;
+    gap: var(--space-2);
+    justify-items: center;
+  }
+  a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    min-height: 32px;
+  }
+  a:hover {
+    color: var(--acid);
+  }
+  .legal-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+
+  /* Ticker con humor */
+  .ticker {
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+    background: rgb(184 255 23 / 6%);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+  }
+  .ticker ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: var(--space-2) 0;
+    gap: var(--space-6);
+    padding-right: var(--space-6);
+    white-space: nowrap;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .star {
+    color: var(--acid);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ticker-track {
+      animation: marquee 38s linear infinite;
+    }
+    .ticker:hover .ticker-track {
+      animation-play-state: paused;
+    }
+    .shine {
+      background: linear-gradient(
+        90deg,
+        var(--acid),
+        #fff,
+        var(--violet-text, #b48cff),
+        var(--acid)
+      );
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shine 5s linear infinite;
+    }
+    .mark {
+      transition: transform var(--dur) var(--ease);
+    }
+    a:hover .mark {
+      transform: rotate(90deg) scale(1.2);
+    }
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes shine {
+    to {
+      background-position: -250% 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .shine {
+      color: var(--acid);
+    }
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--space-5) var(--space-6);
+    padding: var(--space-6) clamp(1rem, 4vw, 3rem) var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    max-width: 72rem;
+    margin-inline: auto;
+  }
+  .brand {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--space-2);
+    max-width: 30rem;
+  }
+  @media (min-width: 900px) {
+    .brand {
+      grid-column: span 2;
+    }
+  }
+  .logo img {
+    width: 7.5rem;
+    height: auto;
+    filter: drop-shadow(0 0 16px rgb(184 255 23 / 25%));
+  }
+  .brand p {
+    margin: 0;
+    line-height: 1.55;
+  }
+  h2 {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--acid);
+    margin: 0 0 var(--space-2);
+  }
+  .grid ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .signs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mark {
+    color: var(--acid);
+    display: inline-block;
+  }
+  .disclaimer {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem) var(--space-4);
+    font-size: 0.78rem;
+    opacity: 0.85;
+  }
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: var(--space-3) clamp(1rem, 4vw, 3rem) calc(var(--space-5) + var(--sab, 0px));
+    border-top: 1px dashed var(--line);
+  }
+  .compact .bottom {
+    justify-content: center;
+    border-top: 0;
+    padding: 0;
+  }
+  .bottom p {
+    margin: 0;
+  }
+  .credit a {
+    font-weight: 700;
+  }
+  .compact .credit a {
+    font-weight: 700;
+  }
+  .top {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  @media print {
+    .site-foot {
+      display: none;
+    }
+  }
+</style>

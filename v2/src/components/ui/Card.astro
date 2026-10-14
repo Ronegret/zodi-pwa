@@ -1,0 +1,45 @@
+---
+/** Panel de cristal Zodi. El título es un h2 enlazado a la región. */
+interface Props {
+  title: string;
+  kicker?: string | undefined;
+  action?: { label: string; href: string } | undefined;
+  class?: string;
+  id?: string;
+  /** Revelado al hacer scroll. */
+  reveal?: boolean;
+  /** Inclinación 3D con el ratón. */
+  tilt?: boolean;
+}
+const { title, kicker, action, class: className, id, reveal = false, tilt = false } = Astro.props;
+const headingId = `${
+  id ??
+  'c-' +
+    title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[^\w]+/g, '-')
+}-title`;
+---
+
+<section
+  class:list={['card', className, { reveal }]}
+  aria-labelledby={headingId}
+  id={id}
+  data-tilt={tilt ? '' : undefined}
+>
+  <header class="card-header">
+    <div class="card-heading">
+      {kicker && <p class="kicker">{kicker}</p>}
+      <h2 id={headingId} class="card-title">
+        {title}
+      </h2>
+    </div>
+    {action && (
+      <a class="card-action" href={action.href}>
+        {action.label}
+      </a>
+    )}
+  </header>
+  <slot />
+</section>

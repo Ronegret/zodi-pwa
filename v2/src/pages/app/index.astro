@@ -1,0 +1,644 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import ElementsDonut from '@/components/dashboard/ElementsDonut.astro';
+import FirstSteps from '@/components/dashboard/FirstSteps.astro';
+import EnergyChart from '@/components/dashboard/EnergyChart.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Explain from '@/components/ui/Explain.astro';
+import Icon from '@/components/ui/Icon.astro';
+import ProgressBar from '@/components/ui/ProgressBar.astro';
+import { TarotOfDay } from '@/components/scenes/TarotOfDay';
+import { formatPosition } from '@/lib/astro-engine/labels';
+import { birthTeaser } from '@/lib/chart/birth-day';
+import { buildDashboard } from '@/lib/dashboard/build';
+import { describeTransit, plainTransit, transitStrength } from '@/lib/daily/today';
+import { ACHIEVEMENT_BY_ID } from '@/lib/progress/achievements';
+import { todayFor } from '@/lib/ai/context';
+import { personSky } from '@/lib/people/affinity';
+import { birthdayLabel, personView } from '@/lib/people/view';
+import { recordActivity } from '@/lib/server/activity';
+import { getLatestSelfChart } from '@/lib/server/charts';
+import { firstSteps } from '@/lib/server/first-steps';
+import { listPeople } from '@/lib/server/people';
+import { trialDaysLeft } from '@/lib/server/quota';
+import { dailyCard } from '@/lib/tarot/daily';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+// Entrar al panel cuenta para la racha (una vez al día).
+const [stored, activity, people] = await Promise.all([
+  getLatestSelfChart(supabase),
+  recordActivity(supabase, 'visit'),
+  listPeople(supabase).catch(() => []),
+]);
+const welcome = Astro.url.searchParams.get('bienvenida') === '1';
+const unlocked = (activity?.unlocked ?? []).map((id) => ACHIEVEMENT_BY_ID.get(id)?.title ?? id);
+const d = buildDashboard(
+  activity
+    ? { ...profile, xp: activity.xp, streak: activity.streak, gems: activity.gems }
+    : profile,
+  stored ? { chart: stored.chart, timeKnown: stored.input.timeKnown } : null,
+  new Date(),
+);
+const card = dailyCard(profile.id, d.today);
+const steps = await firstSteps(supabase, profile, Boolean(stored));
+const showSteps = steps.some((s) => !s.done);
+const trialDays = trialDaysLeft(profile.trial_ends_at);
+// Adelanto de "El día que naciste".
+const teaser = stored ? birthTeaser(stored.chart, stored.input.date, new Date()) : null;
+const MOON_EMOJI: Record<string, string> = {
+  'Luna nueva': '🌑',
+  Creciente: '🌒',
+  'Cuarto creciente': '🌓',
+  'Gibosa creciente': '🌔',
+  'Luna llena': '🌕',
+  'Gibosa menguante': '🌖',
+  'Cuarto menguante': '🌗',
+  Menguante: '🌘',
+};
+// Tu gente hoy: las cuatro primeras, con cómo está el día entre los dos.
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const myBirth = stored?.input.date ?? profile.birth_date;
+const now = new Date();
+const me = myBirth
+  ? {
+      birthDate: myBirth,
+      sky: personSky(myBirth, stored?.input.timeKnown ? stored.input.time : null, tz),
+    }
+  : null;
+const gente = me
+  ? people
+      .slice(0, 4)
+      .map((p) => personView(p, me, { timeZone: tz, today: todayFor(now, tz), now }))
+  : [];
+---
+
+<AppShell
+  title={`Hola, ${d.firstName}`}
+  current="inicio"
+  intro={d.headline}
+  toast={
+    welcome
+      ? { message: 'Carta calculada. Te damos la bienvenida al lado oscuro del cielo.' }
+      : unlocked.length
+        ? { message: `Logro desbloqueado: ${unlocked.join(', ')}. +${unlocked.length * 5} gemas.` }
+        : undefined
+  }
+>
+  {trialDays > 0 && (
+    <p class="trial" role="note">
+      <Icon name="sparkles" />
+      <span>
+        <strong>
+          Tienes ZODI completo gratis {trialDays === 1 ? '1 día más' : `${trialDays} días más`}.
+        </strong>{' '}
+        Todas las lecturas, el oráculo y tu carta, sin pagar nada.
+      </span>
+    </p>
+  )}
+  {showSteps && <FirstSteps steps={steps} />}
+  <div class="bento" data-celebrate={welcome ? '' : undefined}>
+    <Card
+      reveal
+      tilt
+      title="Lo que dice el cielo"
+      kicker={`Hoy · ${d.moon.name}`}
+      class="span-hoy"
+      action={{ label: 'Lectura completa', href: '/app/horoscopo' }}
+    >
+      <img
+        class="zodi-banner"
+        src="/art/zodi-senalando-1024.webp"
+        srcset="/art/zodi-senalando-640.webp 640w, /art/zodi-senalando-1024.webp 1024w"
+        sizes="(min-width: 1280px) 50vw, 100vw"
+        alt="ZODI te señala: hoy va contigo"
+        width="1024"
+        height="683"
+        loading="eager"
+        decoding="async"
+      />
+      <p class="moon">
+        <Icon name="moon" />
+        <span>
+          Luna en <strong>{d.moon.sign}</strong> · {Math.round(d.moon.illumination * 100)} %
+          iluminada
+        </span>
+      </p>
+      {d.transits.length ? (
+        <ul class="transits">
+          {d.transits.map((t) => (
+            <li>
+              <span class="transit-text">
+                <span>{plainTransit(t)}</span>
+                <span class="muted tiny">
+                  {describeTransit(t)} · orbe {t.orb.toFixed(1)}°
+                </span>
+              </span>
+              <Badge tone={t.type === 'square' || t.type === 'opposition' ? 'hot' : 'acid'}>
+                {transitStrength(t.orb)}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="muted">Hoy ningún planeta toca tu carta de cerca. Disfruta la calma, no dura.</p>
+      )}
+      <Explain>
+        <p>
+          Los planetas se mueven cada día. Cuando uno de hoy forma un ángulo con un punto de tu
+          carta natal, se nota en esa parte de tu vida: eso es un <strong>tránsito</strong>.
+        </p>
+        <p>
+          "Exacto hoy" es cuando más se nota. Los verdes ayudan; los rosas ponen a prueba (no es
+          malo: es donde creces).
+        </p>
+      </Explain>
+    </Card>
+
+    <Card
+      reveal
+      tilt
+      title="Tu carta"
+      kicker="Tus tres pilares"
+      class="span-carta"
+      action={{ label: 'Ver carta', href: '/app/carta' }}
+    >
+      {d.chart ? (
+        <>
+          <img
+            class="sign-art vt-sign-art"
+            src={d.chart.sunImage}
+            alt=""
+            width="640"
+            height="640"
+            loading="eager"
+            decoding="async"
+          />
+          <dl class="big3">
+            <div>
+              <dt>
+                <Icon name="sun" size={18} /> Sol <span class="pill-hint">tu esencia</span>
+              </dt>
+              <dd>{formatPosition(d.chart.sun)}</dd>
+            </div>
+            <div>
+              <dt>
+                <Icon name="moon" size={18} /> Luna <span class="pill-hint">tus emociones</span>
+              </dt>
+              <dd>{formatPosition(d.chart.moon)}</dd>
+            </div>
+            <div>
+              <dt>
+                <Icon name="star" size={18} /> Ascendente <span class="pill-hint">cómo te ven</span>
+              </dt>
+              <dd>
+                {d.chart.ascendant ? formatPosition(d.chart.ascendant) : 'Sin hora de nacimiento'}
+              </dd>
+            </div>
+          </dl>
+          {teaser && (
+            <a class="born-teaser" href="/app/carta/significado#nacimiento">
+              <span class="born-emoji" aria-hidden="true">
+                {MOON_EMOJI[teaser.moon]}
+              </span>
+              <span>
+                Naciste un <strong>{teaser.weekday}</strong> de{' '}
+                <strong>{teaser.moon.toLowerCase()}</strong>.
+                {teaser.daysToSolarReturn !== null && (
+                  <>
+                    {' '}
+                    Tu retorno solar es en <strong>{teaser.daysToSolarReturn} días</strong>.
+                  </>
+                )}{' '}
+                <span class="born-more">Mira el cielo de ese día →</span>
+              </span>
+            </a>
+          )}
+          <a class="meaning-link" href="/app/carta/significado">
+            <Icon name="sparkles" size={16} /> Lee todo lo que dice de ti (y tus números)
+          </a>
+        </>
+      ) : (
+        <EmptyState title="Aún no hay carta" image={false}>
+          <Button href="/app/onboarding">Completar mis datos</Button>
+        </EmptyState>
+      )}
+    </Card>
+
+    <Card reveal tilt title="Tu energía" kicker="Biorritmo" class="span-energia">
+      {d.energy ? (
+        <EnergyChart series={d.energy.series} todayIndex={d.energy.todayIndex} />
+      ) : (
+        <p class="muted">Necesitamos tu fecha de nacimiento para calcularlo.</p>
+      )}
+      <Explain>
+        <p>
+          Tres ciclos que empiezan el día que naces: <strong>físico</strong> (23 días),
+          <strong> emocional</strong> (28) y <strong>intelectual</strong> (33).
+        </p>
+        <p>
+          Por encima de 0 % vas con pilas; por debajo, en modo ahorro. No es bueno ni malo: te ayuda
+          a elegir cuándo empujar y cuándo descansar.
+        </p>
+      </Explain>
+    </Card>
+
+    <Card reveal title="Carta del día" kicker="Tu carta para hoy" class="span-tarot">
+      <TarotOfDay client:visible card={card} />
+      <Explain>
+        <p>
+          Cada día te toca una carta del tarot (los 22 arcanos mayores). Dale la vuelta y léela como
+          el consejo del día. Para preguntas concretas, mejor una tirada en Lecturas.
+        </p>
+      </Explain>
+    </Card>
+
+    <Card reveal tilt title="Tus elementos" kicker="Reparto de planetas" class="span-elementos">
+      {d.chart ? (
+        <>
+          <ElementsDonut balance={d.chart.elements} />
+          <Explain>
+            <p>
+              Cada signo es de un elemento: <strong>fuego</strong> (acción), <strong>tierra</strong>
+              (lo práctico), <strong>aire</strong> (ideas) o <strong>agua</strong> (emociones). Aquí
+              ves cuántos de tus planetas caen en cada uno: el que domina dice mucho de cómo eres.
+            </p>
+          </Explain>
+        </>
+      ) : (
+        <p class="muted">Sin carta todavía.</p>
+      )}
+    </Card>
+
+    <Card
+      reveal
+      tilt
+      title="Racha y XP"
+      kicker={d.progress.rank}
+      class="span-racha"
+      action={{ label: 'Tu progreso', href: '/app/progreso' }}
+    >
+      <div class="streak">
+        <span class="streak-icon">
+          <Icon name="flame" size={28} />
+        </span>
+        <p>
+          <span class="streak-num mono" data-countup={d.streak} aria-hidden="true">
+            {d.streak}
+          </span>
+          <span class="visually-hidden">{d.streak}</span>
+          <span class="muted">{d.streak === 1 ? 'día seguido' : 'días seguidos'}</span>
+        </p>
+      </div>
+      <ProgressBar
+        label={`Nivel ${d.progress.level}`}
+        value={d.progress.current}
+        max={d.progress.needed}
+        valueText={`${d.progress.current} de ${d.progress.needed} XP`}
+      />
+      <p class="muted small">
+        <Badge tone="gems">
+          <span aria-hidden="true">◆</span> {d.gems}
+          <span class="visually-hidden"> gemas</span>
+        </Badge>
+        Vuelve mañana: la racha no se mantiene sola.
+      </p>
+    </Card>
+
+    <Card reveal tilt title="Rituales" kicker={d.moon.name} class="span-rituales">
+      <ul class="rituals">
+        {d.rituals.map((r) => (
+          <li>
+            <Icon name="sparkles" size={18} />
+            <span>{r}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+
+    <Card
+      reveal
+      title="Tu gente hoy"
+      kicker="Familia, pareja y amistades"
+      class="span-match"
+      action={gente.length ? { label: 'Ver todos', href: '/app/gente' } : undefined}
+    >
+      {gente.length ? (
+        <ul class="gente">
+          {gente.map((x) => (
+            <li class={`tone-${x.day.tone}`}>
+              <a href={`/app/gente/${x.person.id}`}>
+                <img src={x.avatar} alt="" width="240" height="240" loading="lazy" />
+                <span>
+                  <strong>{x.person.name}</strong>
+                  <span class="gente-day">{x.day.label}</span>
+                  {birthdayLabel(x.day.birthdayIn) && (
+                    <span class="gente-bday">{birthdayLabel(x.day.birthdayIn)}</span>
+                  )}
+                </span>
+                <span class="gente-score">{x.affinity.score}%</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div class="gente-empty">
+          <p class="muted">
+            Añade a tu pareja, tu familia o tus amistades con su fecha de nacimiento: te digo cuánta
+            afinidad hay y cómo está el día entre los dos. Y no se te pasa ningún cumpleaños.
+          </p>
+          <div class="gente-actions">
+            <Button href="/app/gente#anadir" variant="violet" icon="people" magnetic>
+              Añadir a mi gente
+            </Button>
+            <Button href="/app/compatibilidad" variant="ghost" icon="heart">
+              Comparar cartas con IA
+            </Button>
+          </div>
+        </div>
+      )}
+    </Card>
+  </div>
+</AppShell>
+
+<style>
+  /* Mobile first: 1 columna · tablet: 2 (sin huecos) · escritorio ancho: 12. */
+  .bento {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+  @media (min-width: 720px) {
+    .bento {
+      gap: var(--space-5);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .bento > :global(.span-hoy),
+    .bento > :global(.span-match) {
+      grid-column: span 2;
+    }
+  }
+  @media (min-width: 1280px) {
+    .bento {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    .bento > :global(.span-hoy),
+    .bento > :global(.span-energia) {
+      grid-column: span 7;
+    }
+    .bento > :global(.span-carta),
+    .bento > :global(.span-tarot) {
+      grid-column: span 5;
+    }
+    .bento > :global(.span-match) {
+      grid-column: span 12;
+    }
+    .bento > :global(.span-elementos),
+    .bento > :global(.span-racha),
+    .bento > :global(.span-rituales) {
+      grid-column: span 4;
+    }
+  }
+  .zodi-banner {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 21 / 9;
+    object-fit: cover;
+    object-position: center 35%;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+  }
+  .moon {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink-soft);
+  }
+  .moon strong {
+    color: var(--ink);
+  }
+  .transits,
+  .rituals {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .transits li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 3%);
+    border: 1px solid var(--line);
+    font-weight: 600;
+  }
+  .transit-text {
+    display: grid;
+    gap: 2px;
+  }
+  .tiny {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .pill-hint {
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    opacity: 0.85;
+  }
+  .trial {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 10%);
+  }
+  .trial :global(svg) {
+    flex: none;
+    color: var(--acid);
+    margin-top: 2px;
+  }
+  /* Arte de ZODI del signo solar: cuadrado y centrado. */
+  .sign-art {
+    display: block;
+    width: min(100%, 15rem);
+    height: auto;
+    aspect-ratio: 1;
+    margin-inline: auto;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-acid);
+  }
+  .big3 {
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .big3 div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 3%);
+    border: 1px solid var(--line);
+  }
+  .big3 dt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink-soft);
+  }
+  .big3 dd {
+    margin: 0;
+    font-weight: 800;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .streak {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .streak-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-lg);
+    background: rgb(255 43 214 / 12%);
+    color: var(--hot);
+  }
+  .streak p {
+    display: grid;
+  }
+  .streak-num {
+    font-size: var(--step-4);
+    font-weight: 800;
+    line-height: 1;
+  }
+  .small {
+    font-size: var(--step--1);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .rituals li {
+    display: flex;
+    gap: var(--space-2);
+    align-items: start;
+  }
+  .rituals li :global(svg) {
+    color: var(--acid);
+    flex: none;
+    margin-top: 0.2em;
+  }
+  .meaning-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    margin-top: var(--space-2);
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .gente {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  }
+  .gente a {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: center;
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    border-left-width: 4px;
+    color: inherit;
+    text-decoration: none;
+  }
+  .gente .tone-fluye a {
+    border-left-color: var(--acid);
+  }
+  .gente .tone-cuidado a {
+    border-left-color: var(--hot);
+  }
+  .gente a:hover {
+    background: rgb(155 77 255 / 10%);
+  }
+  .gente img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .gente a > span:nth-child(2) {
+    display: grid;
+    min-width: 0;
+  }
+  .gente-day,
+  .gente-bday {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .gente-bday {
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .gente-score {
+    font-family: var(--font-display);
+    color: var(--acid);
+    font-size: var(--step-1);
+  }
+  .gente-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  .born-teaser {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: linear-gradient(135deg, rgb(155 77 255 / 18%), rgb(184 255 23 / 6%));
+    color: var(--ink);
+    text-decoration: none;
+    font-size: var(--step--1);
+  }
+  .born-teaser:hover {
+    border-color: var(--acid);
+  }
+  .born-emoji {
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .born-more {
+    color: var(--acid);
+    font-weight: 700;
+  }
+</style>

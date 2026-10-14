@@ -1,0 +1,85 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import ReadingGuide from '@/components/readings/ReadingGuide.astro';
+import { ReadingStudio } from '@/components/readings/ReadingStudio';
+import { aiAvailable } from '@/lib/ai/client';
+import { GUIDES } from '@/lib/ai/guides';
+import { KIND_BY_SLUG } from '@/lib/ai/kinds';
+import { getLatestSelfChart } from '@/lib/server/charts';
+import { getQuotaStatus } from '@/lib/server/quota';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const def = KIND_BY_SLUG.get(Astro.params.slug ?? '');
+if (!def) return Astro.rewrite('/404');
+
+const [quota, stored] = await Promise.all([getQuotaStatus(supabase), getLatestSelfChart(supabase)]);
+const remaining = quota ? Math.max(0, quota.limit - quota.used) : null;
+const missingChart = def.needsChart && !stored;
+const current = def.slug === 'compatibilidad' ? 'match' : 'lecturas';
+const guide = GUIDES[def.slug];
+---
+
+<AppShell title={def.title} current={current} kicker={def.kicker} intro={def.blurb}>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/app/lecturas">Lecturas</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{def.title}</span>
+  </nav>
+  {missingChart ? (
+    <EmptyState title="Me faltan tus datos de nacimiento" headingLevel={2}>
+      <p>
+        Sin tu fecha (y a poder ser hora y lugar) solo podría leerte el horóscopo de la sala de
+        espera. Dos minutos y tienes tu carta real.
+      </p>
+      <Button href="/app/onboarding?paso=nacimiento">Completar mis datos</Button>
+    </EmptyState>
+  ) : !aiAvailable() ? (
+    <EmptyState title="Zodi está afilando la lengua" headingLevel={2}>
+      <p>Las lecturas con IA vuelven en un rato. Mientras, tu carta y tu día siguen en Inicio.</p>
+      <Button href="/app" variant="secondary" icon="chevronLeft">
+        Volver al inicio
+      </Button>
+    </EmptyState>
+  ) : (
+    <ReadingStudio
+      client:load
+      def={{
+        slug: def.slug,
+        title: def.title,
+        input: def.input,
+        cta: def.cta,
+        art: def.art,
+        ...(def.spreads ? { spreads: def.spreads } : {}),
+      }}
+      defaultTone={profile.reading_tone}
+      defaultName={def.input === 'name' ? profile.display_name : ''}
+      remaining={remaining}
+    />
+  )}
+  {guide && (
+    <div class="guide-wrap">
+      <ReadingGuide guide={guide} />
+    </div>
+  )}
+</AppShell>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .guide-wrap {
+    margin-top: var(--space-7);
+  }
+</style>

@@ -1,0 +1,113 @@
+---
+/** "¿Qué es esto?", temas y glosario de una lectura. Funciona sin JS (details). */
+import type { Guide } from '@/lib/ai/guides';
+
+interface Props {
+  guide: Guide;
+  /** Para el título: "¿Qué es el tarot?"… */
+  title?: string;
+}
+
+const { guide, title = '¿Qué es esto?' } = Astro.props;
+---
+
+<section class="guide card" aria-labelledby="guide-title">
+  <div class="guide-head">
+    <img
+      src="/art/zodi-senalando-640.webp"
+      alt=""
+      width="640"
+      height="640"
+      loading="lazy"
+      decoding="async"
+    />
+    <div>
+      <p class="kicker">Para entenderlo</p>
+      <h2 id="guide-title">{title}</h2>
+    </div>
+  </div>
+  <p class="guide-explainer">{guide.explainer}</p>
+  <ul class="guide-topics" aria-label="Lo que toca esta lectura">
+    {guide.topics.map((t) => (
+      <li class="badge badge-acid">{t}</li>
+    ))}
+  </ul>
+  {guide.concepts.length > 0 && (
+    <div class="guide-glossary">
+      <h3>Glosario</h3>
+      {guide.concepts.map((c) => (
+        <details>
+          <summary>{c.term}</summary>
+          <p>{c.def}</p>
+        </details>
+      ))}
+    </div>
+  )}
+</section>
+
+<style>
+  .guide {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 52rem;
+  }
+  .guide-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .guide-head img {
+    flex: none;
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    border: 1px solid var(--line-acid);
+  }
+  .guide-head h2 {
+    margin: 0;
+    font-size: var(--step-2);
+  }
+  .guide-explainer {
+    color: var(--ink-soft);
+    max-width: 65ch;
+  }
+  .guide-topics {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .guide-glossary {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .guide-glossary h3 {
+    font-size: var(--step-1);
+    margin: 0 0 var(--space-1);
+  }
+  .guide-glossary details {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 3%);
+    padding: 0 var(--space-4);
+  }
+  .guide-glossary details[open] {
+    border-color: var(--line-violet);
+    background: rgb(155 77 255 / 8%);
+  }
+  .guide-glossary summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .guide-glossary details p {
+    margin: 0 0 var(--space-3);
+    color: var(--ink-soft);
+  }
+</style>

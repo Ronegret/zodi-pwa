@@ -1,0 +1,118 @@
+---
+/**
+ * Borrar la cuenta (derecho de supresión, RGPD). Pide escribir BORRAR; borra
+ * el usuario de Auth con service role y todo lo suyo cae en cascada
+ * (perfil, carta, lecturas, logros, publicaciones, comentarios).
+ */
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+
+const { supabase, user } = Astro.locals;
+if (!supabase || !user) return Astro.redirect('/auth/login', 303);
+
+let errors: Record<string, string> = {};
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const confirm = String(form.get('confirmacion') ?? '')
+    .trim()
+    .toUpperCase();
+  const admin = createSupabaseAdminClient();
+  if (confirm !== 'BORRAR') {
+    errors = { confirmacion: 'Escribe BORRAR (en mayúsculas o minúsculas) para confirmar.' };
+    Astro.response.status = 422;
+  } else if (!admin) {
+    errors = { _form: 'Ahora mismo no podemos borrar cuentas. Inténtalo en un rato.' };
+    Astro.response.status = 503;
+  } else {
+    const { error } = await admin.auth.admin.deleteUser(user.id);
+    if (error) {
+      console.error('[cuenta] borrar', error.message);
+      errors = { _form: 'No hemos podido borrar la cuenta. Inténtalo otra vez.' };
+      Astro.response.status = 500;
+    } else {
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+      return Astro.redirect('/auth/login?aviso=cuenta-borrada', 303);
+    }
+  }
+}
+---
+
+<AppShell
+  title="Borrar mi cuenta"
+  current="ajustes"
+  kicker="Tu cuenta"
+  intro="Si te vas, nos llevamos el disgusto, no tus datos."
+>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/app/ajustes">Ajustes</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Borrar cuenta</span>
+  </nav>
+  <div class="danger card">
+    <h2>Esto no se puede deshacer</h2>
+    <p>Se borra para siempre:</p>
+    <ul>
+      <li>tu perfil y tus datos de nacimiento,</li>
+      <li>tu carta natal y todas tus lecturas guardadas,</li>
+      <li>tu progreso, logros y gemas,</li>
+      <li>tus publicaciones, comentarios y reacciones en la comunidad.</li>
+    </ul>
+    <ErrorSummary errors={errors} />
+    <form method="post" novalidate class="stack">
+      <Field
+        name="confirmacion"
+        label="Escribe BORRAR para confirmar"
+        autocomplete="off"
+        spellcheck="false"
+        required
+        error={errors.confirmacion}
+      />
+      <div class="actions">
+        <Button type="submit" variant="danger" icon="trash">
+          Borrar mi cuenta para siempre
+        </Button>
+        <Button href="/app/ajustes" variant="ghost">
+          Mejor no
+        </Button>
+      </div>
+    </form>
+  </div>
+</AppShell>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .danger {
+    max-width: 38rem;
+    display: grid;
+    gap: var(--space-3);
+    border-color: rgb(255 77 109 / 45%);
+  }
+  .danger h2 {
+    font-size: var(--step-2);
+    margin: 0;
+  }
+  .danger ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--ink-soft);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

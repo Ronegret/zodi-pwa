@@ -1,0 +1,145 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import Card from '@/components/ui/Card.astro';
+import { CommunityFeed } from '@/components/community/CommunityFeed';
+import { TOPIC_VALUES } from '@/lib/community/options';
+import { PAGE_SIZE, listFeed } from '@/lib/server/community';
+import type { CommunityTopic } from '@/lib/supabase/database.types';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const raw = Astro.url.searchParams.get('tema');
+const topic = TOPIC_VALUES.includes(raw as CommunityTopic) ? (raw as CommunityTopic) : null;
+const posts = await listFeed(supabase, { topic: topic ?? undefined });
+const firstName = profile.display_name.trim().split(/\s+/)[0] || 'tú';
+---
+
+<AppShell
+  title="Comunidad"
+  current="comunidad"
+  kicker="La tribu cósmica"
+  intro="Desahógate, pregunta y celebra con gente que también culpa a Mercurio."
+>
+  <div class="layout">
+    <CommunityFeed
+      client:load
+      initialPosts={posts}
+      initialTopic={topic}
+      me={{ id: profile.id, firstName }}
+      pageSize={PAGE_SIZE}
+    />
+    <aside class="rules">
+      <img
+        class="rules-zodi"
+        src="/art/zodi-riendose-640.webp"
+        alt="ZODI riéndose a carcajadas"
+        width="640"
+        height="640"
+        loading="lazy"
+        decoding="async"
+      />
+      <Card title="Reglas de la tribu" kicker="Léelas una vez">
+        <ol>
+          <li>
+            <strong>Ácido sí, cruel no.</strong> Aquí se viene a reír, no a herir.
+          </li>
+          <li>
+            <strong>Nada de datos personales</strong>, ni tuyos ni de nadie.
+          </li>
+          <li>
+            <strong>Ni spam ni gurús</strong> vendiendo cuarzos milagrosos.
+          </li>
+          <li>
+            Si algo no está bien, <strong>denúncialo</strong>: con tres denuncias se oculta solo
+            hasta que lo revisemos.
+          </li>
+        </ol>
+      </Card>
+      <a class="ask" href="/app/oraculo">
+        <img src="/brand/isotipo-96.webp" alt="" width="48" height="48" />
+        <span>
+          <strong>¿Prefieres la verdad sin público?</strong>
+          <span class="muted">Pregúntale a Zodi en privado.</span>
+        </span>
+      </a>
+    </aside>
+  </div>
+</AppShell>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+  @media (min-width: 1100px) {
+    .layout {
+      grid-template-columns: minmax(0, 48rem) minmax(0, 20rem);
+    }
+    .rules {
+      position: sticky;
+      top: var(--space-4);
+    }
+  }
+  .rules {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .rules-zodi {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-acid);
+  }
+  /* En pantallas estrechas, debajo del feed: ZODI pequeño al lado de las reglas. */
+  @media (max-width: 1099px) {
+    .rules {
+      grid-template-columns: 7rem minmax(0, 1fr);
+      align-items: start;
+    }
+    .rules .ask {
+      grid-column: 1 / -1;
+    }
+  }
+  .rules ol {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: var(--space-2);
+    color: var(--ink-soft);
+  }
+  .rules li::marker {
+    color: var(--acid);
+    font-weight: 800;
+  }
+  .rules strong {
+    color: var(--ink);
+  }
+  .ask {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-acid);
+    background: rgb(184 255 23 / 5%);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .ask img {
+    border-radius: 50%;
+    border: 2px solid var(--acid);
+    flex: none;
+  }
+  .ask > span {
+    display: grid;
+    gap: 2px;
+  }
+  .ask:hover {
+    border-color: var(--acid);
+  }
+</style>

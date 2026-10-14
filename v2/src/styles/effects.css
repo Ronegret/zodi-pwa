@@ -1,0 +1,222 @@
+/**
+ * Efectos de rodd.es adaptados a ZODI (CSS puro, sin JavaScript):
+ *  - .fx-meteors  meteoros que cruzan el cielo (animación "meteor")
+ *  - .fx-shiny    texto con un barrido de brillo ("shiny-text")
+ *  - .fx-beam     borde con una luz que lo recorre ("border beam")
+ * Todos se paran con "reducir movimiento" y dejan el contenido legible.
+ */
+@property --beam-a {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* Contenedor que recibe efectos de fondo detrás de su contenido. */
+.fx-host {
+  position: relative;
+  isolation: isolate;
+}
+
+/* ---------- Meteoros ---------- */
+.fx-meteors {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.fx-meteors span {
+  position: absolute;
+  top: var(--y, 0);
+  left: var(--x, 50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 10%),
+    0 0 8px 2px rgb(184 255 23 / 45%);
+  opacity: 0;
+  transform: rotate(215deg);
+}
+/* Posiciones y tiempos fijos (la CSP no admite estilos en línea). */
+.fx-meteors span:nth-child(1) {
+  --x: 11%;
+  --y: 0%;
+  --delay: 0s;
+  --d: 5s;
+}
+.fx-meteors span:nth-child(2) {
+  --x: 48%;
+  --y: -13%;
+  --delay: 6.3s;
+  --d: 8s;
+}
+.fx-meteors span:nth-child(3) {
+  --x: 85%;
+  --y: -26%;
+  --delay: 2.7s;
+  --d: 6s;
+}
+.fx-meteors span:nth-child(4) {
+  --x: 22%;
+  --y: -9%;
+  --delay: 9s;
+  --d: 9s;
+}
+.fx-meteors span:nth-child(5) {
+  --x: 59%;
+  --y: -22%;
+  --delay: 5.4s;
+  --d: 7s;
+}
+.fx-meteors span:nth-child(6) {
+  --x: 96%;
+  --y: -5%;
+  --delay: 1.8s;
+  --d: 5s;
+}
+.fx-meteors span:nth-child(7) {
+  --x: 33%;
+  --y: -18%;
+  --delay: 8.1s;
+  --d: 8s;
+}
+.fx-meteors span:nth-child(8) {
+  --x: 70%;
+  --y: -1%;
+  --delay: 4.5s;
+  --d: 6s;
+}
+.fx-meteors span:nth-child(9) {
+  --x: 7%;
+  --y: -14%;
+  --delay: 0.9s;
+  --d: 9s;
+}
+.fx-meteors span:nth-child(10) {
+  --x: 44%;
+  --y: -27%;
+  --delay: 7.2s;
+  --d: 7s;
+}
+.fx-meteors span:nth-child(11) {
+  --x: 81%;
+  --y: -10%;
+  --delay: 3.6s;
+  --d: 5s;
+}
+.fx-meteors span:nth-child(12) {
+  --x: 18%;
+  --y: -23%;
+  --delay: 0s;
+  --d: 8s;
+}
+/* La cola del meteoro. */
+.fx-meteors span::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: 70px;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, rgb(184 255 23 / 90%), transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fx-meteors span {
+    animation: fx-meteor var(--d, 6s) linear var(--delay, 0s) infinite;
+  }
+}
+@keyframes fx-meteor {
+  0% {
+    transform: rotate(215deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(215deg) translateX(-520px);
+    opacity: 0;
+  }
+}
+
+/* ---------- Texto con brillo ---------- */
+.fx-shiny {
+  color: var(--acid);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fx-shiny {
+    background: linear-gradient(105deg, var(--acid) 0 38%, #fff 50%, var(--acid) 62% 100%);
+    background-size: 260% 100%;
+    background-position: 150% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: fx-shiny 7s ease-in-out infinite;
+  }
+}
+@keyframes fx-shiny {
+  0%,
+  90%,
+  100% {
+    background-position: 150% 0;
+  }
+  30%,
+  60% {
+    background-position: -50% 0;
+  }
+}
+
+/* ---------- Borde con luz ---------- */
+.fx-beam {
+  position: relative;
+}
+.fx-beam::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--beam-a),
+    transparent 0 62%,
+    rgb(155 77 255 / 90%) 78%,
+    var(--acid) 90%,
+    #fff 94%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fx-beam::after {
+    opacity: 1;
+    animation: fx-beam 7s linear infinite;
+  }
+}
+@keyframes fx-beam {
+  to {
+    --beam-a: 360deg;
+  }
+}
+
+@media print {
+  .fx-meteors,
+  .fx-beam::after {
+    display: none !important;
+  }
+  .fx-shiny {
+    background: none !important;
+    color: #5b21b6 !important;
+    animation: none !important;
+  }
+}

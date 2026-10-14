@@ -1,0 +1,422 @@
+/* ---------- Lecturas: tarot 3D, runas, cristal, sello maya, números ---------- */
+
+/* Tirada de tarot: se reparten boca abajo y se voltean en 3D. */
+.tarot-spread {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.tarot-spread[data-layout='una'] {
+  grid-template-columns: minmax(0, 15rem);
+  justify-content: center;
+}
+.tarot-spread[data-layout='celta'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 640px) {
+  .tarot-spread[data-layout='celta'] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.tarot-slot {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: center;
+  align-content: start;
+  text-align: center;
+}
+.tarot-slot .kicker {
+  min-height: 2.4em;
+  display: flex;
+  align-items: flex-end;
+}
+.tarot-card3d {
+  width: min(100%, 13rem);
+  aspect-ratio: 2 / 3;
+  perspective: 900px;
+}
+.tarot-spread[data-animate] .tarot-card3d {
+  animation: card-deal 620ms var(--ease-spring) both;
+  animation-delay: calc(var(--i, 0) * 110ms);
+}
+@keyframes card-deal {
+  from {
+    opacity: 0;
+    transform: translateY(-48px) rotate(-10deg) scale(0.82);
+  }
+}
+.tarot-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 780ms var(--ease-spring);
+}
+.tarot-card3d[data-revealed] .tarot-inner {
+  transform: rotateY(180deg);
+}
+.tarot-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--line-violet);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: var(--surface-2);
+}
+.tarot-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tarot-back {
+  box-shadow: 0 0 22px rgb(155 77 255 / 35%);
+}
+.tarot-front {
+  transform: rotateY(180deg);
+  border-color: var(--acid);
+  box-shadow: var(--glow-acid);
+}
+.tarot-front[data-reversed] {
+  border-color: var(--hot);
+}
+.tarot-front[data-reversed] > * {
+  rotate: 180deg;
+}
+.tarot-classic {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  place-items: center;
+  padding: var(--space-3) var(--space-2);
+  background:
+    radial-gradient(circle at 50% 45%, rgb(155 77 255 / 45%), transparent 62%),
+    repeating-linear-gradient(45deg, rgb(184 255 23 / 4%) 0 2px, transparent 2px 12px),
+    var(--surface-2);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.tarot-card-numeral {
+  color: var(--acid);
+  font-size: var(--step-1);
+}
+.tarot-card-sigil {
+  font-size: var(--step-4);
+  color: var(--violet-text);
+  text-shadow: 0 0 18px rgb(155 77 255 / 80%);
+}
+.tarot-card-name {
+  font-size: var(--step--1);
+  line-height: 1.2;
+}
+/* Cruz celta: diez cartas pequeñas; etiquetas y nombres compactos. */
+.tarot-spread[data-layout='celta'] .kicker {
+  min-height: 3.4em;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.tarot-spread[data-layout='celta'] .tarot-card-sigil {
+  font-size: var(--step-2);
+}
+.tarot-spread[data-layout='celta'] .tarot-card-numeral {
+  font-size: var(--step-0);
+}
+.tarot-spread[data-layout='celta'] .tarot-card-name {
+  font-size: 0.6rem;
+}
+.tarot-card-name {
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.tarot-slot-name {
+  font-weight: 700;
+  font-size: var(--step--1);
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease);
+}
+.tarot-slot-name[data-revealed] {
+  opacity: 1;
+}
+
+/* Runas: piedras con el trazo grabado. */
+.rune-cast {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: var(--space-4);
+}
+.rune-slot {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  text-align: center;
+  animation: card-deal 620ms var(--ease-spring) both;
+  animation-delay: calc(var(--i, 0) * 160ms);
+}
+.rune-stone {
+  width: 6.5rem;
+  aspect-ratio: 4 / 5;
+  display: grid;
+  place-items: center;
+  border-radius: 46% 54% 50% 50% / 42% 44% 56% 58%;
+  background:
+    radial-gradient(circle at 35% 30%, rgb(255 255 255 / 14%), transparent 55%),
+    linear-gradient(160deg, #3a3550, #17141f);
+  border: 1px solid var(--line-strong);
+  box-shadow:
+    inset 0 -6px 14px rgb(0 0 0 / 50%),
+    0 10px 24px rgb(0 0 0 / 40%);
+}
+.rune-glyph {
+  width: 2.6rem;
+  height: 4.2rem;
+  fill: none;
+  stroke: var(--acid);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgb(184 255 23 / 70%));
+}
+.rune-stone[data-reversed] .rune-glyph {
+  rotate: 180deg;
+  stroke: var(--hot);
+  filter: drop-shadow(0 0 6px rgb(255 43 214 / 70%));
+}
+.rune-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.rune-meaning {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+  max-width: 16rem;
+}
+
+/* Cristal, sello maya y números del nombre. */
+.crystal-card,
+.maya-card,
+.name-card {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line-acid);
+  background: var(--panel);
+  animation: card-deal 620ms var(--ease-spring) both;
+}
+.crystal-card figcaption,
+.maya-card figcaption,
+.name-card figcaption {
+  flex: 1 1 16rem;
+  display: grid;
+  gap: var(--space-2);
+}
+.crystal-gem {
+  width: 6rem;
+  height: 7.5rem;
+  filter: drop-shadow(0 0 22px var(--gem));
+  animation: gem-float 3.2s var(--ease) infinite alternate;
+}
+.gem-body {
+  fill: var(--gem);
+  opacity: 0.85;
+}
+.gem-facet {
+  fill: rgb(255 255 255 / 12%);
+  stroke: rgb(255 255 255 / 55%);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+@keyframes gem-float {
+  to {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+.crystal-name,
+.maya-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-2);
+  line-height: 1.1;
+}
+.maya-card {
+  border-color: var(--maya);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--maya) 30%, transparent);
+}
+.maya-numeral {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 5.5rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--maya) 12%, transparent);
+}
+.maya-dots {
+  display: flex;
+  gap: 6px;
+  min-height: 12px;
+}
+.maya-dots i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--maya);
+}
+.maya-numeral b {
+  display: block;
+  width: 4.2rem;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--maya);
+}
+.maya-facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+.maya-facts dt {
+  font-weight: 800;
+  color: var(--ink);
+}
+.maya-facts dd {
+  margin: 0;
+  color: var(--ink-soft);
+}
+.name-card img {
+  width: 8rem;
+  height: 8rem;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  border: 1px solid var(--line-acid);
+}
+.name-card .chip-group {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.name-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+.name-numbers div {
+  text-align: center;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: rgb(255 255 255 / 4%);
+}
+.name-numbers dt {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+.name-numbers dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-3);
+  color: var(--acid);
+}
+.name-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-zodi,
+  .tarot-spread[data-animate] .tarot-card3d,
+  .rune-slot,
+  .crystal-card,
+  .maya-card,
+  .name-card,
+  .crystal-gem,
+  .reading-paper[data-streaming] .rich-text > :last-child::after {
+    animation: none;
+  }
+  .tarot-inner,
+  .tarot-slot-name {
+    transition: none;
+  }
+}
+
+/* ---------- Oráculo: cabecera, cómo funciona ---------- */
+.oracle-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.oracle-avatar {
+  flex: none;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 30%;
+  border: 2px solid var(--acid);
+  box-shadow: 0 0 28px rgb(184 255 23 / 30%);
+}
+.oracle-intro {
+  display: grid;
+  gap: var(--space-2);
+}
+.oracle-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-1);
+  line-height: 1.15;
+}
+.oracle-pillars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.oracle-intro a {
+  color: var(--acid);
+}
+.oracle-how {
+  list-style: none;
+  counter-reset: how;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+.oracle-how li {
+  counter-increment: how;
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 3%);
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+.oracle-how li strong {
+  color: var(--ink);
+  font-size: var(--step-0);
+}
+.oracle-how li strong::before {
+  content: counter(how) '. ';
+  color: var(--acid);
+}

@@ -1,0 +1,185 @@
+---
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import { AUTH_UNAVAILABLE, authErrorMessage } from '@/lib/auth/errors';
+import { isGoogleEnabled } from '@/lib/server/auth-settings';
+import { registerSchema } from '@/lib/validation/auth';
+import { fieldErrors, formToObject } from '@/lib/validation/common';
+
+let errors: Record<string, string> = {};
+let values = { name: '', email: '' };
+let checkEmail = false;
+const google = await isGoogleEnabled();
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  values = {
+    name: String(form.get('name') ?? '').slice(0, 60),
+    email: String(form.get('email') ?? '').slice(0, 254),
+  };
+  const parsed = registerSchema.safeParse(formToObject(form));
+  if (!parsed.success) {
+    errors = fieldErrors(parsed.error);
+    Astro.response.status = 422;
+  } else if (!Astro.locals.supabase) {
+    errors = { _form: AUTH_UNAVAILABLE };
+    Astro.response.status = 503;
+  } else {
+    const { data, error } = await Astro.locals.supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: {
+        emailRedirectTo: `${Astro.url.origin}/auth/callback?next=/app/onboarding`,
+        data: { full_name: parsed.data.name },
+      },
+    });
+    if (error) {
+      errors = { _form: authErrorMessage(error) };
+      Astro.response.status = error.status === 429 ? 429 : 400;
+    } else if (data.session) {
+      return Astro.redirect('/app/onboarding', 303);
+    } else {
+      // Con confirmación por correo activa Supabase no crea sesión todavía.
+      checkEmail = true;
+    }
+  }
+}
+---
+
+<AuthLayout
+  card
+  title={checkEmail ? 'Mira tu correo' : 'Crea tu cuenta'}
+  intro={checkEmail ? undefined : 'Tu carta natal, calculada de verdad. Sin horóscopos de revista.'}
+>
+  {checkEmail ? (
+    <p class="notice" role="status">
+      Si el correo es correcto, te acabamos de enviar un enlace para activar la cuenta. Ábrelo en
+      este mismo navegador. Si no aparece, revisa spam: a veces los astros se esconden ahí.
+    </p>
+  ) : (
+    <>
+      <ErrorSummary errors={errors} />
+      <form method="post" novalidate class="stack" data-validate>
+        <Field
+          name="name"
+          label="Nombre"
+          autocomplete="given-name"
+          value={values.name}
+          required
+          error={errors.name}
+        />
+        <Field
+          name="email"
+          label="Correo electrónico"
+          type="email"
+          autocomplete="email"
+          inputmode="email"
+          spellcheck="false"
+          value={values.email}
+          required
+          error={errors.email}
+        />
+        <Field
+          name="password"
+          label="Contraseña"
+          type="password"
+          autocomplete="new-password"
+          hint="Mínimo 10 caracteres, con al menos una letra y un número."
+          required
+          error={errors.password}
+        />
+        <Field
+          name="confirm"
+          label="Repite la contraseña"
+          type="password"
+          autocomplete="new-password"
+          required
+          error={errors.confirm}
+        />
+        <div class="field consent">
+          <label class="check" for="f-terms">
+            <input
+              id="f-terms"
+              type="checkbox"
+              name="terms"
+              required
+              aria-describedby="f-terms-error"
+              aria-invalid={errors.terms ? 'true' : undefined}
+            />
+            <span>
+              Tengo 16 años o más y acepto los{' '}
+              <a href="/legal/terminos" target="_blank" rel="noopener">
+                Términos<span class="visually-hidden"> (se abre en otra pestaña)</span>
+              </a>
+              y la{' '}
+              <a href="/legal/privacidad" target="_blank" rel="noopener">
+                Política de Privacidad
+                <span class="visually-hidden"> (se abre en otra pestaña)</span>
+              </a>
+              .
+            </span>
+          </label>
+          <p id="f-terms-error" class="field-error" data-error-for="terms" hidden={!errors.terms}>
+            {errors.terms}
+          </p>
+        </div>
+        <button class="btn btn-block" type="submit">
+          Crear cuenta
+        </button>
+      </form>
+      {google && (
+        <>
+          <p class="divider">o</p>
+          <form method="post" action="/auth/google?next=/app/onboarding">
+            <button class="btn btn-secondary btn-block" type="submit">
+              Registrarme con Google
+            </button>
+            <p class="google-note">
+              Al registrarte con Google aceptas los <a href="/legal/terminos">Términos</a> y la
+              <a href="/legal/privacidad">Política de Privacidad</a>, y confirmas que tienes 16 años
+              o más.
+            </p>
+          </form>
+        </>
+      )}
+    </>
+  )}
+  <p class="alt">
+    ¿Ya tienes cuenta? <a href="/auth/login">Entra</a>
+  </p>
+</AuthLayout>
+
+<script>
+  import { enhanceForm } from '@/lib/forms/enhance';
+  import { registerSchema } from '@/lib/validation/auth';
+
+  enhanceForm(document.querySelector<HTMLFormElement>('form[data-validate]'), registerSchema);
+</script>
+
+<style>
+  .alt {
+    margin: 0;
+  }
+  .alt a {
+    display: inline-block;
+    padding-block: 0.6rem;
+  }
+  .consent {
+    font-size: var(--step--1);
+  }
+  .consent :global(.check) {
+    align-items: flex-start;
+  }
+  .consent a,
+  .google-note a {
+    color: var(--acid);
+    text-decoration: underline;
+  }
+  .google-note {
+    margin: var(--space-2) 0 0;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+</style>

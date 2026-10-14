@@ -1,0 +1,288 @@
+---
+/**
+ * "El día que naciste": el cielo sobre tu lugar, la Luna, el día o la
+ * noche, la estación, tu vida en números y tus próximas citas con el cielo.
+ */
+import BirthSky from '@/components/chart/BirthSky.astro';
+import Icon from '@/components/ui/Icon.astro';
+import type { BirthDay } from '@/lib/chart/birth-day';
+
+interface Props {
+  b: BirthDay;
+  place: string;
+  timeKnown: boolean;
+  timeZone: string;
+  birthDate: string;
+  ask: string;
+}
+const { b, place, timeKnown, timeZone, birthDate, ask } = Astro.props;
+
+const MOON_EMOJI: Record<string, string> = {
+  'Luna nueva': '🌑',
+  Creciente: '🌒',
+  'Cuarto creciente': '🌓',
+  'Gibosa creciente': '🌔',
+  'Luna llena': '🌕',
+  'Gibosa menguante': '🌖',
+  'Cuarto menguante': '🌗',
+  Menguante: '🌘',
+};
+const n = (x: number) => new Intl.NumberFormat('es-ES', { useGrouping: 'always' }).format(x);
+const longDate = (d: Date) =>
+  new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeStyle: 'short', timeZone }).format(d);
+const monthYear = (d: Date) =>
+  new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric', timeZone }).format(d);
+const year = (d: Date) => d.getUTCFullYear();
+const now = new Date();
+const days = (d: Date) => Math.ceil((d.getTime() - now.getTime()) / 86_400_000);
+const saturnAge = (d: Date) =>
+  Math.floor((d.getTime() - Date.parse(`${birthDate}T12:00:00Z`)) / (365.2422 * 86_400_000));
+const city = place.split(',')[0]?.trim() || 'tu ciudad';
+const generation = b.generation.startsWith('Generación')
+  ? `de la ${b.generation}`
+  : b.generation.toLowerCase();
+---
+
+<section id="nacimiento" class="birth card" aria-labelledby="nacimiento-t">
+  <BirthSky sky={b.sky} isDay={b.daylight?.isDay ?? null} place={city} seed={birthDate} />
+  <div class="birth-text">
+    <p class="kicker">El día que naciste</p>
+    <h2 id="nacimiento-t">
+      Un {b.weekday.day} de {b.season.name} en {city}
+    </h2>
+    <p>
+      Naciste en {b.weekday.day}, {b.weekday.text}.
+    </p>
+    <p class="moon-line">
+      <span class="moon-emoji" aria-hidden="true">
+        {MOON_EMOJI[b.moon.name]}
+      </span>
+      <span>
+        {b.moon.text}{' '}
+        <span class="muted">
+          ({b.moon.name}, {Math.round(b.moon.illumination * 100)} % iluminada)
+        </span>
+      </span>
+    </p>
+    {b.daylight ? (
+      <p>
+        {b.daylight.isDay
+          ? `Naciste de día: el Sol estaba a ${b.daylight.sunAltitude}° sobre el horizonte.`
+          : 'Naciste de noche, con el Sol bajo el horizonte.'}
+        {b.daylight.sunrise &&
+          b.daylight.sunset &&
+          ` Ese día, en ${city}, el Sol salió a las ${b.daylight.sunrise} y se puso a las ${b.daylight.sunset}.`}
+      </p>
+    ) : (
+      <p class="muted">
+        Sin tu hora de nacimiento no sé si era de día o de noche: el mapa muestra el cielo a
+        mediodía. Añádela en Ajustes y lo afino al minuto.
+      </p>
+    )}
+    <p>
+      Era {b.season.name} en el hemisferio {b.season.hemisphere}: {b.season.text}. Eres {generation}
+      .
+    </p>
+  </div>
+
+  <ul class="life" aria-label="Tu vida en números">
+    <li>
+      <strong>{n(b.life.days)}</strong>
+      <span>días vividos (y otros tantos amaneceres)</span>
+    </li>
+    <li>
+      <strong>{n(b.life.fullMoons)}</strong>
+      <span>lunas llenas desde que naciste</span>
+    </li>
+    <li>
+      <strong>{n(b.life.kmAroundSun)} millones</strong>
+      <span>de km recorridos alrededor del Sol</span>
+    </li>
+    <li>
+      <strong>{n(b.life.heartbeats)} millones</strong>
+      <span>de latidos, más o menos</span>
+    </li>
+  </ul>
+
+  <div class="dates">
+    <h3>Tus próximas citas con el cielo</h3>
+    <ol>
+      {b.nextSolarReturn && (
+        <li>
+          <span class="date">{longDate(b.nextSolarReturn)}</span>
+          <strong>Tu retorno solar · en {days(b.nextSolarReturn)} días</strong>
+          <span class="muted">
+            El minuto exacto en que el Sol vuelve a donde estaba cuando naciste: tu cumpleaños
+            astrológico. Lo que hagas ese día marca el tono de tu año.
+          </span>
+        </li>
+      )}
+      {b.jupiterReturn && (
+        <li>
+          <span class="date">{monthYear(b.jupiterReturn)}</span>
+          <strong>Tu retorno de Júpiter</strong>
+          <span class="muted">
+            Cada doce años Júpiter, el planeta de la suerte, vuelve a su sitio: año de crecer, de
+            abrir puertas y de decir que sí.
+          </span>
+        </li>
+      )}
+      {b.saturn.first && b.saturn.first < now ? (
+        <li>
+          <span class="date">{year(b.saturn.first)} · ya vivido</span>
+          <strong>Tu retorno de Saturno (a los {saturnAge(b.saturn.first)})</strong>
+          <span class="muted">
+            La gran prueba de madurez: lo que se cayó entonces dejó sitio a lo que de verdad era
+            tuyo.{b.saturn.next && ` El siguiente llegará en ${year(b.saturn.next)}.`}
+          </span>
+        </li>
+      ) : b.saturn.next ? (
+        <li>
+          <span class="date">{monthYear(b.saturn.next)}</span>
+          <strong>Tu retorno de Saturno</strong>
+          <span class="muted">
+            Hacia los 29 años Saturno vuelve a su sitio: la gran prueba de madurez. Lo que
+            construyas antes, aguanta.
+          </span>
+        </li>
+      ) : null}
+    </ol>
+  </div>
+
+  <a class="ask" href={ask}>
+    <Icon name="chat" size={16} /> Pregúntale a ZODI qué significa todo esto
+  </a>
+  {!timeKnown && (
+    <p class="muted small">Calculado a mediodía porque falta tu hora de nacimiento.</p>
+  )}
+</section>
+
+<style>
+  .birth {
+    display: grid;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+    max-width: 58rem;
+    background:
+      radial-gradient(circle at 15% 20%, rgb(155 77 255 / 22%), transparent 55%),
+      radial-gradient(circle at 85% 80%, rgb(184 255 23 / 10%), transparent 50%),
+      var(--glass, rgb(18 18 28 / 80%));
+    border-color: var(--line-acid);
+  }
+  @media (min-width: 820px) {
+    .birth {
+      grid-template-columns: 20rem minmax(0, 1fr);
+    }
+    .life,
+    .dates,
+    .ask,
+    .small {
+      grid-column: 1 / -1;
+    }
+  }
+  .birth-text {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+  .birth-text h2 {
+    margin: 0;
+    font-size: var(--step-3);
+  }
+  .birth-text p {
+    margin: 0;
+    line-height: 1.6;
+  }
+  .moon-line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+  }
+  .moon-emoji {
+    font-size: 2.2rem;
+    line-height: 1;
+  }
+  .life {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  }
+  .life li {
+    display: grid;
+    gap: 2px;
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 8%);
+  }
+  .life strong {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    color: var(--acid);
+    line-height: 1.1;
+  }
+  .life span {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .dates h3 {
+    margin: 0 0 var(--space-3);
+    font-size: var(--step-1);
+  }
+  .dates ol {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 var(--space-4);
+    border-left: 2px solid var(--line-acid);
+    display: grid;
+    gap: var(--space-4);
+  }
+  .dates li {
+    position: relative;
+    display: grid;
+    gap: 2px;
+  }
+  .dates li::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--space-4) - 7px);
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--acid);
+    box-shadow: 0 0 12px var(--acid);
+  }
+  .date {
+    font-family: var(--font-mono, monospace);
+    font-size: var(--step--1);
+    color: var(--acid);
+  }
+  .date::first-letter {
+    text-transform: uppercase;
+  }
+  .dates .muted {
+    font-size: var(--step--1);
+  }
+  .ask {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line-acid);
+    color: var(--acid);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .small {
+    font-size: var(--step--1);
+    margin: 0;
+  }
+</style>

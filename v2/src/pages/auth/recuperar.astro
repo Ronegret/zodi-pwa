@@ -1,0 +1,89 @@
+---
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import { AUTH_UNAVAILABLE, authErrorMessage } from '@/lib/auth/errors';
+import { recoverSchema } from '@/lib/validation/auth';
+import { fieldErrors, formToObject } from '@/lib/validation/common';
+
+let errors: Record<string, string> = {};
+let email = '';
+let sent = false;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  email = String(form.get('email') ?? '').slice(0, 254);
+  const parsed = recoverSchema.safeParse(formToObject(form));
+  if (!parsed.success) {
+    errors = fieldErrors(parsed.error);
+    Astro.response.status = 422;
+  } else if (!Astro.locals.supabase) {
+    errors = { _form: AUTH_UNAVAILABLE };
+    Astro.response.status = 503;
+  } else {
+    const { error } = await Astro.locals.supabase.auth.resetPasswordForEmail(parsed.data.email, {
+      redirectTo: `${Astro.url.origin}/auth/callback?next=/auth/nueva-clave`,
+    });
+    // Misma respuesta exista o no la cuenta: no se confirma qué correos están registrados.
+    if (error?.status === 429) {
+      errors = { _form: authErrorMessage(error) };
+      Astro.response.status = 429;
+    } else {
+      if (error) console.error('[auth] resetPasswordForEmail', error.code ?? error.status);
+      sent = true;
+    }
+  }
+}
+---
+
+<AuthLayout
+  title={sent ? 'Revisa tu correo' : 'Recupera tu contraseña'}
+  intro={sent ? undefined : 'Te enviamos un enlace para elegir una nueva. Sin preguntas incómodas.'}
+>
+  {sent ? (
+    <p class="notice" role="status">
+      Si hay una cuenta con ese correo, te hemos enviado un enlace para cambiar la contraseña.
+      Caduca en una hora.
+    </p>
+  ) : (
+    <>
+      <ErrorSummary errors={errors} />
+      <form method="post" novalidate class="stack" data-validate>
+        <Field
+          name="email"
+          label="Correo electrónico"
+          type="email"
+          autocomplete="email"
+          inputmode="email"
+          spellcheck="false"
+          value={email}
+          required
+          error={errors.email}
+        />
+        <button class="btn btn-block" type="submit">
+          Enviar enlace
+        </button>
+      </form>
+    </>
+  )}
+  <p class="alt">
+    <a href="/auth/login">Volver a entrar</a>
+  </p>
+</AuthLayout>
+
+<script>
+  import { enhanceForm } from '@/lib/forms/enhance';
+  import { recoverSchema } from '@/lib/validation/auth';
+
+  enhanceForm(document.querySelector<HTMLFormElement>('form[data-validate]'), recoverSchema);
+</script>
+
+<style>
+  .alt {
+    margin: 0;
+  }
+  .alt a {
+    display: inline-block;
+    padding-block: 0.6rem;
+  }
+</style>

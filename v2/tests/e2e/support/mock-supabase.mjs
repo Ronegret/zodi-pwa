@@ -1,0 +1,907 @@
+/**
+ * Supabase falso para e2e: lo mínimo de GoTrue (/auth/v1) y PostgREST
+ * (/rest/v1) que usa la app, con estado en memoria y "RLS" por token.
+ * Los tests crean usuarios propios con POST /__test/users, así los proyectos
+ * de Playwright (móvil, tablet, escritorio) no se pisan entre sí.
+ */
+import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { createServer } from 'node:http';
+
+const PORT = Number(process.env.MOCK_SUPABASE_PORT ?? 54329);
+const PASSWORD = 'Estrella2024';
+
+/** @type {Map<string, {id: string, email: string, password: string}>} */
+const users = new Map();
+/** @type {Map<string, Record<string, unknown>>} */
+const profiles = new Map();
+/** @type {Map<string, Record<string, unknown>[]>} */
+const charts = new Map();
+/** access/refresh token → user id */
+const accessTokens = new Map();
+const refreshTokens = new Map();
+/** Lecturas guardadas (todas; la "RLS" filtra por usuario). */
+const readings = [];
+/** Tu gente: fichas privadas de cada usuario. */
+const people = [];
+/** Registro de nombres: caché compartida y consultas por usuario. */
+const nameMeanings = [];
+const nameLookups = new Map();
+/** Cuota de IA usada hoy por usuario, y eventos (id → user id). */
+const quotaUsed = new Map();
+const quotaEvents = new Map();
+let nextEventId = 1;
+/** Límites por plan (usage_limits); durante el periodo gratis cuenta como premium. */
+const LIMITS = { free: { lecturas: 5, oraculo: 15 }, premium: { lecturas: 40, oraculo: 60 } };
+function limitFor(userId, bucket) {
+  const p = profiles.get(userId);
+  const trial = p?.trial_ends_at && Date.parse(p.trial_ends_at) > Date.now();
+  const plan = p?.plan === 'free' && trial ? 'premium' : (p?.plan ?? 'free');
+  return (LIMITS[plan] ?? LIMITS.premium)[bucket];
+}
+/** Clave de service role que Playwright pasa al servidor de la app. */
+export const SERVICE_KEY = 'e2e-service-role-key';
+/** Última petición a la IA falsa (para que los tests miren el prompt). */
+/** Peticiones a la IA falsa (cada test busca la suya por un texto único). */
+const aiRequests = [];
+
+// Carta real (generada por el motor, ver tests/unit/e2e-fixture.test.ts).
+const FIXTURE = JSON.parse(readFileSync(new URL('./fixture-chart.json', import.meta.url), 'utf8'));
+
+/** Fila de perfil con las mismas columnas que la tabla real. */
+function blankProfile(id, now) {
+  return {
+    id,
+    display_name: 'E2E',
+    username: null,
+    avatar_url: null,
+    birth_date: null,
+    birth_time: null,
+    birth_time_known: null,
+    birth_place: null,
+    birth_lat: null,
+    birth_lon: null,
+    time_zone: null,
+    language: 'es',
+    reading_tone: 'directo',
+    favorite_topics: [],
+    notification_prefs: [],
+    relationship_status: null,
+    partner_name: null,
+    has_kids: null,
+    kids_count: null,
+    personal_bio: null,
+    plan: 'free',
+    gems: 0,
+    xp: 0,
+    level: 1,
+    streak: 0,
+    best_streak: 0,
+    last_active_on: null,
+    referral_code: id.slice(0, 10),
+    referred_by: null,
+    onboarding_completed_at: null,
+    // Sin periodo gratis por defecto: los tests ven los límites de free.
+    trial_ends_at: null,
+    created_at: now,
+    updated_at: now,
+  };
+}
+
+function createUser({ onboarded, trial = false, moderator = false }) {
+  const id = randomUUID();
+  const email = `e2e-${id.slice(0, 8)}@zodi.test`;
+  users.set(id, { id, email, password: PASSWORD });
+  const now = new Date().toISOString();
+  profiles.set(id, {
+    ...blankProfile(id, now),
+    ...(trial ? { trial_ends_at: new Date(Date.now() + 30 * 86_400_000).toISOString() } : {}),
+    ...(moderator ? { is_moderator: true } : {}),
+    ...(onboarded
+      ? {
+          display_name: 'Ana Estrella',
+          username: `ana_${id.slice(0, 6)}`,
+          birth_date: '1990-04-15',
+          birth_time: '10:30:00',
+          birth_time_known: true,
+          birth_place: 'Madrid, Comunidad de Madrid, España',
+          birth_lat: 40.4168,
+          birth_lon: -3.7038,
+          time_zone: 'Europe/Madrid',
+          xp: 340,
+          level: 3,
+          streak: 5,
+          best_streak: 5,
+          // Ya entró hoy: visitar el panel no cambia la racha (los tests esperan 5).
+          last_active_on: new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(
+            new Date(),
+          ),
+          gems: 12,
+          onboarding_completed_at: now,
+        }
+      : {}),
+  });
+  charts.set(
+    id,
+    onboarded
+      ? [
+          {
+            id: randomUUID(),
+            user_id: id,
+            label: 'Yo',
+            is_self: true,
+            input: FIXTURE.input,
+            chart: FIXTURE.chart,
+            engine_version: FIXTURE.engine_version,
+            created_at: now,
+          },
+        ]
+      : [],
+  );
+  return { id, email, password: PASSWORD };
+}
+
+/** Tabla places simulada (mismas columnas que search_places). */
+const PLACES = [
+  {
+    id: 3117735,
+    name: 'Madrid',
+    country_code: 'ES',
+    admin1: 'Comunidad de Madrid',
+    latitude: 40.4165,
+    longitude: -3.70256,
+    time_zone: 'Europe/Madrid',
+    population: 3255944,
+  },
+  {
+    id: 3871336,
+    name: 'Santiago',
+    country_code: 'CL',
+    admin1: 'Región Metropolitana',
+    latitude: -33.45694,
+    longitude: -70.64827,
+    time_zone: 'America/Santiago',
+    population: 4837295,
+  },
+  {
+    id: 3109642,
+    name: 'Santiago de Compostela',
+    country_code: 'ES',
+    admin1: 'Galicia',
+    latitude: 42.88052,
+    longitude: -8.54569,
+    time_zone: 'Europe/Madrid',
+    population: 95092,
+  },
+  {
+    id: 3128760,
+    name: 'Barcelona',
+    country_code: 'ES',
+    admin1: 'Cataluña',
+    latitude: 41.38879,
+    longitude: 2.15899,
+    time_zone: 'Europe/Madrid',
+    population: 1620343,
+  },
+];
+const fold = (s) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
+function searchPlaces(body) {
+  const q = fold(String(body.p_query ?? ''));
+  if (q.length < 2) return [];
+  return PLACES.filter((p) => fold(p.name).startsWith(q))
+    .sort(
+      (x, y) =>
+        Number(fold(y.name) === q) - Number(fold(x.name) === q) || y.population - x.population,
+    )
+    .slice(0, body.p_limit ?? 8);
+}
+
+const b64url = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
+
+function userJson(u) {
+  return {
+    id: u.id,
+    aud: 'authenticated',
+    role: 'authenticated',
+    email: u.email,
+    email_confirmed_at: new Date(0).toISOString(),
+    app_metadata: { provider: 'email', providers: ['email'] },
+    user_metadata: {},
+    identities: [],
+    created_at: new Date(0).toISOString(),
+    updated_at: new Date(0).toISOString(),
+  };
+}
+
+function issueSession(u) {
+  const now = Math.floor(Date.now() / 1000);
+  const access = [
+    b64url({ alg: 'HS256', typ: 'JWT' }),
+    b64url({
+      sub: u.id,
+      role: 'authenticated',
+      aud: 'authenticated',
+      exp: now + 3600,
+      iat: now,
+      session_id: randomUUID(),
+    }),
+    'mock-signature',
+  ].join('.');
+  const refresh = randomUUID();
+  accessTokens.set(access, u.id);
+  refreshTokens.set(refresh, u.id);
+  return {
+    access_token: access,
+    token_type: 'bearer',
+    expires_in: 3600,
+    expires_at: now + 3600,
+    refresh_token: refresh,
+    user: userJson(u),
+  };
+}
+
+/** Responde y devuelve true (para saber que la petición ya está atendida). */
+function send(res, status, body, headers = {}) {
+  res.writeHead(status, { 'content-type': 'application/json', ...headers });
+  res.end(body === undefined ? '' : JSON.stringify(body));
+  return true;
+}
+
+async function readBody(req) {
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  const raw = Buffer.concat(chunks).toString('utf8');
+  return raw ? JSON.parse(raw) : {};
+}
+
+function currentUser(req) {
+  const token = (req.headers.authorization ?? '').replace(/^Bearer /, '');
+  const id = accessTokens.get(token);
+  return id ? users.get(id) : undefined;
+}
+
+const isServiceRole = (req) =>
+  (req.headers.authorization ?? '').replace(/^Bearer /, '') === SERVICE_KEY;
+
+/** Filtros `col=eq.valor` de PostgREST. */
+function applyFilters(rows, params) {
+  let out = rows;
+  for (const [key, value] of params) {
+    if (['select', 'order', 'limit'].includes(key)) continue;
+    const [op, ...rest] = value.split('.');
+    const expected = rest.join('.');
+    if (op === 'eq') out = out.filter((r) => String(r[key]) === expected);
+    if (op === 'neq') out = out.filter((r) => String(r[key]) !== expected);
+    if (op === 'gte') out = out.filter((r) => String(r[key]) >= expected);
+    if (op === 'lt') out = out.filter((r) => String(r[key]) < expected);
+    // jsonb @> (PostgREST "cs"): cada clave del objeto pedido coincide.
+    if (op === 'cs') {
+      const want = JSON.parse(expected);
+      out = out.filter((r) =>
+        Object.entries(want).every(([k, v]) => JSON.stringify(r[key]?.[k]) === JSON.stringify(v)),
+      );
+    }
+    if (op === 'in') {
+      // in.(a,b,"c d") → ['a', 'b', 'c d']
+      const set = expected
+        .replace(/^\(|\)$/g, '')
+        .split(',')
+        .map((x) => x.replace(/^"|"$/g, ''));
+      out = out.filter((r) => set.includes(String(r[key])));
+    }
+  }
+  const order = params.get('order');
+  if (order) {
+    // Varias columnas: "favorite.desc,created_at.asc".
+    const keys = order.split(',').map((o) => o.split('.'));
+    out = [...out].sort((a, b) => {
+      for (const [col, dir] of keys) {
+        const c = String(a[col]).localeCompare(String(b[col]));
+        if (c) return (dir === 'desc' ? -1 : 1) * c;
+      }
+      return 0;
+    });
+  }
+  const limit = params.get('limit');
+  return limit ? out.slice(0, Number(limit)) : out;
+}
+
+function respondRows(req, res, rows, status = 200) {
+  const wantsObject = (req.headers.accept ?? '').includes('vnd.pgrst.object');
+  if (!wantsObject) return send(res, status, rows);
+  if (rows.length !== 1) {
+    return send(res, 406, {
+      code: 'PGRST116',
+      message: 'JSON object requested, multiple (or no) rows returned',
+      details: null,
+      hint: null,
+    });
+  }
+  return send(res, status, rows[0]);
+}
+
+async function handleAuth(req, res, url) {
+  const path = url.pathname.replace('/auth/v1', '');
+  if (path === '/token' && req.method === 'POST') {
+    const body = await readBody(req);
+    if (url.searchParams.get('grant_type') === 'refresh_token') {
+      const id = refreshTokens.get(body.refresh_token);
+      if (!id)
+        return send(res, 400, {
+          code: 'refresh_token_not_found',
+          error_code: 'refresh_token_not_found',
+          msg: 'Invalid Refresh Token',
+        });
+      return send(res, 200, issueSession(users.get(id)));
+    }
+    const u = [...users.values()].find(
+      (x) => x.email === body.email && x.password === body.password,
+    );
+    if (!u)
+      return send(res, 400, {
+        code: 'invalid_credentials',
+        error_code: 'invalid_credentials',
+        msg: 'Invalid login credentials',
+      });
+    return send(res, 200, issueSession(u));
+  }
+  // Ajustes públicos de Auth: la app solo enseña "Continuar con Google" si está activado.
+  if (path === '/settings' && req.method === 'GET') {
+    return send(res, 200, { external: { google: true, email: true }, disable_signup: false });
+  }
+  if (path === '/user' && req.method === 'GET') {
+    const u = currentUser(req);
+    if (!u) return send(res, 403, { code: 'bad_jwt', error_code: 'bad_jwt', msg: 'invalid JWT' });
+    return send(res, 200, userJson(u));
+  }
+  // Borrar usuario (admin, service role): cae en cascada todo lo suyo.
+  const adminDelete = /^\/admin\/users\/([0-9a-f-]{36})$/.exec(path);
+  if (adminDelete && req.method === 'DELETE') {
+    if (!isServiceRole(req)) return send(res, 401, { msg: 'mock: solo service role' });
+    const id = adminDelete[1];
+    users.delete(id);
+    profiles.delete(id);
+    charts.delete(id);
+    for (let i = readings.length - 1; i >= 0; i--)
+      if (readings[i].user_id === id) readings.splice(i, 1);
+    for (const [token, owner] of accessTokens) if (owner === id) accessTokens.delete(token);
+    return send(res, 200, {});
+  }
+  if (path === '/logout' && req.method === 'POST') {
+    const token = (req.headers.authorization ?? '').replace(/^Bearer /, '');
+    accessTokens.delete(token);
+    return send(res, 204);
+  }
+  if (path === '/signup' && req.method === 'POST') {
+    const body = await readBody(req);
+    // Confirmación por correo activa: usuario sin sesión.
+    return send(res, 200, {
+      ...userJson({ id: randomUUID(), email: body.email }),
+      email_confirmed_at: null,
+    });
+  }
+  if (path === '/recover' && req.method === 'POST') return send(res, 200, {});
+  return send(res, 404, { msg: `mock: ${req.method} ${url.pathname} no implementado` });
+}
+
+async function handleRest(req, res, url) {
+  const u = currentUser(req);
+  const [, , , resource, fn] = url.pathname.split('/');
+  if (resource === 'rpc' && fn === 'search_places') {
+    return send(res, 200, searchPlaces(await readBody(req)));
+  }
+  if (resource === 'rpc' && (fn === 'ai_quota_status' || fn === 'oracle_quota_status')) {
+    if (!u) return send(res, 200, []);
+    const bucket = fn === 'oracle_quota_status' ? 'oraculo' : 'lecturas';
+    const key = `${u.id}:${bucket}`;
+    return send(res, 200, [{ used: quotaUsed.get(key) ?? 0, daily_limit: limitFor(u.id, bucket) }]);
+  }
+  if (resource === 'rpc' && fn === 'consume_ai_quota') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    // Lecturas y oráculo llevan cuentas separadas (como consume_ai_quota).
+    const bucket = (await readBody(req)).p_kind === 'assistant' ? 'oraculo' : 'lecturas';
+    const key = `${u.id}:${bucket}`;
+    const limit = limitFor(u.id, bucket);
+    const used = quotaUsed.get(key) ?? 0;
+    if (used >= limit) {
+      return send(res, 200, [{ allowed: false, used, daily_limit: limit, event_id: null }]);
+    }
+    const id = nextEventId++;
+    quotaUsed.set(key, used + 1);
+    quotaEvents.set(id, key);
+    return send(res, 200, [{ allowed: true, used: used + 1, daily_limit: limit, event_id: id }]);
+  }
+  // ---------- Moderación (misma lógica que moderation_queue y moderate) ----------
+  if (resource === 'rpc' && (fn === 'moderation_queue' || fn === 'moderate')) {
+    if (!u || !profiles.get(u.id)?.is_moderator) {
+      return send(res, 403, { code: '42501', message: 'forbidden' });
+    }
+    if (fn === 'moderate') {
+      const { p_id, p_action } = await readBody(req);
+      const item = posts.find((x) => x.id === p_id) ?? comments.find((x) => x.id === p_id);
+      if (!item) return send(res, 400, { code: 'P0002', message: 'not_found' });
+      if (p_action === 'eliminar') item.status = 'removed';
+      if (p_action === 'restaurar') item.status = 'published';
+      if (p_action === 'restaurar' || p_action === 'descartar') {
+        for (let i = reports.length - 1; i >= 0; i--)
+          if (reports[i].target === p_id) reports.splice(i, 1);
+      }
+      return send(res, 204);
+    }
+    const byTarget = new Map();
+    for (const r of reports) byTarget.set(r.target, [...(byTarget.get(r.target) ?? []), r]);
+    const rows = [];
+    for (const [target, rs] of byTarget) {
+      const post = posts.find((x) => x.id === target);
+      const item = post ?? comments.find((x) => x.id === target);
+      if (!item || item.status === 'removed') continue;
+      rows.push({
+        kind: post ? 'post' : 'comment',
+        id: target,
+        body: item.body,
+        status: item.status,
+        author_name: profiles.get(item.author_id)?.display_name || 'Anónimo',
+        created_at: item.created_at,
+        reports: new Set(rs.map((r) => r.reporter)).size,
+        reasons: [...new Set(rs.map((r) => r.reason))],
+        last_report_at: new Date().toISOString(),
+      });
+    }
+    rows.sort((a, b) => (b.status === 'hidden') - (a.status === 'hidden') || b.reports - a.reports);
+    return send(res, 200, rows);
+  }
+  if (resource === 'rpc' && fn === 'record_activity') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    return send(res, 200, [recordActivity(u.id, (await readBody(req)).p_action)]);
+  }
+  if (resource === 'rpc' && fn === 'toggle_favorite') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const { p_reading } = await readBody(req);
+    const row = readings.find((r) => r.id === p_reading && r.user_id === u.id);
+    if (!row) return send(res, 400, { code: 'P0002', message: 'reading_not_found' });
+    row.favorite = !row.favorite;
+    return send(res, 200, row.favorite);
+  }
+  if (resource === 'user_achievements' && req.method === 'GET') {
+    const own = u
+      ? [...(achievements.get(u.id) ?? new Map())].map(([achievement, unlocked_at]) => ({
+          user_id: u.id,
+          achievement,
+          unlocked_at,
+        }))
+      : [];
+    return respondRows(req, res, applyFilters(own, url.searchParams));
+  }
+  if (resource === 'usage_events' && req.method === 'DELETE' && isServiceRole(req)) {
+    const id = Number((url.searchParams.get('id') ?? '').replace('eq.', ''));
+    const owner = quotaEvents.get(id);
+    if (owner) {
+      quotaEvents.delete(id);
+      quotaUsed.set(owner, Math.max(0, (quotaUsed.get(owner) ?? 1) - 1));
+    }
+    return send(res, 204);
+  }
+  if (resource === 'readings') {
+    if (req.method === 'POST') {
+      if (!isServiceRole(req))
+        return send(res, 401, { code: '42501', message: 'permission denied' });
+      const row = {
+        id: randomUUID(),
+        created_at: new Date().toISOString(),
+        favorite: false,
+        ...(await readBody(req)),
+      };
+      readings.push(row);
+      return respondRows(req, res, [row], 201);
+    }
+    if (req.method === 'GET') {
+      const own = u ? readings.filter((r) => r.user_id === u.id) : [];
+      return respondRows(req, res, applyFilters(own, url.searchParams));
+    }
+  }
+  if (resource === 'profiles') {
+    const visible = u ? [profiles.get(u.id)] : [];
+    if (req.method === 'GET') return respondRows(req, res, applyFilters(visible, url.searchParams));
+    if (req.method === 'PATCH') {
+      const body = await readBody(req);
+      const target = applyFilters(visible, url.searchParams);
+      if (
+        body.username &&
+        [...profiles.values()].some((p) => p.username === body.username && p.id !== u?.id)
+      ) {
+        return send(res, 409, {
+          code: '23505',
+          message: 'duplicate key value violates unique constraint "profiles_username_key"',
+          details: null,
+          hint: null,
+        });
+      }
+      for (const row of target) Object.assign(row, body, { updated_at: new Date().toISOString() });
+      return respondRows(req, res, target);
+    }
+  }
+  if (resource === 'natal_charts') {
+    const own = u ? (charts.get(u.id) ?? []) : [];
+    if (req.method === 'GET') return respondRows(req, res, applyFilters(own, url.searchParams));
+    if (req.method === 'POST') {
+      if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+      const body = await readBody(req);
+      const row = {
+        id: randomUUID(),
+        user_id: u.id,
+        created_at: new Date().toISOString(),
+        ...body,
+      };
+      own.push(row);
+      charts.set(u.id, own);
+      return respondRows(req, res, [row], 201);
+    }
+  }
+  // ---------- Registro de nombres (caché compartida y tope diario) ----------
+  if (resource === 'rpc' && fn === 'claim_name_lookup') {
+    if (!u) return send(res, 200, false);
+    const used = nameLookups.get(u.id) ?? 0;
+    if (used >= 30) return send(res, 200, false);
+    nameLookups.set(u.id, used + 1);
+    return send(res, 200, true);
+  }
+  if (resource === 'name_meanings') {
+    if (req.method === 'GET') {
+      if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+      return respondRows(req, res, applyFilters(nameMeanings, url.searchParams));
+    }
+    if (req.method === 'POST') {
+      if (!isServiceRole(req))
+        return send(res, 401, { code: '42501', message: 'permission denied' });
+      const row = { created_at: new Date().toISOString(), ...(await readBody(req)) };
+      const i = nameMeanings.findIndex((r) => r.kind === row.kind && r.key === row.key);
+      if (i >= 0) nameMeanings[i] = row;
+      else nameMeanings.push(row);
+      return respondRows(req, res, [row], 201);
+    }
+  }
+  if (resource === 'people') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const own = people.filter((r) => r.user_id === u.id);
+    if (req.method === 'GET') return respondRows(req, res, applyFilters(own, url.searchParams));
+    if (req.method === 'POST') {
+      if (own.length >= 50) return send(res, 400, { code: 'P0001', message: 'people_limit' });
+      const row = {
+        id: randomUUID(),
+        user_id: u.id,
+        birth_time: null,
+        favorite: false,
+        created_at: new Date().toISOString(),
+        ...(await readBody(req)),
+      };
+      people.push(row);
+      return respondRows(req, res, [row], 201);
+    }
+    if (req.method === 'DELETE') {
+      for (const row of applyFilters(own, url.searchParams)) people.splice(people.indexOf(row), 1);
+      return send(res, 204);
+    }
+    if (req.method === 'PATCH') {
+      const body = await readBody(req);
+      const target = applyFilters(own, url.searchParams);
+      for (const row of target) Object.assign(row, body);
+      return respondRows(req, res, target);
+    }
+  }
+  const community = await handleCommunity(req, res, url, u, resource, fn);
+  if (community !== undefined) return community;
+  return send(res, 404, { message: `mock: ${req.method} ${url.pathname} no implementado` });
+}
+
+// ---------- Actividad (misma lógica que record_activity) ----------
+/** user id → (logro → fecha) */
+const achievements = new Map();
+const XP_BY_ACTION = { visit: 0, reading: 10, post: 8, comment: 3, favorite: 2 };
+const levelForXp = (xp) => Math.max(1, Math.floor((1 + Math.sqrt(1 + Math.max(xp, 0) / 12.5)) / 2));
+
+function recordActivity(userId, action) {
+  const p = profiles.get(userId);
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: p.time_zone ?? 'UTC' }).format(
+    new Date(),
+  );
+  const yesterday = new Date(Date.parse(`${today}T12:00:00Z`) - 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const newDay = !p.last_active_on || p.last_active_on < today;
+  if (newDay) {
+    p.streak = p.last_active_on === yesterday ? p.streak + 1 : 1;
+    p.best_streak = Math.max(p.best_streak ?? 0, p.streak);
+    p.xp += 5;
+    if (p.streak % 7 === 0) p.gems += 10;
+  }
+  p.xp += XP_BY_ACTION[action] ?? 0;
+  p.level = levelForXp(p.xp);
+  p.last_active_on = today;
+
+  const own = readings.filter((r) => r.user_id === userId);
+  const count = (kinds) => own.filter((r) => kinds.includes(r.kind)).length;
+  const total = own.filter((r) => r.kind !== 'assistant');
+  const candidates = [
+    total.length >= 1 && 'primera-senal',
+    total.length >= 10 && 'coleccionista',
+    new Set(total.map((r) => r.kind)).size >= 8 && 'explorador',
+    count(['tarot', 'celtic-tarot']) && 'primer-tarot',
+    count(['celtic-tarot']) && 'cruz-celta',
+    count(['runes']) && 'las-runas-hablan',
+    count(['natal-chart']) && 'mapa-descubierto',
+    count(['compatibility']) && 'quimica-detectada',
+    count(['dream']) && 'sonador',
+    count(['numerology', 'name-reading']) && 'los-numeros-no-mienten',
+    count(['roast']) && 'aguanto-el-roast',
+    count(['assistant']) && 'consulta-al-oraculo',
+    own.some((r) => r.favorite) && 'favorita',
+    p.streak >= 3 && 'racha-3',
+    p.streak >= 7 && 'racha-7',
+    p.streak >= 30 && 'racha-30',
+    p.level >= 5 && 'nivel-5',
+    p.level >= 10 && 'nivel-10',
+    posts.some((post) => post.author_id === userId) && 'voz-de-la-comunidad',
+  ].filter(Boolean);
+  const mine = achievements.get(userId) ?? new Map();
+  achievements.set(userId, mine);
+  const unlocked = candidates.filter((a) => !mine.has(a));
+  for (const a of unlocked) mine.set(a, new Date().toISOString());
+  p.gems += unlocked.length * 5;
+  return {
+    xp: p.xp,
+    level: p.level,
+    streak: p.streak,
+    best_streak: p.best_streak,
+    gems: p.gems,
+    unlocked,
+  };
+}
+
+// ---------- Comunidad (misma lógica que la RLS y las funciones reales) ----------
+const posts = [];
+const comments = [];
+const reactions = [];
+const reports = [];
+
+function authorCard(userId) {
+  const p = profiles.get(userId) ?? {};
+  return {
+    author_id: userId,
+    author_name: p.display_name ?? 'Alguien',
+    author_username: p.username ?? null,
+    author_avatar: p.avatar_url ?? null,
+    author_level: p.level ?? 1,
+    author_sign: (charts.get(userId) ?? []).length ? 'Aries' : null,
+  };
+}
+
+function feedRow(p, viewerId) {
+  const counts = {};
+  for (const r of reactions.filter((x) => x.post_id === p.id)) {
+    counts[r.kind] = (counts[r.kind] ?? 0) + 1;
+  }
+  return {
+    id: p.id,
+    body: p.body,
+    topic: p.topic,
+    created_at: p.created_at,
+    ...authorCard(p.author_id),
+    comment_count: comments.filter((c) => c.post_id === p.id && c.status === 'published').length,
+    reactions: counts,
+    my_reactions: reactions
+      .filter((x) => x.post_id === p.id && x.user_id === viewerId)
+      .map((x) => x.kind)
+      .sort(),
+  };
+}
+
+const conflict = (res) =>
+  send(res, 409, { code: '23505', message: 'duplicate key value', details: null, hint: null });
+
+async function handleCommunity(req, res, url, u, resource, fn) {
+  const id = (key) => (url.searchParams.get(key) ?? '').replace('eq.', '');
+  if (resource === 'rpc' && fn === 'community_feed') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const { p_topic, p_before, p_limit } = await readBody(req);
+    const rows = posts
+      .filter((p) => p.status === 'published')
+      .filter((p) => !p_topic || p.topic === p_topic)
+      .filter((p) => !p_before || p.created_at < p_before)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(0, Math.min(Math.max(p_limit ?? 20, 1), 50));
+    return send(
+      res,
+      200,
+      rows.map((p) => feedRow(p, u.id)),
+    );
+  }
+  if (resource === 'rpc' && fn === 'post_comments') {
+    if (!u) return send(res, 401, { code: '42501', message: 'permission denied' });
+    const { p_post } = await readBody(req);
+    return send(
+      res,
+      200,
+      comments
+        .filter((c) => c.post_id === p_post && c.status === 'published')
+        .map((c) => ({
+          id: c.id,
+          body: c.body,
+          created_at: c.created_at,
+          ...authorCard(c.author_id),
+        })),
+    );
+  }
+  if (
+    !u &&
+    ['community_posts', 'comments', 'post_reactions', 'content_reports'].includes(resource)
+  ) {
+    return send(res, 401, { code: '42501', message: 'permission denied' });
+  }
+  if (resource === 'community_posts' && req.method === 'POST') {
+    const body = await readBody(req);
+    const row = {
+      id: randomUUID(),
+      author_id: u.id,
+      body: body.body,
+      topic: body.topic ?? 'general',
+      status: 'published',
+      created_at: new Date().toISOString(),
+    };
+    posts.push(row);
+    return respondRows(req, res, [{ id: row.id }], 201);
+  }
+  if (resource === 'community_posts' && req.method === 'DELETE') {
+    const i = posts.findIndex((p) => p.id === id('id') && p.author_id === u.id);
+    return send(res, 200, i >= 0 ? posts.splice(i, 1).map((p) => ({ id: p.id })) : []);
+  }
+  if (resource === 'comments' && req.method === 'POST') {
+    const body = await readBody(req);
+    const post = posts.find((p) => p.id === body.post_id && p.status === 'published');
+    if (!post) return send(res, 403, { code: '42501', message: 'row-level security' });
+    const row = {
+      id: randomUUID(),
+      post_id: body.post_id,
+      author_id: u.id,
+      body: body.body,
+      status: 'published',
+      created_at: new Date().toISOString(),
+    };
+    comments.push(row);
+    return respondRows(req, res, [{ id: row.id }], 201);
+  }
+  if (resource === 'comments' && req.method === 'DELETE') {
+    const i = comments.findIndex(
+      (c) =>
+        c.id === id('id') &&
+        (c.author_id === u.id || posts.find((p) => p.id === c.post_id)?.author_id === u.id),
+    );
+    return send(res, 200, i >= 0 ? comments.splice(i, 1).map((c) => ({ id: c.id })) : []);
+  }
+  if (resource === 'post_reactions' && req.method === 'POST') {
+    const { post_id, kind } = await readBody(req);
+    if (reactions.some((r) => r.post_id === post_id && r.user_id === u.id && r.kind === kind)) {
+      return conflict(res);
+    }
+    reactions.push({ post_id, user_id: u.id, kind });
+    return send(res, 201);
+  }
+  if (resource === 'post_reactions' && req.method === 'DELETE') {
+    const keep = reactions.filter(
+      (r) => !(r.post_id === id('post_id') && r.user_id === u.id && r.kind === id('kind')),
+    );
+    reactions.splice(0, reactions.length, ...keep);
+    return send(res, 204);
+  }
+  if (resource === 'content_reports' && req.method === 'POST') {
+    const body = await readBody(req);
+    const target = body.post_id ?? body.comment_id;
+    if (reports.some((r) => r.reporter === u.id && r.target === target)) return conflict(res);
+    reports.push({ reporter: u.id, target, reason: body.reason ?? '' });
+    const reporters = new Set(reports.filter((r) => r.target === target).map((r) => r.reporter));
+    if (reporters.size >= 3) {
+      const post = posts.find((p) => p.id === target);
+      if (post) post.status = 'hidden';
+    }
+    return send(res, 201);
+  }
+  return undefined;
+}
+
+/**
+ * API de Anthropic falsa: responde en streaming SSE como la real. Repite el
+ * nombre y, en el tarot, las cartas que recibe, para que los tests
+ * comprueben que el prompt lleva los datos de la persona.
+ */
+async function handleAi(req, res) {
+  const body = await readBody(req);
+  aiRequests.push(body);
+  const prompt = [...body.system.map((b) => b.text), ...body.messages.map((m) => m.content)].join(
+    '\n',
+  );
+  const name = /Nombre: ([^ (\n]+)/.exec(prompt)?.[1] ?? 'tú';
+  // "1. Pasado: III · La Emperatriz (invertida) — Arcano ZODI: …"
+  // Los Arcanos ZODI llevan "·" en el numeral (Z·II): se corta en " · ".
+  const cards = [...prompt.matchAll(/^\d+\. [^:\n]+: .+? · ([^\n(—]+)/gm)].map((m) => m[1].trim());
+  const isChat = body.system.some((b) => b.text.includes('MODO CHAT'));
+  // Registro de nombres: responde en JSON como la IA real.
+  const nameWord = body.system.some((b) => b.text.includes('onomástica'))
+    ? (/: (\S+)$/.exec(body.messages.at(-1).content)?.[1] ?? '')
+    : null;
+  const text =
+    nameWord !== null
+      ? JSON.stringify(
+          /^zorblax$/i.test(nameWord)
+            ? { o: 'desconocido', m: 'desconocido' }
+            : { o: 'castellano (de prueba)', m: `significado de prueba de ${nameWord}` },
+        )
+      : isChat
+        ? `Oye **${name}**, respira. Cuéntame qué te pesa y lo miramos con tu carta.`
+        : [
+            `Mira, **${name}**: tu Sol en Aries llega con ganas de lío hoy.`,
+            cards.length ? `Tus cartas: ${cards.join(', ')}.` : 'La Luna te pide calma.',
+            '- **Amor:** di lo que piensas antes de las ocho.',
+            '- **Trabajo:** termina lo pendiente.',
+            '',
+            '**Hoy haz esto:** escribe tres cosas que quieres soltar.',
+          ].join('\n');
+  res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
+  const event = (type, data) =>
+    res.write(`event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`);
+  event('message_start', {
+    message: {
+      id: 'msg_e2e',
+      type: 'message',
+      role: 'assistant',
+      model: body.model,
+      content: [],
+      stop_reason: null,
+      stop_sequence: null,
+      usage: { input_tokens: 120, output_tokens: 1 },
+    },
+  });
+  event('content_block_start', { index: 0, content_block: { type: 'text', text: '' } });
+  for (const chunk of text.match(/[\s\S]{1,24}/g)) {
+    event('content_block_delta', { index: 0, delta: { type: 'text_delta', text: chunk } });
+    await new Promise((r) => setTimeout(r, 15));
+  }
+  event('content_block_stop', { index: 0 });
+  event('message_delta', {
+    delta: { stop_reason: 'end_turn', stop_sequence: null },
+    usage: { output_tokens: 42 },
+  });
+  event('message_stop', {});
+  res.end();
+}
+
+createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url ?? '/', `http://127.0.0.1:${PORT}`);
+    if (url.pathname === '/__test/health') return send(res, 200, { ok: true });
+    if (url.pathname === '/__test/users' && req.method === 'POST') {
+      return send(res, 201, createUser(await readBody(req)));
+    }
+    if (url.pathname === '/__test/ai') {
+      // Última petición cuyo system + mensajes contengan `contains`.
+      const needle = url.searchParams.get('contains') ?? '';
+      const found = aiRequests.findLast((r) =>
+        JSON.stringify([r.system, r.messages]).includes(needle),
+      );
+      return send(res, found ? 200 : 404, found ?? { message: 'sin coincidencias' });
+    }
+    if (url.pathname === '/__test/quota' && req.method === 'POST') {
+      const { userId, used, bucket = 'lecturas' } = await readBody(req);
+      quotaUsed.set(`${userId}:${bucket}`, used);
+      return send(res, 200, { ok: true });
+    }
+    if (url.pathname === '/v1/messages' && req.method === 'POST') return await handleAi(req, res);
+    if (url.pathname.startsWith('/auth/v1/')) return await handleAuth(req, res, url);
+    if (url.pathname.startsWith('/rest/v1/')) return await handleRest(req, res, url);
+    return send(res, 404, { message: 'mock: ruta desconocida' });
+  } catch (error) {
+    console.error('[mock-supabase]', error);
+    return send(res, 500, { message: 'mock: error interno' });
+  }
+}).listen(PORT, '127.0.0.1', () => {
+  console.log(`mock-supabase en http://127.0.0.1:${PORT}`);
+});

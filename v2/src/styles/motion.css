@@ -1,0 +1,256 @@
+/*
+ * Movimiento de Zodi. Solo transform y opacity (y clip/translate). Con
+ * movimiento reducido, por sistema o por Ajustes (html[data-motion=reduce]),
+ * todo se queda en su estado final al instante.
+ */
+@import 'lenis/dist/lenis.css';
+
+/* ---------- Transiciones de página (View Transitions nativas) ---------- */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root) {
+  animation: zodi-vt-out var(--dur-fast) var(--ease-in) both;
+}
+::view-transition-new(root) {
+  animation: zodi-vt-in var(--dur) var(--ease) both;
+}
+::view-transition-group(page-title),
+::view-transition-group(sign-art) {
+  animation-duration: var(--dur);
+  animation-timing-function: var(--ease);
+}
+@keyframes zodi-vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes zodi-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+/* Elementos compartidos entre páginas. */
+.vt-title {
+  view-transition-name: page-title;
+}
+.vt-sign-art {
+  view-transition-name: sign-art;
+}
+
+/* ---------- Revelado al hacer scroll (sin JS) ---------- */
+/* Solo translate/scale (no opacity): el contraste del texto nunca baja durante el
+   revelado, y transform queda libre para el tilt de las tarjetas. */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: zodi-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 80%;
+  }
+}
+@keyframes zodi-reveal {
+  from {
+    translate: 0 40px;
+    scale: 0.97;
+  }
+}
+
+/* ---------- Parallax sutil (solo portada) ---------- */
+@supports (animation-timeline: scroll()) {
+  .parallax-slow {
+    animation: zodi-parallax linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100vh;
+  }
+}
+@keyframes zodi-parallax {
+  to {
+    transform: translateY(18vh);
+  }
+}
+
+/* ---------- Puntero (solo ratón, lo activa lib/motion/client.ts) ---------- */
+[data-magnetic] {
+  translate: var(--mx, 0) var(--my, 0);
+  transition:
+    translate var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+[data-tilt] {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition:
+    transform var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+[data-cursor-glow] {
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+}
+.cursor-glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 420px;
+  height: 420px;
+  margin: -210px 0 0 -210px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgb(184 255 23 / 16%),
+    rgb(155 77 255 / 8%) 45%,
+    transparent 70%
+  );
+  transform: translate(var(--gx, -999px), var(--gy, -999px));
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease);
+  /* Por detrás del texto: el halo nunca rebaja el contraste. */
+  z-index: -1;
+}
+.cursor-glow.is-on {
+  opacity: 1;
+}
+
+/* ---------- Microinteracciones ---------- */
+.chip:has(input:checked)::before {
+  animation: zodi-pop-in var(--dur) var(--ease-spring) both;
+}
+.choice:has(input:checked) {
+  animation: zodi-press var(--dur) var(--ease-spring);
+}
+@keyframes zodi-pop-in {
+  from {
+    transform: scale(0);
+  }
+}
+@keyframes zodi-press {
+  40% {
+    transform: scale(0.98);
+  }
+}
+/* Las barras se llenan al cargar. */
+.progress-native::-webkit-progress-value {
+  animation: zodi-grow var(--dur-slow) var(--ease) both;
+  transform-origin: left center;
+}
+.progress-native::-moz-progress-bar {
+  animation: zodi-grow var(--dur-slow) var(--ease) both;
+  transform-origin: left center;
+}
+@keyframes zodi-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.toast-leaving {
+  animation: zodi-toast-out var(--dur-fast) var(--ease-in) forwards;
+}
+@keyframes zodi-toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+/* Interruptor: <input type="checkbox" role="switch" class="switch"> */
+.switch {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 52px;
+  height: 30px;
+  margin: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-3);
+  cursor: pointer;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.switch::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  transition:
+    transform var(--dur) var(--ease-spring),
+    background-color var(--dur) var(--ease);
+}
+.switch:checked {
+  background: rgb(184 255 23 / 18%);
+  border-color: var(--acid);
+}
+.switch:checked::before {
+  transform: translateX(22px);
+  background: var(--acid);
+}
+.switch:focus-visible {
+  outline: 3px solid var(--acid);
+  outline-offset: 3px;
+}
+
+/* ---------- Confeti ---------- */
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  overflow: hidden;
+}
+.confetti-bit {
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--c);
+}
+
+/* ---------- Movimiento reducido: estado final al instante ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  .parallax-slow {
+    animation: none !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+:root[data-motion='reduce'] *,
+:root[data-motion='reduce'] *::before,
+:root[data-motion='reduce'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion='reduce'] .reveal,
+:root[data-motion='reduce'] .parallax-slow {
+  animation: none !important;
+}
+:root[data-motion='reduce']::view-transition-group(*),
+:root[data-motion='reduce']::view-transition-old(*),
+:root[data-motion='reduce']::view-transition-new(*) {
+  animation: none !important;
+}

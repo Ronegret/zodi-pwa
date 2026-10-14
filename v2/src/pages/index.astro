@@ -1,0 +1,1141 @@
+---
+/**
+ * Portada: ZODI protagonista con la corona 3D, su vídeo, el horóscopo de hoy
+ * por signo, una muestra gratis con la fecha de nacimiento, el Tarot ZODI y
+ * todo lo que se puede consultar. Funciona sin JS (la muestra es un GET).
+ */
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/ui/Button.astro';
+import Meteors from '@/components/fx/Meteors.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import AmbientVideo from '@/components/media/AmbientVideo.astro';
+import SongButton from '@/components/media/SongButton.astro';
+import { ZodiDemo } from '@/components/landing/ZodiDemo';
+import { HeroZodiac } from '@/components/scenes/HeroZodiac';
+import '@/styles/landing.css';
+import { KINDS } from '@/lib/ai/kinds';
+import { SIGN_INFO } from '@/lib/public/signs';
+import { knownEntry, norm } from '@/lib/names/meaning';
+import { birthTeaser, parseBirthDate } from '@/lib/public/teaser';
+import { longDate, publicToday } from '@/lib/public/today';
+import { ZODI_ARCANA } from '@/lib/tarot/deck';
+
+const today = publicToday();
+const fecha = longDate(today);
+const rawBirth = Astro.url.searchParams.get('nacimiento');
+const birth = parseBirthDate(rawBirth, today);
+const teaser = birth ? birthTeaser(birth) : null;
+// Opcional: el nombre de pila, para contar qué significa (solo el registro de serie, sin IA).
+const rawName =
+  (Astro.url.searchParams.get('nombre') ?? '').trim().split(/\s+/)[0]?.slice(0, 30) ?? '';
+const firstName = /^[\p{L}'-]{2,30}$/u.test(rawName)
+  ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
+  : '';
+const nameEntry = firstName ? knownEntry('nombre', norm(firstName)) : null;
+const MOON_EMOJI: Record<string, string> = {
+  'Luna nueva': '🌑',
+  Creciente: '🌒',
+  'Cuarto creciente': '🌓',
+  'Gibosa creciente': '🌔',
+  'Luna llena': '🌕',
+  'Gibosa menguante': '🌖',
+  'Cuarto menguante': '🌗',
+  Menguante: '🌘',
+};
+const NUMBER_ART = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33]);
+
+const VERDAD = [
+  {
+    img: '/art/zodi-cartas-flotando-640.webp',
+    title: 'Tarot vivo',
+    body: 'Cartas que se reparten y se voltean delante de ti, con los Arcanos ZODI. A veces abraza; a veces te mira fijo hasta que entiendes.',
+  },
+  {
+    img: '/art/zodi-energia-640.webp',
+    title: 'Rituales diarios',
+    body: 'Cristales, Luna del día y pequeñas acciones para ordenar la energía sin convertir tu casa en una tienda esotérica.',
+  },
+  {
+    img: '/art/zodi-riendose-640.webp',
+    title: 'Humor ácido',
+    body: 'Lecturas con carácter y frases para compartir. Sinceridad que duele poquito pero ilumina mucho.',
+  },
+];
+
+const STEPS = [
+  ['Crea tu cuenta gratis', 'En menos de un minuto. Sin tarjeta. Solo tú y el cosmos.'],
+  [
+    'Completa tu perfil astral',
+    'Fecha, hora y lugar de nacimiento. Con eso calculamos tu carta real: Sol, Luna, ascendente, casas y aspectos.',
+  ],
+  [
+    'Elige qué consultar',
+    `${KINDS.length} tipos de lectura y el oráculo: horóscopo, tarot, carta natal, sueños, runas, nombre, mano, compatibilidad y más.`,
+  ],
+  [
+    'Elige tu tono',
+    'Suave, directo, brutal o sarcástico. ZODI se adapta a cómo quieres recibir la verdad.',
+  ],
+  [
+    'Guarda lo que resuena',
+    'Tu historial de lecturas para releerlas cuando el universo diga: te lo dije.',
+  ],
+];
+
+const FAQ = [
+  [
+    '¿ZODI es gratis?',
+    'Sí. Al crear tu cuenta tienes 30 días con todo, sin tarjeta y sin pagar nada: lecturas con IA, oráculo, tarot, tu carta y la comunidad. Queremos que compruebes si ZODI te habla claro antes de pensar en nada más.',
+  ],
+  [
+    '¿Tengo que saber astrología?',
+    'No. Cada lectura trae su "¿Qué es esto?" y un glosario con palabras normales: qué significa, cómo te afecta y qué puedes hacer.',
+  ],
+  [
+    '¿Por qué piden fecha, hora y lugar de nacimiento?',
+    'Para calcular tu carta real con efemérides astronómicas. Sin esos datos solo tendrías un horóscopo de revista, igual para todos los de tu signo.',
+  ],
+  [
+    '¿Puedo guardar mis lecturas?',
+    'Sí. Todas quedan en tu historial, para cuando el lunes no te creas la lectura y el jueves estés viviendo exactamente eso.',
+  ],
+  [
+    '¿Las lecturas son destino absoluto?',
+    'No. Son guía simbólica, emocional y práctica. Si te ayudan a ver algo más claro, perfecto. Las decisiones las tomas tú.',
+  ],
+  [
+    '¿Hay comunidad?',
+    'Sí. Publicaciones por temas, reacciones, comentarios y confesiones cósmicas, con moderación para que nadie se pase.',
+  ],
+];
+---
+
+<Base
+  title="El universo tiene mensajes para ti"
+  description="ZODI: horóscopo, carta natal real, Tarot ZODI, numerología, runas, compatibilidad y un oráculo con IA que no se muerde la lengua. Gratis."
+  canonical="/"
+>
+  <header class="top">
+    <img src="/brand/logo-240.webp" alt="ZODI" width="240" height="160" class="logo" />
+    <nav aria-label="Cuenta" class="top-actions">
+      <a href="/horoscopo" class="top-link">
+        Horóscopo de hoy
+      </a>
+      <Button href="/auth/login" variant="ghost" size="sm">
+        Entrar
+      </Button>
+      <Button href="/auth/registro" size="sm">
+        Crear cuenta
+      </Button>
+    </nav>
+  </header>
+  <main id="main">
+    <div class="hero fx-host" data-cursor-glow>
+      <Meteors />
+      <div class="copy">
+        <p class="kicker">Astrología con carácter</p>
+        <h1>
+          El universo tiene mensajes <span class="graffiti">para ti.</span>
+        </h1>
+        <p class="lead">
+          ZODI calcula tu carta natal real, te cuenta cómo viene tu día y responde lo que le
+          preguntes. Con humor ácido, en palabras normales y sin rodeos. Gratis 30 días con todo.
+        </p>
+        <div class="cta">
+          <Button href="/auth/registro" icon="sparkles" magnetic>
+            Empezar gratis
+          </Button>
+          <Button href="/auth/login" variant="secondary" magnetic>
+            Ya tengo cuenta
+          </Button>
+        </div>
+        <SongButton />
+      </div>
+      <section class="stage" aria-label="Los doce signos">
+        <HeroZodiac client:load>
+          <img
+            class="character"
+            src="/brand/zodi-720.webp"
+            srcset="/brand/zodi-480.webp 480w, /brand/zodi-720.webp 720w"
+            sizes="(min-width: 960px) 34rem, 90vw"
+            alt="ZODI, con su capucha, su máscara de neón y su corona"
+            width="720"
+            height="1080"
+            fetchpriority="high"
+          />
+        </HeroZodiac>
+      </section>
+    </div>
+
+    <section class="block" id="que-es" aria-labelledby="que-es-title">
+      <div class="block-head">
+        <p class="kicker">Qué es ZODI, en 20 segundos</p>
+        <h2 id="que-es-title">
+          Tu astrólogo de bolsillo. Sin humo y sin frases de sobre de azúcar.
+        </h2>
+      </div>
+      <ol class="what-grid">
+        <li class="what-card">
+          <img
+            src="/art/carta-astral-640.webp"
+            alt=""
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="what-n">01</span>
+          <h3>Tu carta real</h3>
+          <p>
+            Con tu fecha, hora y lugar de nacimiento calculamos dónde estaba cada planeta el día que
+            naciste. No es tu signo a secas: es tu mapa completo.
+          </p>
+        </li>
+        <li class="what-card">
+          <img
+            src="/art/zodi-movil-640.webp"
+            alt=""
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="what-n">02</span>
+          <h3>Te habla claro</h3>
+          <p>
+            ZODI lee tu carta y el cielo de cada día y te lo cuenta en el tono que elijas: suave,
+            directo, brutal o sarcástico. Y le puedes preguntar lo que quieras.
+          </p>
+        </li>
+        <li class="what-card">
+          <img
+            src="/art/tarot-zodi-640.webp"
+            alt=""
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="what-n">03</span>
+          <h3>Algo nuevo cada día</h3>
+          <p>
+            Horóscopo personal, Tarot ZODI, runas, numerología, compatibilidad y una comunidad para
+            contarlo. Cada lectura te explica qué es y qué significa.
+          </p>
+        </li>
+      </ol>
+      <div class="demo">
+        <p class="kicker">Pruébalo aquí mismo</p>
+        <ZodiDemo client:visible />
+      </div>
+    </section>
+
+    <section class="cinema" aria-labelledby="sin-filtro">
+      <AmbientVideo src="/video/zodi-portada" width={1280} height={720} class="cinema-video" />
+      <div class="cinema-text">
+        <p class="kicker">Tu oráculo personal</p>
+        <h2 id="sin-filtro">Tu futuro. Sin filtro.</h2>
+        <p>
+          Carta astral, tarot y un oráculo que conoce tu cielo de hoy. ZODI no te dice lo que
+          quieres oír: te dice lo que necesitas saber.
+        </p>
+        <Button href="/auth/registro" icon="sparkles">
+          Consultar a ZODI
+        </Button>
+      </div>
+    </section>
+
+    <section class="block" id="hoy" aria-labelledby="hoy-title">
+      <div class="block-head">
+        <p class="kicker">
+          Horóscopo de hoy · <time datetime={today}>{fecha}</time>
+        </p>
+        <h2 id="hoy-title">¿De qué signo eres?</h2>
+        <p class="muted">Tu día con el cielo real, gratis y sin cuenta.</p>
+      </div>
+      <ul class="signs">
+        {SIGN_INFO.map((s) => (
+          <li>
+            <a class="sign" href={`/horoscopo/${s.slug}`}>
+              <img
+                src={`/signos/${s.slug}-avatar-240.webp`}
+                alt=""
+                width="240"
+                height="240"
+                loading="lazy"
+                decoding="async"
+              />
+              <span class="sign-name">{s.name}</span>
+              <span class="sign-dates">{s.dates}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="block sabe" id="sabe" aria-labelledby="sabe-title">
+      <div class="sabe-grid">
+        <div class="sabe-copy">
+          <p class="kicker">Pruébalo ahora</p>
+          <h2 id="sabe-title">Mira lo que ZODI sabe de ti</h2>
+          <p class="muted">
+            Solo con tu fecha de nacimiento (y tu nombre, si quieres). Sin registro. Una muestra de
+            lo que te espera dentro.
+          </p>
+          <form method="get" action="/#sabe" class="sabe-form">
+            <label class="field-label" for="nacimiento">
+              Tu fecha de nacimiento
+            </label>
+            {rawBirth && !birth && (
+              <p id="nacimiento-err" class="field-error">
+                <span class="visually-hidden">Error: </span>
+                Esa fecha no existe en este universo. Revisa día, mes y año.
+              </p>
+            )}
+            <div class="sabe-row">
+              <input
+                id="nacimiento"
+                name="nacimiento"
+                type="date"
+                class="input"
+                min="1900-01-01"
+                max={today}
+                required
+                value={birth ?? undefined}
+                aria-invalid={rawBirth && !birth ? 'true' : undefined}
+                aria-describedby={rawBirth && !birth ? 'nacimiento-err' : undefined}
+              />
+              <button type="submit" class="btn btn-primary">
+                <span class="btn-label">Leerme</span>
+              </button>
+            </div>
+            <label class="field-label" for="nombre-sabe">
+              Tu nombre <span class="field-req">(opcional)</span>
+            </label>
+            <input
+              id="nombre-sabe"
+              name="nombre"
+              type="text"
+              class="input"
+              maxlength="30"
+              autocomplete="given-name"
+              value={firstName || undefined}
+            />
+          </form>
+          {teaser && (
+            <div class="teaser" aria-live="polite">
+              <ul class="teaser-grid" aria-label="Lo que ZODI sabe de ti">
+                {firstName && (
+                  <li class="tile tile-wide">
+                    <span class="tile-k">Tu nombre</span>
+                    <span class="tile-v">{firstName}</span>
+                    <span class="tile-s">
+                      {nameEntry
+                        ? `${nameEntry.origin}: ${nameEntry.meaning.includes('«') ? nameEntry.meaning : `«${nameEntry.meaning}»`}.${nameEntry.note ? ` ${nameEntry.note}.` : ''}`
+                        : 'No está en mi lista pública: dentro lo investigo para ti, con tus apellidos.'}
+                    </span>
+                  </li>
+                )}
+                <li class="tile">
+                  <span class="tile-emoji" aria-hidden="true">
+                    {MOON_EMOJI[teaser.moon]}
+                  </span>
+                  <span class="tile-k">Naciste un {teaser.weekday}</span>
+                  <span class="tile-v">{teaser.moon}</span>
+                  <span class="tile-s">La Luna del día en que llegaste</span>
+                </li>
+                <li class="tile">
+                  <img
+                    src={`/signos/${teaser.sun.slug}-avatar-240.webp`}
+                    alt=""
+                    width="240"
+                    height="240"
+                  />
+                  <span class="tile-k">Tu Sol</span>
+                  <span class="tile-v">
+                    {teaser.sun.glyph} {teaser.sun.sign}
+                  </span>
+                </li>
+                <li class="tile">
+                  {NUMBER_ART.has(teaser.lifePath) && (
+                    <img
+                      src={`/numeros/${teaser.lifePath}-480.webp`}
+                      alt=""
+                      width="480"
+                      height="480"
+                    />
+                  )}
+                  <span class="tile-k">Camino de vida</span>
+                  <span class="tile-v">{teaser.lifePath}</span>
+                </li>
+                <li class="tile">
+                  <span class="tile-k">Horóscopo chino</span>
+                  <span class="tile-v">
+                    {teaser.chinese.animal} de {teaser.chinese.element}
+                  </span>
+                </li>
+                <li class="tile">
+                  <span class="tile-k">Sello maya</span>
+                  <span class="tile-v">{teaser.maya.name}</span>
+                  <span class="tile-s">Kin {teaser.maya.kin}</span>
+                </li>
+                <li class="tile">
+                  <span class="tile-k">Tu carta del tarot</span>
+                  <span class="tile-v">
+                    {teaser.card.numeral} · {teaser.card.name}
+                  </span>
+                  <span class="tile-s">{teaser.card.message}</span>
+                </li>
+              </ul>
+              <p class="teaser-note">
+                {teaser.sun.desc} Esto es la superficie: tu Luna, tu ascendente y tus tránsitos de
+                hoy necesitan tu hora y tu lugar de nacimiento.
+              </p>
+              <div class="cta">
+                <Button href="/auth/registro" icon="sparkles">
+                  Ver mi carta completa gratis
+                </Button>
+                <Button href={`/horoscopo/${teaser.sun.slug}`} variant="secondary">
+                  Mi horóscopo de hoy
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        <AmbientVideo src="/video/zodi-cartas" width={540} height={960} class="sabe-video" />
+      </div>
+    </section>
+
+    <section class="block" id="tarot" aria-labelledby="tarot-title">
+      <div class="block-head">
+        <p class="kicker">Tarot ZODI</p>
+        <h2 id="tarot-title">Respuestas que pican. Pero que necesitas escuchar.</h2>
+        <p class="muted">
+          Los 22 arcanos mayores de siempre y nueve Arcanos ZODI que no vas a encontrar en ningún
+          otro mazo.
+        </p>
+      </div>
+      <!-- Región desplazable: enfocable para moverse con las flechas (WCAG 2.1.1, axe scrollable-region-focusable). -->
+      {/* eslint-disable-next-line astro/jsx-a11y/no-noninteractive-tabindex */}
+      <ul class="arcana" aria-label="Arcanos ZODI" tabindex="0">
+        {ZODI_ARCANA.map((c) => (
+          <li class="arcanum">
+            <img
+              src={c.art}
+              alt={c.name}
+              width="480"
+              height="720"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="arcanum-msg">{c.message}</span>
+          </li>
+        ))}
+      </ul>
+      <div class="cta">
+        <Button href="/auth/registro" icon="sparkles">
+          Tirar mis cartas
+        </Button>
+      </div>
+    </section>
+
+    <section class="block" id="consultas" aria-labelledby="consultas-title">
+      <div class="block-head">
+        <p class="kicker">Lecturas</p>
+        <h2 id="consultas-title">Todo lo que puedes consultar</h2>
+        <p class="muted">
+          {KINDS.length} tipos de lectura con IA, todas con tu carta real delante. Y el oráculo para
+          lo que no cabe en ninguna.
+        </p>
+      </div>
+      <ul class="kinds">
+        {KINDS.map((k) => (
+          <li class="kind">
+            <img src={k.art} alt="" width="640" height="640" loading="lazy" decoding="async" />
+            <span class="kind-text">
+              <span class="kicker">{k.kicker}</span>
+              <span class="kind-title">{k.title}</span>
+              <span class="kind-blurb">{k.blurb}</span>
+            </span>
+          </li>
+        ))}
+        <li class="kind">
+          <img
+            src="/art/zodi-bola-640.webp"
+            alt=""
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="kind-text">
+            <span class="kicker">Consulta libre</span>
+            <span class="kind-title">Oráculo de ZODI</span>
+            <span class="kind-blurb">Pregunta lo que te pese y ZODI te contesta en directo.</span>
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="block" id="verdad" aria-labelledby="verdad-title">
+      <div class="block-head">
+        <p class="kicker">Lecturas con carácter</p>
+        <h2 id="verdad-title">La verdad que ZODI te dice no viene suavizada.</h2>
+      </div>
+      <ul class="verdad">
+        {VERDAD.map((v) => (
+          <li class="verdad-card">
+            <img src={v.img} alt="" width="640" height="480" loading="lazy" decoding="async" />
+            <h3>{v.title}</h3>
+            <p>{v.body}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="block" id="como" aria-labelledby="como-title">
+      <div class="block-head">
+        <p class="kicker">Cómo funciona</p>
+        <h2 id="como-title">En cinco pasos. Sin saber qué es un ascendente.</h2>
+      </div>
+      <ol class="steps">
+        {STEPS.map(([title, body], i) => (
+          <li>
+            <span class="step-n" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="block social" aria-labelledby="social-title">
+      <img
+        src="/art/zodi-trono-640.webp"
+        alt=""
+        width="640"
+        height="640"
+        loading="lazy"
+        decoding="async"
+      />
+      <div>
+        <p class="kicker">Magia social</p>
+        <h2 id="social-title">Tu futuro, sin filtro. Tu comunidad, sin postureo.</h2>
+        <p class="muted">
+          Publica, reacciona y mira lo que están viviendo otros signos. Un confesionario cósmico con
+          mejor estética y menos gente diciendo "todo pasa por algo".
+        </p>
+        <Button href="/auth/registro" variant="secondary" icon="users">
+          Entrar a la comunidad
+        </Button>
+      </div>
+    </section>
+
+    <section class="block" id="planes" aria-labelledby="planes-title">
+      <div class="block-head">
+        <p class="kicker">Planes</p>
+        <h2 id="planes-title">30 días con todo, gratis. Sin tarjeta.</h2>
+      </div>
+      <div class="plans">
+        <div class="plan card plan-free">
+          <h3>30 días con todo</h3>
+          <p class="plan-price">Gratis</p>
+          <ul>
+            <li>40 lecturas con IA al día</li>
+            <li>60 mensajes al día con el oráculo</li>
+            <li>Carta natal real en 3D</li>
+            <li>Horóscopo diario personal</li>
+            <li>Tarot ZODI, runas, numerología y más</li>
+            <li>Oráculo y comunidad</li>
+          </ul>
+          <Button href="/auth/registro" block icon="sparkles">
+            Crear cuenta gratis
+          </Button>
+        </div>
+        <div class="plan card">
+          <h3>Después de los 30 días</h3>
+          <p class="plan-price">Tú decides</p>
+          <ul>
+            <li>Sigues con una cuenta gratis: 5 lecturas y 15 mensajes al día</li>
+            <li>Tu carta, tu historial y la comunidad, siempre gratis</li>
+            <li>Si quieres más, te contaremos los planes con tiempo</li>
+          </ul>
+          <p class="muted small">Nunca te cobramos nada sin que lo pidas: no pedimos tarjeta.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="faq" aria-labelledby="faq-title">
+      <div class="block-head">
+        <p class="kicker">Preguntas</p>
+        <h2 id="faq-title">Antes de darle tus datos al cosmos</h2>
+      </div>
+      <div class="faq">
+        {FAQ.map(([q, a]) => (
+          <details>
+            <summary>{q}</summary>
+            <p>{a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="block final" aria-labelledby="final-title">
+      <img
+        src="/art/zodi-senalando-640.webp"
+        alt=""
+        width="640"
+        height="640"
+        loading="lazy"
+        decoding="async"
+      />
+      <div>
+        <p class="kicker">Tu oráculo te espera</p>
+        <h2 id="final-title">Empieza a consultar gratis. Sin excusas, sin tarjeta.</h2>
+        <p class="muted">Tu perfil astral en dos minutos. ZODI te lee mejor cuanto más lo usas.</p>
+        <div class="cta">
+          <Button href="/auth/registro" icon="sparkles">
+            Crear mi cuenta gratis
+          </Button>
+          <Button href="/horoscopo" variant="secondary">
+            Ver el horóscopo de hoy
+          </Button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter variant="full" />
+</Base>
+
+<style>
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) clamp(1rem, 4vw, 3rem);
+  }
+  .logo {
+    width: 110px;
+    height: auto;
+    filter: drop-shadow(0 0 16px rgb(184 255 23 / 25%));
+  }
+  .top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .top-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-2);
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .top-link:hover {
+    color: var(--acid);
+  }
+  @media (max-width: 380px) {
+    .logo {
+      width: 84px;
+    }
+  }
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: center;
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: clamp(2rem, 6vw, 5rem) clamp(1rem, 4vw, 3rem) var(--space-8);
+  }
+  @media (min-width: 960px) {
+    .hero {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    }
+  }
+  .copy {
+    display: grid;
+    gap: var(--space-5);
+    justify-items: start;
+  }
+  /* Sin guiones: "universo" y "mensajes" caben enteras en la columna. */
+  h1 {
+    font-size: clamp(2.3rem, 1.1rem + 4.4vw, 5rem);
+    max-width: 12ch;
+    hyphens: manual;
+  }
+  @media (min-width: 960px) {
+    h1 {
+      font-size: clamp(3rem, 0.6rem + 3.9vw, 4.75rem);
+    }
+  }
+  .lead {
+    max-width: 52ch;
+    color: var(--ink-soft);
+    font-size: var(--step-1);
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .stage {
+    width: min(100%, 34rem);
+    justify-self: center;
+  }
+  .character {
+    filter: drop-shadow(0 0 40px rgb(155 77 255 / 35%));
+  }
+
+  /* Banda de cine con el vídeo de ZODI detrás. */
+  .cinema {
+    position: relative;
+    display: grid;
+    min-height: clamp(26rem, 60vw, 38rem);
+    border-block: 1px solid var(--line-acid);
+    overflow: hidden;
+  }
+  .cinema > :global(.cinema-video) {
+    position: absolute;
+    inset: 0;
+  }
+  .cinema::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgb(6 6 8 / 92%) 0%,
+      rgb(6 6 8 / 70%) 45%,
+      rgb(6 6 8 / 15%) 100%
+    );
+    pointer-events: none;
+  }
+  .cinema-text {
+    position: relative;
+    z-index: 1;
+    align-self: center;
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+    max-width: 34rem;
+    padding: var(--space-7) clamp(1rem, 6vw, 5rem);
+  }
+  .cinema-text h2 {
+    font-size: clamp(2.2rem, 1.2rem + 4vw, 4rem);
+  }
+  .cinema-text p:not(.kicker) {
+    color: var(--ink-soft);
+    font-size: var(--step-1);
+  }
+
+  /* Titulares sin guiones de corte ("Tu fu-turo"): mejor saltar de línea entera. */
+  main :global(h2),
+  main :global(h3) {
+    hyphens: manual;
+  }
+  .block {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: var(--space-8) clamp(1rem, 4vw, 3rem) 0;
+    display: grid;
+    gap: var(--space-5);
+  }
+  .block-head {
+    display: grid;
+    gap: var(--space-2);
+    max-width: 48rem;
+  }
+  .block-head h2 {
+    font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3rem);
+  }
+  .block-head p {
+    margin: 0;
+  }
+
+  .signs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+  }
+  .sign {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    text-align: center;
+    text-decoration: none;
+    transition:
+      border-color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .sign:hover {
+    border-color: var(--acid);
+    transform: translateY(-2px);
+  }
+  .sign img {
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--line-acid);
+  }
+  .sign-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+  .sign-dates {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+  }
+
+  .sabe-grid {
+    display: grid;
+    gap: var(--space-6);
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .sabe-grid {
+      grid-template-columns: minmax(0, 1fr) 20rem;
+    }
+  }
+  .sabe-copy {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .sabe-copy h2 {
+    font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3rem);
+  }
+  .sabe-form {
+    display: grid;
+    gap: var(--space-2);
+    max-width: 30rem;
+  }
+  .sabe-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .sabe-row .input {
+    flex: 1 1 12rem;
+  }
+  .sabe :global(.sabe-video) {
+    width: min(100%, 20rem);
+    aspect-ratio: 9 / 16;
+    justify-self: center;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-acid);
+    box-shadow: var(--glow-acid);
+  }
+  .teaser {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .teaser-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+  }
+  .tile {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 8%);
+  }
+  .tile img {
+    width: 4rem;
+    height: 4rem;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+  .tile-k {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .tile-v {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-1);
+    line-height: 1.15;
+  }
+  .tile-s {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .teaser-note {
+    color: var(--ink-soft);
+    max-width: 65ch;
+  }
+
+  /* Arcanos ZODI en carrusel con scroll-snap (sin JS). */
+  .arcana {
+    list-style: none;
+    margin: 0;
+    padding: var(--space-2) 0 var(--space-4);
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(11rem, 14rem);
+    gap: var(--space-4);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-color: var(--acid) transparent;
+  }
+  .arcana:focus-visible {
+    outline: 3px solid var(--acid);
+    outline-offset: 4px;
+  }
+  .arcanum {
+    scroll-snap-align: start;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .arcanum img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--line-acid);
+    box-shadow: 0 0 22px rgb(155 77 255 / 30%);
+  }
+  .arcanum-msg {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+
+  .kinds {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  }
+  .kind {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: var(--panel);
+  }
+  .kind img {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+  .kind-text {
+    display: grid;
+    gap: 2px;
+  }
+  .kind-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.95rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+  .kind-blurb {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+
+  .verdad {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  }
+  .verdad-card {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    padding-bottom: var(--space-4);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    border: 1px solid var(--line-acid);
+    background: var(--panel);
+  }
+  .verdad-card img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  .verdad-card h3,
+  .verdad-card p {
+    margin: 0;
+    padding: 0 var(--space-4);
+  }
+  .verdad-card p {
+    color: var(--ink-soft);
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  }
+  .steps li {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+  }
+  .step-n {
+    font-family: var(--font-mono);
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .steps h3 {
+    font-size: var(--step-1);
+    margin: 0;
+  }
+  .steps p {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .social,
+  .final {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+  }
+  @media (min-width: 800px) {
+    .social,
+    .final {
+      grid-template-columns: 16rem minmax(0, 1fr);
+    }
+  }
+  .social img,
+  .final img {
+    width: 100%;
+    max-width: 16rem;
+    height: auto;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-violet);
+    justify-self: center;
+  }
+  .social > div,
+  .final > div {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+  }
+  .social h2,
+  .final h2 {
+    font-size: clamp(1.8rem, 1.2rem + 2.2vw, 2.8rem);
+  }
+
+  .plans {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  }
+  .plan {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+  .plan-free {
+    border-color: var(--acid);
+    box-shadow: var(--glow-acid);
+  }
+  .plan h3 {
+    font-size: var(--step-2);
+    margin: 0;
+  }
+  .plan-price {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-2);
+    color: var(--acid);
+  }
+  .plan ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: var(--space-1);
+    color: var(--ink-soft);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+
+  .faq {
+    display: grid;
+    gap: var(--space-2);
+    max-width: 52rem;
+  }
+  .faq details {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: rgb(255 255 255 / 3%);
+    padding: 0 var(--space-4);
+  }
+  .faq details[open] {
+    border-color: var(--line-acid);
+  }
+  .faq summary {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .faq details p {
+    margin: 0 0 var(--space-4);
+    color: var(--ink-soft);
+  }
+
+  .final {
+    padding-bottom: var(--space-8);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sign:hover {
+      transform: none;
+    }
+  }
+  .tile-wide {
+    grid-column: 1 / -1;
+  }
+  .tile-emoji {
+    font-size: 2.4rem;
+    line-height: 1;
+  }
+  .sabe-form .input[type='text'] {
+    width: 100%;
+    max-width: 20rem;
+  }
+</style>

@@ -1,0 +1,648 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import NatalWheel from '@/components/chart/NatalWheel.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import { NatalWheel3D, type WheelPlanetDetail } from '@/components/scenes/NatalWheel3D';
+import {
+  ASPECT_NAMES,
+  formatPosition,
+  PLANET_GLYPHS,
+  PLANET_NAMES,
+  signSlug,
+  SIGN_GLYPHS,
+} from '@/lib/astro-engine/labels';
+import { HOUSES, PLANET_ROLE, plainPlanet } from '@/lib/chart/plain';
+import { SIGN_KEYWORDS } from '@/lib/public/signs';
+import { getLatestSelfChart } from '@/lib/server/charts';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const stored = await getLatestSelfChart(supabase);
+const chart = stored?.chart;
+const timeKnown = stored?.input.timeKnown ?? false;
+const place = profile.birth_place ?? '';
+const birth = stored
+  ? new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: 'UTC' }).format(
+      new Date(`${stored.input.date}T12:00:00Z`),
+    )
+  : '';
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+const systemLabel = chart?.houseSystem === 'placidus' ? 'Placidus' : 'Signos enteros';
+const sun = chart?.planets.find((p) => p.id === 'sun');
+// Arte de ZODI del signo solar (el mismo de las páginas públicas).
+const sunArt = sun ? `/signos/${signSlug(sun.sign)}-640.webp` : null;
+const moon = chart?.planets.find((p) => p.id === 'moon');
+// Los tres pilares en palabras sencillas (para quien nunca ha visto una carta).
+const pillars =
+  chart && sun && moon
+    ? [
+        {
+          glyph: '☉',
+          label: `Sol en ${sun.sign}`,
+          what: 'Tu esencia',
+          plain: `${SIGN_KEYWORDS[sun.sign]}. Es cómo brillas cuando eres tú.`,
+        },
+        {
+          glyph: '☽',
+          label: `Luna en ${moon.sign}`,
+          what: 'Tus emociones',
+          plain: `${SIGN_KEYWORDS[moon.sign]}. Lo que necesitas para sentirte bien.`,
+        },
+        timeKnown
+          ? {
+              glyph: '↑',
+              label: `Ascendente en ${chart.ascendant.sign}`,
+              what: 'Cómo te ven',
+              plain: `${SIGN_KEYWORDS[chart.ascendant.sign]}. Tu primera impresión.`,
+            }
+          : {
+              glyph: '↑',
+              label: 'Ascendente',
+              what: 'Cómo te ven',
+              plain: 'Necesita tu hora de nacimiento. Añádela en Ajustes cuando la tengas.',
+            },
+      ]
+    : [];
+// Solo lo que necesita la isla 3D (las props viajan serializadas al cliente).
+const wheelPlanets: WheelPlanetDetail[] = (chart?.planets ?? []).map((p) => ({
+  id: p.id,
+  lon: p.lon,
+  sign: p.sign,
+  degree: p.degree,
+  minute: p.minute,
+  house: timeKnown ? p.house : null,
+  retrograde: p.retrograde,
+}));
+const wheelAspects = (chart?.aspects ?? []).map(({ a, b, type }) => ({ a, b, type }));
+---
+
+<AppShell
+  title="Tu carta natal"
+  current="carta"
+  kicker="Calculada con efemérides reales"
+  intro={
+    stored
+      ? `${birth}${timeKnown ? `, ${stored.input.time}` : ', hora desconocida'} · ${place}`
+      : undefined
+  }
+>
+  {!chart || !stored ? (
+    <EmptyState title="Todavía no hay carta" headingLevel={2}>
+      <p>Danos tu fecha, hora y lugar de nacimiento y la calculamos al minuto.</p>
+      <Button href="/app/onboarding">Completar mis datos</Button>
+    </EmptyState>
+  ) : (
+    <>
+      <section class="pillars card" aria-labelledby="pilares">
+        <div class="pillars-head">
+          {sunArt && (
+            <img
+              class="pillars-art"
+              src={sunArt}
+              alt={`${sun!.sign} según ZODI`}
+              width="640"
+              height="640"
+            />
+          )}
+          <div class="pillars-title">
+            <p class="kicker">Para entenderla</p>
+            <h2 id="pilares">Tus tres pilares, en palabras normales</h2>
+          </div>
+          <div class="pillars-actions">
+            <Button href="/app/carta/significado" icon="sparkles">
+              Lee el significado completo
+            </Button>
+            <Button href="/app/lecturas/carta-natal" variant="secondary">
+              Que ZODI me la interprete
+            </Button>
+            <Button href="/app/yo/informe" variant="secondary">
+              Informe completo en PDF
+            </Button>
+          </div>
+        </div>
+        <ul class="pillars-list">
+          {pillars.map((p) => (
+            <li>
+              <span class="pillar-glyph" aria-hidden="true">
+                {p.glyph}
+              </span>
+              <span class="pillar-text">
+                <span class="pillar-what">{p.what}</span>
+                <strong>{p.label}</strong>
+                <span class="muted">{p.plain}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section class="more-chart" aria-labelledby="mas-carta">
+        <h2 id="mas-carta">Más cosas que dice tu nacimiento</h2>
+        <ul>
+          <li>
+            <a href="/app/carta/significado#compat">
+              <strong>Con quién encajas</strong>
+              <span>Tus mejores y peores signos, con truco incluido.</span>
+            </a>
+          </li>
+          <li>
+            <a href="/app/carta/significado#numeros">
+              <strong>Tu numerología</strong>
+              <span>Camino de vida, año personal y los números de tu nombre.</span>
+            </a>
+          </li>
+          <li>
+            <a href="/app/carta/significado#chino">
+              <strong>Tu animal chino</strong>
+              <span>Cómo eres, cómo amas y quién es tu amigo secreto.</span>
+            </a>
+          </li>
+          <li>
+            <a href="/app/carta/significado#nombre">
+              <strong>Tu nombre y apellidos</strong>
+              <span>De dónde vienen y qué historia cuentan.</span>
+            </a>
+          </li>
+          <li>
+            <a href="/app/gente">
+              <strong>Compatibilidad con tu gente</strong>
+              <span>Pareja, familia y amistades, con su signo y la afinidad.</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+      <div class="layout">
+        <Card
+          title="Tu rueda del cielo"
+          kicker={timeKnown ? 'El cielo del día que naciste' : 'Sin hora: sin casas'}
+          class="wheel-card"
+        >
+          <NatalWheel3D
+            client:visible
+            planets={wheelPlanets}
+            ascendant={timeKnown ? chart.ascendant.lon : null}
+            aspects={wheelAspects}
+          >
+            <NatalWheel chart={chart} timeKnown={timeKnown} />
+          </NatalWheel3D>
+          <ol class="how-read" aria-label="Cómo se lee la rueda">
+            <li>
+              <strong>Las fichas de colores son los 12 signos.</strong> El color dice su elemento:
+              <span class="sw sw-fire" aria-hidden="true"></span> rosa, fuego ·
+              <span class="sw sw-earth" aria-hidden="true"></span> verde, tierra ·
+              <span class="sw sw-air" aria-hidden="true"></span> azul, aire ·
+              <span class="sw sw-water" aria-hidden="true"></span> violeta, agua.
+            </li>
+            <li>
+              <strong>Las piezas blancas son tus planetas.</strong> Cada una está en el signo donde
+              estaba ese planeta el día que naciste. Toca una (o usa los botones) para ver cuál es.
+            </li>
+            <li>
+              <strong>Las líneas del centro unen planetas que se influyen.</strong>
+              <span class="k k-soft" aria-hidden="true"></span> Azules: se llevan bien (tus
+              talentos). <span class="k k-hard" aria-hidden="true"></span> Rosas: chocan (retos que
+              te hacen crecer).
+            </li>
+            {timeKnown && (
+              <li>
+                <strong>La raya verde del borde es tu Ascendente:</strong> el signo que asomaba por
+                el horizonte cuando naciste.
+              </li>
+            )}
+          </ol>
+          {!timeKnown && (
+            <p class="notice">
+              Sin hora de nacimiento no hay Ascendente ni casas fiables: calculamos los planetas a
+              mediodía. Si encuentras la hora, <a href="/app/onboarding?paso=nacimiento">añádela</a>
+              .
+            </p>
+          )}
+          {chart.houseSystemNote && <p class="notice">{chart.houseSystemNote}</p>}
+        </Card>
+
+        <div class="tables">
+          <section class="planets card" aria-labelledby="uno-a-uno">
+            <p class="kicker">En palabras normales</p>
+            <h2 id="uno-a-uno">Tus planetas, uno a uno</h2>
+            <p class="muted small">
+              Cada planeta es una parte de ti; el signo, cómo la vives; y la casa, en qué área de tu
+              vida se nota más.
+            </p>
+            <ul class="planet-list">
+              {chart.planets.map((p) => (
+                <li>
+                  <span class="planet-glyph" aria-hidden="true">
+                    {PLANET_GLYPHS[p.id]}
+                  </span>
+                  <span class="planet-text">
+                    <span class="planet-head">
+                      <strong>{PLANET_NAMES[p.id]}</strong>
+                      <span class="muted">· {PLANET_ROLE[p.id].short}</span>
+                    </span>
+                    <span class="planet-where">
+                      <span aria-hidden="true">{SIGN_GLYPHS[p.sign]}</span> en {p.sign}
+                      {timeKnown && (
+                        <span class="badge badge-violet">
+                          Casa {p.house} · {HOUSES[p.house - 1]!.name}
+                        </span>
+                      )}
+                      {p.retrograde && p.id !== 'northNode' && (
+                        <span class="badge badge-hot">Retrógrado</span>
+                      )}
+                    </span>
+                    <span class="planet-plain">
+                      {plainPlanet(p.id, p.sign, timeKnown ? p.house : null)}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p class="muted small">
+              <strong>Retrógrado</strong>: visto desde la Tierra, el planeta parecía ir hacia atrás
+              cuando naciste. Su energía va más hacia dentro: la piensas mucho antes de mostrarla.
+            </p>
+          </section>
+
+          <details class="tech card">
+            <summary>Datos técnicos (para quien sabe de astrología)</summary>
+            <p class="muted small">
+              Grados exactos: el número es el punto dentro del signo (de 0 a 29), como los minutos
+              dentro de una hora. Las casas se calculan con el sistema {systemLabel}.
+            </p>
+            <div class="table-wrap" tabindex="0" role="region" aria-label="Tabla: Planetas">
+              <table class="table">
+                <caption>Planetas</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Planeta</th>
+                    <th scope="col">Posición</th>
+                    {timeKnown && <th scope="col">Casa</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {chart.planets.map((p) => (
+                    <tr>
+                      <th scope="row">
+                        <span class="glyph" aria-hidden="true">
+                          {PLANET_GLYPHS[p.id]}
+                        </span>
+                        {PLANET_NAMES[p.id]}
+                      </th>
+                      <td>
+                        <span class="glyph" aria-hidden="true">
+                          {SIGN_GLYPHS[p.sign]}
+                        </span>
+                        {formatPosition(p)}
+                        {p.retrograde && p.id !== 'northNode' && (
+                          <Badge tone="hot">
+                            <span aria-hidden="true">℞</span>
+                            <span class="visually-hidden">retrógrado</span>
+                          </Badge>
+                        )}
+                      </td>
+                      {timeKnown && (
+                        <td class="num">
+                          {p.house} <span class="muted">({ROMAN[p.house - 1]})</span>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {timeKnown && (
+              <div class="table-wrap" tabindex="0" role="region" aria-label="Tabla: Casas">
+                <table class="table">
+                  <caption>Casas ({systemLabel})</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Casa</th>
+                      <th scope="col">Área de tu vida</th>
+                      <th scope="col">Empieza en</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chart.houses.map((h, i) => (
+                      <tr>
+                        <th scope="row">
+                          {i + 1} <span class="muted">({ROMAN[i]})</span>
+                          {i === 0 ? ' · Ascendente' : i === 9 ? ' · Medio Cielo' : ''}
+                        </th>
+                        <td>{HOUSES[i]!.name}</td>
+                        <td>{formatPosition(h)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div
+              class="table-wrap"
+              tabindex="0"
+              role="region"
+              aria-label="Tabla: Aspectos principales"
+            >
+              <table class="table">
+                <caption>Aspectos principales</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Entre</th>
+                    <th scope="col">Aspecto</th>
+                    <th scope="col">Qué significa</th>
+                    <th scope="col">Orbe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chart.aspects.map((a) => (
+                    <tr>
+                      <th scope="row">
+                        {PLANET_NAMES[a.a]} y {PLANET_NAMES[a.b]}
+                      </th>
+                      <td>{ASPECT_NAMES[a.type]}</td>
+                      <td>
+                        {a.type === 'trine' || a.type === 'sextile'
+                          ? 'Se llevan bien'
+                          : a.type === 'conjunction'
+                            ? 'Van juntos'
+                            : 'Chocan'}
+                      </td>
+                      <td class="num">{a.orb.toFixed(2)}°</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p class="muted small">
+              Motor v{stored.engineVersion} · cúspides contrastadas con Swiss Ephemeris (±2′).
+            </p>
+          </details>
+        </div>
+      </div>
+    </>
+  )}
+</AppShell>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (max-width: 1099px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .layout > :global(.wheel-card) {
+    position: sticky;
+    top: var(--space-4);
+  }
+  @media (max-width: 1099px) {
+    .layout > :global(.wheel-card) {
+      position: static;
+    }
+  }
+  .tables {
+    display: grid;
+    gap: var(--space-5);
+    min-width: 0;
+  }
+  .glyph {
+    font-family: 'Segoe UI Symbol', 'Apple Symbols', 'Noto Sans Symbols 2', sans-serif;
+    color: var(--acid);
+    margin-right: var(--space-2);
+  }
+  .pillars-art {
+    width: 7rem;
+    height: 7rem;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    border: 1px solid var(--line-acid);
+    box-shadow: var(--glow-acid);
+  }
+  .pillars-title {
+    flex: 1 1 14rem;
+  }
+  .how-read {
+    margin: var(--space-3) 0 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: var(--space-2);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .how-read strong {
+    color: var(--ink);
+  }
+  .sw {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 3px;
+    vertical-align: -0.05em;
+  }
+  .sw-fire {
+    background: var(--hot);
+  }
+  .sw-earth {
+    background: var(--acid);
+  }
+  .sw-air {
+    background: var(--cyan);
+  }
+  .sw-water {
+    background: var(--violet-text);
+  }
+  .planets {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .planets h2 {
+    margin: 0;
+    font-size: var(--step-2);
+  }
+  .planet-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .planet-list li {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+  }
+  .planet-glyph {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    color: var(--acid);
+    background: rgb(184 255 23 / 10%);
+  }
+  .planet-text {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+  .planet-where {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+  }
+  .planet-plain {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .tech {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .tech > summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--acid);
+  }
+  .key {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .key li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .k {
+    display: inline-block;
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+  }
+  .k-soft {
+    background: var(--cyan);
+  }
+  .k-hard {
+    background: var(--hot);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+  .pillars {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+  .pillars-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: var(--space-3);
+  }
+  .pillars-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .pillars-head h2 {
+    margin: 0;
+    font-size: var(--step-2);
+  }
+  .pillars-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+  .pillars-list li {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+  }
+  .pillar-glyph {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    color: var(--acid);
+    background: rgb(184 255 23 / 10%);
+  }
+  .pillar-text {
+    display: grid;
+    gap: 2px;
+  }
+  .pillar-what {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--acid);
+  }
+  .more-chart {
+    margin: var(--space-5) 0;
+  }
+  .more-chart h2 {
+    font-size: var(--step-1);
+    margin: 0 0 var(--space-3);
+  }
+  .more-chart ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+  .more-chart a {
+    display: grid;
+    gap: 2px;
+    height: 100%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: linear-gradient(135deg, rgb(155 77 255 / 14%), rgb(184 255 23 / 5%));
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .more-chart a:hover {
+    border-color: var(--acid);
+  }
+  .more-chart strong {
+    color: var(--acid);
+  }
+  .more-chart span {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+</style>

@@ -1,0 +1,90 @@
+---
+/**
+ * Bienvenida al entrar en el panel: ZODI bailando con cartas, una vez por
+ * sesión y unos segundos. Es decorativa: no atrapa el foco ni los clics
+ * (pointer-events: none), Esc la quita y con movimiento reducido no sale.
+ */
+---
+
+<div class="splash" data-splash hidden aria-hidden="true">
+  <video muted playsinline preload="none" poster="/video/zodi-cartas.webp" width="540" height="960">
+    <source src="/video/zodi-cartas.mp4" type="video/mp4" />
+  </video>
+  <p class="splash-text">
+    Tu futuro. <span>Sin filtro.</span>
+  </p>
+</div>
+
+<script>
+  const KEY = 'zodi:bienvenida';
+  const splash = document.querySelector<HTMLElement>('[data-splash]');
+  let seen = true;
+  try {
+    seen = sessionStorage.getItem(KEY) === '1';
+    sessionStorage.setItem(KEY, '1');
+  } catch {
+    // Sin almacenamiento (modo privado estricto): sin bienvenida.
+  }
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (splash && !seen && !reduce) {
+    const video = splash.querySelector('video')!;
+    const close = () => {
+      splash.dataset.leaving = '';
+      window.setTimeout(() => splash.remove(), 600);
+      window.removeEventListener('keydown', onKey);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
+    splash.hidden = false;
+    video.preload = 'auto';
+    void video.play().catch(() => undefined);
+    window.addEventListener('keydown', onKey);
+    window.setTimeout(close, 3200);
+  } else splash?.remove();
+</script>
+
+<style>
+  .splash {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: var(--space-4);
+    background: radial-gradient(circle at 50% 40%, rgb(155 77 255 / 30%), rgb(6 6 8 / 96%) 65%);
+    pointer-events: none;
+    animation: splash-in 400ms var(--ease) both;
+    transition: opacity 600ms var(--ease);
+  }
+  .splash[hidden] {
+    display: none;
+  }
+  .splash[data-leaving] {
+    opacity: 0;
+  }
+  .splash video {
+    width: min(62vw, 18rem);
+    height: auto;
+    aspect-ratio: 9 / 16;
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--acid);
+    box-shadow: 0 0 60px rgb(184 255 23 / 35%);
+    object-fit: cover;
+  }
+  .splash-text {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 1rem + 3vw, 2.6rem);
+    text-align: center;
+  }
+  .splash-text span {
+    color: var(--acid);
+  }
+  @keyframes splash-in {
+    from {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+  }
+</style>

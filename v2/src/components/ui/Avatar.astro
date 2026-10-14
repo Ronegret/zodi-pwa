@@ -1,0 +1,39 @@
+---
+/** Foto o iniciales. `alt` vacío si el nombre ya aparece al lado. */
+interface Props {
+  name: string;
+  src?: string | null | undefined;
+  size?: 'sm' | 'md' | 'lg';
+  decorative?: boolean;
+}
+const { name, src, size = 'md', decorative = false } = Astro.props;
+const initials =
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('') || 'Z';
+---
+
+<span
+  class:list={['avatar', `avatar-${size}`]}
+  role={decorative ? undefined : 'img'}
+  aria-label={decorative ? undefined : name}
+  aria-hidden={decorative ? 'true' : undefined}
+>
+  {src ? (
+    <img src={src} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+  ) : (
+    <span aria-hidden="true">{initials}</span>
+  )}
+</span>
+
+<style>
+  .avatar-sm {
+    --size: 36px;
+  }
+  .avatar-lg {
+    --size: 64px;
+  }
+</style>

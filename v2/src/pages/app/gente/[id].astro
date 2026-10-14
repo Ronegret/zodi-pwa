@@ -1,0 +1,440 @@
+---
+/**
+ * Una persona de "Tu gente": afinidad explicada parte por parte, cómo está
+ * el día entre los dos, cómo es según las estrellas y sus números.
+ */
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { todayFor } from '@/lib/ai/context';
+import { chineseZodiac, lifePathNumber } from '@/lib/ai/numerology';
+import { numberImage } from '@/lib/chart/meaning';
+import { LIFE_PATH } from '@/lib/chart/texts';
+import { mySky } from '@/lib/people/affinity';
+import { RELATIONS } from '@/lib/people/relations';
+import { birthdayLabel, personView, signAvatar } from '@/lib/people/view';
+import { SIGN_INFO } from '@/lib/public/signs';
+import { getLatestSelfChart } from '@/lib/server/charts';
+import { deletePerson, getPerson } from '@/lib/server/people';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const person = await getPerson(supabase, Astro.params.id ?? '');
+if (!person) return Astro.redirect('/app/gente', 303);
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (form.get('accion') === 'borrar') {
+    await deletePerson(supabase, person.id);
+    return Astro.redirect('/app/gente?borrado=1', 303);
+  }
+}
+
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const now = new Date();
+const today = todayFor(now, tz);
+const stored = await getLatestSelfChart(supabase);
+const myBirth = stored?.input.date ?? profile.birth_date;
+if (!myBirth) return Astro.redirect('/app/gente', 303);
+const me = {
+  birthDate: myBirth,
+  sky: mySky(stored?.chart, stored?.input.timeKnown, myBirth, tz),
+};
+const x = personView(person, me, { timeZone: tz, today, now });
+const info = SIGN_INFO.find((s) => s.name === x.sky.sun)!;
+const life = lifePathNumber(person.birthDate);
+const chinese = chineseZodiac(person.birthDate);
+const born = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeZone: 'UTC' }).format(
+  new Date(`${person.birthDate}T12:00:00Z`),
+);
+const relation = RELATIONS[person.relation].label.toLowerCase();
+const question = `¿Cómo me llevo con ${person.name} (${relation}), que es ${x.sky.sun}${x.sky.moon ? ` con Luna en ${x.sky.moon}` : ''}? Yo soy ${me.sky.sun}. Dame un consejo concreto para nuestra relación.`;
+const isNew = Astro.url.searchParams.get('nuevo') === '1';
+const firstName = profile.display_name.trim().split(/\s+/)[0] || 'Tú';
+---
+
+<AppShell
+  title={person.name}
+  current="gente"
+  kicker={`${RELATIONS[person.relation].label} · ${x.sky.sun}`}
+  intro={`Nació el ${born}. Esto es lo que dicen las estrellas de los dos.`}
+  toast={isNew ? { message: `${person.name} ya está en tu gente.` } : undefined}
+>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/app/gente">Tu gente</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{person.name}</span>
+  </nav>
+
+  <section class={`duo card tone-${x.day.tone}`} aria-labelledby="afinidad">
+    <div class="duo-faces" aria-hidden="true">
+      <figure>
+        <img src={signAvatar(me.sky.sun)} alt="" width="240" height="240" />
+        <figcaption>
+          {firstName} · {me.sky.sun}
+        </figcaption>
+      </figure>
+      <span class="duo-plus">+</span>
+      <figure>
+        <img src={x.avatar} alt="" width="240" height="240" />
+        <figcaption>
+          {person.name} · {x.sky.sun}
+        </figcaption>
+      </figure>
+    </div>
+    <div class="duo-score">
+      <p class="kicker">La afinidad entre los dos</p>
+      <h2 id="afinidad">
+        <span class="big">{x.affinity.score}%</span>
+      </h2>
+      <p>{x.affinity.verdict}</p>
+    </div>
+  </section>
+
+  <div class="detail-grid">
+    <Card title="Hoy entre los dos" kicker={x.day.label}>
+      <p>{x.day.text}</p>
+      <p class="tip">
+        <strong>Consejo de ZODI:</strong> {x.day.tip}
+      </p>
+      {birthdayLabel(x.day.birthdayIn) && <p class="bday">🎂 {birthdayLabel(x.day.birthdayIn)}</p>}
+      <p class="muted small">
+        Sale de la Luna de hoy y del biorritmo emocional de cada cual. Cambia cada día: vuelve
+        mañana.
+      </p>
+    </Card>
+
+    <Card
+      title={`Cómo es ${person.name} según las estrellas`}
+      kicker={`${info.glyph} ${info.name}`}
+    >
+      <p>{info.desc}</p>
+      <ul class="traits" aria-label="Rasgos">
+        {info.traits.map((t) => (
+          <li class="badge">{t}</li>
+        ))}
+      </ul>
+      <dl class="facts">
+        <div>
+          <dt>Elemento</dt>
+          <dd>{info.element}</dd>
+        </div>
+        <div>
+          <dt>Luna</dt>
+          <dd>{x.sky.moon ?? `${x.sky.moonOptions.join(' o ')} (con su hora lo afinamos)`}</dd>
+        </div>
+        <div>
+          <dt>Venus (cómo ama)</dt>
+          <dd>{x.sky.venus}</dd>
+        </div>
+        <div>
+          <dt>Marte (cómo actúa)</dt>
+          <dd>{x.sky.mars}</dd>
+        </div>
+        <div>
+          <dt>Horóscopo chino</dt>
+          <dd>
+            {chinese.animal} de {chinese.element}
+          </dd>
+        </div>
+      </dl>
+      <a class="more-link" href={`/horoscopo/${info.slug}`}>
+        Todo sobre {info.name} y su horóscopo de hoy <Icon name="chevronRight" size={16} />
+      </a>
+    </Card>
+  </div>
+
+  <section class="parts" aria-labelledby="partes">
+    <h2 id="partes">La afinidad, parte por parte</h2>
+    <p class="muted">
+      Comparamos varios planetas, no solo el signo: por eso dos personas del mismo signo pueden
+      llevarse distinto.
+    </p>
+    <ul>
+      {x.affinity.parts.map((p) => (
+        <li class="part card">
+          <div class="part-head">
+            <h3>{p.title}</h3>
+            <span class="part-score">{p.score}%</span>
+          </div>
+          <span class="part-bar" aria-hidden="true">
+            <span class={`w-${Math.round(p.score / 5) * 5}`} />
+          </span>
+          <p class="muted small">{p.what}</p>
+          <p>
+            <strong>{p.pair}</strong> · {p.name}
+          </p>
+          <p>{p.text}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="numbers card" aria-labelledby="numero">
+    <img src={numberImage(life)} alt="" width="480" height="480" loading="lazy" />
+    <div>
+      <p class="kicker">Numerología</p>
+      <h2 id="numero">Su camino de vida es el {life}</h2>
+      <p>{LIFE_PATH[life]}</p>
+    </div>
+  </section>
+
+  <div class="actions">
+    <Button href={`/app/oraculo?pregunta=${encodeURIComponent(question)}`} icon="chat">
+      Pregúntale a ZODI por {person.name}
+    </Button>
+    <Button href="/app/lecturas/compatibilidad" variant="secondary" icon="heart">
+      Estudio de compatibilidad con IA
+    </Button>
+  </div>
+
+  <details class="danger-zone">
+    <summary>Borrar a {person.name}</summary>
+    <form method="post">
+      <input type="hidden" name="accion" value="borrar" />
+      <p class="muted">Se borra su ficha. No se avisa a nadie.</p>
+      <Button type="submit" variant="danger" size="sm" icon="trash">
+        Sí, borrar a {person.name}
+      </Button>
+    </form>
+  </details>
+</AppShell>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .duo {
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+    justify-items: center;
+    text-align: center;
+    margin-bottom: var(--space-5);
+  }
+  @media (min-width: 720px) {
+    .duo {
+      grid-template-columns: auto minmax(0, 1fr);
+      justify-items: start;
+      text-align: left;
+    }
+  }
+  .duo-faces {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .duo-faces figure {
+    margin: 0;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-1);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .duo-faces img {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--acid);
+  }
+  .duo-plus {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    color: var(--acid);
+  }
+  .duo-score h2 {
+    margin: 0;
+  }
+  .big {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 10vw, 5rem);
+    line-height: 1;
+    color: var(--acid);
+  }
+  .detail-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 960px) {
+    .detail-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .tip,
+  .bday {
+    margin: var(--space-2) 0;
+  }
+  .bday {
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+  .traits {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0;
+    margin: var(--space-3) 0;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+  }
+  .facts div {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line-violet);
+  }
+  .facts dt {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+  }
+  .facts dd {
+    margin: 0;
+    font-weight: 700;
+  }
+  .more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 44px;
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .parts {
+    margin-top: var(--space-6);
+  }
+  .parts h2 {
+    margin: 0 0 var(--space-2);
+  }
+  .parts ul {
+    list-style: none;
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  }
+  .part p {
+    margin: var(--space-1) 0;
+  }
+  .part-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+  .part-head h3 {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+  .part-score {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    color: var(--acid);
+  }
+  .part-bar {
+    display: block;
+    height: 6px;
+    border-radius: 3px;
+    background: rgb(255 255 255 / 10%);
+    margin: var(--space-2) 0;
+    overflow: hidden;
+  }
+  .part-bar > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet, #9b4dff), var(--acid));
+  }
+  .w-40 {
+    width: 40%;
+  }
+  .w-45 {
+    width: 45%;
+  }
+  .w-50 {
+    width: 50%;
+  }
+  .w-55 {
+    width: 55%;
+  }
+  .w-60 {
+    width: 60%;
+  }
+  .w-65 {
+    width: 65%;
+  }
+  .w-70 {
+    width: 70%;
+  }
+  .w-75 {
+    width: 75%;
+  }
+  .w-80 {
+    width: 80%;
+  }
+  .w-85 {
+    width: 85%;
+  }
+  .w-90 {
+    width: 90%;
+  }
+  .w-95 {
+    width: 95%;
+  }
+  .numbers {
+    margin-top: var(--space-6);
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+  }
+  @media (min-width: 720px) {
+    .numbers {
+      grid-template-columns: 8rem minmax(0, 1fr);
+    }
+  }
+  .numbers img {
+    width: 8rem;
+    height: 8rem;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+  }
+  .numbers h2 {
+    margin: 0 0 var(--space-2);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin: var(--space-6) 0;
+  }
+  .danger-zone {
+    border-top: 1px solid var(--line-violet);
+    padding-top: var(--space-4);
+    color: var(--ink-soft);
+  }
+  .danger-zone summary {
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+</style>

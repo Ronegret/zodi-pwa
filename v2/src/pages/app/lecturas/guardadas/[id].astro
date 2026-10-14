@@ -1,0 +1,120 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import { RichText } from '@/components/readings/RichText';
+import { FavoriteButton } from '@/components/readings/FavoriteButton';
+import { RuneCast } from '@/components/readings/ReadingVisuals';
+import { TarotSpread } from '@/components/readings/TarotSpread';
+import type { DrawnCard } from '@/lib/ai/extras';
+import type { DrawnRune } from '@/lib/divination/runes';
+import { KIND_BY_KIND } from '@/lib/ai/kinds';
+import { TONE_LABELS, type Tone } from '@/lib/ai/options';
+import { readingDate } from '@/lib/readings/format';
+import { getReading } from '@/lib/server/readings';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const id = Astro.params.id ?? '';
+const reading = /^[0-9a-f-]{36}$/i.test(id) ? await getReading(supabase, id) : null;
+if (!reading) return Astro.rewrite('/404');
+
+const def = KIND_BY_KIND.get(reading.kind);
+const input = (reading.input ?? {}) as {
+  tone?: Tone;
+  question?: string;
+  dream?: string;
+  partner?: { name: string };
+  cards?: Omit<DrawnCard, 'message'>[];
+  runes?: Omit<DrawnRune, 'reversible'>[];
+};
+const cards = input.cards?.map((c) => ({ ...c, message: '' })) as DrawnCard[] | undefined;
+const runes = input.runes?.map((r) => ({ ...r, reversible: true }));
+const date = readingDate(reading.created_at, profile.time_zone ?? 'Europe/Madrid');
+---
+
+<AppShell title={def?.title ?? 'Tu lectura'} current="lecturas" kicker={`Guardada · ${date}`}>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/app/lecturas">Lecturas</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Lectura guardada</span>
+  </nav>
+  <div class="saved">
+    {(input.question || input.dream || input.partner) && (
+      <p class="asked">
+        {input.question && (
+          <>
+            <strong>Tu pregunta:</strong> {input.question}
+          </>
+        )}
+        {input.dream && (
+          <>
+            <strong>Tu sueño:</strong> {input.dream}
+          </>
+        )}
+        {input.partner && (
+          <>
+            <strong>Con:</strong> {input.partner.name}
+          </>
+        )}
+      </p>
+    )}
+    {cards && <TarotSpread cards={cards} animate={false} />}
+    {runes && <RuneCast runes={runes} />}
+    <article class="reading-paper">
+      <RichText text={reading.content} />
+    </article>
+    <p class="muted small">
+      Tono {input.tone ? TONE_LABELS[input.tone].toLowerCase() : 'por defecto'}. Guía simbólica, no
+      profecía: las decisiones las tomas tú.
+    </p>
+    <div class="actions">
+      <FavoriteButton client:idle id={reading.id} initial={reading.favorite ?? false} />
+      {def && (
+        <Button href={`/app/lecturas/${def.slug}`} icon="sparkles">
+          Otra lectura así
+        </Button>
+      )}
+      <Button href="/app/lecturas" variant="secondary" icon="chevronLeft">
+        Todas las lecturas
+      </Button>
+    </div>
+  </div>
+</AppShell>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .saved {
+    display: grid;
+    gap: var(--space-5);
+    max-width: 46rem;
+  }
+  .asked {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border-left: 3px solid var(--violet);
+    background: rgb(155 77 255 / 8%);
+    color: var(--ink-soft);
+  }
+  .asked strong {
+    color: var(--ink);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+</style>

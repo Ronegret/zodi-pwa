@@ -1,0 +1,29 @@
+---
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import Button from '@/components/ui/Button.astro';
+
+Astro.response.status = 404;
+---
+
+<AuthLayout
+  title="Aquí no hay nada"
+  kicker="Error 404"
+  intro="Ni los astros saben dónde está esta página. Mercurio retrógrado, seguramente."
+>
+  <div class="actions">
+    <Button href="/" icon="home">
+      Volver al inicio
+    </Button>
+    <Button href="/app/lecturas" variant="secondary" icon="sparkles">
+      Pedir una lectura
+    </Button>
+  </div>
+</AuthLayout>
+
+<style>
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>

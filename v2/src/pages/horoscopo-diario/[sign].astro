@@ -1,0 +1,7 @@
+---
+// URL de la Zodi de antes: el horóscopo de cada signo vive ahora en /horoscopo/[signo].
+import { SIGN_BY_SLUG } from '@/lib/public/signs';
+
+const sign = (Astro.params.sign ?? '').toLowerCase();
+return Astro.redirect(SIGN_BY_SLUG.has(sign) ? `/horoscopo/${sign}` : '/horoscopo', 301);
+---

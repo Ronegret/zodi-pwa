@@ -1,0 +1,171 @@
+@import '@fontsource-variable/syne';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource-variable/jetbrains-mono';
+@import './tokens.css';
+@import './components.css';
+@import './readings.css';
+@import './motion.css';
+@import './effects.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
+  scrollbar-gutter: stable;
+}
+body {
+  min-height: 100dvh;
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  font-feature-settings: 'kern', 'liga', 'calt';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+/* Fondo Zodi: halos violeta / ácido / rosa + rejilla de 40 px, fijos (sin repintado al hacer scroll). */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 10% -5%, rgb(155 77 255 / 14%), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 5%, rgb(184 255 23 / 10%), transparent),
+    radial-gradient(ellipse 50% 60% at 50% 100%, rgb(255 43 214 / 6%), transparent);
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 2.5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 2.5%) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+::selection {
+  background: var(--acid);
+  color: var(--bg);
+}
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+h1 {
+  font-size: var(--step-5);
+}
+h2 {
+  font-size: var(--step-2);
+}
+h3 {
+  font-size: var(--step-1);
+}
+p {
+  margin: 0;
+}
+img,
+svg {
+  max-width: 100%;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+a {
+  color: var(--acid);
+  text-underline-offset: 0.18em;
+}
+:focus-visible {
+  outline: 3px solid var(--acid);
+  outline-offset: 3px;
+}
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  background: var(--acid);
+  color: var(--brand-ink);
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-md);
+  z-index: 100;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Utilidades */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+/* Etiqueta de sección Zodi: mayúsculas espaciadas en ácido. */
+.kicker {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--kicker);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+.muted {
+  color: var(--ink-soft);
+}
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--ink-soft);
+  font-size: var(--step--1);
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
+.glow-text {
+  text-shadow: 0 0 20px rgb(184 255 23 / 45%);
+}
+.graffiti {
+  background: linear-gradient(90deg, var(--acid) 0%, #fff 40%, var(--hot) 70%, var(--violet) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}

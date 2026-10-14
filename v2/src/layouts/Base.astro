@@ -1,0 +1,65 @@
+---
+import '@/styles/global.css';
+// Precarga de las fuentes del primer render: sin ella el cambio de fuente
+// desplaza el contenido (CLS).
+import jakartaUrl from '@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2?url';
+import syneUrl from '@fontsource-variable/syne/files/syne-latin-wght-normal.woff2?url';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Ruta canónica (páginas públicas indexables). */
+  canonical?: string;
+  /** Imagen para compartir (ruta de public/). */
+  image?: string;
+}
+const {
+  title,
+  description = 'Zodi — astrología personal con IA, sin filtro.',
+  canonical,
+  image = '/brand/zodi-720.webp',
+} = Astro.props;
+const site = Astro.site ?? Astro.url;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="author" content="Rodrigo Negrete (rodrigonegrete.es)" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#060608" />
+    <link rel="icon" type="image/webp" href="/brand/isotipo-96.webp" />
+    <link rel="preload" href={syneUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={jakartaUrl} as="font" type="font/woff2" crossorigin />
+    <title>{title} · Zodi</title>
+    {canonical && <link rel="canonical" href={new URL(canonical, site).href} />}
+    <meta property="og:site_name" content="ZODI" />
+    <meta property="og:title" content={`${title} · Zodi`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, site).href} />
+    <meta property="og:locale" content="es_ES" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      Saltar al contenido
+    </a>
+    <slot />
+    <script>
+      import { inject } from '@vercel/analytics';
+      import { injectSpeedInsights } from '@vercel/speed-insights';
+      import { initMotion } from '@/lib/motion/client';
+
+      initMotion();
+      // Métricas sin cookies (Vercel Web Analytics y Speed Insights), solo en producción:
+      // cargan /_vercel/... del propio dominio, así que la CSP no cambia.
+      if (import.meta.env.PROD) {
+        inject({ framework: 'astro' });
+        injectSpeedInsights({ framework: 'astro' });
+      }
+    </script>
+  </body>
+</html>

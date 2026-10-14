@@ -1,0 +1,47 @@
+---
+/**
+ * Resumen de errores (patrón GOV.UK): recibe el foco para que el lector de
+ * pantalla lo anuncie y cada error enlaza a su campo. El contenedor raíz
+ * existe siempre para que la validación en cliente pinte el mismo marcado.
+ */
+interface Props {
+  errors: Record<string, string>;
+}
+const { errors } = Astro.props;
+const { _form: formError, ...fields } = errors;
+const fieldEntries = Object.entries(fields);
+const count = fieldEntries.length;
+---
+
+<div data-error-summary-root>
+  {(formError || count > 0) && (
+    <div
+      class="error-summary"
+      tabindex="-1"
+      aria-labelledby="error-summary-title"
+      data-error-summary
+    >
+      <h2 id="error-summary-title">
+        {count > 0
+          ? count === 1
+            ? 'Hay 1 cosa que corregir'
+            : `Hay ${count} cosas que corregir`
+          : 'No ha funcionado'}
+      </h2>
+      {formError && <p>{formError}</p>}
+      {count > 0 && (
+        <ul>
+          {fieldEntries.map(([name, message]) => (
+            <li>
+              <a href={`#f-${name}`}>{message}</a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )}
+</div>
+
+<script>
+  document.querySelector<HTMLElement>('[data-error-summary]')?.focus();
+</script>

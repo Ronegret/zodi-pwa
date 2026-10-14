@@ -1,0 +1,646 @@
+---
+/**
+ * Shell de la app. Estructura inspirada en AEM Planner (sidebar 264 px,
+ * título grande, rejilla bento, botón flotante); estilo 100 % Zodi.
+ * Escritorio ≥ 1100 px: sidebar · tablet: rail con iconos y etiqueta ·
+ * móvil < 720 px: barra inferior.
+ */
+import Base from './Base.astro';
+import Avatar from '@/components/ui/Avatar.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+import type { IconName } from '@/components/ui/icons';
+import WelcomeSplash from '@/components/media/WelcomeSplash.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import { ToastRegion } from '@/components/ui/ToastRegion';
+import type { ToastDetail } from '@/components/ui/toast';
+
+export type NavId =
+  | 'inicio'
+  | 'lecturas'
+  | 'comunidad'
+  | 'carta'
+  | 'gente'
+  | 'yo'
+  | 'horoscopo'
+  | 'match'
+  | 'ajustes'
+  | 'oraculo'
+  | 'progreso'
+  | 'moderacion';
+
+interface Props {
+  title: string;
+  current?: NavId;
+  kicker?: string | undefined;
+  intro?: string | undefined;
+  toast?: ToastDetail | undefined;
+}
+const { title, current = 'inicio', kicker, intro, toast } = Astro.props;
+const profile = Astro.locals.profile;
+const name = profile?.display_name?.trim() || 'Viajera cósmica';
+const planLabel = { free: 'Free', premium: 'Premium', vip: 'VIP' }[profile?.plan ?? 'free'];
+
+// `mobile: true`: en la barra inferior del móvil (4 huecos + "Más"). El resto
+// va en la hoja "Más", que sube desde abajo.
+type NavItem = { id: NavId; label: string; href: string; icon: IconName; mobile: boolean };
+const allNav: NavItem[] = [
+  { id: 'inicio', label: 'Inicio', href: '/app', icon: 'home', mobile: true },
+  { id: 'lecturas', label: 'Lecturas', href: '/app/lecturas', icon: 'sparkles', mobile: true },
+  { id: 'gente', label: 'Tu gente', href: '/app/gente', icon: 'people', mobile: true },
+  { id: 'carta', label: 'Carta', href: '/app/carta', icon: 'wheel', mobile: true },
+  { id: 'yo', label: 'Todo sobre mí', href: '/app/yo', icon: 'user', mobile: false },
+  { id: 'horoscopo', label: 'Horóscopo', href: '/app/horoscopo', icon: 'sun', mobile: false },
+  { id: 'oraculo', label: 'Oráculo', href: '/app/oraculo', icon: 'chat', mobile: false },
+  { id: 'comunidad', label: 'Comunidad', href: '/app/comunidad', icon: 'users', mobile: false },
+  { id: 'match', label: 'Match', href: '/app/compatibilidad', icon: 'heart', mobile: false },
+  { id: 'progreso', label: 'Progreso', href: '/app/progreso', icon: 'star', mobile: false },
+  // Solo para moderadores (se filtra abajo).
+  { id: 'moderacion', label: 'Moderación', href: '/app/moderacion', icon: 'eye', mobile: false },
+  { id: 'ajustes', label: 'Ajustes', href: '/app/ajustes', icon: 'sliders', mobile: false },
+];
+const nav = allNav.filter((item) => item.id !== 'moderacion' || profile?.is_moderator);
+const more = nav.filter((item) => !item.mobile);
+const inMore = more.some((item) => item.id === current);
+
+const today = new Intl.DateTimeFormat('es-ES', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  timeZone: profile?.time_zone ?? 'Europe/Madrid',
+}).format(new Date());
+---
+
+<Base title={title}>
+  <div class="shell" data-tz={profile?.time_zone ?? 'Europe/Madrid'}>
+    {/* La hoja "Más" va antes que su botón: con el HTML en streaming, el botón nunca
+        apunta a algo que aún no ha llegado. Al ser popover, se pinta en la capa superior. */}
+    <div id="mas-menu" class="more-sheet" popover>
+      <div class="more-head">
+        <p class="more-title">Más de ZODI</p>
+        <button
+          type="button"
+          class="btn btn-ghost btn-icon"
+          popovertarget="mas-menu"
+          popovertargetaction="hide"
+          aria-label="Cerrar el menú"
+        >
+          <Icon name="x" />
+        </button>
+      </div>
+      <nav aria-label="Más secciones">
+        <ul class="more-grid">
+          {more.map((item) => (
+            <li>
+              <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>
+                <span class="nav-icon">
+                  <Icon name={item.icon} size={22} />
+                </span>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <form method="post" action="/auth/salir">
+        <button class="btn btn-secondary btn-block" type="submit">
+          <Icon name="logout" size={18} />
+          <span class="btn-label">Cerrar sesión</span>
+        </button>
+      </form>
+    </div>
+    <aside class="sidebar">
+      <a class="logo" href="/app">
+        <img
+          class="logo-full"
+          src="/brand/logo-240.webp"
+          alt="ZODI, ir al inicio"
+          width="240"
+          height="160"
+        />
+        <img
+          class="logo-mark"
+          src="/brand/isotipo-96.webp"
+          alt="ZODI, ir al inicio"
+          width="48"
+          height="48"
+        />
+      </a>
+      <nav aria-label="Principal" class="nav-scroll">
+        <ul class="nav">
+          {nav.map((item) => (
+            <li class:list={{ 'desktop-only': !item.mobile }}>
+              <a href={item.href} aria-current={item.id === current ? 'page' : undefined}>
+                <span class="nav-icon">
+                  <Icon name={item.icon} size={20} />
+                </span>
+                <span class="nav-label">{item.label}</span>
+              </a>
+            </li>
+          ))}
+          <li class="mobile-only">
+            <button
+              type="button"
+              class:list={['nav-more', { 'is-current': inMore }]}
+              popovertarget="mas-menu"
+            >
+              <span class="nav-icon">
+                <Icon name="menu" size={20} />
+              </span>
+              <span class="nav-label">Más</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+      <div class="me">
+        <div class="me-row">
+          <Avatar name={name} src={profile?.avatar_url} decorative />
+          <div class="me-text">
+            <p class="me-name">{name}</p>
+            <p class="me-badges">
+              <Badge tone="acid">{planLabel}</Badge>
+              <Badge tone="gems">
+                <span aria-hidden="true">◆</span> {profile?.gems ?? 0}
+                <span class="visually-hidden"> gemas</span>
+              </Badge>
+            </p>
+          </div>
+        </div>
+        <form method="post" action="/auth/salir">
+          <button class="btn btn-secondary btn-sm btn-block" type="submit">
+            <Icon name="logout" size={18} />
+            <span class="btn-label">Cerrar sesión</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="content">
+      <header class="topbar">
+        <div class="topbar-text">
+          <p class="kicker">{kicker ?? today}</p>
+          <h1 class="vt-title">{title}</h1>
+          {intro && <p class="intro">{intro}</p>}
+        </div>
+        <form class="topbar-logout" method="post" action="/auth/salir">
+          <button class="btn btn-ghost btn-icon" type="submit" aria-label="Cerrar sesión">
+            <Icon name="logout" />
+          </button>
+        </form>
+      </header>
+      <main id="main" class="main" tabindex="-1">
+        <slot />
+        <SiteFooter variant="compact" />
+      </main>
+    </div>
+
+    {current !== 'oraculo' && (
+      <a
+        class:list={['fab', { 'fab-home': current === 'inicio' }]}
+        href="/app/oraculo"
+        aria-label="Consultar al oráculo de ZODI"
+      >
+        <img src="/brand/isotipo-96.webp" alt="" width="64" height="64" />
+        <span class="fab-label" aria-hidden="true">
+          Pregúntale a ZODI
+        </span>
+      </a>
+    )}
+    <ToastRegion client:idle initial={toast} />
+    <WelcomeSplash />
+  </div>
+</Base>
+
+<script>
+  import { syncTimeZone } from '@/lib/timezone-sync';
+  syncTimeZone(document.querySelector<HTMLElement>('[data-tz]'));
+</script>
+
+<style>
+  .shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    min-height: 100dvh;
+  }
+
+  /* ---- Sidebar (escritorio) ---- */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    display: grid;
+    /* El menú se desplaza si no cabe: "Cerrar sesión" siempre a la vista. */
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-4);
+    background: linear-gradient(180deg, rgb(12 12 20) 0%, rgb(8 8 16) 100%);
+    border-right: 1px solid var(--line);
+    z-index: var(--z-nav);
+  }
+  .logo {
+    display: block;
+    border-radius: var(--radius-md);
+  }
+  .logo-full {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin-inline: auto;
+    filter: drop-shadow(0 0 16px rgb(184 255 23 / 22%));
+  }
+  .logo-mark {
+    display: none;
+  }
+  .mobile-only {
+    display: none;
+  }
+  .nav-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+  }
+  .nav a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 48px;
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid transparent;
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+  .nav-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: rgb(255 255 255 / 5%);
+    color: var(--ink-soft);
+    flex: none;
+    transition:
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  .nav a:hover {
+    background: rgb(255 255 255 / 4%);
+  }
+  .nav a:hover .nav-icon {
+    color: var(--acid);
+  }
+  .nav a[aria-current='page'] {
+    border-color: var(--line-acid);
+    background: rgb(184 255 23 / 8%);
+    color: var(--acid-soft);
+    box-shadow: var(--glow-acid);
+  }
+  .nav a[aria-current='page'] .nav-icon {
+    background: var(--acid);
+    color: var(--brand-ink);
+  }
+  .me {
+    display: grid;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+  }
+  .me-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+  .me-text {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+  .me-name {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .me-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  /* ---- Contenido ---- */
+  .content {
+    min-width: 0;
+    display: grid;
+    /* Columna explícita: un hijo ancho no puede ensanchar la página. */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--space-4);
+    padding: var(--space-6) clamp(1rem, 3vw, 2.5rem) var(--space-5);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-text {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  .topbar h1 {
+    font-size: var(--step-5);
+  }
+  .intro {
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+  .topbar-logout {
+    display: none;
+  }
+  .main {
+    /* Hueco final para que el botón flotante no tape la última tarjeta. */
+    padding: var(--space-5) clamp(1rem, 3vw, 2.5rem) 7rem;
+    min-width: 0;
+  }
+  .main:focus {
+    outline: none;
+  }
+  .app-foot {
+    margin-top: var(--space-8);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+  }
+
+  /* ---- Botón flotante del oráculo ---- */
+  .fab {
+    position: fixed;
+    right: clamp(1rem, 3vw, 2rem);
+    bottom: calc(clamp(1rem, 3vw, 2rem) + var(--sab));
+    z-index: var(--z-fab);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--ink);
+    text-decoration: none;
+    transition: transform var(--dur) var(--ease);
+  }
+  .fab img {
+    order: 2;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--acid);
+    box-shadow:
+      0 0 0 4px rgb(184 255 23 / 12%),
+      0 12px 32px rgb(184 255 23 / 25%);
+    animation: fab-pulse 2.8s var(--ease) infinite;
+  }
+  .fab-label {
+    display: none;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line-acid);
+    background: rgb(6 6 8 / 88%);
+    font-weight: 700;
+    font-size: var(--step--1);
+  }
+  @media (min-width: 1400px) {
+    .fab-label {
+      display: block;
+    }
+  }
+  @keyframes fab-pulse {
+    50% {
+      box-shadow:
+        0 0 0 10px rgb(184 255 23 / 0%),
+        0 12px 32px rgb(155 77 255 / 40%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fab img {
+      animation: none;
+    }
+  }
+  .fab:hover {
+    transform: scale(1.06) rotate(-4deg);
+  }
+  .fab:active {
+    transform: scale(0.96);
+  }
+
+  /* ---- Tablet: rail ---- */
+  @media (max-width: 1099px) {
+    .shell {
+      grid-template-columns: var(--rail-w) minmax(0, 1fr);
+    }
+    .sidebar {
+      padding: var(--space-4) var(--space-2);
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+    .logo-full,
+    .me {
+      display: none;
+    }
+    .logo-mark {
+      display: block;
+      margin-inline: auto;
+      border-radius: 50%;
+    }
+    .nav a {
+      flex-direction: column;
+      gap: var(--space-1);
+      padding: var(--space-2) var(--space-1);
+      font-size: 0.75rem;
+      text-align: center;
+    }
+    .topbar-logout {
+      display: block;
+    }
+  }
+
+  /* ---- Móvil: barra inferior ---- */
+  @media (max-width: 719px) {
+    .shell {
+      grid-template-columns: minmax(0, 1fr);
+      padding-bottom: calc(var(--nav-h) + var(--sab));
+    }
+    .sidebar {
+      position: fixed;
+      inset: auto 0 0 0;
+      top: auto;
+      height: auto;
+      display: block;
+      padding: var(--space-1) var(--space-1) calc(var(--space-1) + var(--sab));
+      background: rgb(8 8 14 / 96%);
+      border-right: 0;
+      border-top: 1px solid var(--line);
+    }
+    .logo {
+      display: none;
+    }
+    .nav {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+    }
+    .nav a {
+      min-height: 56px;
+      border-radius: var(--radius-md);
+    }
+    .nav .desktop-only {
+      display: none;
+    }
+    .nav .mobile-only {
+      display: block;
+    }
+    .nav-more {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-1);
+      min-height: 56px;
+      padding: var(--space-2) var(--space-1);
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      background: none;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav-more.is-current {
+      border-color: var(--line-acid);
+      background: rgb(184 255 23 / 8%);
+      color: var(--acid-soft);
+    }
+    .nav-more.is-current .nav-icon {
+      background: var(--acid);
+      color: var(--brand-ink);
+    }
+    .nav-icon {
+      width: 32px;
+      height: 28px;
+    }
+    .topbar {
+      padding: var(--space-5) var(--space-4) var(--space-4);
+    }
+    /* Syne 800 es muy ancha: en el móvil, títulos contenidos y sin partir palabras. */
+    .topbar h1 {
+      font-size: clamp(1.5rem, 7vw, 2.25rem);
+      hyphens: manual;
+    }
+    /* "Cerrar sesión" vive en la hoja "Más": el título tiene todo el ancho. */
+    .topbar-logout {
+      display: none;
+    }
+    .main {
+      padding: var(--space-4) var(--space-4) 6rem;
+    }
+    .fab {
+      bottom: calc(var(--nav-h) + var(--space-3) + var(--sab));
+    }
+    /* En el móvil tapaba botones de los formularios: solo en Inicio (el oráculo está en "Más"). */
+    .fab:not(.fab-home) {
+      display: none;
+    }
+    .fab img {
+      width: 56px;
+      height: 56px;
+    }
+    /* Los avisos, por encima de la barra inferior y del botón del oráculo: no tapan nada. */
+    :global(.toast-region) {
+      bottom: calc(var(--nav-h) + var(--space-3) + 56px + var(--space-3) + var(--sab));
+    }
+  }
+
+  /* ---- Hoja "Más" (móvil): sube desde abajo; se cierra tocando fuera o con Esc ---- */
+  .more-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    max-width: none;
+    max-height: 85dvh;
+    margin: 0;
+    overflow-y: auto;
+    padding: var(--space-4) var(--space-4) calc(var(--space-5) + var(--sab));
+    border: 0;
+    border-top: 1px solid var(--line-acid);
+    border-radius: 24px 24px 0 0;
+    background: rgb(10 10 18 / 98%);
+    color: var(--ink);
+    box-shadow: 0 -20px 60px rgb(0 0 0 / 60%);
+  }
+  .more-sheet::backdrop {
+    background: rgb(0 0 0 / 55%);
+  }
+  .more-sheet:popover-open {
+    animation: sheet-up 220ms var(--ease);
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .more-sheet:popover-open {
+      animation: none;
+    }
+  }
+  .more-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+  .more-title {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+  }
+  .more-grid {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  .more-grid a {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-1);
+    min-height: 76px;
+    padding: var(--space-3) var(--space-1);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+    color: var(--ink);
+    font-size: var(--step--1);
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+  }
+  .more-grid a[aria-current='page'] {
+    border-color: var(--line-acid);
+    color: var(--acid-soft);
+  }
+  .more-grid .nav-icon {
+    width: 40px;
+    height: 40px;
+  }
+</style>

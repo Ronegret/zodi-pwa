@@ -1,0 +1,178 @@
+---
+/**
+ * Compatibilidad de signos (pública, indexable): eliges tu signo y el suyo.
+ * Sin JS: el formulario va por GET y aquí se redirige a la página de la pareja.
+ */
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import SelectField from '@/components/ui/SelectField.astro';
+import { bestFor, pairSlug } from '@/lib/public/compat';
+import { SIGN_BY_SLUG, SIGN_INFO } from '@/lib/public/signs';
+import { publicCacheControl } from '@/lib/public/today';
+
+const tu = SIGN_BY_SLUG.get(Astro.url.searchParams.get('tu') ?? '');
+const su = SIGN_BY_SLUG.get(Astro.url.searchParams.get('su') ?? '');
+if (tu && su) return Astro.redirect(`/compatibilidad/${pairSlug(tu, su)}`, 302);
+Astro.response.headers.set('Cache-Control', publicCacheControl());
+
+const options = [
+  { value: '', label: 'Elige…' },
+  ...SIGN_INFO.map((s) => ({ value: s.slug, label: `${s.name} (${s.dates})` })),
+];
+---
+
+<PublicLayout
+  title="Compatibilidad de signos: amor, amistad y trabajo"
+  description="¿Encaja tu signo con el suyo? Elige los dos y ZODI te cuenta cómo funcionan en el amor, la amistad y el trabajo, sin rodeos."
+  canonical="/compatibilidad"
+  image="/art/compatibilidad-1024.webp"
+>
+  <section class="compat-hero">
+    <img
+      src="/art/compatibilidad-1024.webp"
+      srcset="/art/compatibilidad-640.webp 640w, /art/compatibilidad-1024.webp 1024w"
+      sizes="(min-width: 900px) 24rem, 90vw"
+      alt="ZODI con las cartas de la compatibilidad"
+      width="1024"
+      height="1024"
+      fetchpriority="high"
+    />
+    <div>
+      <p class="kicker">Compatibilidad de signos</p>
+      <h1>¿Encajan o chocan?</h1>
+      <p class="lead">
+        Elige tu signo y el de esa persona. ZODI te dice cómo funcionan juntos en el amor, la
+        amistad y el trabajo, y por qué.
+      </p>
+      <form method="get" action="/compatibilidad" class="compat-form card">
+        <SelectField name="tu" label="Tu signo" options={options} required />
+        <SelectField name="su" label="Su signo" options={options} required />
+        <Button type="submit" icon="heart">
+          Ver compatibilidad
+        </Button>
+      </form>
+    </div>
+  </section>
+
+  <section class="best" aria-labelledby="mejores">
+    <h2 id="mejores">Con quién encaja mejor cada signo</h2>
+    <p class="muted">Las tres parejas con más afinidad de cada signo, solo por el Sol.</p>
+    <ul>
+      {SIGN_INFO.map((s) => (
+        <li class="card">
+          <img
+            src={`/signos/${s.slug}-avatar-240.webp`}
+            alt=""
+            width="240"
+            height="240"
+            loading="lazy"
+          />
+          <div>
+            <h3>
+              <span aria-hidden="true">{s.glyph}</span> {s.name}
+            </h3>
+            <p>
+              {bestFor(s).map((b, i) => (
+                <>
+                  {i > 0 && ' · '}
+                  <a href={`/compatibilidad/${pairSlug(s, b)}`}>{b.name}</a>
+                </>
+              ))}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="compat-cta card" aria-labelledby="completa">
+    <h2 id="completa">El signo es solo el principio</h2>
+    <p>
+      Dos personas del mismo signo pueden llevarse distinto: depende también de la Luna (las
+      emociones), de Venus y Marte (la química) y de Mercurio (la comunicación). En ZODI añades a tu
+      gente con su fecha de nacimiento y lo ves todo, más cómo está el día entre los dos.
+    </p>
+    <Button href="/auth/registro" icon="sparkles">
+      Probar gratis 30 días
+    </Button>
+  </section>
+</PublicLayout>
+
+<style>
+  .compat-hero {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .compat-hero {
+      grid-template-columns: 24rem minmax(0, 1fr);
+    }
+  }
+  .compat-hero img {
+    width: 100%;
+    max-width: 24rem;
+    height: auto;
+    border-radius: var(--radius-xl, 24px);
+    border: 1px solid var(--line-acid);
+  }
+  .compat-hero h1 {
+    margin: var(--space-2) 0;
+  }
+  .lead {
+    color: var(--ink-soft);
+    max-width: 52ch;
+  }
+  .compat-form {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    max-width: 30rem;
+  }
+  .best {
+    margin-top: var(--space-7);
+  }
+  .best ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+  .best li {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+  }
+  .best img {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .best h3 {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+  .best p {
+    margin: var(--space-1) 0 0;
+  }
+  .best a {
+    color: var(--acid);
+    display: inline-block;
+    min-height: 24px;
+  }
+  .compat-cta {
+    margin-top: var(--space-7);
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+    max-width: 52rem;
+  }
+  .compat-cta h2,
+  .compat-cta p {
+    margin: 0;
+  }
+</style>

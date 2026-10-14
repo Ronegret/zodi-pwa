@@ -1,0 +1,271 @@
+---
+import AppShell from '@/layouts/AppShell.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { ReadingStudio } from '@/components/readings/ReadingStudio';
+import { RichText } from '@/components/readings/RichText';
+import SignDayPanel from '@/components/public/SignDayPanel.astro';
+import { localToUtc } from '@/lib/astro-engine';
+import { elementOf, signSlug, SIGN_GLYPHS } from '@/lib/astro-engine/labels';
+import { SIGNS } from '@/lib/astro-engine/types';
+import { skyAt } from '@/lib/astro-engine/sky';
+import { aiAvailable } from '@/lib/ai/client';
+import { todayFor } from '@/lib/ai/context';
+import { KIND_BY_SLUG } from '@/lib/ai/kinds';
+import { getLatestSelfChart } from '@/lib/server/charts';
+import { getQuotaStatus } from '@/lib/server/quota';
+import { latestReadingSince } from '@/lib/server/readings';
+import { signDay } from '@/lib/public/sign-day';
+import { SIGN_INFO as PUBLIC_SIGNS, SIGN_KEYWORDS } from '@/lib/public/signs';
+import { SIGN_INFO } from '@/lib/zodiac/signs';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const now = new Date();
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const dayStart = localToUtc(todayFor(now, tz), '00:00', tz).toISOString();
+const [todays, quota, stored] = await Promise.all([
+  latestReadingSince(supabase, 'daily-horoscope', dayStart),
+  getQuotaStatus(supabase),
+  getLatestSelfChart(supabase),
+]);
+const remaining = quota ? Math.max(0, quota.limit - quota.used) : null;
+const daily = KIND_BY_SLUG.get('horoscopo-diario')!;
+const more = ['horoscopo-semanal', 'horoscopo-mensual', 'horoscopo-chino'].map((s) =>
+  KIND_BY_SLUG.get(s)!,
+);
+
+// Signo de la temporada: donde está el Sol ahora mismo.
+const sun = skyAt(now).find((p) => p.id === 'sun')!;
+const info = SIGN_INFO[sun.sign];
+const season = PUBLIC_SIGNS[SIGNS.indexOf(sun.sign)]!;
+const seasonSlug = signSlug(sun.sign);
+// Tu día de un vistazo: el cielo de hoy para tu signo solar (sin IA, al momento).
+const mySun = stored?.chart.planets.find((p) => p.id === 'sun')?.sign ?? sun.sign;
+const myDay = signDay(SIGNS.indexOf(mySun), todayFor(now, tz));
+const generatedAt = todays
+  ? new Intl.DateTimeFormat('es-ES', { timeStyle: 'short', timeZone: tz }).format(
+      new Date(todays.created_at),
+    )
+  : null;
+---
+
+<AppShell
+  title="Horóscopo"
+  current="horoscopo"
+  kicker="Diario · semanal · mensual"
+  intro="Escrito para ti con tus tránsitos de hoy, no para los mil millones que comparten tu signo."
+>
+  <div class="layout">
+    <section class="today" aria-labelledby="today-title">
+      <h2 id="today-title" class="section-title">
+        <Icon name="sun" /> Tu día de un vistazo
+      </h2>
+      <p class="muted">
+        Lo que dice hoy el cielo para <strong>{mySun}</strong>: amor, trabajo y energía, con el
+        consejo de ZODI. Más abajo, tu lectura personal con tu carta completa.
+      </p>
+      <SignDayPanel day={myDay} level={3} />
+      <h2 class="section-title">
+        <Icon name="sparkles" /> Tu lectura personal
+      </h2>
+      {todays ? (
+        <>
+          <article class="reading-paper">
+            <RichText text={todays.content} />
+          </article>
+          <p class="muted small">
+            Escrito hoy a las {generatedAt}. Mañana, otro. Si quieres más detalle, pide tu semana o
+            tu mes.
+          </p>
+        </>
+      ) : !stored ? (
+        <p class="notice">
+          Sin tus datos de nacimiento solo tengo horóscopos de sala de espera.{' '}
+          <a href="/app/onboarding?paso=nacimiento">Complétalos en dos minutos</a>.
+        </p>
+      ) : !aiAvailable() ? (
+        <p class="notice">Zodi está afilando la lengua. Vuelve en un rato.</p>
+      ) : (
+        <ReadingStudio
+          client:load
+          compact
+          def={{
+            slug: daily.slug,
+            title: daily.title,
+            input: daily.input,
+            cta: daily.cta,
+            art: daily.art,
+          }}
+          defaultTone={profile.reading_tone}
+          remaining={remaining}
+        />
+      )}
+    </section>
+
+    <aside class="side">
+      <section class="season card" aria-labelledby="temporada">
+        <div class="season-art">
+          <img
+            src={`/signos/${seasonSlug}-1024.webp`}
+            srcset={`/signos/${seasonSlug}-640.webp 640w, /signos/${seasonSlug}-1024.webp 1024w`}
+            sizes="(min-width: 1100px) 26rem, 90vw"
+            alt={`${sun.sign} según ZODI`}
+            width="1024"
+            height="1024"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <p class="kicker">El signo del momento</p>
+        <h2 id="temporada">
+          <span aria-hidden="true">{SIGN_GLYPHS[sun.sign]}</span> Temporada de {sun.sign}
+        </h2>
+        <p class="muted">
+          {info.dates} · el Sol está ahora en {sun.sign}.
+        </p>
+        <p class="season-blurb">“{info.blurb}”</p>
+        <ul class="season-facts" aria-label={`Datos de ${sun.sign}`}>
+          <li class="badge badge-acid">{elementOf(sun.sign)}</li>
+          <li class="badge badge-violet">{season.modality}</li>
+          <li class="badge">Rige {season.ruler}</li>
+        </ul>
+        <p class="muted small">
+          <strong>¿Qué es una temporada?</strong> Durante unas cuatro semanas el Sol pasa por un
+          signo y todo el mundo nota un poco su energía: {SIGN_KEYWORDS[sun.sign].toLowerCase()}.
+        </p>
+        <a class="season-link" href={`/horoscopo/${seasonSlug}`}>
+          Horóscopo de hoy para {sun.sign} <Icon name="chevronRight" size={16} />
+        </a>
+      </section>
+      <nav class="more" aria-label="Más horóscopos">
+        {more.map((k) => (
+          <a href={`/app/lecturas/${k.slug}`}>
+            <span>
+              <span class="kicker">{k.kicker}</span>
+              <strong>{k.title}</strong>
+            </span>
+            <Icon name="chevronRight" />
+          </a>
+        ))}
+      </nav>
+    </aside>
+  </div>
+</AppShell>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+  @media (min-width: 1100px) {
+    .layout {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    }
+  }
+  .today,
+  .side {
+    display: grid;
+    /* minmax(0, 1fr): los hijos se encogen a la columna (sin desbordar a 320 px). */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    min-width: 0;
+  }
+  .season {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .season h2 {
+    margin: 0;
+    font-size: var(--step-2);
+  }
+  /* La ilustración del signo flota suave con un halo del color de ZODI. */
+  .season-art {
+    margin-bottom: var(--space-2);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    border: 1px solid var(--line-acid);
+    box-shadow:
+      0 0 40px rgb(155 77 255 / 35%),
+      var(--glow-acid);
+  }
+  .season-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    animation: season-float 6s var(--ease) infinite alternate;
+  }
+  @keyframes season-float {
+    from {
+      transform: scale(1.02) translateY(0);
+    }
+    to {
+      transform: scale(1.06) translateY(-6px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .season-art img {
+      animation: none;
+    }
+  }
+  .season-blurb {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--acid-soft);
+  }
+  .season-facts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .season-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 44px;
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--step-2);
+  }
+  .more {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .more a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .more a > span {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .more a:hover {
+    border-color: var(--acid);
+  }
+  .more :global(svg) {
+    color: var(--acid);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+</style>

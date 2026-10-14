@@ -1,0 +1,295 @@
+---
+/**
+ * Todo sobre mí: el centro de todo lo que ZODI sabe de ti. Tu ficha cósmica,
+ * el informe en PDF, lo que dicen de ti los números, el animal chino y los
+ * nombres, tu gente y tus datos (descargar o borrar).
+ */
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Meteors from '@/components/fx/Meteors.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { bestAndWorst } from '@/lib/knowledge';
+import { buildReport } from '@/lib/report/build';
+import { SIGN_BY_SLUG } from '@/lib/public/signs';
+import { signSlug } from '@/lib/astro-engine/labels';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const r = await buildReport({ supabase, profile });
+const sun = r?.big3.sun as 'Aries' | undefined;
+const { best } = sun ? bestAndWorst(sun) : { best: [] };
+const art = sun ? `/signos/${signSlug(sun)}-640.webp` : '/art/zodi-bola-640.webp';
+const SECTIONS = [
+  [
+    'El significado de tu carta',
+    'Planetas, casas, aspectos, amor y trabajo.',
+    '/app/carta/significado',
+  ],
+  [
+    'Con quién encajas',
+    'Tus mejores signos y los que te suben la tensión.',
+    '/app/carta/significado#compat',
+  ],
+  [
+    'Tu numerología',
+    'Camino de vida, año personal y los números de tu nombre.',
+    '/app/carta/significado#numeros',
+  ],
+  [
+    'Tu nombre y apellidos',
+    'De dónde vienen y qué historia cuentan.',
+    '/app/carta/significado#nombre',
+  ],
+  ['Tu gente', 'Pareja, familia y amistades, con su afinidad.', '/app/gente'],
+  ['Tu carta natal', 'La rueda del cielo, explicada de verdad.', '/app/carta'],
+] as const;
+---
+
+<AppShell
+  title="Todo sobre mí"
+  current="yo"
+  kicker="Tu expediente cósmico"
+  intro="Todo lo que ZODI sabe de ti, en un solo sitio. Ni tu madre te conoce tanto (aunque ella te quiere más)."
+>
+  {!r ? (
+    <EmptyState title="Aún no tengo nada tuyo" headingLevel={2}>
+      <p>Dame tu fecha, hora y lugar de nacimiento y te armo el expediente completo.</p>
+      <Button href="/app/onboarding">Completar mis datos</Button>
+    </EmptyState>
+  ) : (
+    <>
+      <section class="hero card fx-host fx-beam" aria-labelledby="informe">
+        <Meteors count={12} />
+        <img src={art} alt="" width="640" height="640" />
+        <div>
+          <p class="kicker">Para llevarte (o presumir)</p>
+          <h2 id="informe">
+            Tu informe <span class="fx-shiny">cósmico</span> en PDF
+          </h2>
+          <p>
+            Todo en un documento bonito: tu carta, el día que naciste, tus números, tu animal chino,
+            tu nombre, con quién encajas y tu gente. Con portada, marca de agua y humor incluido.
+          </p>
+          <div class="hero-actions">
+            <Button href="/app/yo/informe" icon="sparkles">
+              Ver y descargar mi informe
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="ficha">
+        <h2 id="ficha" class="h">
+          Tu ficha cósmica
+        </h2>
+        <ul class="cards">
+          {r.cards.map((c) => (
+            <li>
+              <a href={c.href}>
+                <span class="k">{c.label}</span>
+                <strong>{c.value}</strong>
+                <span class="l">{c.line}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {best.length > 0 && (
+        <section class="card match" aria-labelledby="encajas">
+          <h2 id="encajas" class="h">
+            Tus signos afines
+          </h2>
+          <p class="muted">Con tu Sol en {sun}, tus mejores apuestas son:</p>
+          <ul class="chips">
+            {best.map((b) => {
+              const a = SIGN_BY_SLUG.get(signSlug(sun!));
+              const o = SIGN_BY_SLUG.get(signSlug(b));
+              const href =
+                a && o
+                  ? `/compatibilidad/${a.index <= o.index ? `${a.slug}-y-${o.slug}` : `${o.slug}-y-${a.slug}`}`
+                  : '/compatibilidad';
+              return (
+                <li>
+                  <a href={href}>
+                    {sun} + {b}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <section aria-labelledby="mas">
+        <h2 id="mas" class="h">
+          Todo lo que se puede leer de ti
+        </h2>
+        <ul class="links">
+          {SECTIONS.map(([t, d, href]) => (
+            <li>
+              <a href={href}>
+                <strong>{t}</strong>
+                <span>{d}</span>
+                <Icon name="chevronRight" size={18} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="card privacy" aria-labelledby="datos">
+        <h2 id="datos" class="h">
+          Tus datos son tuyos
+        </h2>
+        <p class="muted">
+          Aquí mandas tú. Puedes llevártelos, cambiarlos o borrarlo todo cuando quieras. Más
+          detalles en la <a href="/legal/privacidad">política de privacidad</a>.
+        </p>
+        <div class="hero-actions">
+          <Button href="/api/mis-datos" variant="secondary" icon="copy">
+            Descargar mis datos (JSON)
+          </Button>
+          <Button href="/app/ajustes" variant="ghost" icon="sliders">
+            Editar mis datos
+          </Button>
+          <Button href="/app/cuenta/borrar" variant="ghost" icon="trash">
+            Borrar mi cuenta
+          </Button>
+        </div>
+      </section>
+    </>
+  )}
+</AppShell>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+    max-width: 58rem;
+    margin-bottom: var(--space-5);
+    border-color: var(--line-acid);
+    background:
+      radial-gradient(circle at 10% 10%, rgb(155 77 255 / 25%), transparent 55%),
+      radial-gradient(circle at 90% 90%, rgb(184 255 23 / 10%), transparent 50%), var(--surface);
+  }
+  @media (min-width: 720px) {
+    .hero {
+      grid-template-columns: 11rem minmax(0, 1fr);
+    }
+  }
+  .hero img {
+    width: 11rem;
+    height: 11rem;
+    border-radius: var(--radius-xl, 24px);
+    border: 2px solid var(--acid);
+    object-fit: cover;
+    justify-self: center;
+  }
+  .hero h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--step-3);
+  }
+  .hero p {
+    margin: 0 0 var(--space-3);
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .h {
+    font-size: var(--step-2);
+    margin: var(--space-5) 0 var(--space-3);
+  }
+  .cards,
+  .links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+  .cards a,
+  .links a {
+    display: grid;
+    gap: 2px;
+    height: 100%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: linear-gradient(135deg, rgb(155 77 255 / 14%), rgb(184 255 23 / 4%));
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      transform var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
+  }
+  .cards a:hover,
+  .links a:hover {
+    border-color: var(--acid);
+    transform: translateY(-2px);
+  }
+  .k {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 700;
+  }
+  .cards strong {
+    color: var(--acid);
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+  .l {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .links a {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .links a span {
+    grid-column: 1;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .links a :global(svg) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    color: var(--acid);
+  }
+  .match,
+  .privacy {
+    max-width: 58rem;
+    margin-top: var(--space-5);
+  }
+  .match .h,
+  .privacy .h {
+    margin-top: 0;
+  }
+  .chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .chips a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line-acid);
+    color: var(--acid);
+    font-weight: 700;
+    text-decoration: none;
+  }
+</style>

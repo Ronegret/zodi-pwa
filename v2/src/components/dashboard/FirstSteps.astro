@@ -1,0 +1,161 @@
+---
+/** Guía de primeros pasos del panel. Desaparece cuando está todo hecho. */
+import Icon from '@/components/ui/Icon.astro';
+import type { FirstStep } from '@/lib/server/first-steps';
+
+interface Props {
+  steps: FirstStep[];
+}
+const { steps } = Astro.props;
+const done = steps.filter((s) => s.done).length;
+const next = steps.find((s) => !s.done);
+---
+
+<section class="first card" aria-labelledby="first-title">
+  <div class="first-head">
+    <img
+      src="/art/zodi-senalando-640.webp"
+      alt=""
+      width="640"
+      height="640"
+      loading="eager"
+      decoding="async"
+    />
+    <div>
+      <p class="kicker">Empieza por aquí</p>
+      <h2 id="first-title">Tus primeros pasos con ZODI</h2>
+      <p class="muted">
+        Cinco cosas para sacarle partido desde hoy. Te las explico sobre la marcha.
+      </p>
+    </div>
+  </div>
+  <div class="first-progress">
+    <progress
+      class="progress-native"
+      max={steps.length}
+      value={done}
+      aria-label="Primeros pasos"
+      aria-valuetext={`${done} de ${steps.length}`}
+    >
+      {done} de {steps.length}
+    </progress>
+    <span class="muted small" aria-hidden="true">
+      {done} de {steps.length}
+    </span>
+  </div>
+  <ol class="steps">
+    {steps.map((s) => (
+      <li class:list={['step', { done: s.done, next: s === next }]}>
+        <span class="mark" aria-hidden="true">
+          {s.done ? <Icon name="check" size={18} /> : null}
+        </span>
+        <span class="text">
+          <strong>
+            {s.title}
+            {s.done && <span class="visually-hidden"> (hecho)</span>}
+          </strong>
+          <span class="muted small">{s.why}</span>
+        </span>
+        {!s.done && (
+          <a
+            class:list={['btn btn-sm', s === next ? 'btn-primary' : 'btn-secondary']}
+            href={s.href}
+          >
+            <span class="btn-label">{s.cta}</span>
+          </a>
+        )}
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .first {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+    border-color: var(--acid);
+    box-shadow: var(--glow-acid);
+  }
+  .first-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .first-head img {
+    flex: none;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--acid);
+  }
+  .first-head h2 {
+    font-size: var(--step-2);
+    margin: 0;
+  }
+  .first-head p {
+    margin: 0;
+  }
+  .first-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .first-progress progress {
+    flex: 1;
+  }
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 3%);
+  }
+  .step.next {
+    border-color: var(--line-acid);
+    background: rgb(184 255 23 / 6%);
+  }
+  .step.done {
+    opacity: 0.7;
+  }
+  .mark {
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 2px solid var(--line-strong);
+    color: var(--ink-on-acid, #060608);
+  }
+  .step.done .mark {
+    border-color: var(--acid);
+    background: var(--acid);
+  }
+  .text {
+    display: grid;
+    gap: 2px;
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+  @media (max-width: 520px) {
+    .step {
+      grid-template-columns: 2rem minmax(0, 1fr);
+    }
+    .step .btn {
+      grid-column: 2;
+      justify-self: start;
+    }
+  }
+</style>

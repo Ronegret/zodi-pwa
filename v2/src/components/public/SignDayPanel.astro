@@ -1,0 +1,160 @@
+---
+/**
+ * El día de un signo de un vistazo: amor, trabajo y energía con estrellas,
+ * avisos del cielo y el consejo de ZODI con número, color y signo afín.
+ * Lo usan el horóscopo público y el horóscopo de la app.
+ */
+import Stars from './Stars.astro';
+import type { SignDay } from '@/lib/public/sign-day';
+import { SIGN_INFO } from '@/lib/public/signs';
+
+interface Props {
+  day: SignDay;
+  /** Nivel de los títulos (2 en la página pública, 3 dentro de otra sección). */
+  level?: 2 | 3;
+}
+const { day, level = 2 } = Astro.props;
+const H = level === 3 ? 'h3' : 'h2';
+const adviceId = `consejo-${day.sign.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()}`;
+const allySlug = SIGN_INFO.find((s) => s.name === day.ally)!.slug;
+---
+
+<section class="areas" aria-label="Tu día por áreas">
+  <div class="area card">
+    <H>Amor</H>
+    <Stars value={day.scores.love} label="Amor" />
+    <p>{day.love}</p>
+  </div>
+  <div class="area card">
+    <H>Trabajo y dinero</H>
+    <Stars value={day.scores.work} label="Trabajo y dinero" />
+    <p>{day.work}</p>
+  </div>
+  <div class="area card">
+    <H>Energía</H>
+    <Stars value={day.scores.energy} label="Energía" />
+    <p>{day.energy}</p>
+  </div>
+</section>
+
+{day.alerts.length > 0 && (
+  <ul class="alerts" aria-label="Avisos del cielo">
+    {day.alerts.map((a) => (
+      <li>{a}</li>
+    ))}
+  </ul>
+)}
+
+<section class="advice" aria-labelledby={adviceId}>
+  <img
+    src="/art/zodi-te-lo-adverti-640.webp"
+    alt=""
+    width="640"
+    height="640"
+    loading="lazy"
+    decoding="async"
+  />
+  <div>
+    <H id={adviceId}>El consejo de ZODI</H>
+    <p class="advice-text">“{day.advice}”</p>
+    <dl class="luck">
+      <div>
+        <dt>Número</dt>
+        <dd>{day.luckyNumber}</dd>
+      </div>
+      <div>
+        <dt>Color</dt>
+        <dd>{day.color}</dd>
+      </div>
+      <div>
+        <dt>Fluye con</dt>
+        <dd>
+          <a href={`/horoscopo/${allySlug}`}>{day.ally}</a>
+        </dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .areas {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+  .area {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+  .area :is(h2, h3) {
+    font-size: var(--step-1);
+    margin: 0;
+  }
+  .area p {
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .alerts {
+    margin: 0;
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgb(255 43 214 / 35%);
+    background: rgb(255 43 214 / 8%);
+    display: grid;
+    gap: var(--space-2);
+  }
+  .alerts li {
+    margin-left: var(--space-3);
+  }
+  .advice {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+    padding: var(--space-5);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 8%);
+  }
+  @media (min-width: 700px) {
+    .advice {
+      grid-template-columns: 10rem minmax(0, 1fr);
+    }
+  }
+  .advice img {
+    width: 10rem;
+    height: 10rem;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+  }
+  .advice :is(h2, h3) {
+    font-size: var(--step-1);
+    margin: 0 0 var(--space-2);
+  }
+  .advice-text {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--acid-soft);
+  }
+  .luck {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin: var(--space-4) 0 0;
+  }
+  .luck dt {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .luck dd {
+    margin: 0;
+    font-weight: 800;
+    font-size: var(--step-1);
+    text-transform: capitalize;
+  }
+  .luck a {
+    color: var(--acid);
+  }
+</style>

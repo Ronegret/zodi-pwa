@@ -1,0 +1,5 @@
+tests/e2e/support/fixture-chart.json
+package-lock.json
+dist
+.vercel
+.astro

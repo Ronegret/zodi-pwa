@@ -1,0 +1,373 @@
+---
+/**
+ * Tu gente: familia, pareja, amistades y trabajo. Con su fecha de nacimiento,
+ * ZODI calcula la afinidad y cómo está el día entre los dos. Solo lo ves tú.
+ */
+import AppShell from '@/layouts/AppShell.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import Icon from '@/components/ui/Icon.astro';
+import SelectField from '@/components/ui/SelectField.astro';
+import { todayFor } from '@/lib/ai/context';
+import { mySky } from '@/lib/people/affinity';
+import { RELATION_IDS, RELATIONS } from '@/lib/people/relations';
+import { birthdayLabel, personView } from '@/lib/people/view';
+import { getLatestSelfChart } from '@/lib/server/charts';
+import { addPerson, listPeople, setFavorite } from '@/lib/server/people';
+import { fieldErrors, formToObject } from '@/lib/validation/common';
+import { personSchema } from '@/lib/validation/people';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+let errors: Record<string, string> = {};
+let raw: Record<string, unknown> = {};
+if (Astro.request.method === 'POST') {
+  raw = formToObject(await Astro.request.formData());
+  // ⭐ Favorita: sale primero aquí y en el panel.
+  if (raw.accion === 'favorito' && typeof raw.id === 'string') {
+    await setFavorite(supabase, raw.id, raw.valor === '1').catch(() => {});
+    return Astro.redirect(`/app/gente#p-${raw.id}`, 303);
+  }
+  const parsed = personSchema.safeParse(raw);
+  if (!parsed.success) {
+    errors = fieldErrors(parsed.error);
+  } else {
+    const res = await addPerson(supabase, parsed.data);
+    if (res.ok) return Astro.redirect(`/app/gente/${res.id}?nuevo=1`, 303);
+    errors = {
+      _form:
+        res.reason === 'limit'
+          ? 'Ya tienes 50 personas: borra alguna para añadir otra.'
+          : 'No hemos podido guardarla. Inténtalo de nuevo.',
+    };
+  }
+  Astro.response.status = 422;
+}
+
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const now = new Date();
+const today = todayFor(now, tz);
+const [stored, people] = await Promise.all([getLatestSelfChart(supabase), listPeople(supabase)]);
+const myBirth = stored?.input.date ?? profile.birth_date;
+const me = myBirth
+  ? {
+      birthDate: myBirth,
+      sky: mySky(stored?.chart, stored?.input.timeKnown, myBirth, tz),
+    }
+  : null;
+const views = me ? people.map((p) => personView(p, me, { timeZone: tz, today, now })) : [];
+const v = (k: string) => String(raw[k] ?? '');
+const relationOptions = [
+  { value: '', label: 'Elige…' },
+  ...RELATION_IDS.map((id) => ({ value: id, label: RELATIONS[id].label })),
+];
+const deleted = Astro.url.searchParams.get('borrado') === '1';
+---
+
+<AppShell
+  title="Tu gente"
+  current="gente"
+  kicker="Familia, pareja, amistades y trabajo"
+  intro="Añade a quien te importa (o te desespera) con su fecha de nacimiento. ZODI te dice cómo encaja su signo con el tuyo y cómo está el día entre los dos. Solo lo ves tú."
+  toast={deleted ? { message: 'Persona borrada.' } : undefined}
+>
+  {!me ? (
+    <Card title="Primero, tú" kicker="Falta tu fecha">
+      <p>Para comparar necesito tu fecha de nacimiento.</p>
+      <Button href="/app/onboarding">Completar mis datos</Button>
+    </Card>
+  ) : (
+    <div class="people-layout">
+      <section aria-labelledby="lista" class="people-list-wrap">
+        <h2 id="lista" class="sr-only">
+          Tus personas
+        </h2>
+        {views.length === 0 ? (
+          <div class="people-empty card">
+            <img src="/art/compatibilidad-640.webp" alt="" width="640" height="640" />
+            <div>
+              <h3>Aún no has añadido a nadie</h3>
+              <p class="muted">
+                Empieza por quien más ves: tu pareja, tu madre, tu mejor amistad o tu jefa. Con su
+                fecha te cuento:
+              </p>
+              <ul class="people-benefits">
+                <li>Cuánta afinidad hay entre su signo y el tuyo, y por qué.</li>
+                <li>La química, la comunicación y lo que necesita cada cual.</li>
+                <li>Cómo está el día entre los dos, con un consejo para hoy.</li>
+                <li>Cuándo es su cumpleaños, para que no se te pase.</li>
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <ul class="people-list">
+            {views.map((x) => (
+              <li id={`p-${x.person.id}`} class={`person card tone-${x.day.tone}`}>
+                <img class="person-avatar" src={x.avatar} alt="" width="240" height="240" />
+                <div class="person-main">
+                  <h3>
+                    <a href={`/app/gente/${x.person.id}`}>{x.person.name}</a>
+                  </h3>
+                  <p class="person-meta">
+                    {RELATIONS[x.person.relation].label} · {x.sky.sun}
+                    {x.sky.moon && <> · Luna en {x.sky.moon}</>}
+                  </p>
+                  <p class="person-day">
+                    <span class="day-badge">{x.day.label}</span> {x.day.tip}
+                  </p>
+                  {birthdayLabel(x.day.birthdayIn) && (
+                    <p class="person-bday">🎂 {birthdayLabel(x.day.birthdayIn)}</p>
+                  )}
+                </div>
+                <div class="person-side">
+                  <form method="post" class="fav-form">
+                    <input type="hidden" name="accion" value="favorito" />
+                    <input type="hidden" name="id" value={x.person.id} />
+                    <input type="hidden" name="valor" value={x.person.favorite ? '0' : '1'} />
+                    <button
+                      type="submit"
+                      class:list={['fav', { on: x.person.favorite }]}
+                      aria-pressed={x.person.favorite ? 'true' : 'false'}
+                      aria-label={`Favorita: ${x.person.name}`}
+                    >
+                      <Icon name="star" size={20} />
+                    </button>
+                  </form>
+                  <p class="person-score">
+                    <strong>{x.affinity.score}%</strong>
+                    <span>afinidad</span>
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <Card title="Añadir a alguien" kicker="Su fecha basta" id="anadir">
+        <form method="post" class="stack" novalidate>
+          <ErrorSummary errors={errors} />
+          <Field
+            name="name"
+            label="Nombre o apodo"
+            required
+            maxlength="60"
+            autocomplete="off"
+            value={v('name')}
+            error={errors.name}
+          />
+          <SelectField
+            name="relation"
+            label="¿Qué es para ti?"
+            required
+            options={relationOptions}
+            value={v('relation')}
+            error={errors.relation}
+          />
+          <Field
+            name="birth_date"
+            type="date"
+            label="Fecha de nacimiento"
+            required
+            value={v('birth_date')}
+            error={errors.birth_date}
+          />
+          <Field
+            name="birth_time"
+            type="time"
+            label="Hora de nacimiento"
+            hint="Opcional. Si la sabes, afino su Luna."
+            value={v('birth_time')}
+            error={errors.birth_time}
+          />
+          <Button type="submit" icon="plus">
+            Añadir y ver nuestra afinidad
+          </Button>
+          <p class="privacy muted">
+            <Icon name="eye" size={16} /> Es privado: no se avisa a nadie y solo lo ves tú.
+          </p>
+        </form>
+      </Card>
+    </div>
+  )}
+</AppShell>
+
+<style>
+  .people-layout {
+    display: grid;
+    gap: var(--space-5);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  @media (min-width: 1024px) {
+    .people-layout {
+      grid-template-columns: minmax(0, 1fr) 22rem;
+    }
+  }
+  .people-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .person {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: center;
+    position: relative;
+    border-left: 4px solid var(--line-violet);
+  }
+  .person.tone-fluye {
+    border-left-color: var(--acid);
+  }
+  .person.tone-cuidado {
+    border-left-color: var(--hot, #ff4d8d);
+  }
+  .person-avatar {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--line-acid);
+  }
+  .person-main {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+  .person h3 {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+  .person h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* Toda la tarjeta es pulsable (el enlace del nombre la cubre). */
+  .person h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .person h3 a:focus-visible {
+    outline: none;
+  }
+  .person:has(h3 a:focus-visible) {
+    outline: 2px solid var(--acid);
+    outline-offset: 2px;
+  }
+  .person-meta,
+  .person-day,
+  .person-bday {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .day-badge {
+    display: inline-block;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    border: 1px solid currentColor;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .tone-fluye .day-badge {
+    color: var(--acid);
+  }
+  .tone-cuidado .day-badge {
+    color: var(--hot, #ff4d8d);
+  }
+  .person-bday {
+    color: var(--acid-soft, var(--acid));
+    font-weight: 700;
+  }
+  .person-score {
+    margin: 0;
+    display: grid;
+    justify-items: center;
+    line-height: 1;
+  }
+  .person-score strong {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    color: var(--acid);
+  }
+  .person-score span {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+  }
+  .people-empty {
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+  }
+  @media (min-width: 720px) {
+    .people-empty {
+      grid-template-columns: 10rem minmax(0, 1fr);
+    }
+  }
+  .people-empty img {
+    width: 10rem;
+    height: 10rem;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+  }
+  .people-empty h3 {
+    margin: 0 0 var(--space-2);
+  }
+  .people-benefits {
+    margin: var(--space-2) 0 0;
+    padding-left: 1.2em;
+    display: grid;
+    gap: var(--space-1);
+  }
+  .privacy {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    font-size: var(--step--1);
+    margin: 0;
+  }
+  .person-side {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-1);
+  }
+  /* Por encima del enlace que cubre la tarjeta. */
+  .fav-form {
+    position: relative;
+    z-index: 1;
+  }
+  .fav {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: rgb(255 255 255 / 4%);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition:
+      transform var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+  .fav:hover {
+    color: var(--acid);
+    transform: scale(1.08);
+  }
+  .fav.on {
+    color: #ffd84d;
+    border-color: #ffd84d;
+    background: rgb(255 216 77 / 12%);
+  }
+  .fav.on :global(svg) {
+    fill: currentColor;
+  }
+</style>

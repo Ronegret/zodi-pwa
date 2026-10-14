@@ -1,0 +1,124 @@
+---
+/** Los doce signos con su día de hoy (público, indexable). */
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import Stars from '@/components/public/Stars.astro';
+import { signDay } from '@/lib/public/sign-day';
+import { SIGN_INFO } from '@/lib/public/signs';
+import { longDate, publicCacheControl, publicToday } from '@/lib/public/today';
+
+const today = publicToday();
+const fecha = longDate(today);
+const days = SIGN_INFO.map((s, i) => ({ ...s, day: signDay(i, today) }));
+Astro.response.headers.set('Cache-Control', publicCacheControl());
+---
+
+<PublicLayout
+  title="Horóscopo de hoy para los 12 signos"
+  description={`Horóscopo de hoy, ${fecha}, para Aries, Tauro, Géminis, Cáncer, Leo, Virgo, Libra, Escorpio, Sagitario, Capricornio, Acuario y Piscis. Con el cielo real y sin filtro.`}
+  canonical="/horoscopo"
+>
+  <header class="intro">
+    <p class="kicker">
+      Horóscopo de hoy · <time datetime={today}>{fecha}</time>
+    </p>
+    <h1>Elige tu signo</h1>
+    <p class="lead">
+      Calculado con el cielo de verdad (Luna, Venus, Marte y compañía) y contado por ZODI, que no se
+      muerde la lengua. Para el tuyo con tu carta completa, crea tu cuenta gratis.
+    </p>
+  </header>
+  <ul class="signs">
+    {days.map((s) => (
+      <li>
+        <a class="sign" href={`/horoscopo/${s.slug}`}>
+          <img
+            src={`/signos/${s.slug}-640.webp`}
+            alt=""
+            width="640"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="sign-text">
+            <span class="sign-name">
+              <span aria-hidden="true">{s.glyph}</span> {s.name}
+            </span>
+            <span class="muted small">{s.dates}</span>
+            <Stars value={s.day.scores.love} label="Amor hoy" />
+            <span class="sign-line">{s.day.headline}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</PublicLayout>
+
+<style>
+  .intro {
+    display: grid;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+  h1 {
+    font-size: clamp(2.4rem, 1.4rem + 4vw, 4.4rem);
+  }
+  .lead {
+    color: var(--ink-soft);
+    max-width: 60ch;
+    font-size: var(--step-1);
+  }
+  .signs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  }
+  .sign {
+    display: grid;
+    height: 100%;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+  .sign:hover {
+    border-color: var(--acid);
+    transform: translateY(-2px);
+  }
+  .sign img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+  }
+  .sign-text {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+  }
+  .sign-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--step-1);
+  }
+  .sign-line {
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sign:hover {
+      transform: none;
+    }
+  }
+</style>

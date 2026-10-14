@@ -1,0 +1,225 @@
+---
+/**
+ * Biorritmo (físico 23 d, emocional 28 d, intelectual 33 d) con KPIs de hoy.
+ * Las series se distinguen por color y por trazo; la tabla oculta es la
+ * alternativa textual completa.
+ */
+import type { BiorhythmPoint, Cycle } from '@/lib/daily/biorhythm';
+import { linePath } from '@/lib/chart/wheel';
+
+interface Props {
+  series: BiorhythmPoint[];
+  todayIndex: number;
+}
+const { series, todayIndex } = Astro.props;
+
+const W = 600;
+const H = 200;
+const PAD = 8;
+const CYCLES: { key: Cycle; label: string; cls: string }[] = [
+  { key: 'fisico', label: 'Físico', cls: 's-fisico' },
+  { key: 'emocional', label: 'Emocional', cls: 's-emocional' },
+  { key: 'intelectual', label: 'Intelectual', cls: 's-intelectual' },
+];
+const pct = (v: number) => Math.round(v * 100);
+const today = series[todayIndex]!;
+const yesterday = series[todayIndex - 1] ?? today;
+const step = (W - 2 * PAD) / (series.length - 1);
+const todayX = PAD + todayIndex * step;
+const dayLabel = (iso: string) => String(Number(iso.slice(8, 10)));
+const fmtDate = (iso: string) =>
+  new Intl.DateTimeFormat('es-ES', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(`${iso}T12:00:00Z`));
+const summary = CYCLES.map((c) => `${c.label.toLowerCase()} ${pct(today[c.key])} %`).join(', ');
+---
+
+<figure class="energy">
+  <svg viewBox={`0 0 ${W} ${H + 24}`} role="img" aria-labelledby="energy-title energy-desc">
+    <title id="energy-title">Biorritmo de los próximos días</title>
+    <desc id="energy-desc">Hoy: {summary}. Datos completos en la tabla.</desc>
+    {[0, 0.5, 1].map((f) => (
+      <line
+        x1={PAD}
+        x2={W - PAD}
+        y1={PAD + f * (H - 2 * PAD)}
+        y2={PAD + f * (H - 2 * PAD)}
+        class="grid"
+      />
+    ))}
+    <line x1={todayX} x2={todayX} y1="0" y2={H} class="today" />
+    {CYCLES.map((c) => (
+      <path
+        d={linePath(
+          series.map((p) => p[c.key]),
+          W,
+          H,
+          PAD,
+        )}
+        class:list={['series', c.cls]}
+      />
+    ))}
+    {series.map((p, i) =>
+      i % 2 === todayIndex % 2 ? (
+        <text
+          x={PAD + i * step}
+          y={H + 16}
+          class:list={['x-label', { 'is-today': i === todayIndex }]}
+        >
+          {i === todayIndex ? 'Hoy' : dayLabel(p.date)}
+        </text>
+      ) : null,
+    )}
+  </svg>
+
+  <ul class="legend" aria-hidden="true">
+    {CYCLES.map((c) => (
+      <li>
+        <svg width="28" height="8" viewBox="0 0 28 8">
+          <line x1="0" x2="28" y1="4" y2="4" class:list={['series', c.cls]} />
+        </svg>
+        {c.label}
+      </li>
+    ))}
+  </ul>
+
+  <dl class="kpis">
+    {CYCLES.map((c) => {
+      const delta = today[c.key] - yesterday[c.key];
+      return (
+        <div>
+          <dt>{c.label}</dt>
+          <dd class="mono">
+            {pct(today[c.key])} %
+            <span class:list={['trend', { down: delta < 0 }]}>
+              <span aria-hidden="true">{delta >= 0 ? '↗' : '↘'}</span>
+              <span class="visually-hidden">{delta >= 0 ? 'subiendo' : 'bajando'}</span>
+            </span>
+          </dd>
+        </div>
+      );
+    })}
+  </dl>
+
+  <!-- Una <table> no encoge a 1 px: se oculta su contenedor. -->
+  <div class="visually-hidden">
+    <table>
+      <caption>Biorritmo por día (porcentaje de −100 a 100)</caption>
+      <thead>
+        <tr>
+          <th scope="col">Día</th>
+          {CYCLES.map((c) => (
+            <th scope="col">{c.label}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {series.map((p, i) => (
+          <tr>
+            <th scope="row">
+              {fmtDate(p.date)}
+              {i === todayIndex ? ' (hoy)' : ''}
+            </th>
+            {CYCLES.map((c) => (
+              <td>{pct(p[c.key])}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</figure>
+
+<style>
+  .energy {
+    margin: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .grid {
+    stroke: rgb(255 255 255 / 8%);
+    stroke-width: 1;
+  }
+  .today {
+    stroke: var(--hot);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+  }
+  .series {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .s-fisico {
+    stroke: var(--acid);
+  }
+  .s-emocional {
+    stroke: var(--violet-text);
+    stroke-dasharray: 10 6;
+  }
+  .s-intelectual {
+    stroke: var(--cyan);
+    stroke-dasharray: 2 6;
+  }
+  .x-label {
+    font-size: 13px;
+    text-anchor: middle;
+    fill: var(--ink-soft);
+    font-family: var(--font-mono);
+  }
+  .x-label.is-today {
+    fill: var(--hot);
+    font-weight: 700;
+  }
+  .legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .kpis {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+  }
+  .kpis dt {
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .kpis dd {
+    margin: 0;
+    font-size: var(--step-2);
+    font-weight: 700;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-1);
+  }
+  .trend {
+    font-size: var(--step-0);
+    color: var(--acid);
+  }
+  .trend.down {
+    color: var(--hot);
+  }
+</style>

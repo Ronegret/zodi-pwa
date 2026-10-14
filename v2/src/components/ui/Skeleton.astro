@@ -1,0 +1,34 @@
+---
+/** Hueco de carga. Decorativo: el estado se anuncia aparte con aria-busy/live. */
+interface Props {
+  lines?: number;
+  class?: string;
+}
+const { lines = 3, class: className } = Astro.props;
+const widths = ['skeleton-w-100', 'skeleton-w-90', 'skeleton-w-70', 'skeleton-w-80'];
+---
+
+<div class:list={['skeleton-stack', className]} aria-hidden="true">
+  {Array.from({ length: lines }, (_, i) => (
+    <span class:list={['skeleton', widths[i % widths.length]]} />
+  ))}
+</div>
+
+<style>
+  .skeleton-stack {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .skeleton-w-100 {
+    width: 100%;
+  }
+  .skeleton-w-90 {
+    width: 90%;
+  }
+  .skeleton-w-80 {
+    width: 80%;
+  }
+  .skeleton-w-70 {
+    width: 70%;
+  }
+</style>

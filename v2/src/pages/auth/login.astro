@@ -1,0 +1,117 @@
+---
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import { AUTH_UNAVAILABLE, authErrorMessage } from '@/lib/auth/errors';
+import { noticeFor } from '@/lib/auth/notices';
+import { safeNext } from '@/lib/auth/routes';
+import { isGoogleEnabled } from '@/lib/server/auth-settings';
+import { loginSchema } from '@/lib/validation/auth';
+import { fieldErrors, formToObject } from '@/lib/validation/common';
+
+const next = safeNext(Astro.url.searchParams.get('next'));
+const nextQuery = next === '/app' ? '' : `?next=${encodeURIComponent(next)}`;
+const notice = noticeFor(Astro.url.searchParams.get('aviso'));
+const google = await isGoogleEnabled();
+let errors: Record<string, string> = {};
+let email = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  email = String(form.get('email') ?? '').slice(0, 254);
+  const parsed = loginSchema.safeParse(formToObject(form));
+  if (!parsed.success) {
+    errors = fieldErrors(parsed.error);
+    Astro.response.status = 422;
+  } else if (!Astro.locals.supabase) {
+    errors = { _form: AUTH_UNAVAILABLE };
+    Astro.response.status = 503;
+  } else {
+    const { error } = await Astro.locals.supabase.auth.signInWithPassword(parsed.data);
+    if (!error) return Astro.redirect(next, 303);
+    errors = { _form: authErrorMessage(error) };
+    Astro.response.status = error.status === 429 ? 429 : 400;
+  }
+}
+---
+
+<AuthLayout
+  card
+  title="Vuelve a tu cielo"
+  intro="Entra para ver tu carta, tus lecturas y lo que los astros opinan de ti hoy."
+>
+  {notice && !Object.keys(errors).length && (
+    <p class:list={['notice', { 'notice-error': notice.tone === 'error' }]} role="status">
+      {notice.text}
+    </p>
+  )}
+  <ErrorSummary errors={errors} />
+
+  <form method="post" novalidate class="stack" data-validate>
+    <Field
+      name="email"
+      label="Correo electrónico"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      spellcheck="false"
+      value={email}
+      required
+      error={errors.email}
+    />
+    <Field
+      name="password"
+      label="Contraseña"
+      type="password"
+      autocomplete="current-password"
+      required
+      error={errors.password}
+    />
+    <button class="btn btn-block" type="submit">
+      Entrar
+    </button>
+  </form>
+
+  {google && (
+    <>
+      <p class="divider">o</p>
+      <form method="post" action={`/auth/google${nextQuery}`}>
+        <button class="btn btn-secondary btn-block" type="submit">
+          Continuar con Google
+        </button>
+      </form>
+    </>
+  )}
+
+  <p class="notice moved">
+    <strong>¿Tenías cuenta en la Zodi de antes?</strong> Nos hemos mudado de casa y las cuentas no
+    se han traído: <a href="/auth/registro">crea la tuya de nuevo</a> (con el mismo correo, si
+    quieres). Dos minutos y vuelves a tener tu carta.
+  </p>
+
+  <p class="links">
+    <a href="/auth/recuperar">¿Olvidaste la contraseña?</a>
+    <a href="/auth/registro">Crear cuenta</a>
+  </p>
+</AuthLayout>
+
+<script>
+  import { enhanceForm } from '@/lib/forms/enhance';
+  import { loginSchema } from '@/lib/validation/auth';
+
+  enhanceForm(document.querySelector<HTMLFormElement>('form[data-validate]'), loginSchema);
+</script>
+
+<style>
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0;
+  }
+  .links a {
+    display: inline-block;
+    padding-block: 0.6rem;
+  }
+</style>

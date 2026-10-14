@@ -1,0 +1,226 @@
+---
+/**
+ * Horóscopo de hoy para un signo (público, indexable). El cielo real del día
+ * por casas solares; la CDN lo guarda hasta medianoche de Madrid.
+ */
+import PublicLayout from '@/layouts/PublicLayout.astro';
+import Button from '@/components/ui/Button.astro';
+import SignDayPanel from '@/components/public/SignDayPanel.astro';
+import { SIGN_GLYPHS } from '@/lib/astro-engine/labels';
+import { bestFor, pairSlug } from '@/lib/public/compat';
+import { signDay } from '@/lib/public/sign-day';
+import { SIGN_BY_SLUG } from '@/lib/public/signs';
+import { longDate, publicCacheControl, publicToday } from '@/lib/public/today';
+
+const info = SIGN_BY_SLUG.get(Astro.params.signo ?? '');
+if (!info) return Astro.rewrite('/404');
+
+const today = publicToday();
+const day = signDay(info.index, today);
+const fecha = longDate(today);
+Astro.response.headers.set('Cache-Control', publicCacheControl());
+
+const title = `Horóscopo de hoy para ${info.name}`;
+const description = `${info.name}, ${fecha}: ${day.headline} Amor, trabajo, energía y el consejo sin filtro de ZODI.`;
+---
+
+<PublicLayout
+  title={title}
+  description={description}
+  canonical={`/horoscopo/${info.slug}`}
+  image={`/signos/${info.slug}-1024.webp`}
+>
+  <nav class="crumbs" aria-label="Migas de pan">
+    <a href="/horoscopo">Horóscopos</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{info.name}</span>
+  </nav>
+
+  <article class="day">
+    <header class="day-hero">
+      <img
+        src={`/signos/${info.slug}-1024.webp`}
+        srcset={`/signos/${info.slug}-640.webp 640w, /signos/${info.slug}-1024.webp 1024w`}
+        sizes="(min-width: 900px) 26rem, 90vw"
+        alt={`${info.name} según ZODI`}
+        width="1024"
+        height="1024"
+        fetchpriority="high"
+      />
+      <div class="day-title">
+        <p class="kicker">
+          Horóscopo de hoy · <time datetime={today}>{fecha}</time>
+        </p>
+        <h1>
+          <span aria-hidden="true">{info.glyph}</span> {info.name}
+        </h1>
+        <ul class="facts" aria-label="Datos del signo">
+          <li class="badge badge-acid">{info.dates}</li>
+          <li class="badge badge-violet">{info.element}</li>
+          <li class="badge">{info.modality}</li>
+          <li class="badge">Rige {info.ruler}</li>
+        </ul>
+        <p class="headline">{day.headline}</p>
+        <p class="muted">
+          Luna en {SIGN_GLYPHS[day.moon.sign]} {day.moon.sign} · {day.moon.name.toLowerCase()} (
+          {Math.round(day.moon.illumination * 100)} %)
+        </p>
+      </div>
+    </header>
+
+    <SignDayPanel day={day} />
+
+    <section class="cta card" aria-labelledby="cta-title">
+      <div>
+        <p class="kicker">Esto es para todos los {info.name}</p>
+        <h2 id="cta-title">El tuyo, con tu carta real</h2>
+        <p>
+          Este horóscopo vale para cualquier {info.name} del planeta. El tuyo sale de tu fecha, hora
+          y lugar de nacimiento: tus tránsitos de hoy, tu Luna, tu ascendente. Y ZODI te lo cuenta
+          en el tono que elijas.
+        </p>
+        <div class="cta-actions">
+          <Button href="/auth/registro" icon="sparkles">
+            Crear mi carta gratis
+          </Button>
+          <Button href="/horoscopo" variant="secondary">
+            Ver otros signos
+          </Button>
+        </div>
+      </div>
+      <img
+        src="/art/zodi-senalando-640.webp"
+        alt=""
+        width="640"
+        height="640"
+        loading="lazy"
+        decoding="async"
+      />
+    </section>
+
+    <section class="about" aria-labelledby="como-es">
+      <h2 id="como-es">Cómo es {info.name}</h2>
+      <p>{info.desc}</p>
+      <ul class="facts" aria-label={`Rasgos de ${info.name}`}>
+        {info.traits.map((t) => (
+          <li class="badge badge-violet">{t}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="about" aria-labelledby="encaja">
+      <h2 id="encaja">Con quién encaja {info.name}</h2>
+      <ul class="facts">
+        {bestFor(info).map((o) => (
+          <li>
+            <a class="badge badge-acid" href={`/compatibilidad/${pairSlug(info, o)}`}>
+              {info.name} y {o.name}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a class="badge" href="/compatibilidad">
+            Comparar con otro signo
+          </a>
+        </li>
+      </ul>
+    </section>
+  </article>
+</PublicLayout>
+
+<style>
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .crumbs a {
+    color: var(--acid);
+  }
+  .day {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+  .day-hero {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .day-hero {
+      grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+    }
+  }
+  .day-hero img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-acid);
+    box-shadow: var(--glow-acid);
+  }
+  .day-title {
+    display: grid;
+    gap: var(--space-3);
+  }
+  h1 {
+    font-size: clamp(2.6rem, 1.4rem + 5vw, 5rem);
+  }
+  .facts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .headline {
+    font-size: var(--step-1);
+    max-width: 55ch;
+  }
+  .cta {
+    display: grid;
+    gap: var(--space-5);
+    align-items: center;
+  }
+  @media (min-width: 800px) {
+    .cta {
+      grid-template-columns: minmax(0, 1fr) 14rem;
+    }
+  }
+  .cta h2 {
+    font-size: var(--step-3);
+    margin: var(--space-1) 0 var(--space-3);
+  }
+  .cta p {
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+  .cta img {
+    width: 100%;
+    max-width: 14rem;
+    height: auto;
+    border-radius: var(--radius-lg);
+    justify-self: center;
+  }
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+  .about {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 62ch;
+  }
+  .about h2 {
+    font-size: var(--step-2);
+  }
+  .about p {
+    color: var(--ink-soft);
+  }
+</style>

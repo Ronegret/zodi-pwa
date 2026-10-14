@@ -1,0 +1,50 @@
+---
+/**
+ * Campo de texto/fecha/hora. El contenedor de error existe siempre (vacío
+ * se oculta) para que la validación en cliente (lib/forms/enhance.ts) pinte
+ * el mismo marcado que el servidor.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends Omit<HTMLAttributes<'input'>, 'id' | 'name' | 'class'> {
+  name: string;
+  label: string;
+  hint?: string | undefined;
+  error?: string | undefined;
+}
+const { name, label, hint, error, required, ...attrs } = Astro.props;
+const id = `f-${name}`;
+const hintId = hint ? `${id}-hint` : undefined;
+const errorId = `${id}-error`;
+const describedBy = [hintId, error ? errorId : undefined].filter(Boolean).join(' ') || undefined;
+---
+
+<div class="field">
+  <label class="field-label" for={id}>
+    {label}
+    {required && <span class="field-req"> (obligatorio)</span>}
+  </label>
+  {hint && (
+    <p id={hintId} class="field-hint">
+      {hint}
+    </p>
+  )}
+  <p id={errorId} class="field-error" data-error-for={name} hidden={!error}>
+    {error && (
+      <>
+        <span class="visually-hidden">Error: </span>
+        {error}
+      </>
+    )}
+  </p>
+  <input
+    id={id}
+    name={name}
+    class="input"
+    required={required}
+    aria-invalid={error ? 'true' : undefined}
+    aria-describedby={describedBy}
+    data-hint-id={hintId}
+    {...attrs}
+  />
+</div>

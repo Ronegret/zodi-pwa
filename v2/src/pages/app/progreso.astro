@@ -1,0 +1,211 @@
+---
+/** Tu progreso: nivel y XP, racha, gemas y logros (los que tienes y cómo conseguir el resto). */
+import AppShell from '@/layouts/AppShell.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Icon from '@/components/ui/Icon.astro';
+import ProgressBar from '@/components/ui/ProgressBar.astro';
+import { levelProgress, rankFor } from '@/lib/daily/progress';
+import { ACHIEVEMENTS, XP_RULES } from '@/lib/progress/achievements';
+import { readingDate } from '@/lib/readings/format';
+
+const { supabase, profile } = Astro.locals;
+if (!supabase || !profile) return Astro.redirect('/auth/login', 303);
+
+const { data: rows, error } = await supabase
+  .from('user_achievements')
+  .select('achievement, unlocked_at');
+if (error) console.error('[progreso] user_achievements', error.message);
+const unlocked = new Map((rows ?? []).map((r) => [r.achievement, r.unlocked_at]));
+const progress = levelProgress(profile.xp);
+const tz = profile.time_zone ?? 'Europe/Madrid';
+const done = ACHIEVEMENTS.filter((a) => unlocked.has(a.id));
+const pending = ACHIEVEMENTS.filter((a) => !unlocked.has(a.id));
+---
+
+<AppShell
+  title="Tu progreso"
+  current="progreso"
+  kicker={rankFor(progress.level)}
+  intro="Cada lectura, cada día que vuelves y cada cosa que compartes suma. No cambia tu destino, pero se nota."
+>
+  <div class="stats">
+    <section class="stat card" aria-labelledby="nivel">
+      <p class="kicker">Nivel</p>
+      <h2 id="nivel" class="big mono">
+        {progress.level}
+      </h2>
+      <ProgressBar
+        label="Hasta el siguiente nivel"
+        value={progress.current}
+        max={progress.needed}
+        valueText={`${progress.current} de ${progress.needed} XP`}
+      />
+      <p class="muted small">{profile.xp} XP en total</p>
+    </section>
+    <section class="stat card" aria-labelledby="racha">
+      <p class="kicker">Racha</p>
+      <h2 id="racha" class="big mono">
+        <Icon name="flame" size={30} />
+        {profile.streak}
+        <span class="visually-hidden">{profile.streak === 1 ? 'día' : 'días'} seguidos</span>
+      </h2>
+      <p class="muted small">
+        {profile.streak === 1 ? 'día seguido' : 'días seguidos'} · tu mejor racha:{' '}
+        {profile.best_streak ?? profile.streak}
+      </p>
+      <p class="muted small">Cada 7 días seguidos, 10 gemas.</p>
+    </section>
+    <section class="stat card" aria-labelledby="gemas">
+      <p class="kicker">Gemas</p>
+      <h2 id="gemas" class="big mono">
+        <span aria-hidden="true">◆</span>
+        {profile.gems}
+        <span class="visually-hidden">gemas</span>
+      </h2>
+      <p class="muted small">5 por cada logro y 10 por cada semana de racha.</p>
+    </section>
+  </div>
+
+  <section class="block" aria-labelledby="logros">
+    <h2 id="logros" class="section-title">
+      Logros{' '}
+      <Badge tone="acid">
+        {done.length} de {ACHIEVEMENTS.length}
+      </Badge>
+    </h2>
+    <ul class="achievements">
+      {done.map((a) => (
+        <li class="ach unlocked">
+          <span class="glyph" aria-hidden="true">
+            {a.glyph}
+          </span>
+          <span class="ach-text">
+            <strong>{a.title}</strong>
+            <span class="muted small">{a.desc}</span>
+            <span class="when small">Desbloqueado el {readingDate(unlocked.get(a.id)!, tz)}</span>
+          </span>
+        </li>
+      ))}
+      {pending.map((a) => (
+        <li class="ach">
+          <span class="glyph" aria-hidden="true">
+            {a.glyph}
+          </span>
+          <span class="ach-text">
+            <strong>
+              {a.title} <span class="visually-hidden">(pendiente)</span>
+            </strong>
+            <span class="muted small">{a.how}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="block" aria-labelledby="como">
+    <h2 id="como" class="section-title">
+      Cómo sumar puntos
+    </h2>
+    <table class="rules">
+      <caption class="visually-hidden">XP que da cada acción</caption>
+      <thead>
+        <tr>
+          <th scope="col">Acción</th>
+          <th scope="col">XP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {XP_RULES.map((r) => (
+          <tr>
+            <td>{r.action}</td>
+            <td class="mono">+{r.xp}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</AppShell>
+
+<style>
+  .stats {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+  .stat {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+  .big {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--step-4);
+    color: var(--acid);
+  }
+  .small {
+    font-size: var(--step--1);
+  }
+  .block {
+    margin-top: var(--space-7);
+    display: grid;
+    gap: var(--space-4);
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--step-2);
+  }
+  .achievements {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+  .ach {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--line-strong);
+    background: rgb(255 255 255 / 2%);
+  }
+  .ach .glyph {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    color: var(--ink-soft);
+    background: rgb(255 255 255 / 5%);
+    filter: grayscale(1);
+  }
+  .ach.unlocked {
+    border-style: solid;
+    border-color: var(--line-acid);
+    background: rgb(184 255 23 / 6%);
+  }
+  .ach.unlocked .glyph {
+    color: var(--acid);
+    background: rgb(184 255 23 / 12%);
+    box-shadow: var(--glow-acid);
+    filter: none;
+  }
+  .ach-text {
+    display: grid;
+    gap: 2px;
+  }
+  .when {
+    color: var(--acid-soft);
+  }
+  .rules {
+    max-width: 32rem;
+  }
+</style>

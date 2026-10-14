@@ -1,0 +1,24 @@
+---
+interface Props {
+  title: string;
+  image?: boolean;
+  headingLevel?: 2 | 3;
+}
+const { title, image = true, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<div class="empty-state">
+  {image && (
+    <img
+      src="/brand/zodi-480.webp"
+      alt=""
+      width="160"
+      height="240"
+      loading="lazy"
+      decoding="async"
+    />
+  )}
+  <Heading>{title}</Heading>
+  <slot />
+</div>

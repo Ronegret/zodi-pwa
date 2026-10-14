@@ -1,0 +1,64 @@
+---
+/**
+ * Botón o enlace con aspecto de botón. `loading` marca aria-busy y muestra
+ * un spinner sin cambiar el nombre accesible.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'violet' | 'danger';
+interface Props extends Omit<HTMLAttributes<'button'>, 'class'> {
+  variant?: Variant;
+  size?: 'md' | 'sm';
+  block?: boolean;
+  loading?: boolean;
+  href?: string;
+  icon?: IconName;
+  /** Se acerca un poco al cursor (solo ratón). */
+  magnetic?: boolean;
+  class?: string;
+}
+const {
+  variant = 'primary',
+  size = 'md',
+  block = false,
+  loading = false,
+  href,
+  icon,
+  magnetic = false,
+  class: className,
+  type = 'button',
+  ...attrs
+} = Astro.props;
+const classes = [
+  'btn',
+  variant !== 'primary' && `btn-${variant}`,
+  size === 'sm' && 'btn-sm',
+  block && 'btn-block',
+  className,
+];
+---
+
+{href ? (
+  <a class:list={classes} href={href} data-magnetic={magnetic ? '' : undefined}>
+    {icon && <Icon name={icon} />}
+    <span class="btn-label">
+      <slot />
+    </span>
+  </a>
+) : (
+  <button
+    class:list={classes}
+    type={type}
+    aria-busy={loading ? 'true' : undefined}
+    data-magnetic={magnetic ? '' : undefined}
+    {...attrs}
+  >
+    {loading && <span class="spinner" aria-hidden="true" />}
+    {icon && <Icon name={icon} />}
+    <span class="btn-label">
+      <slot />
+    </span>
+  </button>
+)}

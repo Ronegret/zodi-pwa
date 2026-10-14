@@ -1,0 +1,483 @@
+---
+/**
+ * Onboarding en 5 pasos con guardado parcial: cada paso valida (Zod en
+ * cliente y servidor), guarda en el perfil y pasa al siguiente. El último
+ * calcula la carta con astro-engine. Funciona sin JS: el buscador de ciudad
+ * cae a una búsqueda en servidor con la lista como radios.
+ */
+import AuthLayout from '@/layouts/AuthLayout.astro';
+import { CityCombobox } from '@/components/onboarding/CityCombobox';
+import Button from '@/components/ui/Button.astro';
+import ErrorSummary from '@/components/ui/ErrorSummary.astro';
+import Field from '@/components/ui/Field.astro';
+import ProgressBar from '@/components/ui/ProgressBar.astro';
+import { placeSchema, type Place } from '@/lib/geo/places';
+import {
+  ARRAY_FIELDS,
+  STEPS,
+  TONES,
+  TOPICS,
+  nextStep,
+  resolveStep,
+  stepIndex,
+  stepSchemas,
+  suggestUsername,
+  type StepId,
+} from '@/lib/onboarding/steps';
+import { RELATIONSHIP_OPTIONS } from '@/lib/validation/about';
+import { geocode } from '@/lib/server/geocoding';
+import { finishOnboarding, UsernameTakenError, updateOwnProfile } from '@/lib/server/profile';
+import { READING_TONES } from '@/lib/supabase/enums';
+import { fieldErrors, formToObject } from '@/lib/validation/common';
+
+const { supabase, user } = Astro.locals;
+let profile = Astro.locals.profile;
+if (!supabase || !user || !profile) return Astro.redirect('/auth/login', 303);
+
+const requested = Astro.url.searchParams.get('paso');
+const step: StepId = resolveStep(requested, profile);
+if (requested && requested !== step) return Astro.redirect(`/app/onboarding?paso=${step}`, 303);
+
+let errors: Record<string, string> = {};
+let raw: Record<string, unknown> = {};
+let choices: Place[] = [];
+
+/** Lugar desde el formulario: combobox (ocultos), radio elegido o búsqueda sin JS. */
+async function placeFromForm(): Promise<Record<string, unknown> | null> {
+  const query = String(raw.city_query ?? '').trim();
+  if (typeof raw.city_choice === 'string') {
+    try {
+      const c = JSON.parse(raw.city_choice) as Place;
+      return {
+        birth_place: c.label,
+        birth_lat: c.latitude,
+        birth_lon: c.longitude,
+        time_zone: c.timeZone,
+      };
+    } catch {
+      return {};
+    }
+  }
+  const hidden = placeSchema.safeParse(raw);
+  if (hidden.success && (!query || query === hidden.data.birth_place)) return raw;
+  if (query.length < 2) return {};
+  try {
+    // supabase no es null: lo garantiza el return del principio.
+    choices = await geocode(supabase!, query);
+  } catch {
+    errors = { city_query: 'El buscador de ciudades no responde. Inténtalo en un momento.' };
+    return null;
+  }
+  if (!choices.length) {
+    errors = {
+      city_query: `Ni rastro de «${query.slice(0, 60)}». Prueba a escribirlo de otra forma.`,
+    };
+  }
+  return null;
+}
+
+if (Astro.request.method === 'POST') {
+  raw = formToObject(await Astro.request.formData(), ARRAY_FIELDS);
+  const input = step === 'lugar' ? await placeFromForm() : raw;
+  if (input && !Object.keys(errors).length) {
+    const parsed = stepSchemas[step].safeParse(input);
+    if (!parsed.success) {
+      const fe = fieldErrors(parsed.error);
+      errors = step === 'lugar' ? { city_query: Object.values(fe)[0]! } : fe;
+    } else {
+      try {
+        profile = await updateOwnProfile(supabase, user.id, parsed.data);
+        const next = nextStep(step);
+        if (next) return Astro.redirect(`/app/onboarding?paso=${next}`, 303);
+        await finishOnboarding(supabase, profile);
+        return Astro.redirect('/app?bienvenida=1', 303);
+      } catch (error) {
+        if (error instanceof UsernameTakenError) {
+          errors = { username: 'Ese usuario ya tiene dueño. Prueba otro.' };
+        } else {
+          console.error('[onboarding]', error);
+          errors = { _form: 'No hemos podido guardar. Inténtalo de nuevo.' };
+        }
+      }
+    }
+  }
+  if (Object.keys(errors).length) Astro.response.status = 422;
+}
+
+// Valores a mostrar: lo enviado (si hubo error) o lo guardado.
+const v = (key: string, saved: unknown) => String(raw[key] ?? saved ?? '');
+const savedPlace: Place | null =
+  profile.birth_place &&
+  profile.birth_lat !== null &&
+  profile.birth_lon !== null &&
+  profile.time_zone
+    ? {
+        id: 'saved',
+        name: profile.birth_place,
+        label: profile.birth_place,
+        latitude: profile.birth_lat,
+        longitude: profile.birth_lon,
+        timeZone: profile.time_zone,
+      }
+    : null;
+const topics = (raw.favorite_topics as string[] | undefined) ?? profile.favorite_topics;
+const relationship = String(raw.relationship_status ?? profile.relationship_status ?? '');
+// Sin nombre de usuario aún: proponemos uno a partir del nombre (se puede cambiar).
+const usernameValue = v(
+  'username',
+  profile.username ?? (profile.display_name ? suggestUsername(profile.display_name, user.id) : ''),
+);
+const tone = String(raw.reading_tone ?? profile.reading_tone);
+const timeUnknown =
+  raw.birth_time_unknown === 'on' || (!raw.birth_date && profile.birth_time_known === false);
+
+const index = stepIndex(step);
+const current = STEPS[index]!;
+const prev = STEPS[index - 1];
+const isLast = index === STEPS.length - 1;
+---
+
+<AuthLayout
+  title="Tu perfil astral"
+  kicker={`Paso ${index + 1} de ${STEPS.length} · ${current.label}`}
+  intro="Cinco pasos y tienes tu carta natal real, calculada con el cielo del día que naciste."
+  wide
+>
+  <ProgressBar
+    label="Progreso"
+    value={index + 1}
+    max={STEPS.length}
+    valueText={`Paso ${index + 1} de ${STEPS.length}`}
+    tone="hot"
+  />
+
+  <nav aria-label="Pasos del onboarding">
+    <ol class="steps">
+      {STEPS.map((s, i) => (
+        <li class:list={{ done: i < index, now: i === index }}>
+          {i < index ? (
+            <a href={`/app/onboarding?paso=${s.id}`}>
+              <span class="visually-hidden">Hecho: </span>
+              {s.label}
+            </a>
+          ) : (
+            <span aria-current={i === index ? 'step' : undefined}>{s.label}</span>
+          )}
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <ErrorSummary errors={errors} />
+
+  <form method="post" class="stack step-form" data-step={step} novalidate>
+    <h2>{current.heading}</h2>
+    <aside class="zodi-tip" aria-label="Lo que te explica ZODI">
+      <img src="/art/zodi-senalando-640.webp" alt="" width="640" height="640" decoding="async" />
+      <p>{current.tip}</p>
+    </aside>
+
+    {step === 'perfil' && (
+      <>
+        <Field
+          name="display_name"
+          label="Nombre visible"
+          autocomplete="given-name"
+          value={v('display_name', profile.display_name)}
+          required
+          error={errors.display_name}
+        />
+        <Field
+          name="username"
+          label="Nombre de usuario"
+          autocomplete="username"
+          spellcheck="false"
+          hint="De 3 a 24 caracteres: letras sin tildes, números o guion bajo."
+          value={usernameValue}
+          required
+          error={errors.username}
+        />
+      </>
+    )}
+
+    {step === 'nacimiento' && (
+      <>
+        <Field
+          name="birth_date"
+          label="Fecha de nacimiento"
+          type="date"
+          min="1900-01-01"
+          value={v('birth_date', profile.birth_date)}
+          required
+          error={errors.birth_date}
+        />
+        <Field
+          name="birth_time"
+          label="Hora"
+          type="time"
+          hint="La que pone en tu partida de nacimiento. Si no la sabes, marca la casilla de abajo."
+          value={v('birth_time', profile.birth_time?.slice(0, 5))}
+          error={errors.birth_time}
+        />
+        <div class="check">
+          <input
+            id="f-birth_time_unknown"
+            name="birth_time_unknown"
+            type="checkbox"
+            checked={timeUnknown}
+          />
+          <label for="f-birth_time_unknown">No sé la hora (ya la buscaré)</label>
+        </div>
+      </>
+    )}
+
+    {step === 'lugar' && (
+      <>
+        <CityCombobox
+          client:load
+          initial={savedPlace}
+          initialQuery={String(raw.city_query ?? '')}
+          error={errors.city_query}
+        />
+        {choices.length > 0 && (
+          <fieldset class="group">
+            <legend>¿Cuál de estos?</legend>
+            <div class="choice-grid">
+              {choices.map((c, i) => (
+                <label class="choice">
+                  <input
+                    type="radio"
+                    name="city_choice"
+                    value={JSON.stringify(c)}
+                    checked={i === 0}
+                    id={i === 0 ? 'f-city_choice' : undefined}
+                  />
+                  <span class="choice-title">{c.name}</span>
+                  <small>
+                    {c.label} · {c.timeZone}
+                  </small>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+      </>
+    )}
+
+    {step === 'estilo' && (
+      <>
+        <fieldset class="group">
+          <legend>Tono de tus lecturas</legend>
+          <div class="choice-grid">
+            {READING_TONES.map((t, i) => (
+              <label class="choice">
+                <input
+                  type="radio"
+                  name="reading_tone"
+                  value={t}
+                  checked={tone === t}
+                  id={i === 0 ? 'f-reading_tone' : undefined}
+                />
+                <span class="choice-title">{TONES[t].title}</span>
+                <small>{TONES[t].hint}</small>
+                <em class="tone-example">“{TONES[t].example}”</em>
+              </label>
+            ))}
+          </div>
+          <p
+            id="f-reading_tone-error"
+            class="field-error"
+            data-error-for="reading_tone"
+            hidden={!errors.reading_tone}
+          >
+            {errors.reading_tone}
+          </p>
+        </fieldset>
+        <fieldset class="group">
+          <legend>Temas que te importan (hasta 4)</legend>
+          <div class="chip-group">
+            {TOPICS.map((t, i) => (
+              <label class="chip">
+                <input
+                  type="checkbox"
+                  name="favorite_topics"
+                  value={t.value}
+                  checked={topics.includes(t.value)}
+                  id={i === 0 ? 'f-favorite_topics' : undefined}
+                />
+                {t.label}
+              </label>
+            ))}
+          </div>
+          <p
+            id="f-favorite_topics-error"
+            class="field-error"
+            data-error-for="favorite_topics"
+            hidden={!errors.favorite_topics}
+          >
+            {errors.favorite_topics}
+          </p>
+        </fieldset>
+      </>
+    )}
+
+    {step === 'sobre-ti' && (
+      <>
+        <div class="field">
+          <label class="field-label" for="f-relationship_status">
+            Situación sentimental
+          </label>
+          <p
+            id="f-relationship_status-error"
+            class="field-error"
+            data-error-for="relationship_status"
+            hidden={!errors.relationship_status}
+          >
+            {errors.relationship_status}
+          </p>
+          <select id="f-relationship_status" name="relationship_status" class="select">
+            <option value="" selected={relationship === ''}>
+              Prefiero no decirlo
+            </option>
+            {RELATIONSHIP_OPTIONS.map((o) => (
+              <option value={o.value} selected={relationship === o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-personal_bio">
+            Cuéntale a ZODI de ti <span class="field-req">(opcional)</span>
+          </label>
+          <p id="f-personal_bio-hint" class="field-hint">
+            A qué te dedicas, qué te preocupa ahora o qué quieres conseguir. Máximo 500 caracteres.
+          </p>
+          <p
+            id="f-personal_bio-error"
+            class="field-error"
+            data-error-for="personal_bio"
+            hidden={!errors.personal_bio}
+          >
+            {errors.personal_bio}
+          </p>
+          <textarea
+            id="f-personal_bio"
+            name="personal_bio"
+            class="input"
+            rows="4"
+            maxlength="500"
+            aria-describedby="f-personal_bio-hint"
+            placeholder="Trabajo en diseño, acabo de mudarme y estoy pensando en cambiar de trabajo."
+          >{v('personal_bio', profile.personal_bio)}</textarea>
+        </div>
+        <p class="field-hint">
+          Puedes dejarlo en blanco y completarlo cuando quieras en Ajustes, junto con tu pareja y
+          tus hijos.
+        </p>
+      </>
+    )}
+
+    <div class="actions">
+      {prev && (
+        <Button href={`/app/onboarding?paso=${prev.id}`} variant="ghost" icon="chevronLeft">
+          Atrás
+        </Button>
+      )}
+      <Button type="submit" class="next">
+        {isLast ? 'Calcular mi carta' : 'Siguiente'}
+      </Button>
+    </div>
+  </form>
+</AuthLayout>
+
+<style>
+  .zodi-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-violet);
+    background: rgb(155 77 255 / 9%);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .zodi-tip img {
+    flex: none;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--acid);
+  }
+  .zodi-tip p {
+    margin: 0;
+  }
+  .tone-example {
+    font-size: var(--step--1);
+    color: var(--acid-soft);
+  }
+</style>
+
+<script>
+  import { enhanceForm } from '@/lib/forms/enhance';
+  import { ARRAY_FIELDS, isStepId, stepSchemas } from '@/lib/onboarding/steps';
+
+  const form = document.querySelector<HTMLFormElement>('form[data-step]');
+  const step = form?.dataset.step ?? null;
+  // En "lugar" valida el servidor: sin JS busca la ciudad escrita.
+  if (form && isStepId(step) && step !== 'lugar') {
+    enhanceForm(form, stepSchemas[step], { arrays: ARRAY_FIELDS });
+  }
+</script>
+
+<style>
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    font-size: var(--step--1);
+    font-weight: 700;
+  }
+  .steps li {
+    display: flex;
+  }
+  .steps li > * {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0.2rem 0.75rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+  }
+  .steps li.done > a {
+    min-height: 44px;
+    color: var(--acid-soft);
+    border-color: var(--line-acid);
+    text-decoration: none;
+  }
+  .steps li.now > span {
+    color: var(--brand-ink);
+    background: var(--acid);
+    border-color: var(--acid);
+  }
+  .step-form h2 {
+    font-size: var(--step-3);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+  }
+  .actions :global(.next) {
+    margin-left: auto;
+    min-width: 12rem;
+  }
+</style>
