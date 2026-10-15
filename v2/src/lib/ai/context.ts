@@ -4,14 +4,11 @@
  * biorritmo, numerología). Puro: recibe los datos y la fecha, devuelve
  * texto para el prompt. Sin esto, una lectura es un horóscopo de revista.
  */
-import type { NatalChart } from '@/lib/astro-engine';
-import {
-  PLANET_NAMES,
-  elementBalance,
-  formatPosition,
-} from '@/lib/astro-engine/labels';
+import type { NatalChart, Sign } from '@/lib/astro-engine';
+import { PLANET_NAMES, elementBalance, formatPosition } from '@/lib/astro-engine/labels';
 import { moonInfo, skyAt, transitsToNatal } from '@/lib/astro-engine/sky';
 import { biorhythmOn, civilDate } from '@/lib/daily/biorhythm';
+import { librarySnippet } from '@/lib/knowledge';
 import { plainAspect, plainTransit, transitStrength } from '@/lib/daily/today';
 import { chineseZodiac, lifePathNumber, personalYear } from './numerology';
 
@@ -225,6 +222,20 @@ export function buildReadingContext(
     lines.push(
       `- Energía hoy (cuerpo, corazón, cabeza): ${energyWord(bio.fisico)}, ${energyWord(bio.emocional)}, ${energyWord(bio.intelectual)}. Cuéntalo con esas palabras, sin porcentajes.`,
     );
+  }
+
+  if (profile.birth_date) {
+    const library = librarySnippet({
+      sunSign: sunSign as Sign | null,
+      lifePath: lifePathNumber(profile.birth_date),
+      personalYear: personalYear(profile.birth_date, today),
+    });
+    if (library)
+      lines.push(
+        '',
+        '## Biblioteca de ZODI (base fiable: tradúcela a su vida, no la copies)',
+        library,
+      );
   }
 
   return { firstName, today, timeZone, text: lines.join('\n'), sunSign };

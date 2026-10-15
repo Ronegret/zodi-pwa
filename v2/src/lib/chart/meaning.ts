@@ -13,9 +13,13 @@ import {
   bestAndWorst,
   chineseElement,
   chineseKnowledge,
+  numberAs,
   numberKnowledge,
+  numberPlus,
   pairKnowledge,
   planetKnowledge,
+  signKnowledge,
+  yearKnowledge,
   type PlanetKey,
 } from '@/lib/knowledge';
 import { SIGN_BY_SLUG } from '@/lib/public/signs';
@@ -172,7 +176,28 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
     image: `/signos/${signSlug(sun)}-640.webp`,
     ...(() => {
       const b = body('sun', SUN[sun]);
-      return { paragraphs: b.paragraphs, ...(b.facts ? { facts: b.facts } : {}) };
+      const sk = signKnowledge(sun);
+      const facts: Fact[] = [
+        ...(b.facts ?? []),
+        ...(sk
+          ? [
+              { label: 'Tu mejor versión', text: sk.luz },
+              { label: 'Tu lado difícil', text: sk.sombra },
+              { label: 'En el amor', text: sk.amor },
+              { label: 'En la intimidad', text: sk.pasion },
+              { label: 'Como amigo o amiga', text: sk.amistad },
+              { label: 'En familia', text: sk.familia },
+              { label: 'En el trabajo', text: sk.trabajo },
+              { label: 'Con el dinero', text: sk.dinero },
+              { label: 'Tu energía', text: sk.energia },
+              { label: 'Lo que suele venir', text: sk.futuro },
+              { label: 'Lo que nunca dices', text: sk.secreto },
+              { label: 'Lo que necesitas', text: sk.necesita },
+              { label: 'Consejo de ZODI', text: sk.consejo },
+            ]
+          : []),
+      ];
+      return { paragraphs: b.paragraphs, ...(facts.length ? { facts } : {}) };
     })(),
     ask: `Explícame mi Sol en ${sun}${houseAsk('sun')}: cómo se nota en mi personalidad y qué potencia tengo.`,
   });
@@ -429,6 +454,21 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
     );
   }
   const lifeK = numberKnowledge(life);
+  const lifeP = numberPlus(life);
+  const yearK = yearKnowledge(year);
+  // Los textos largos de la biblioteca sustituyen a los cortos de las tarjetas.
+  const longText = (kind: 'alma' | 'expresion' | 'personalidad' | 'nacimiento', n: number) =>
+    numberAs(kind, n);
+  const dayText = longText('nacimiento', day);
+  if (dayText) numbers[2]!.text = dayText;
+  if (name) {
+    const ex = longText('expresion', name.expression);
+    const so = longText('alma', name.soul);
+    const pe = longText('personalidad', name.personality);
+    if (ex) numbers[3]!.text = ex;
+    if (so) numbers[4]!.text = so;
+    if (pe) numbers[5]!.text = pe;
+  }
   const nameK = name ? numberKnowledge(name.expression) : null;
   const numFacts: Fact[] = lifeK
     ? [
@@ -443,6 +483,30 @@ export function chartMeaning(input: MeaningInput): MeaningSection[] {
           label: `Con qué números encajas (${lifeK.compatibles.join(', ')}) y con cuáles chocas (${lifeK.choca.join(', ')})`,
           text: lifeK.compat_texto,
         },
+        ...(lifeP
+          ? [
+              { label: 'Tu personalidad', text: lifeP.personalidad },
+              { label: 'Tu energía', text: lifeP.energia },
+              { label: 'Lo que suele venir', text: lifeP.futuro },
+              { label: 'Como amigo o amiga', text: lifeP.amistad },
+              { label: 'En familia', text: lifeP.familia },
+              { label: 'Qué piensan al conocerte', text: lifeP.como_te_ven },
+              { label: 'Lo que no cuentas', text: lifeP.secreto },
+              { label: 'Tu pareja ideal', text: lifeP.pareja_ideal },
+              { label: 'Dónde brillas (profesiones)', text: lifeP.profesiones },
+            ]
+          : []),
+        ...(yearK
+          ? [
+              { label: `Tu año personal ${year}: «${yearK.titulo}»`, text: yearK.tema },
+              { label: `Año ${year} · amor`, text: yearK.amor },
+              { label: `Año ${year} · trabajo`, text: yearK.trabajo },
+              { label: `Año ${year} · dinero`, text: yearK.dinero },
+              { label: `Año ${year} · energía`, text: yearK.energia },
+              { label: `Año ${year} · qué evitar`, text: yearK.evita },
+              { label: `Año ${year} · consejo`, text: yearK.consejo },
+            ]
+          : []),
         { label: 'Consejo de ZODI', text: lifeK.consejo },
       ]
     : [];

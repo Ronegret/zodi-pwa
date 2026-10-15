@@ -149,7 +149,7 @@ describe('prompts', () => {
     expect(msg).toContain('HORÓSCOPO DE HOY');
     expect(msg).toContain('[Enfócate especialmente en el área de: amor]');
     expect(msg).toContain('TONO BRUTAL');
-    expect(msg).toContain('EXTENSIÓN MÁXIMA: 90 palabras');
+    expect(msg).toContain('EXTENSIÓN MÁXIMA: 140 palabras');
   });
 
   it('cada tipo de lectura tiene slug único e instrucciones', () => {

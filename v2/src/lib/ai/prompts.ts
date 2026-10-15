@@ -50,7 +50,7 @@ NUNCA
 /** Formato de las lecturas (el chat tiene el suyo en ZODI_CHAT_MODE). */
 const READING_FORMAT = `FORMATO (la web lo reparte en tarjetas: respétalo al pie de la letra)
 1. PRIMERA LÍNEA: una sola frase (máximo 25 palabras) que resuma todo con humor negro. Sin título ni negritas. Se lee en grande: que se entienda sola.
-2. Después, de 2 a 4 bloques. Cada bloque empieza con una línea que sea SOLO el título en negrita, de 1 a 3 palabras: **Amor**, **Trabajo y dinero**, **Energía**. Debajo, 2 o 3 frases cortas.
+2. Después, de 3 a 6 bloques (los que pida la extensión). Cada bloque empieza con una línea que sea SOLO el título en negrita, de 1 a 3 palabras: **Amor**, **Trabajo y dinero**, **Energía**. Debajo, 2 a 4 frases cortas con un ejemplo de su vida real.
 3. El último bloque es siempre **Hoy haz esto:** seguido de UNA acción concreta que pueda hacer hoy (máximo 20 palabras).
 Sin listas, tablas, emojis ni títulos con #.`;
 
@@ -98,11 +98,11 @@ Registro: "Mercurio no tiene la culpa de que contestes mensajes a las tres de la
 
 const LENGTH_HINT: Record<ReadingLength, string> = {
   breve:
-    'EXTENSIÓN MÁXIMA: 90 palabras en total (es un límite, no una sugerencia). Resumen, un bloque y la acción.',
+    'EXTENSIÓN MÁXIMA: 140 palabras en total (es un límite, no una sugerencia). Resumen, dos bloques y la acción.',
   normal:
-    'EXTENSIÓN MÁXIMA: 220 palabras en total (es un límite, no una sugerencia). Frases cortas.',
+    'EXTENSIÓN MÁXIMA: 380 palabras en total (es un límite, no una sugerencia). Frases cortas. Usa de 4 a 5 bloques.',
   extensa:
-    'EXTENSIÓN MÁXIMA: 450 palabras en total, con la misma estructura de tarjetas (es un límite, no una sugerencia).',
+    'EXTENSIÓN MÁXIMA: 750 palabras en total, con la misma estructura de tarjetas y 5 o 6 bloques (es un límite, no una sugerencia).',
 };
 
 export interface ReadingRequestParts {
@@ -130,6 +130,7 @@ export function buildUserMessage({
     '</perfil>',
     '',
     `<lectura>\n${def.instructions}\n</lectura>`,
+    'Si en el perfil hay una «Biblioteca de ZODI», es la base: no la copies, tradúcela a la vida de esta persona y añade lo que solo vale para ella.',
     extra ? `\n<consulta>\n${extra}\n</consulta>` : '',
     '',
     focus ? `[Enfócate especialmente en el área de: ${FOCUS_LABELS[focus]}]` : '',

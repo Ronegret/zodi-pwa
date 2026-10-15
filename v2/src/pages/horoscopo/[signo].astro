@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button.astro';
 import SignDayPanel from '@/components/public/SignDayPanel.astro';
 import { SIGN_GLYPHS } from '@/lib/astro-engine/labels';
 import { bestFor, pairSlug } from '@/lib/public/compat';
+import { signKnowledge } from '@/lib/knowledge';
 import { signDay } from '@/lib/public/sign-day';
 import { SIGN_BY_SLUG } from '@/lib/public/signs';
 import { longDate, publicCacheControl, publicToday } from '@/lib/public/today';
@@ -18,6 +19,19 @@ if (!info) return Astro.rewrite('/404');
 const today = publicToday();
 const day = signDay(info.index, today);
 const fecha = longDate(today);
+const ficha = signKnowledge(info.name);
+const TEMAS: Array<[keyof NonNullable<typeof ficha>, string]> = [
+  ['luz', 'Lo mejor de ti'],
+  ['sombra', 'Tu lado difícil'],
+  ['amor', 'En el amor'],
+  ['pasion', 'En la intimidad'],
+  ['amistad', 'Como amigo o amiga'],
+  ['familia', 'En familia'],
+  ['trabajo', 'En el trabajo'],
+  ['dinero', 'Con el dinero'],
+  ['energia', 'Tu energía'],
+  ['futuro', 'Lo que suele venir'],
+];
 Astro.response.headers.set('Cache-Control', publicCacheControl());
 
 const title = `Horóscopo de hoy para ${info.name}`;
@@ -107,6 +121,24 @@ const description = `${info.name}, ${fecha}: ${day.headline} Amor, trabajo, ener
         ))}
       </ul>
     </section>
+
+    {ficha && (
+      <section class="about" aria-labelledby="a-fondo">
+        <h2 id="a-fondo">{info.name} a fondo</h2>
+        <p class="lead">{ficha.esencia}</p>
+        <div class="profile">
+          {TEMAS.map(([k, label]) => (
+            <article class="profile-card">
+              <h3>{label}</h3>
+              <p>{ficha[k]}</p>
+            </article>
+          ))}
+        </div>
+        <p class="profile-tip">
+          <strong>Consejo de ZODI:</strong> {ficha.consejo}
+        </p>
+      </section>
+    )}
 
     <section class="about" aria-labelledby="encaja">
       <h2 id="encaja">Con quién encaja {info.name}</h2>
@@ -211,6 +243,44 @@ const description = `${info.name}, ${fecha}: ${day.headline} Amor, trabajo, ener
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-4);
+  }
+  .profile {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: 1fr;
+    margin-top: var(--space-4);
+  }
+  @media (min-width: 720px) {
+    .profile {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .profile-card {
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+  .profile-card h3 {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    color: var(--violet-text);
+  }
+  .profile-card p {
+    margin: 0;
+    line-height: 1.6;
+  }
+  .about .profile-tip,
+  .about .profile-tip strong {
+    color: var(--brand-ink);
+  }
+  .profile-tip {
+    margin-top: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--acid);
+    color: var(--brand-ink);
   }
   .about {
     display: grid;
