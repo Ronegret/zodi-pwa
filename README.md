@@ -4,7 +4,7 @@
 
 <a href="https://zodi.aibueno.es"><img src="https://img.shields.io/badge/🌐_Live_Demo-8B5CF6?style=for-the-badge" /></a>
 
-<a href="https://zodi.aibueno.es"><img width="85%" src="https://image.thum.io/get/wait/8/width/900/crop/520/noanimate/https://zodi.aibueno.es" alt="ZODI preview" /></a>
+<a href="https://zodi.aibueno.es"><img width="85%" src="./zodi-home-preview.png" alt="ZODI preview" /></a>
 
 </div>
 
