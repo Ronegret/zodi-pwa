@@ -38,3 +38,11 @@ next-env.d.ts
 # os
 .DS_Store
 Thumbs.db
+
+# Media pesada fuera del repo (showcase)
+*.mp4
+*.mov
+*.webm
+*.mp3
+*.wav
+ZODI IMAGENES/
