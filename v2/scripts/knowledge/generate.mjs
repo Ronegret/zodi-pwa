@@ -193,6 +193,75 @@ JSON: {"texto":"qué significa, en 4-5 frases claras y con humor, hablándole de
   },
 };
 
+const NUMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33];
+const numLabel = (n) => `${n}${[11, 22, 33].includes(n) ? ' (número maestro)' : ''}`;
+
+SETS.signos = {
+  file: 'signos.json',
+  items: SIGNS.map((s, i) => ({
+    key: slug(s),
+    ask: `Ficha completa del signo ${s} (${ELEM[i % 4]}, ${MODAL[i % 3]}, regido por ${RULER[s]}). Es la ficha que lee alguien que NO sabe astrología: todo en palabras de calle.
+JSON: {"frase":"frase para compartir (máx. 110 car.)","esencia":"quién es y cómo funciona, 4-5 frases (máx. 520)","luz":"sus mejores cualidades, con ejemplos de la vida diaria (máx. 360)","sombra":"su cara difícil, con cariño (máx. 360)","amor":"cómo ama, qué busca, cómo se enamora y cómo se desenamora (máx. 460)","pasion":"cómo es en la intimidad, con elegancia y humor, sin explícito (máx. 260)","amistad":"qué tipo de amigo es (máx. 320)","familia":"cómo es como hijo/a, hermano/a, padre o madre (máx. 320)","trabajo":"cómo trabaja, cómo es de jefe y de empleado, en qué brilla (máx. 400)","dinero":"cómo gana, gasta y ahorra (máx. 340)","energia":"cómo gestiona su energía, estrés y descanso, sin consejos médicos (máx. 340)","futuro":"qué suele traerle la vida a este signo a medio plazo y qué le conviene preparar; tendencia simbólica, nada absoluto (máx. 400)","como_te_ven":"la primera impresión que da (máx. 240)","secreto":"lo que nunca dice en voz alta (máx. 240)","necesita":"lo que necesita para estar bien (máx. 200)","consejo":"qué hacer hoy, una frase (máx. 180)"}`,
+  })),
+};
+
+SETS.numeros_plus = {
+  file: 'numeros_plus.json',
+  items: NUMS.map((n) => ({
+    key: String(n),
+    ask: `Numerología pitagórica: ampliación del número ${numLabel(n)} como camino de vida. Le hablas a quien lo tiene.
+JSON: {"personalidad":"cómo es en el día a día y cómo trata a la gente, 4-5 frases (máx. 520)","energia":"cuándo está en su mejor y peor momento, cómo gasta y recarga energía (máx. 340)","futuro":"qué etapas y cambios suele vivir quien tiene este número y para qué prepararse; simbólico, nada absoluto (máx. 400)","amistad":"qué amigo/a es (máx. 260)","familia":"cómo es en familia (máx. 260)","como_te_ven":"qué piensan los demás al conocerte (máx. 240)","secreto":"lo que no cuenta (máx. 220)","pareja_ideal":"qué tipo de pareja le funciona y por qué (máx. 280)","profesiones":"6 profesiones o ámbitos donde encaja, separados por comas (máx. 160)"}`,
+  })),
+};
+
+const KINDS = {
+  alma: 'Número del Alma (el deseo del corazón: lo que de verdad quieres, sacado de las vocales del nombre)',
+  expresion:
+    'Número de Expresión o Destino (tus talentos y cómo los usas, sacado de todas las letras del nombre)',
+  personalidad:
+    'Número de Personalidad (la máscara: lo que los demás perciben de ti, sacado de las consonantes del nombre)',
+  nacimiento: 'Número del día de nacimiento (el don natural con el que llegaste al mundo)',
+};
+SETS.numeros_tipos = {
+  file: 'numeros_tipos.json',
+  items: Object.entries(KINDS).map(([k, what]) => ({
+    key: k,
+    ask: `Numerología pitagórica: ${what}. Le hablas a quien lo tiene. Un texto por número.
+JSON con exactamente estas claves, cada valor de 3 frases (máx. 380 car.): {${NUMS.map((n) => `"${n}":"el ${numLabel(n)}"`).join(', ')}}`,
+  })),
+};
+
+SETS.anio = {
+  file: 'anio.json',
+  items: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({
+    key: String(n),
+    ask: `Numerología: Año Personal ${n} (el ciclo de 9 años en el que estás). Le hablas a quien lo está viviendo ahora.
+JSON: {"titulo":"apodo gracioso del año (3-5 palabras)","tema":"de qué va este año y qué se espera de ti, 4 frases (máx. 460)","amor":"qué pasa en el amor (máx. 320)","trabajo":"qué pasa en el trabajo y los proyectos (máx. 320)","dinero":"qué pasa con el dinero (máx. 260)","energia":"cómo estará tu energía y qué cuidar, sin consejos médicos (máx. 260)","evita":"qué conviene evitar (máx. 220)","consejo":"el consejo del año, una frase (máx. 180)"}`,
+  })),
+};
+
+// Más apellidos (los que no estén ya), por familias de origen. Se fusionan con los existentes.
+const FAMILIAS = [
+  'patronímicos terminados en -ez / -iz / -oz (hijo de…)',
+  'toponímicos de España (de un pueblo, río, monte o lugar)',
+  'de oficios (Herrero, Molinero, Zapatero…)',
+  'apodos y descriptivos (Rubio, Calvo, Moreno, Delgado…)',
+  'vascos y navarros',
+  'catalanes, valencianos y baleares',
+  'gallegos y asturianos',
+  'mapuche, quechua, aymara, náhuatl, guaraní y otros indígenas frecuentes en Chile y Latinoamérica',
+  'italianos, alemanes, croatas, franceses e ingleses frecuentes en Chile y Argentina',
+  'árabes, sefardíes y portugueses frecuentes en el mundo hispano',
+];
+SETS.apellidos_mas = {
+  items: FAMILIAS.map((f, i) => ({
+    key: `mas#${i}`,
+    ask: `Dame 20 apellidos comunes del mundo hispano de esta familia: ${f}. NO repitas los que ya existen (aquí tienes sus claves): __YA__
+Para cada uno: "w" (apellido bien escrito), "o" (origen en pocas palabras, máx. 70 car.), "m" (significado, máx. 110), "n" (nota breve, máx. 140) y "d" (descripción de 3-4 frases, máx. 380: cómo nació, dónde abunda, una curiosidad real y comprobable, con humor cariñoso; si algo es discutido, dilo).
+JSON: {"clave_en_minusculas_sin_tildes":{"w":"…","o":"…","m":"…","n":"…","d":"…"}, ...}`,
+  })),
+};
+
 // Nombres y apellidos: se AMPLÍA lo ya generado con una descripción larga (campo d).
 function nameItems(kind) {
   const file = `${NAMES}${kind}.json`;
@@ -218,10 +287,19 @@ JSON: {"palabra_en_minuscula_sin_tildes":"descripción", ...} usando exactamente
 }
 
 async function run(name) {
+  const isMas = name === 'apellidos_mas';
   const isName = name === 'nombres' || name === 'apellidos';
-  const file = isName ? `${NAMES}${name}.json` : `${OUT}${SETS[name].file}`;
+  const file =
+    isName || isMas ? `${NAMES}${isMas ? 'apellidos' : name}.json` : `${OUT}${SETS[name].file}`;
   const data = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
-  let items = isName ? nameItems(name) : SETS[name].items.filter((it) => !data[it.key]);
+  let items = isName
+    ? nameItems(name)
+    : isMas
+      ? SETS[name].items.map((it) => ({
+          ...it,
+          ask: it.ask.replace('__YA__', Object.keys(data).join(', ')),
+        }))
+      : SETS[name].items.filter((it) => !data[it.key]);
   if (trial) items = items.slice(0, 2);
   console.log(`${name}: ${items.length} peticiones`);
   if (!items.length) return;
@@ -229,7 +307,8 @@ async function run(name) {
     custom_id: `r${i}`,
     params: {
       model: MODEL,
-      max_tokens: isName ? 5000 : name === 'pares' ? 2000 : 2000,
+      max_tokens:
+        isName || isMas ? 8000 : name === 'signos' ? 3000 : name === 'pares' ? 2000 : 2000,
       system: [{ type: 'text', text: VOICE, cache_control: { type: 'ephemeral', ttl: '1h' } }],
       messages: [{ role: 'user', content: it.ask }],
       thinking: { type: 'disabled' },
@@ -255,7 +334,25 @@ async function run(name) {
     try {
       const text = r.result.message.content.map((c) => c.text ?? '').join('');
       const json = JSON.parse(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
-      if (isName) {
+      if (isMas) {
+        for (const [k, v] of Object.entries(json)) {
+          const key = k
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+          if (!data[key] && v && typeof v.w === 'string' && typeof v.m === 'string') {
+            data[key] = {
+              w: v.w,
+              o: v.o ?? '',
+              m: v.m,
+              n: v.n ?? '',
+              d: String(v.d ?? '').slice(0, 420),
+            };
+            ok++;
+          }
+        }
+      } else if (isName) {
         for (const [k, d] of Object.entries(json)) {
           if (data[k] && typeof d === 'string' && d.trim()) {
             data[k].d = d.trim().replace(/\s+/g, ' ').slice(0, 420);
@@ -276,14 +373,26 @@ async function run(name) {
   );
   writeFileSync(
     file,
-    JSON.stringify(sorted, null, isName ? 0 : 1).replace(
-      isName ? /},"/g : /^$/,
-      isName ? '},\n"' : '',
+    JSON.stringify(sorted, null, isName || isMas ? 0 : 1).replace(
+      isName || isMas ? /},"/g : /^$/,
+      isName || isMas ? '},\n"' : '',
     ) + '\n',
   );
   console.log(`  guardado: ${ok} nuevos`);
 }
 
-for (const name of ['numeros', 'chino', 'planetas', 'pares', 'nombres', 'apellidos']) {
+for (const name of [
+  'numeros',
+  'chino',
+  'planetas',
+  'pares',
+  'signos',
+  'numeros_plus',
+  'numeros_tipos',
+  'anio',
+  'nombres',
+  'apellidos',
+  'apellidos_mas',
+]) {
   if (!only || only === name) await run(name);
 }

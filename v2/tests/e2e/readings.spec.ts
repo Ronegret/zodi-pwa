@@ -79,7 +79,7 @@ test.describe('lecturas con IA', () => {
     const prompt = ai.messages[0]!.content;
     expect(prompt).toContain('Nombre: Ana');
     expect(prompt).toMatch(/Sol en \w+ \d+°/);
-    expect(prompt).toContain('Tránsitos de hoy');
+    expect(prompt).toContain('Lo que pasa hoy en el cielo');
     expect(prompt).toContain('HORÓSCOPO DE HOY');
 
     await page.getByRole('link', { name: 'Ver guardada' }).click();

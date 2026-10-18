@@ -4,16 +4,12 @@
  * biorritmo, numerología). Puro: recibe los datos y la fecha, devuelve
  * texto para el prompt. Sin esto, una lectura es un horóscopo de revista.
  */
-import type { NatalChart } from '@/lib/astro-engine';
-import {
-  ASPECT_NAMES,
-  PLANET_NAMES,
-  elementBalance,
-  formatPosition,
-} from '@/lib/astro-engine/labels';
+import type { NatalChart, Sign } from '@/lib/astro-engine';
+import { PLANET_NAMES, elementBalance, formatPosition } from '@/lib/astro-engine/labels';
 import { moonInfo, skyAt, transitsToNatal } from '@/lib/astro-engine/sky';
 import { biorhythmOn, civilDate } from '@/lib/daily/biorhythm';
-import { describeTransit } from '@/lib/daily/today';
+import { librarySnippet } from '@/lib/knowledge';
+import { plainAspect, plainTransit, transitStrength } from '@/lib/daily/today';
 import { chineseZodiac, lifePathNumber, personalYear } from './numerology';
 
 export interface ProfileForReading {
@@ -103,9 +99,10 @@ function age(birthDate: string, today: string): number {
   return ty - by - (tm < bm || (tm === bm && td < bd) ? 1 : 0);
 }
 
+/** Biorritmo [-1, 1] en palabras (el modelo no repite porcentajes). */
+const energyWord = (v: number) =>
+  v > 0.5 ? 'arriba' : v > 0 ? 'normal' : v > -0.5 ? 'justa' : 'por los suelos';
 const pct = (v: number) => `${Math.round(v * 100)} %`;
-/** Biorritmo de [-1, 1] a 0–100 %. */
-const level = (v: number) => `${Math.round(((v + 1) / 2) * 100)} %`;
 
 export function buildReadingContext(
   profile: ProfileForReading,
@@ -171,19 +168,23 @@ export function buildReadingContext(
     const tight = chart.aspects
       .filter((a) => a.orb <= 3)
       .slice(0, 5)
-      .map(
-        (a) => `${PLANET_NAMES[a.a]} ${ASPECT_NAMES[a.type].toLowerCase()} ${PLANET_NAMES[a.b]}`,
-      );
-    if (tight.length) lines.push(`- Aspectos natales más fuertes: ${tight.join('; ')}.`);
+      .map((a) => plainAspect(a));
+    if (tight.length)
+      lines.push(`- Rasgos que más pesan en su carta (en palabras llanas): ${tight.join('; ')}.`);
 
     const transits = transitsToNatal(chart, now, { maxOrb: 4, includeAscendant: timeKnown }).slice(
       0,
       6,
     );
-    lines.push('', '## Tránsitos de hoy a su carta');
+    lines.push(
+      '',
+      '## Lo que pasa hoy en el cielo, ya traducido (úsalo tal cual, sin términos técnicos)',
+    );
     lines.push(
       transits.length
-        ? transits.map((t) => `- ${describeTransit(t)} (orbe ${t.orb.toFixed(1)}°)`).join('\n')
+        ? transits
+            .map((t) => `- ${plainTransit(t)} (${transitStrength(t.orb).toLowerCase()})`)
+            .join('\n')
         : '- Ningún tránsito cercano: día de calma en su carta.',
     );
   } else {
@@ -219,8 +220,22 @@ export function buildReadingContext(
     );
     lines.push(`- Zodiaco chino: ${cz.animal} de ${cz.element} (año lunar ${cz.year}).`);
     lines.push(
-      `- Biorritmo hoy: físico ${level(bio.fisico)}, emocional ${level(bio.emocional)}, intelectual ${level(bio.intelectual)}.`,
+      `- Energía hoy (cuerpo, corazón, cabeza): ${energyWord(bio.fisico)}, ${energyWord(bio.emocional)}, ${energyWord(bio.intelectual)}. Cuéntalo con esas palabras, sin porcentajes.`,
     );
+  }
+
+  if (profile.birth_date) {
+    const library = librarySnippet({
+      sunSign: sunSign as Sign | null,
+      lifePath: lifePathNumber(profile.birth_date),
+      personalYear: personalYear(profile.birth_date, today),
+    });
+    if (library)
+      lines.push(
+        '',
+        '## Biblioteca de ZODI (base fiable: tradúcela a su vida, no la copies)',
+        library,
+      );
   }
 
   return { firstName, today, timeZone, text: lines.join('\n'), sunSign };

@@ -19,7 +19,7 @@ import { SPREADS } from '@/lib/tarot/deck';
 import { toast } from '@/components/ui/toast';
 import { ACHIEVEMENT_BY_ID } from '@/lib/progress/achievements';
 import { FavoriteButton } from './FavoriteButton';
-import { RichText } from './RichText';
+import { ReadingCards } from './ReadingCards';
 import { CrystalCard, MayaCard, NameNumbersCard, RuneCast } from './ReadingVisuals';
 import { TarotSpread } from './TarotSpread';
 
@@ -37,8 +37,10 @@ interface Props {
 
 const LOADING_LINES = [
   'Consultando a los astros (y a su abogado)…',
-  'Alineando planetas. Mercurio se resiste.',
+  'Alineando planetas. Mercurio se resiste, como tu ex.',
   'Leyendo tu carta con las gafas de cerca…',
+  'Preguntando al universo. Tarda: está de baja por depresión cósmica.',
+  'Traduciendo el destino a cristiano…',
 ];
 
 /**
@@ -545,7 +547,7 @@ export function ReadingStudio({
             className="reading-paper"
             data-streaming={phase === 'streaming' ? '' : undefined}
           >
-            <RichText text={text} />
+            <ReadingCards text={text} />
           </article>
         )}
         {error && (

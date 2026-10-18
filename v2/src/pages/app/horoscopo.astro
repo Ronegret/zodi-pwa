@@ -2,7 +2,7 @@
 import AppShell from '@/layouts/AppShell.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { ReadingStudio } from '@/components/readings/ReadingStudio';
-import { RichText } from '@/components/readings/RichText';
+import { ReadingCards } from '@/components/readings/ReadingCards';
 import SignDayPanel from '@/components/public/SignDayPanel.astro';
 import { localToUtc } from '@/lib/astro-engine';
 import { elementOf, signSlug, SIGN_GLYPHS } from '@/lib/astro-engine/labels';
@@ -72,7 +72,7 @@ const generatedAt = todays
       {todays ? (
         <>
           <article class="reading-paper">
-            <RichText text={todays.content} />
+            <ReadingCards client:visible text={todays.content} />
           </article>
           <p class="muted small">
             Escrito hoy a las {generatedAt}. Mañana, otro. Si quieres más detalle, pide tu semana o

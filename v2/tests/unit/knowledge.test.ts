@@ -160,3 +160,33 @@ describe('base de conocimiento', () => {
     }
   });
 });
+
+describe('biblioteca ampliada', () => {
+  it('cada signo tiene su ficha completa', async () => {
+    const { signKnowledge } = await import('@/lib/knowledge');
+    for (const s of SIGNS) {
+      const k = signKnowledge(s);
+      expect(k, s).not.toBeNull();
+      for (const v of Object.values(k!)) expect(String(v).length).toBeGreaterThan(30);
+    }
+  });
+
+  it('los números tienen ampliación, tipos y año personal', async () => {
+    const { numberPlus, numberAs, yearKnowledge } = await import('@/lib/knowledge');
+    for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33]) {
+      expect(numberPlus(n)?.futuro, `plus ${n}`).toBeTruthy();
+      for (const kind of ['alma', 'expresion', 'personalidad', 'nacimiento'] as const)
+        expect(numberAs(kind, n), `${kind} ${n}`).toBeTruthy();
+    }
+    for (let n = 1; n <= 9; n++) expect(yearKnowledge(n)?.consejo, `año ${n}`).toBeTruthy();
+  });
+
+  it('la biblioteca para la IA resume signo, número y año', async () => {
+    const { librarySnippet } = await import('@/lib/knowledge');
+    const t = librarySnippet({ sunSign: 'Aries', lifePath: 7, personalYear: 3 });
+    expect(t).toMatch(/Su signo \(Aries\)/);
+    expect(t).toMatch(/camino de vida 7/);
+    expect(t).toMatch(/año personal/);
+    expect(t.length).toBeLessThan(2000);
+  });
+});

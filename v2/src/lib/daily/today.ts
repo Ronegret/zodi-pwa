@@ -53,6 +53,31 @@ export function plainTransit(t: Transit): string {
   return `${subject(t.transiting)} ${ASPECT_PLAIN[t.type]} ${NATAL_PLAIN[t.natal]}.`;
 }
 
+/** Aspecto entre dos planetas de TU carta, sin jerga: "tu suerte da viento a favor a tus emociones". */
+const PLANET_PLAIN: Record<string, string> = {
+  sun: 'tu energía',
+  moon: 'tus emociones',
+  mercury: 'tu forma de pensar y hablar',
+  venus: 'tu manera de querer',
+  mars: 'tus ganas y tu genio',
+  jupiter: 'tu suerte',
+  saturn: 'tus responsabilidades',
+  uranus: 'tu necesidad de libertad',
+  neptune: 'tu intuición',
+  pluto: 'tu poder personal',
+  northNode: 'tu camino',
+};
+const ASPECT_NATAL: Record<Transit['type'], string> = {
+  conjunction: 'va de la mano con',
+  trine: 'se lleva de maravilla con',
+  sextile: 'se entiende bien con',
+  square: 'se pelea con',
+  opposition: 'tira en dirección contraria a',
+};
+export function plainAspect(a: { a: string; b: string; type: Transit['type'] }): string {
+  return `${PLANET_PLAIN[a.a] ?? a.a} ${ASPECT_NATAL[a.type]} ${PLANET_PLAIN[a.b] ?? a.b}`;
+}
+
 /** Fuerza del tránsito según el orbe (en lugar de "orbe 0.3°"). */
 export function transitStrength(orb: number): string {
   if (orb < 1) return 'Exacto hoy';

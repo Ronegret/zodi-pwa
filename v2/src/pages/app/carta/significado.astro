@@ -101,6 +101,7 @@ const ficha = sections
         ? `Camino de vida ${s.numbers?.[0]?.n ?? ''}`
         : s.title.replace(/^Tu /, ''),
   }));
+const FACTS_OPEN = 6;
 ---
 
 <AppShell
@@ -228,24 +229,39 @@ const ficha = sections
                 </>
               )}
               {s.facts && (
-                <dl class="facts">
-                  {s.facts.map((f) => (
-                    <div>
-                      <dt>{f.label}</dt>
-                      <dd>
-                        {f.text}
-                        {f.href && (
-                          <>
-                            {' '}
-                            <a class="fact-link" href={f.href}>
-                              Ver la pareja completa
-                            </a>
-                          </>
-                        )}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
+                <>
+                  <dl class="facts">
+                    {s.facts.slice(0, FACTS_OPEN).map((f) => (
+                      <div>
+                        <dt>{f.label}</dt>
+                        <dd>
+                          {f.text}
+                          {f.href && (
+                            <>
+                              {' '}
+                              <a class="fact-link" href={f.href}>
+                                Ver la pareja completa
+                              </a>
+                            </>
+                          )}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {s.facts.length > FACTS_OPEN && (
+                    <details class="facts-more">
+                      <summary>Ver {s.facts.length - FACTS_OPEN} cosas más de ti</summary>
+                      <dl class="facts">
+                        {s.facts.slice(FACTS_OPEN).map((f) => (
+                          <div>
+                            <dt>{f.label}</dt>
+                            <dd>{f.text}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </details>
+                  )}
+                </>
               )}
               {s.numbers && (
                 <ul class="numbers">
@@ -569,6 +585,26 @@ const ficha = sections
     margin: var(--space-2) 0;
     display: grid;
     gap: var(--space-2);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .facts {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .facts-more summary {
+    cursor: pointer;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-4);
+    border-radius: 999px;
+    border: 1px solid var(--line-acid);
+    color: var(--acid);
+    font-weight: 700;
+  }
+  .facts-more[open] summary {
+    margin-bottom: var(--space-2);
   }
   .facts > div {
     padding: var(--space-3);

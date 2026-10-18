@@ -838,10 +838,14 @@ async function handleAi(req, res) {
       : isChat
         ? `Oye **${name}**, respira. Cuéntame qué te pesa y lo miramos con tu carta.`
         : [
-            `Mira, **${name}**: tu Sol en Aries llega con ganas de lío hoy.`,
+            `Mira, **${name}**: hoy tienes ganas de lío y poco sentido común.`,
+            '',
+            '**Amor**',
             cards.length ? `Tus cartas: ${cards.join(', ')}.` : 'La Luna te pide calma.',
-            '- **Amor:** di lo que piensas antes de las ocho.',
-            '- **Trabajo:** termina lo pendiente.',
+            'Di lo que piensas antes de las ocho.',
+            '',
+            '**Trabajo**',
+            'Termina lo pendiente, que tu jefe no es adivino.',
             '',
             '**Hoy haz esto:** escribe tres cosas que quieres soltar.',
           ].join('\n');
